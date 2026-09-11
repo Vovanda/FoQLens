@@ -62,6 +62,17 @@ def test_zero_level_removes_the_block_and_costs_no_bits():
     assert ctl.mean_bits() == 0.0 and torch.equal(mixed(x), torch.zeros_like(before))
 
 
+def test_packed_copies_exist_only_for_levels_in_use():
+    mixed = MixedPrecisionLinear(make_linear(), block_rows=64)
+    assert mixed.packed_levels == ()
+    mixed.set_levels(np.array([[0, 3, 0, 3], [3, 0, 3, 0]], dtype=np.uint8))
+    assert mixed.packed_levels == ()  # a bf16 / ZERO bench holds no quantized copy
+    mixed.set_levels(Level.NF4)
+    assert mixed.packed_levels == (Level.NF4,)
+    mixed.set_levels(np.array([0, 1, 2, 3], dtype=np.uint8))
+    assert mixed.packed_levels == (Level.NF4, Level.INT8)
+
+
 def test_int8_error_is_within_half_a_step():
     weight = make_linear().weight.data
     q = Int8Weight.quantize(weight)

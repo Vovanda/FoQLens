@@ -7,6 +7,7 @@ results go.
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
+from functools import partial
 
 import numpy as np
 
@@ -41,6 +42,18 @@ def evaluate_policy(
             answer = questions[i].answer
             rows.append({"correct": bool(lp.argmax() == answer), "logprob": float(lp[answer]), "mean_bits": float(b)})
     return rows
+
+
+def evaluate_all(
+    model, tokenizer, ctl: Controller, questions: list[Question], policies: list[LayoutPolicy], ids: list[int],
+    batch_size: int, log: Callable[[str], None] = partial(print, flush=True),
+) -> dict[str, list[dict]]:
+    """evaluate_policy for every policy, by name, logging each finished one so a long run can be followed."""
+    results = {}
+    for i, policy in enumerate(policies, 1):
+        results[policy.name] = evaluate_policy(model, tokenizer, ctl, questions, policy, ids, batch_size)
+        log(f"[{i}/{len(policies)}] {policy.name}")
+    return results
 
 
 def summarize(results: dict[str, list[dict]], questions: list[Question]) -> dict:

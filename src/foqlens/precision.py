@@ -1,8 +1,9 @@
 """Precision controller: bit depth per layer, module and block of weight rows.
 
 Every linear module of the text decoder is replaced by a MixedPrecisionLinear. It keeps the
-original bf16 weight and its packed int8 and nf4 copies; the level is set per block of block_rows
-output rows, either one layout for the whole batch or one layout per sample of the batch.
+original bf16 weight and, for the levels some layout has used, a packed int8 or nf4 copy; the level
+is set per block of block_rows output rows, either one layout for the whole batch or one layout
+per sample of the batch.
 
 Hot-path rule: levels live on the CPU as a numpy array, so forward never synchronizes with the
 GPU to find out what to compute. A mixed layout computes the output once per level in use and
@@ -14,6 +15,8 @@ Invariants (each one has a test):
 - Invariant: with per-sample layouts, sample b is bit-exact with sample b of the same batch run
   under layout b for every sample - a per-sample layout changes nothing but the selection.
 - Invariant: forward never reads levels from the GPU.
+- Invariant: a packed copy exists only for a level some layout has used - a bench that only
+  reads bf16 and ZERO holds no int8 or nf4 copy.
 """
 
 from __future__ import annotations
@@ -44,6 +47,8 @@ CONTROLLED = (
 
 DEFAULT_BLOCK_ROWS = 64
 BITS_BY_CODE = np.array([lv.bits for lv in Level], dtype=np.float64)
+# Levels read from a packed copy of the weight; bf16 reads the weight itself, ZERO reads nothing.
+PACKED = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight}
 
 
 class MixedPrecisionLinear(nn.Module):
@@ -58,14 +63,23 @@ class MixedPrecisionLinear(nn.Module):
         self.weight = linear.weight
         self.weight.requires_grad_(False)
         self.bias = linear.bias
-        self.int8 = Int8Weight.quantize(self.weight.data)
-        self.nf4 = Nf4Weight.quantize(self.weight.data)
+        self._packed: dict[Level, Int8Weight | Nf4Weight] = {}
         self.set_levels(Level.BF16)
 
     @property
     def levels(self) -> np.ndarray:
         """Level code per block: [n_blocks], or [batch, n_blocks] for per-sample layouts. A copy."""
         return self._levels.copy()
+
+    @property
+    def packed_levels(self) -> tuple[Level, ...]:
+        """Levels whose packed copy of the weight is held, in the order they were first used."""
+        return tuple(self._packed)
+
+    def _materialize(self, level: Level) -> None:
+        """Quantize the weight into the level on its first use; bf16 and ZERO need no copy."""
+        if level in PACKED and level not in self._packed:
+            self._packed[level] = PACKED[level].quantize(self.weight.data)
 
     def set_levels(self, levels: Level | int | np.ndarray) -> None:
         """One level for all blocks, a level per block, or a level per block per sample of the batch."""
@@ -76,6 +90,8 @@ class MixedPrecisionLinear(nn.Module):
             raise ValueError(f"levels of shape {arr.shape} for {self.n_blocks} blocks")
         self._levels = arr.copy()
         self._used = tuple(Level(int(c)) for c in np.unique(arr))
+        for level in self._used:
+            self._materialize(level)
         self._rows = None if len(self._used) == 1 else self._row_codes(arr)
 
     def _row_codes(self, arr: np.ndarray) -> torch.Tensor:
@@ -94,10 +110,9 @@ class MixedPrecisionLinear(nn.Module):
         """The whole output as if every block were read at this level."""
         if level is Level.BF16:
             return F.linear(x, self.weight, self.bias)
-        if level is Level.INT8:
-            return self.int8.matmul(x, self.bias)
-        if level is Level.NF4:
-            return self.nf4.matmul(x, self.bias)
+        if level in PACKED:
+            self._materialize(level)
+            return self._packed[level].matmul(x, self.bias)
         out = x.new_zeros(*x.shape[:-1], self.out_features)
         return out if self.bias is None else out + self.bias
 

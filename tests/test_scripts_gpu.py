@@ -27,10 +27,36 @@ def test_reference_answers_smoke(tmp_path):
     assert (tmp_path / "e2b" / "answers.md").read_text().startswith("# Reference answers")
 
 
+def test_step3_injection_smoke(tmp_path):
+    inj = load_script("step3_injection")
+    out = inj.main(["--limit", "3", "--apertures", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",
+                    "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    summary = json.loads(Path(out).read_text())
+    assert summary["questions"] == {"biology": 3, "math": 3, "history": 3, "geography": 3}
+    assert set(summary["comparisons"]) == {
+        f"{pair}|{s}|0.950" for pair in ("biology-math", "history-geography") for s in ("pooled", "gradient")
+    }
+    c = summary["comparisons"]["biology-math|pooled|0.950"]["own_minus_other"]
+    assert c["lo"] <= c["mean"] <= c["hi"] and c["n"] == 6
+    assert {"own_topic_gradient_0.950", "other_topic_pooled_0.950", "random_0.950", "uniform_zero"} <= set(summary["configs"])
+
+
+def test_step3_backbone_smoke(tmp_path):
+    bb = load_script("step3_backbone")
+    out = bb.main(["--limit", "3", "--apertures", "0.95", "--shares", "0.8", "--pooled-batch", "4", "--gradient-batch", "2",
+                   "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    summary = json.loads(Path(out).read_text())
+    assert {"backbone_0.950", "bb0.80_random_0.950", "bb0.80_own_gradient_0.950", "bb0.80_other_pooled_0.950"} <= set(summary["configs"])
+    assert "own_minus_other" in summary["comparisons"]["biology-math|gradient|0.80|0.950"]
+    assert "backbone_minus_random" in summary["comparisons"]["history-geography|backbone|0.950"]
+    bits = {name: c["mean_bits"] for name, c in summary["configs"].items() if name.endswith("0.950")}
+    assert max(bits.values()) - min(bits.values()) < 0.05  # every policy at one aperture spends the same budget
+
+
 def test_step3_quality_smoke(tmp_path):
     step3 = load_script("step3_quality")
     out = step3.main(
-        ["--limit", "2", "--domains", "biology", "heldout/geography", "--apertures", "0.1",
+        ["--limit", "2", "--domains", "biology", "heldout/geography", "--apertures", "0.1", "--coarse", "nf4",
          "--pooled-batch", "2", "--gradient-batch", "2", "--eval-batch", "4",
          "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)]
     )

@@ -1,10 +1,13 @@
-"""Step 3: turning a mask into a precision layout at a given aperture.
+"""Step 3: turning masks into a precision layout at a given aperture.
 
-The aperture is the share of weights read sharp (bf16); every other block is read coarse (nf4).
+The aperture is the share of weights read sharp (bf16); every other block is read coarse.
 Aperture 0 is a closed lens - everything coarse; aperture 1 is fully open - everything sharp.
-The mask says where to sharpen, the aperture how much. At aperture a the nominal mean is 4 + 12 a
-bits, so a = 1/3 matches uniform int8 at 8 bits. Directed and random layouts use the same rule on
-the same block weights, so at one aperture they spend the same budget.
+The mask says where to sharpen, the aperture how much. At aperture a with nf4 as the coarse level
+the nominal mean is 4 + 12 a bits. Directed and random layouts use the same rule on the same
+block weights, so at one aperture they spend the same budget.
+
+Invariant: every layout at aperture a holds at least a share a of all weights sharp, and at most
+one block more than needed.
 """
 
 from __future__ import annotations
@@ -20,15 +23,20 @@ def block_weights(ctl: Controller) -> np.ndarray:
     return np.concatenate([m.block_sizes() * m.in_features for m in ctl.modules.values()]).astype(np.int64)
 
 
+def take_until(order: np.ndarray, weights: np.ndarray, amount: float, sharp: np.ndarray | None = None) -> np.ndarray:
+    """Add blocks in the given order (skipping those already sharp) until their weights reach amount."""
+    sharp = np.zeros(len(weights), dtype=bool) if sharp is None else sharp.copy()
+    if amount <= 0:
+        return sharp
+    order = order[~sharp[order]]
+    cum = np.cumsum(weights[order])
+    sharp[order[: min(int(np.searchsorted(cum, amount)) + 1, len(order))]] = True
+    return sharp
+
+
 def select_by_budget(order: np.ndarray, weights: np.ndarray, aperture: float) -> np.ndarray:
     """Blocks taken in the given order until their weights reach the aperture's share of all weights."""
-    if aperture <= 0:
-        return np.zeros(len(weights), dtype=bool)
-    cum = np.cumsum(weights[order])
-    k = min(int(np.searchsorted(cum, aperture * weights.sum())) + 1, len(order))
-    sharp = np.zeros(len(weights), dtype=bool)
-    sharp[order[:k]] = True
-    return sharp
+    return take_until(order, weights, aperture * weights.sum())
 
 
 def directed(scores: np.ndarray, weights: np.ndarray, aperture: float) -> np.ndarray:
@@ -39,6 +47,13 @@ def directed(scores: np.ndarray, weights: np.ndarray, aperture: float) -> np.nda
 def random_layout(weights: np.ndarray, aperture: float, rng: np.random.Generator) -> np.ndarray:
     """Random blocks within the same aperture."""
     return select_by_budget(rng.permutation(len(weights)), weights, aperture)
+
+
+def layered(backbone: np.ndarray, fill: np.ndarray, weights: np.ndarray, aperture: float, share: float) -> np.ndarray:
+    """The backbone's top blocks for `share` of the aperture, the rest of the aperture in the fill's order."""
+    sharp = directed(backbone, weights, aperture * share)
+    remaining = aperture * weights.sum() - weights[sharp].sum()
+    return take_until(np.argsort(-fill, kind="stable"), weights, remaining, sharp)
 
 
 def to_levels(sharp: np.ndarray, hi: Level = Level.BF16, lo: Level = Level.NF4) -> np.ndarray:

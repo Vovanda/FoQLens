@@ -17,11 +17,13 @@ TEXT = (
 
 @pytest.fixture(scope="module")
 def stand():
-    model, tokenizer = fm.load(fm.E2B)
-    # the reference is taken before install: everything the bench does later is checked against it
+    model, tokenizer = fm.load(fm.E2B, text_only=False)
+    # the reference is taken on the untouched model: dropping the towers and installing the
+    # controller are both checked against it
     ref_logits = fm.logits(model, tokenizer, TEXT)
     ref_hidden = fm.hidden_states(model, tokenizer, TEXT)
     ref_ppl = fm.perplexity(model, tokenizer, TEXT)
+    fm.drop_towers(model)
     ctl = install(model)
     yield model, tokenizer, ctl, ref_logits, ref_hidden, ref_ppl
     del model

@@ -17,19 +17,48 @@ REVISIONS = {
 }
 
 
+# Left outside the allocator cap for memory CUDA libraries take past the torch allocator.
+SPILL_MARGIN_BYTES = 256 * 2**20
+TOWERS = ("vision_tower", "embed_vision", "audio_tower", "embed_audio")
+
+
+def forbid_spill(device: str = "cuda") -> None:
+    """Cap this process's allocator at the VRAM it holds plus what is free now.
+
+    Invariant: the bench never spills into shared system memory. Past the cap torch raises OOM;
+    without it the Windows driver silently moves allocations to system RAM over PCIe and a run
+    crawls on (6.4 GB spilled in the first backbone run).
+    """
+    index = torch.device(device).index
+    index = torch.cuda.current_device() if index is None else index
+    free, total = torch.cuda.mem_get_info(index)
+    usable = free + torch.cuda.memory_reserved(index) - SPILL_MARGIN_BYTES
+    torch.cuda.set_per_process_memory_fraction(max(usable, 0) / total, index)
+
+
+def drop_towers(model: Gemma4ForConditionalGeneration) -> None:
+    """Remove the vision and audio towers (~0.9 GiB for E2B): text-only input never calls them."""
+    for name in TOWERS:
+        setattr(model.model, name, None)
+    torch.cuda.empty_cache()
+
+
 def load(
     model_id: str = E2B,
     device: str = "cuda",
     dtype: torch.dtype = torch.bfloat16,
     attn_implementation: str | None = None,
+    text_only: bool = True,
 ) -> tuple[Gemma4ForConditionalGeneration, PreTrainedTokenizerBase]:
-    """The whole model at its pinned revision (vision and audio towers are dead weight) and its tokenizer, in eval mode.
+    """The model at its pinned revision and its tokenizer, in eval mode, with the allocator capped (forbid_spill).
 
-    attn_implementation="eager" is needed wherever attention weights are read (step 1).
+    text_only drops the vision and audio towers. attn_implementation="eager" is needed wherever
+    attention weights are read (step 1).
     """
     # bf16 matmuls accumulate partial sums in fp32: halves the batch-size dependence of the
     # numbers (letter log-probabilities 0.19 -> 0.09 apart between a batch and one by one).
     torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
+    forbid_spill(device)
     revision = REVISIONS[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
     # Gemma 4 derives position ids from arange(seq), not from the attention mask, so left padding
@@ -39,6 +68,8 @@ def load(
         model_id, revision=revision, dtype=dtype, device_map=device, attn_implementation=attn_implementation
     )
     model.eval()
+    if text_only:
+        drop_towers(model)
     return model, tokenizer
 
 

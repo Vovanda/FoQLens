@@ -10,6 +10,7 @@ dependencies = [
     "bitsandbytes>=0.46",
     "numpy",
     "scikit-learn",
+    "pyarrow>=25.0.1",
 ]
 
 [dependency-groups]

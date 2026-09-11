@@ -38,7 +38,7 @@ All predictions were [preregistered](prereg/) in git before the first run, as di
 
 - Preregistration committed before any run.
 - The bench is ready: bf16 / int8 / nf4 precision set per layer, per module or per block of 64 weight rows over Gemma 4 E2B, with a mean-bits account. Health tests prove the control is real: all-bf16 is bit-exact with the original model, and switching layer N leaves every earlier layer's output untouched.
-- Steps 0-3 have not been run yet.
+- Run 1 on E2B ([results](docs/results-run1.md)): topics separate in the model's representations (step 0, ARI 0.98). The naive per-block score separated the debugging domains weakly in exploration, but **failed the preregistered confirmation on held-out domains** - step 1 is not supported with this instrument. Next, as preregistered: a gradient-based block score.
 
 What this bench does **not** show: memory savings. Coarse copies are stored alongside the full weights and dequantized on the fly - the numbers are exactly those of a weight read at that precision, which is all quality measurements need.
 
@@ -63,6 +63,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.
 - [`docs/prior-art.md`](docs/prior-art.md) - what dynamic quantization already has and where FoQLens differs.
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
+- [`docs/data-sources.md`](docs/data-sources.md) - where the questions come from (run 1: MMLU-Redux-2.0) and why.
 - [`prereg/`](prereg/) - the preregistration: predictions fixed before any run.
 - [`src/foqlens/`](src/foqlens/) - the bench: model loading, quantizers, precision controller.
 - [`scripts/`](scripts/) - model download.

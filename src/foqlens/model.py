@@ -21,12 +21,16 @@ def load(
     model_id: str = E2B,
     device: str = "cuda",
     dtype: torch.dtype = torch.bfloat16,
+    attn_implementation: str | None = None,
 ) -> tuple[Gemma4ForConditionalGeneration, PreTrainedTokenizerBase]:
-    """The whole model at its pinned revision (vision and audio towers are dead weight) and its tokenizer, in eval mode."""
+    """The whole model at its pinned revision (vision and audio towers are dead weight) and its tokenizer, in eval mode.
+
+    attn_implementation="eager" is needed wherever attention weights are read (step 1).
+    """
     revision = REVISIONS[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
     model = Gemma4ForConditionalGeneration.from_pretrained(
-        model_id, revision=revision, dtype=dtype, device_map=device
+        model_id, revision=revision, dtype=dtype, device_map=device, attn_implementation=attn_implementation
     )
     model.eval()
     return model, tokenizer

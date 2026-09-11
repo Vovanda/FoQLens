@@ -1,12 +1,12 @@
 """Step 1: are per-block masks separable by topic and concentrated.
 
 Reads prompts/<domain>.jsonl (one {"text": ...} per line), computes the naive mask vectors of
-every query in all three center modes of prereg/ADDENDUM-01.md (norm, pooled, attention) in one
+every query in all three center modes of experiments/E001-run1-exploration/ADDENDUM-01.md (norm, pooled, attention) in one
 eager-attention pass, and writes:
 
-- runs/step1/<model>/raw/vectors_<mode>.npy and raw/queries.json - mask vectors, labels, the
+- runs/E001-run1-exploration/step1/<model>/raw/vectors_<mode>.npy and raw/queries.json - mask vectors, labels, the
   token positions and tokens each mode was built on;
-- runs/step1/<model>/summary.json - for every mode: separation for every pair of domains and over
+- runs/E001-run1-exploration/step1/<model>/summary.json - for every mode: separation for every pair of domains and over
   all domains, on raw vectors and with the background subtracted (the mean vector over all
   queries), plus the concentration (Gini, normalized entropy) of every query's mask.
 
@@ -58,7 +58,7 @@ def main() -> None:
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
     parser.add_argument("--domains", nargs="+", default=DEBUG_DOMAINS)
     parser.add_argument("--prompts-dir", type=Path, default=Path("prompts"))
-    parser.add_argument("--out", type=Path, default=Path("runs/step1"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E001-run1-exploration/step1"))
     parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K)
     parser.add_argument("--modes", nargs="+", choices=MODES, default=list(MODES), help="center modes to compute")
     parser.add_argument("--permutations", type=int, default=0, help="label permutations per domain pair (0 = none)")

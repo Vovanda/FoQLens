@@ -1,10 +1,16 @@
 # FoQLens
 
+Hi, I'm Vladimir Savkin. I hold master's degrees in mathematical software and in fundamental computer science, and I work as a systems architect - distributed systems, lately with formal verification. FoQLens is my research, and it is a hobby: I am not a professional scientist. That is why the bench keeps me honest - every prediction is committed before the run that tests it. More about me: [CV](https://sawking.tech/cv).
+
 **Can a language model spend its precision where the question is, instead of everywhere?**
 
-FoQLens is a research bench that tests one idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are.
+The larger goal is a universal **precision regulator** - one mechanism that sets how finely a model works right now and makes it adaptive: to the task, to the machine it runs on and to the value of the query ([the idea](https://sawking.tech/blog/kvantovaniie-vsio-chto-vam-nuzhno)). One set of weights serves every device and every load: it runs lean on a phone or on a hot, busy server, and opens to full precision exactly where a query needs it. Under pressure it degrades gracefully - the background coarsens first, what the query needs stays sharp.
 
-Name: Focus + Quantization + Lens. The lens is a visual metaphor, not the mechanism.
+Mixture of Experts is its rigid special case: experts with hard edges fixed at training, opened by a router. The regulator makes experts continuous - zones emerge from the query itself, related topics share them, and the junction between two topics is sharpened instead of falling between two experts.
+
+**The main hypothesis:** such a model is not only cheaper but better at the work that matters. A model that does not sink into irrelevant detail stays on the task; for an agent that reasons over many steps, a model behind a filter should be both more efficient and more accurate than the same model read in full. It looks like a paradox - the filter removes information - but what it removes is what the task does not need. It is tested once the FoQLens model exists: an agent on a hard multi-step task, such as designing a software architecture, on the lens model against the same model in bf16 ([H4](docs/hypotheses.md)). A stronger one: the lens model should be more accurate and more efficient than a Mixture of Experts built from the same model ([H5](docs/hypotheses.md)).
+
+**FoQLens** (Focus + Quantization + Lens) is the model that uses this regulator: its weights sit behind a filter, and lenses open where the query needs to see. This repository is the R&D inside FoQLens - a bench that tests the core of the idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are ([goals](docs/goals.md)).
 
 ## The problem
 
@@ -14,11 +20,28 @@ A question about biology and a question about a proof do not need *more or less*
 
 ## The idea
 
-1. Run the first layers coarsely. Their activations already tell what the query is about - a signal that is computed on every pass and read by nobody.
-2. Turn that intermediate representation into a score per block of weights: how much this block matters for this meaning.
-3. Read high-scoring blocks at high precision (bf16), everything else coarsely (int8 / nf4), at a fixed mean bit budget.
+1. Score every block of weights (64 output rows) by how much it matters for the query - from the model's own activations and gradients, no trained router.
+2. Place the blocks on a **weight map**, where blocks that light up together lie close. The query's mask has peaks on this map: its **expert zones**.
+3. Put the whole network behind a **glass** and insert a **lens** into each expert zone: sharp at its center, falling off toward its edge.
 
-No router is trained and no experts are defined in advance. If the idea holds, **expert zones emerge** as the regions that stay sharp when everything around them is coarsened - and related topics share part of their zone instead of paying for it twice, as MoE experts do.
+Three controls, each doing one thing:
+
+- **glass** - the precision of everything outside the lenses, down to nothing at all;
+- **focus_area** - the size of the lenses;
+- **focus_strength** - how far the lens centers rise above the glass.
+
+Memory is the result, not a preset budget: a query that needs little sees through small lenses and pays little. The mechanism in formulas, the single source of truth for it: [docs/lens.md](docs/lens.md).
+
+If the idea holds, **expert zones emerge** as the regions that stay sharp when everything around them is coarsened - and related topics share part of their zone instead of paying for it twice, as MoE experts do.
+
+## Where it leads
+
+- **On-device models.** One weights file for a phone, glasses or a laptop: precision follows the battery, the heat and the free memory, and the lenses stay where the query is.
+- **Cost per query in data centers.** A simple question sees through small lenses and costs little; a hard one opens them wider. The price of a token follows the question, not the model size.
+- **Agents.** Long chains of reasoning on a model that keeps to the task - the main hypothesis above.
+- **Graceful degradation.** Under load or heat the model gets coarser in what the query does not need, not everywhere at once.
+
+These are the directions the regulator opens; each is tested by a step of the [plan](docs/goals.md) before it is claimed.
 
 ## What the bench checks
 
@@ -30,21 +53,24 @@ The steps are ordered so each one can kill the next:
 | 1 | Are per-block masks similar within a topic and different between topics? Are they concentrated? | masks look the same for every query |
 | 2 | Do related topics (biology-chemistry) share more of their zones than unrelated ones (biology-math)? | no overlap structure |
 | 2+ | Geometry: are masks additive, is there a junction zone, does ablating it break mixed questions only? | - (refining, not load-bearing) |
-| 3 | At the same mean bits, is quality above **both** uniform quantization and a random mask of the same concentration? | it beats uniform but not random: then any non-uniformity helps, not the address |
+| 3 | At the same memory, do the query's own lenses beat the other topic's lenses, the lenses of generic importance and the same memory without a mask? Random lenses are the floor. | own lenses do no better than the other topic's or generic importance: then there is no address |
+| 7 | Is an agent on the lens model more accurate and cheaper than on the same model in full? (the main hypothesis, once the model exists) | - |
 
-All predictions were [preregistered](prereg/) in git before the first run, as directions ("A > B"), not numbers. The full reasoning is in [`docs/`](docs/).
+All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"), not numbers. The full reasoning is in [`docs/`](docs/).
 
 ## Status
 
-- Preregistration committed before any run.
-- The bench is ready: bf16 / int8 / nf4 precision set per layer, per module or per block of 64 weight rows over Gemma 4 E2B, with a mean-bits account. Health tests prove the control is real: all-bf16 is bit-exact with the original model, and switching layer N leaves every earlier layer's output untouched.
-- Run 1 on E2B ([results](docs/results-run1.md)): topics separate in the model's representations (step 0, ARI 0.98). The naive per-block score separated the debugging domains weakly in exploration, but **failed the preregistered confirmation on held-out domains** - step 1 is not supported with this instrument. Next, as preregistered: a gradient-based block score.
-
-What this bench does **not** show: memory savings. Coarse copies are stored alongside the full weights and dequantized on the fly - the numbers are exactly those of a weight read at that precision, which is all quality measurements need.
+- **Step 0** ([results](experiments/E001-run1-exploration/results.md)): topics separate in the model's representations (ARI 0.98).
+- **Step 1**: the naive block score failed the preregistered confirmation on the held-out topics; a linear probe still reads the topic from the masks (0.95).
+- **Step 3**, on Gemma 4 E2B, 395 questions:
+  - generic block importance carries most of the budget ([backbone](experiments/E005-backbone/results.md)); flat topic masks added nothing on top of it ([injection](experiments/E004-injection/results.md), [dilation](experiments/E007-dilation/results.md));
+  - legacy fixed-budget layout, checked along the way because it was cheap: expert zones from the gradient mask, fitted to a preset mean of bits, beat random zones, the paired topic and no mask for a polar pair (biology-math), most of all when bits are scarce, not for a close pair (history-geography) ([zones](experiments/E008-zones-fixed-budget/results.md), [matrix](experiments/E009-zones-matrix/results.md));
+  - next, the test of the idea itself: a glass over the network with lenses in the expert zones, memory following the lenses (ADDENDUM-11, in preparation).
+- **Memory**: one stored copy of the weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant); without the bf16 weights the bench frees 1.63 GiB on E2B, and every block can store only the depth it is read to ([results](experiments/E006-read-depths/results.md)). The slices are unpacked before the multiplication: speed and energy savings would need a kernel that reads only the bits it needs.
 
 ## Reproduce
 
-Requirements: an NVIDIA GPU with 16 GB+ of memory (E2B with the controller installed takes ~12.3 GB), [uv](https://docs.astral.sh/uv/). uv fetches Python 3.12 by itself.
+Requirements: an NVIDIA GPU with 16 GB+ of memory, [uv](https://docs.astral.sh/uv/). uv fetches Python 3.12 by itself.
 
 ```sh
 git clone https://github.com/Vovanda/FoQLens.git
@@ -54,19 +80,31 @@ uv run python scripts/download_models.py        # Gemma 4 E2B at its pinned revi
 uv run pytest                                   # unit + bench health tests on the GPU
 ```
 
+A run takes 0.8 of the GPU by default - that share of the VRAM, and rest between batches - so the card stays usable; `--gpu-share 1` or `FOQLENS_GPU_SHARE=1` gives the full speed.
+
 Model weights are not stored in the repository. `scripts/download_models.py` fetches them from Hugging Face (Apache 2.0, no token needed) at the commits pinned in `foqlens.model.REVISIONS`, and `foqlens.model.load()` reads exactly those commits. Add `e4b` to the download for the confirmation model (~16 GB).
 
 ## Layout
 
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
 - [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones as an outcome, not an input.
+- [`docs/lens.md`](docs/lens.md) - the filter and its lenses: how precision is laid out over the weights.
+- [`docs/zones.md`](docs/zones.md) - expert zones on the weight map; the legacy fixed-budget layout.
+- [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.
+- [`experiments/`](experiments/_index.md) - one folder per experiment (`E0NN-slug`): its preregistration, card and results; raw summaries in `runs/E0NN-slug/`.
 - [`docs/prior-art.md`](docs/prior-art.md) - what dynamic quantization already has and where FoQLens differs.
+- [`docs/reading-notes.md`](docs/reading-notes.md) - notes from the papers read, with the passages cited and what FoQLens takes from them.
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
-- [`docs/data-sources.md`](docs/data-sources.md) - where the questions come from (run 1: MMLU-Redux-2.0) and why.
-- [`prereg/`](prereg/) - the preregistration: predictions fixed before any run.
-- [`src/foqlens/`](src/foqlens/) - the bench: model loading, quantizers, precision controller.
-- [`scripts/`](scripts/) - model download.
+- [`docs/data-sources.md`](docs/data-sources.md) - where the questions come from (MMLU-Redux-2.0) and why.
+- [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
+- [`src/foqlens/`](src/foqlens/) - the bench:
+  - `model`, `quant`, `precision` - loading, quantizers and residual slices, the per-block precision controller;
+  - `scoring`, `pipeline` - mask sources (a new score is a new `MaskSource`);
+  - `evaluate`, `quality` - quality metrics (a new metric is a new `QualityMetric`) and evaluation;
+  - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - from masks to layouts: zone sources, fields and level rules as replaceable parts;
+  - `gpu_share`, `gpu_monitor` - the share of the GPU a run takes, and its utilization.
+- [`scripts/`](scripts/) - model download and one script per run; they only wire the bench together.
 - [`tests/`](tests/) - unit tests and bench health tests.
 
 ## Order of work

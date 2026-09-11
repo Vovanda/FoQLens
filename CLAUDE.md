@@ -2,13 +2,13 @@
 
 # FoQLens
 
-A directed quantization bench: weight precision is allocated by the meaning of the query, expert zones emerge instead of being set by a router. The problem statement and the plan are in `docs/`, the predictions in `prereg/`.
+FoQLens is a model whose precision regulator reads the weights through a filter with lenses in the query's expert zones; MoE is a special case of it. This repository is the R&D bench inside FoQLens that tests the idea: weight precision is allocated by the meaning of the query, expert zones emerge instead of being set by a router. The problem statement and the plan are in `docs/`, the main preregistration in `prereg/`, and every experiment in `experiments/E0NN-slug/` - its addenda, a card (`_index.md`, YAML front matter for Hugo: dates, commits, hypotheses, status, verdict) and `results.md` - with its raw summaries in `runs/E0NN-slug/`. A new experiment takes the next id; hypotheses are tracked in `docs/hypotheses.md`.
 
 Everything in the repository is written in English: docs, code comments, test messages, commit messages.
 
 ## Bench discipline (do not break)
 
-- **The preregistration is untouchable.** The binding version is the Russian original `prereg/PREREGISTRATION.ru.md`, committed in `be66b77`; it is never edited and its history is never rewritten. `prereg/PREREGISTRATION.md` is an English translation. Clarifications go into a new file in a new dated commit; the old one stays.
+- **The preregistration is untouchable.** The binding version is the Russian original `prereg/PREREGISTRATION.ru.md`, committed in `be66b77`; it is never edited and its history is never rewritten. `prereg/PREREGISTRATION.md` is an English translation. Clarifications go into a new file in a new dated commit; the old one stays. What is untouchable in every preregistration file is the hypothesis and its predictions, criteria and bets: when files move, link paths inside them are updated in a separate commit whose diff touches only the links.
 - **Commit order:** preregistration → run code → runs → results, in separate commits.
 - **Blind analysis.** All runs at once; during the runs only check that the script did not crash. The exception is step 0.
 - **Held-out topics** (`prompts/heldout/`) are not opened and not run while the score is being debugged.

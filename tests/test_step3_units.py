@@ -80,13 +80,13 @@ def test_topic_mask_leaves_the_question_out_of_its_own_topic():
 
 
 def test_own_and_other_topic_policies_point_at_different_blocks():
-    from foqlens.layouts import TopicMask, TopicMeans
+    from foqlens.layouts import OtherTopic, OwnTopic, TopicMask, TopicMeans
 
     weights = np.full(4, 64)
     scores = np.array([[9.0, 8.0, 0.0, 0.0]] * 3 + [[0.0, 0.0, 9.0, 8.0]] * 3)
     means = TopicMeans(scores, ("a",) * 3 + ("b",) * 3)
-    own = TopicMask("own", "pooled", 0.5, means, {"a": "b", "b": "a"}, weights, Level.ZERO)
-    other = TopicMask("other", "pooled", 0.5, means, {"a": "b", "b": "a"}, weights, Level.ZERO)
+    own = TopicMask(OwnTopic(means), "pooled", 0.5, weights, Level.ZERO)
+    other = TopicMask(OtherTopic(means, {"a": "b", "b": "a"}), "pooled", 0.5, weights, Level.ZERO)
     assert own.levels(np.array([0]))[0].tolist() == [Level.BF16, Level.BF16, Level.ZERO, Level.ZERO]
     assert other.levels(np.array([0]))[0].tolist() == [Level.ZERO, Level.ZERO, Level.BF16, Level.BF16]
     assert own.name == "own_topic_pooled_0.500"
@@ -103,18 +103,18 @@ def test_layered_keeps_the_backbone_and_fills_the_rest_by_the_fill_order():
 
 
 def test_backbone_fill_policies_share_the_backbone_and_differ_in_the_fill():
-    from foqlens.layouts import Backbone, BackboneFill, TopicMeans
+    from foqlens.layouts import Backbone, BackboneFill, OtherTopic, OwnTopic, RandomFill, TopicMeans
 
     weights = np.full(6, 10)
     backbone = np.array([9.0, 8.0, 0.0, 0.0, 0.0, 0.0])
     scores = np.array([[0, 0, 5.0, 4.0, 0, 0]] * 2 + [[0, 0, 0, 0, 5.0, 4.0]] * 2)
     means = TopicMeans(scores, ("a", "a", "b", "b"))
     pairs = {"a": "b", "b": "a"}
-    own = BackboneFill("own", "pooled", 4 / 6, 0.5, backbone, weights, means, pairs, coarse=Level.ZERO).levels(np.array([0]))[0]
-    other = BackboneFill("other", "pooled", 4 / 6, 0.5, backbone, weights, means, pairs, coarse=Level.ZERO).levels(np.array([0]))[0]
+    own = BackboneFill(OwnTopic(means), "pooled", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO).levels(np.array([0]))[0]
+    other = BackboneFill(OtherTopic(means, pairs), "pooled", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO).levels(np.array([0]))[0]
     sharp = lambda row: [i for i, v in enumerate(row) if v == Level.BF16]  # noqa: E731
     assert sharp(own) == [0, 1, 2, 3] and sharp(other) == [0, 1, 4, 5]
-    rnd = BackboneFill("random", "-", 4 / 6, 0.5, backbone, weights, seed=0, coarse=Level.ZERO)
+    rnd = BackboneFill(RandomFill(4 / 6, seed=0), "-", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO)
     assert set(sharp(rnd.levels(np.array([0]))[0])) >= {0, 1} and rnd.name == "bb0.50_random_0.667"
     assert sharp(Backbone(4 / 6, backbone, weights, Level.ZERO).levels(np.array([0, 3]))[1])[:2] == [0, 1]
 
@@ -142,16 +142,136 @@ def test_compute_masks_stacks_batches_in_order():
     assert masks[:, 0].tolist() == [1.0, 2.0, 3.0]
 
 
+def test_token_batches_keep_the_budget_and_take_every_index_once():
+    from foqlens.quality import token_batches
+
+    lengths = np.random.default_rng(1).integers(5, 200, size=97).tolist()
+    groups = token_batches(lengths, max_tokens=8 * max(lengths), max_batch=32)
+    assert sorted(np.concatenate(groups).tolist()) == list(range(97))
+    for g in groups:
+        assert len(g) <= 32 and len(g) * max(lengths[i] for i in g) <= 8 * max(lengths)
+    assert lengths[groups[0][0]] == max(lengths) and len(groups[0]) == 8  # the longest go first, 8 of them
+    assert token_batches([500, 10], max_tokens=100, max_batch=4)[0].tolist() == [0]  # too long alone still goes
+
+
+def test_compute_masks_in_token_batches_come_back_in_the_prompts_order():
+    prompts = ["aaaa", "b", "ccc", "dd"]
+    masks = compute_masks(lambda texts: [np.full(2, float(len(t))) for t in texts], prompts, 2,
+                          groups=[np.array([0, 2]), np.array([3, 1])])
+    assert masks[:, 0].tolist() == [4.0, 1.0, 3.0, 2.0]
+
+
 def test_evaluate_all_names_results_and_logs_every_policy(monkeypatch):
     from types import SimpleNamespace
 
     import foqlens.quality as quality
 
-    monkeypatch.setattr(quality, "evaluate_policy", lambda *a: [{"policy": a[4].name}])
+    from concurrent.futures import ThreadPoolExecutor
+
+    monkeypatch.setattr(quality, "evaluate_policy", lambda *a, **k: [{"policy": a[4].name}])
     lines = []
-    policies = [SimpleNamespace(name="a"), SimpleNamespace(name="b")]
-    out = quality.evaluate_all(None, None, None, [], policies, [], 1, log=lines.append)
-    assert out == {"a": [{"policy": "a"}], "b": [{"policy": "b"}]} and lines == ["[1/2] a", "[2/2] b"]
+    policies = [SimpleNamespace(name="a", levels=lambda idx: idx), SimpleNamespace(name="b", levels=lambda idx: idx)]
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        out = quality.evaluate_all(None, None, None, [], policies, [], 1, log=lines.append, pool=pool)
+    assert out == {"a": [{"policy": "a"}], "b": [{"policy": "b"}]}
+    assert lines[0].startswith("[1/2] a (50%), ETA ") and lines[1].startswith("[2/2] b (100%), ETA ")
+
+
+def test_layouts_built_in_the_worker_process_equal_those_built_here():
+    from foqlens.layouts import Random
+    from foqlens.quality import batches, layout_pool, policy_layouts
+
+    policy = Random(0.3, np.arange(1, 41, dtype=np.int64) * 64, seed=4)
+    groups = list(batches(7, 3))
+    with layout_pool() as pool:
+        remote = pool.submit(policy_layouts, policy, groups).result()
+    local = policy_layouts(policy, groups)
+    assert len(remote) == len(local) and all(np.array_equal(r, l) for r, l in zip(remote, local))
+
+
+def test_evaluate_all_takes_queued_layouts_in_order_and_refuses_a_short_queue(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from types import SimpleNamespace
+
+    import foqlens.quality as quality
+
+    seen = []
+    monkeypatch.setattr(quality, "evaluate_policy", lambda *a, layouts, **k: seen.append((a[4].name, layouts)) or [{}])
+    policies = [SimpleNamespace(name=n, levels=lambda idx, n=n: np.full(len(idx), ord(n))) for n in "abc"]
+    groups = list(quality.batches(5, 2))
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        queued = quality.submit_layouts(pool, policies, groups)
+        quality.evaluate_all(None, None, None, [None] * 5, policies, [], 2, log=lambda _: None, pool=pool, layouts=queued)
+        assert [name for name, _ in seen] == ["a", "b", "c"]
+        assert all(len(lay) == len(groups) and lay[0][0] == ord(name) for name, lay in seen)  # each policy got its own
+        with pytest.raises(ValueError):  # a queue shorter than the policies is an error, not a silent skip
+            quality.evaluate_all(None, None, None, [None] * 5, policies, [], 2, log=lambda _: None, pool=pool,
+                                 layouts=queued[:2])
+
+
+def test_a_new_fill_is_a_new_class_and_needs_no_change_to_the_policies():
+    from typing import ClassVar
+
+    from foqlens.layouts import BackboneFill, TopicMask
+
+    class Last:  # ranks the last blocks first
+        kind: ClassVar[str] = "last"
+
+        def label(self, source: str) -> str:
+            return f"last_{source}"
+
+        def vector(self, index: int, n_blocks: int) -> np.ndarray:
+            return np.arange(n_blocks, dtype=float)
+
+    weights = np.full(6, 10)
+    backbone = np.array([9.0, 8.0, 0.0, 0.0, 0.0, 0.0])
+    fill = BackboneFill(Last(), "pooled", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO)
+    sharp = np.flatnonzero(fill.levels(np.array([0]))[0] == Level.BF16).tolist()
+    assert sharp == [0, 1, 4, 5] and fill.name == "bb0.50_last_pooled_0.667"
+    mask = TopicMask(Last(), "pooled", 2 / 6, weights, Level.ZERO)
+    assert np.flatnonzero(mask.levels(np.array([0]))[0] == Level.BF16).tolist() == [4, 5]
+    assert mask.name == "last_topic_pooled_0.333"
+
+
+def test_flat_policies_are_exactly_their_budget_rules():
+    from foqlens.layouts import BackboneFill, OtherTopic, OwnTopic, RandomFill, TopicMask, TopicMeans, _rng
+
+    rng = np.random.default_rng(3)
+    domains = ("a",) * 3 + ("b",) * 3
+    partner = {"a": "b", "b": "a"}
+    n, share, cut = 40, 0.4, 0.5
+    weights = rng.integers(64, 640, size=n)
+    backbone = rng.normal(size=n)
+    means = TopicMeans(rng.normal(size=(len(domains), n)), domains)
+    idx = np.arange(len(domains))
+    direct_topic = lambda topic_of: np.stack(  # noqa: E731
+        [bg.to_levels(bg.directed(means.mean(i, topic_of(i)), weights, share), lo=Level.ZERO) for i in idx])
+    assert np.array_equal(TopicMask(OwnTopic(means), "s", share, weights, Level.ZERO).levels(idx), direct_topic(lambda i: domains[i]))
+    assert np.array_equal(TopicMask(OtherTopic(means, partner), "s", share, weights, Level.ZERO).levels(idx),
+                          direct_topic(lambda i: partner[domains[i]]))
+    random_fill = BackboneFill(RandomFill(share, seed=7), "-", share, cut, backbone, weights, coarse=Level.ZERO)
+    direct_random = np.stack([bg.to_levels(bg.layered(backbone, _rng(7, int(i), share, salt=1).random(n), weights, share, cut),
+                                           lo=Level.ZERO) for i in idx])
+    assert np.array_equal(random_fill.levels(idx), direct_random)
+
+
+def test_zone_comparisons_cell_by_cell_equal_all_cells_at_once():
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "step3_zones.py"
+    spec = importlib.util.spec_from_file_location("step3_zones", path)
+    sz = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sz)
+    rng = np.random.default_rng(0)
+    domains = ("biology",) * 4 + ("math",) * 4 + ("history",) * 4 + ("geography",) * 4
+    cells = [(0.25, 0.5), (0.5, 0.0)]
+    names = [f"zone_uniform_ps{p:.3f}" for p, _ in cells]
+    names += [sz.zone_name(k, src, s, p) for p, s in cells for src in sz.MASK_SOURCES for k in ("own", "other", "random")]
+    results = {n: [{sz.METRIC.primary: float(v)} for v in rng.normal(size=len(domains))] for n in names}
+    together = sz.comparisons(results, domains, cells, seed=0)
+    one_by_one = sz.comparisons(results, domains, cells[:1], seed=0) | sz.comparisons(results, domains, cells[1:], seed=0)
+    assert together and together == one_by_one
 
 
 def test_summarize_averages_whatever_the_metric_names_overall_and_per_domain():
@@ -236,8 +356,11 @@ def test_a_new_mask_source_plugs_into_the_bench_without_touching_it():
         def score_batch(self, model, tokenizer, texts):
             return [np.full(3, float(len(t))) for t in texts]
 
+    def one_token_per_char(texts):
+        return {"input_ids": [list(t) for t in texts]}
+
     levels = []
-    bench = Bench(model=None, tokenizer=None, ctl=SimpleNamespace(set_all=levels.append))
+    bench = Bench(model=None, tokenizer=one_token_per_char, ctl=SimpleNamespace(set_all=levels.append))
     masks = bench.masks(["a", "bbb", "cc"], [PromptLength()])
     assert list(masks) == ["prompt_length"] and masks["prompt_length"][:, 0].tolist() == [1.0, 3.0, 2.0]
     assert levels == [Level.BF16]  # masks are computed with every block at bf16

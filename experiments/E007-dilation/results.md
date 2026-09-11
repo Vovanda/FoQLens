@@ -1,6 +1,6 @@
-# Results - dilation on E2B (prereg/ADDENDUM-06.md)
+# Results - dilation on E2B (experiments/E007-dilation/ADDENDUM-06.md)
 
-Run 2026-09-11 after ADDENDUM-06 was committed (`a2f93f7`), code `88c49f0`. 395 questions (biology 95, math 100, history 100, geography 100); backbone share 0.8 of the aperture; outside the aperture every block is removed (ZERO). 2.06 neighbours per block on average in both tables (q/k/v and the per-layer input gate have none; gate/up one; residual-stream writers up to eight). Raw numbers: [runs/dilation/e2b/summary.json](../runs/dilation/e2b/summary.json).
+Run 2026-09-11 after ADDENDUM-06 was committed (`a2f93f7`), code `88c49f0`. 395 questions (biology 95, math 100, history 100, geography 100); backbone share 0.8 of the aperture; outside the aperture every block is removed (ZERO). 2.06 neighbours per block on average in both tables (q/k/v and the per-layer input gate have none; gate/up one; residual-stream writers up to eight). Raw numbers: [runs/E007-dilation/e2b/summary.json](../../runs/E007-dilation/e2b/summary.json).
 
 ## Verdict against the predictions
 

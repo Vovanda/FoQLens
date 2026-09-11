@@ -4,7 +4,7 @@ Mean perplexity over the same question texts at bf16, int8, nf4 and the read dep
 then the bf16 weights are dropped and D8 is read again from the resident sliced copy. GPU memory
 is taken right after install (bf16 only, no quantized copy) and after the drop.
 
-Writes runs/depths/<model>/summary.json.
+Writes runs/E006-read-depths/<model>/summary.json.
 
     uv run python scripts/depth_perplexity.py
     uv run python scripts/depth_perplexity.py --per-domain 1 --out /tmp/depths   # smoke check
@@ -35,7 +35,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--domains", nargs="+", default=DOMAINS)
     parser.add_argument("--prompts-dir", type=Path, default=Path("prompts"))
     parser.add_argument("--per-domain", type=int, default=10)
-    parser.add_argument("--out", type=Path, default=Path("runs/depths"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E006-read-depths"))
     return parser.parse_args(argv)
 
 

@@ -2,7 +2,7 @@
 
 Fixed 2026-09-11, **before the run of ADDENDUM-07**. Not edited after its commit.
 
-ADDENDUM-07 used working names. The code, the documentation ([docs/zones.md](../docs/zones.md)) and the results use the terms of the problem statement ([docs/problem-statement.md](../docs/problem-statement.md)) and of the lens:
+ADDENDUM-07 used working names. The code, the documentation ([docs/zones.md](../../docs/zones.md)) and the results use the terms of the problem statement ([docs/problem-statement.md](../../docs/problem-statement.md)) and of the lens:
 
 | ADDENDUM-07 | Reads as |
 | --- | --- |

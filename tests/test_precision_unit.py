@@ -158,6 +158,16 @@ def test_reading_several_depths_at_once_is_exact_against_separate_reads():
         assert all(torch.equal(a, b) for a, b in zip(together, separate)), type(store).__name__
 
 
+def test_unpacking_all_slices_at_once_sums_exactly_as_slice_by_slice():
+    from foqlens.quant import _SliceReader
+
+    full = SlicedWeight.quantize(make_linear(out_features=192).weight.data)
+    for depths in ([1, 2, 3, 4], [2, 4], [3], [4], [1]):
+        fast = [w.clone() for w in full._sums(depths)]
+        reference = [w.clone() for w in _SliceReader._sums(full, depths)]  # the slice-by-slice path
+        assert all(torch.equal(a, b) for a, b in zip(fast, reference, strict=True)), depths
+
+
 def test_caps_need_a_resident_module():
     mixed = MixedPrecisionLinear(make_linear(), block_rows=64)
     with pytest.raises(ValueError):

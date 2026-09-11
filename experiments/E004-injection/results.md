@@ -1,6 +1,6 @@
-# Results - mask injection on E2B (prereg/ADDENDUM-04.md)
+# Results - mask injection on E2B (experiments/E004-injection/ADDENDUM-04.md)
 
-Run 2026-09-11 after ADDENDUM-04 was committed (`7848717`). 395 questions (biology 95, math 100, history 100, geography 100); outside the aperture every block is removed (ZERO). Raw numbers: [runs/injection/e2b/summary.json](../runs/injection/e2b/summary.json).
+Run 2026-09-11 after ADDENDUM-04 was committed (`7848717`). 395 questions (biology 95, math 100, history 100, geography 100); outside the aperture every block is removed (ZERO). Raw numbers: [runs/E004-injection/e2b/summary.json](../../runs/E004-injection/e2b/summary.json).
 
 ## Verdict against the predictions
 

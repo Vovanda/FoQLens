@@ -42,15 +42,15 @@ Masks for related topics (biology and chemistry) should overlap more than for un
 
 If so, compactness through refusing to duplicate is confirmed as an effect, not as an argument.
 
-## Step 3. Quality against budget
+## Step 3. Precision follows the meaning
 
-Only if steps 1–2 passed.
+Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the lens layout ([lens.md](lens.md)); the fixed-budget layouts of E008 and E009 are legacy.*
 
-Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → high-scoring blocks are read deep, the rest at base.
+Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → a lens in each zone, the rest of the weights behind the filter (a glass at any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
-At the start it is fine to cheat: keep three separate copies (bf16 / int8 / nf4) instead of residuals. Same mechanics, more memory. Fits for 4.5B.
+The weights are stored once, as residual slices read to a depth (step 5), so a lens costs only the depth it reads.
 
-Measurement: quality against the **mean** number of bits. Baseline - uniform quantization at the same mean. Curve above the baseline → the scheme works.
+Measurement: quality against **memory**. Baselines - the same memory without a mask, the paired topic's lenses and generic importance; random lenses of the same number and size are the floor. Curve above all → the scheme works.
 
 ## Step 4. Learned score
 
@@ -64,7 +64,7 @@ A side effect in favor of the statement: with a continuous learnable mask **zone
 
 ## Step 5. Residuals instead of copies
 
-An engineering optimization, not a test of the hypothesis.
+An engineering optimization, not a test of the hypothesis. *Done 2026-09-11 ([E006](../experiments/E006-read-depths/_index.md)): 4 slices of 2 bits after MoBiQuant, read at 2 / 4 / 6 / 8 bits.*
 
 A 2-bit base plus residual levels (the difference between the real weight and what the base layer gave). 2/4/6 bits from one data set, without three copies and without repacking. Sharpening stops costing separate memory.
 
@@ -74,11 +74,11 @@ A side benefit: no need to re-cut blocks by meaning - the layout stays aligned, 
 
 ## What to honestly expect
 
-**There are no memory savings and there will be none** - with three copies they are negative. Real byte savings need residuals and work inside the inference internals; that is the job of existing work and is solved there without us.
+*Updated 2026-09-12.* Memory savings are real on the bench now: one sliced copy replaces the bf16 weights (-1.63 GiB on E2B) and every block can store only the depth it is read to. What is not shown at home is speed and energy: the slices are unpacked before the multiplication, and reading only the needed bits takes a kernel of its own.
 
 What can honestly be shown at home:
-- **speed** - computation runs at low precision regardless of what is stored;
-- **quality at a fixed budget** - if groups are read by meaning, the same mean bit describes the model better;
+- **memory** - the lenses of a query cost only what they read;
+- **quality against memory** - if precision is laid out by meaning, the same memory describes the model better;
 - **compactness in parameter count** - through overlapping zones, not through bits per weight;
 - **the shape of the degradation curve** - see experiment 2 on hardware inputs, value and degradation priority (author's private notes).
 
@@ -210,7 +210,7 @@ This is enough for the result to be able to fail - nothing more is required from
 
 **Numbers appear after the first run**, once the scale is known, and go into the second - confirmatory - pass on held-out topics. There they are meaningful. Before the main measurements it is useful to calibrate: known-unrelated texts and known paraphrases, to see the working range of the cosine. The calibrated thresholds are recorded in a separate commit, after calibration and before the confirmatory measurements.
 
-**A paper after step 1, not before.** Before a result it is an announcement, and an announcement without data is exactly the genre discussed in the Navier–Stokes story (a press release versus a published Lean formalization). After step 1 there is something to show either way: confirmed or rejected - both outcomes are meaningful.
+**Publication only with a result.** Before a result it is an announcement, and an announcement without data is exactly the genre discussed in the Navier–Stokes story (a press release versus a published Lean formalization). *Updated 2026-09-12:* a second model and a text for others come only after a stable positive result on E2B with more than one score; external review comes after publication.
 
 ## What each prediction tests - the instrument or the topology
 
@@ -248,8 +248,8 @@ Background subtraction is worth keeping in the plan as a prepared next step: it 
 
 **There is not one baseline but two.** Without the second the result cannot be interpreted.
 
-1. **Uniform quantization** at the same mean number of bits.
-2. **A random mask of the same concentration** - the same share of blocks is read deep, but chosen at random.
+1. **Uniform quantization** at the same memory.
+2. **A random mask of the same shape** - the same share of blocks read deep, chosen at random; for the lens layout, random lenses of the same number and size around random blocks of the weight map.
 
 **Why.** Even a coarse non-random hit beats uniform coarsening simply because the uniform scheme spends bits on everything, including what is clearly useless for this query. So **any non-uniformity beats uniformity**, and a win over the first baseline proves nothing.
 

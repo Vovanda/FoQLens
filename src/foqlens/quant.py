@@ -8,6 +8,8 @@ packed copies, so it saves no memory by itself (see docs/plan.md, step 5, for th
 
 from __future__ import annotations
 
+import functools
+from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import IntEnum
 
@@ -120,25 +122,25 @@ class _SliceReader:
     def _weight(self, w: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
         return (w * self.scale).view(w.shape[0], -1).to(dtype)
 
+    def _sums(self, depths: list[int]) -> Iterator[torch.Tensor]:
+        """The fp32 accumulator after each of the ascending `depths` - one tensor, added to in place, slice by slice."""
+        w, done = self._accumulator(), 0
+        for depth in depths:
+            for e in range(done, depth):
+                self._add_slice(w, e)
+            done = depth
+            yield w
+
     def dequantize(self, dtype: torch.dtype, depth: int = N_SLICES) -> torch.Tensor:
         """The weight read to the first `depth` slices (one fp32 temporary)."""
-        w = self._accumulator()
-        for e in range(depth):
-            self._add_slice(w, e)
-        return self._weight(w, dtype)
+        return self._weight(next(self._sums([depth])), dtype)
 
     def matmul(self, x: torch.Tensor, bias: torch.Tensor | None = None, depth: int = N_SLICES) -> torch.Tensor:
         return F.linear(x, self.dequantize(x.dtype, depth), bias)
 
     def linear_at_depths(self, x: torch.Tensor, bias: torch.Tensor | None, depths: list[int]) -> list[torch.Tensor]:
         """F.linear at every depth of the ascending `depths`, with the slices unpacked and added once."""
-        w, done, outs = self._accumulator(), 0, []
-        for depth in depths:
-            for e in range(done, depth):
-                self._add_slice(w, e)
-            done = depth
-            outs.append(F.linear(x, self._weight(w, x.dtype), bias))
-        return outs
+        return [F.linear(x, self._weight(w, x.dtype), bias) for w in self._sums(depths)]
 
 
 def _slice_delta(codes: torch.Tensor, e: int) -> torch.Tensor:
@@ -181,6 +183,29 @@ class SlicedWeight(_SliceReader):
 
     def _add_slice(self, w: torch.Tensor, e: int) -> None:
         w += _slice_delta(_unpack(self.packed[e]).view(w.shape), e)
+
+    def _sums(self, depths: list[int]) -> Iterator[torch.Tensor]:
+        """As _SliceReader._sums, bit for bit, but every slice needed is unpacked and scaled in one go.
+
+        One pass of a few large kernels over all slices replaces a handful of small ones per slice; the
+        additions are the same, in the same order, so the sums are identical.
+        """
+        top = depths[-1]
+        if top == 0:
+            yield from super()._sums(depths)
+            return
+        shape = self._accumulator_shape()
+        deltas = (_unpack(self.packed[:top]).view(top, *shape).float() - (_SLICE_ZERO - 0.5)) * _slice_steps(top, self.packed.device)
+        w, done = deltas[0].clone(), 1  # 0 + d0 is d0 exactly (a delta is never -0.0)
+        for depth in depths:
+            for e in range(done, depth):
+                w += deltas[e]
+            done = max(done, depth)
+            yield w
+
+    def _accumulator_shape(self) -> tuple[int, int, int]:
+        out, inp = self.packed.shape[1], self.packed.shape[2] * _CODES_PER_BYTE
+        return out, inp // SLICE_GROUP, SLICE_GROUP
 
     @property
     def nbytes(self) -> int:
@@ -239,7 +264,18 @@ def _pack(codes: torch.Tensor) -> torch.Tensor:
     return (c << shifts).sum(dim=-1, dtype=torch.uint8)
 
 
+@functools.cache
+def _shifts(device: torch.device) -> torch.Tensor:
+    """The bit shift of every code in a byte, made once per device instead of on every unpack."""
+    return torch.arange(_CODES_PER_BYTE, device=device, dtype=torch.uint8) * SLICE_BITS
+
+
+@functools.cache
+def _slice_steps(n: int, device: torch.device) -> torch.Tensor:
+    """[n, 1, 1, 1] fp32: the step of slice e in steps of slice 1, 4**-e - the factor _slice_delta uses."""
+    return torch.tensor([float(_SLICE_LEVELS) ** -e for e in range(n)], device=device, dtype=torch.float32).view(n, 1, 1, 1)
+
+
 def _unpack(packed: torch.Tensor) -> torch.Tensor:
-    shifts = torch.arange(_CODES_PER_BYTE, device=packed.device, dtype=torch.uint8) * SLICE_BITS
-    c = (packed.unsqueeze(-1) >> shifts) & (_SLICE_LEVELS - 1)
+    c = (packed.unsqueeze(-1) >> _shifts(packed.device)) & (_SLICE_LEVELS - 1)
     return c.view(*packed.shape[:-1], -1)

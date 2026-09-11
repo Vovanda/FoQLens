@@ -1,4 +1,4 @@
-"""Expert zones (prereg/ADDENDUM-07.md; terms: ADDENDUM-08 to 10): a topic's zones against random zones.
+"""Expert zones (experiments/E008-zones-fixed-budget/ADDENDUM-07.md; terms: ADDENDUM-08 to 10): a topic's zones against random zones.
 
 The weight map comes from the raw gradient masks of all questions of the run (co-activation, no
 labels). For every question, the expert zones of its own topic's mask and of the paired topic's mask
@@ -9,7 +9,19 @@ share spent evenly, without a mask, is the reference of its row. The generic imp
 The cells run from the most promising to the least - nearest to PROMISING first - and the summary is
 written after every cell, so a stopped run still leaves what it has done.
 
-Writes runs/zones/<model>/summary.json and raw per-question results.
+Writes runs/E008-zones-fixed-budget/<model>/summary.json and raw per-question results.
+
+Measured 2026-09-12 on an RTX 3090 Ti, Gemma 4 E2B, with the layout worker, its queue across cells and
+all slices unpacked in one go:
+- one batch of 32 questions with per-question D4 / D6 / D8 layouts: 1.26 s (1.48 s before the one-go
+  unpacking), GPU 93% busy; uniform D8: 0.72 s; bf16: 0.37 s - the slices are still unpacked on every batch;
+- one fixed-budget layout: 26 ms of Python and numpy, built in the layout worker process;
+- --limit 32 (128 questions), one cell: 95 s; evaluation utilization 89% (median 99%) at --gpu-share 1,
+  80% (median 98%) at 0.8; masks 39-51%; with batches by tokens (pipeline.GRADIENT_BATCH) masks 38% at 0.8
+  and 50% at 1, peak 16.6 GiB reserved at both - the lengths of these questions are close, and the mask
+  pass stays bound by kernel launches;
+- the full matrix of E009 (395 questions, 24 cells x 7 policies) took 1 h 42 min before these changes,
+  at 40% evaluation utilization.
 
     uv run python scripts/step3_zones.py
     uv run python scripts/step3_zones.py --limit 4 --focus-area 0.5 --out /tmp/zones   # smoke check
@@ -28,9 +40,10 @@ from foqlens.evaluate import LetterChoice
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
-from foqlens.layouts import TopicMeans, TopicZones, Uniform, ZoneLayout
-from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
-from foqlens.quality import evaluate_all, summarize
+from foqlens.layouts import FixedZones, NoZones, OtherZones, OwnZones, RandomZones, TopicMeans, TopicZones, Uniform, legacy_zone_layout
+from foqlens.pipeline import GRADIENT_BATCH, MASK_SOURCES, POOLED_BATCH, Bench, subtract_background
+from foqlens.progress import Progress
+from foqlens.quality import batches, evaluate_all, layout_pool, submit_layouts, summarize
 from foqlens.quant import Level
 from foqlens.stats import paired_bootstrap
 from foqlens.topics import PAIR_NAMES, PAIRS, SPECS
@@ -45,7 +58,6 @@ PRECISION_SHARES = [0.125, 0.25, 0.5, 0.75]
 FOCUS_AREAS = [0.0, 0.2, 0.333, 0.5, 0.667, 0.8]
 # Where an address is most likely to show: a mid precision share (room above and below) and the zones as found.
 PROMISING = (0.375, 0.5)
-KINDS = ("own", "other", "random")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -56,11 +68,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--focus-area", nargs="+", type=float, default=FOCUS_AREAS, help="0 the zones' centers only, 0.5 as found, 1 the whole map (no mask)")
     parser.add_argument("--limit", type=int, default=None, help="questions per topic, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--pooled-batch", type=int, default=32)
-    parser.add_argument("--gradient-batch", type=int, default=8)
+    parser.add_argument("--pooled-batch", type=int, default=POOLED_BATCH)
+    parser.add_argument("--gradient-batch", type=int, default=GRADIENT_BATCH)
     parser.add_argument("--eval-batch", type=int, default=32)
     parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
-    parser.add_argument("--out", type=Path, default=Path("runs/zones"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E008-zones-fixed-budget"))
     return parser.parse_args(argv)
 
 
@@ -77,9 +89,10 @@ def zone_name(kind: str, source: str, focus_area: float, precision_share: float)
 
 def cell_policies(cell, coords, weights, topics, backbone_zones, seed) -> list:
     p, s = cell
-    out = [ZoneLayout("fixed", "backbone", s, p, coords, weights, fixed=backbone_zones, seed=seed)]
+    out = [legacy_zone_layout(zone_name("fixed", "backbone", s, p), FixedZones(backbone_zones), s, p, coords, weights, seed)]
     for src in MASK_SOURCES:
-        out += [ZoneLayout(k, src, s, p, coords, weights, topics[src], seed=seed) for k in KINDS]
+        kinds = {"own": OwnZones(topics[src]), "other": OtherZones(topics[src]), "random": RandomZones(topics[src], seed)}
+        out += [legacy_zone_layout(zone_name(k, src, s, p), zs, s, p, coords, weights, seed) for k, zs in kinds.items()]
     return out
 
 
@@ -103,6 +116,11 @@ def comparisons(results: dict, domains: tuple[str, ...], cells, seed: int) -> di
 
 def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
+    with layout_pool() as pool:  # started first: its imports run while the model loads
+        return run(args, pool)
+
+
+def run(args: argparse.Namespace, pool) -> Path:
     questions = [q for spec in SPECS.values() for q in read_questions(args.prompts_dir, spec, args.limit)]
     domains = tuple(q.domain for q in questions)
     bench = Bench.load(MODELS[args.model], gpu_share=args.gpu_share)
@@ -116,20 +134,33 @@ def main(argv: list[str] | None = None) -> Path:
     metric = METRIC.for_tokenizer(bench.tokenizer)
     out_dir = args.out / args.model
 
-    def evaluate(policies: list) -> dict:
+    groups = list(batches(len(questions), args.eval_batch))
+
+    def evaluate(policies: list, queued: list) -> dict:
         return evaluate_all(bench.model, bench.tokenizer, bench.ctl, questions, policies, metric, args.eval_batch,
-                            throttle=bench.throttle)
+                            throttle=bench.throttle, pool=pool, layouts=queued)
 
     references = [Uniform(Level.BF16, bench.ctl.n_blocks), Uniform(Level.D4, bench.ctl.n_blocks), Uniform(Level.D8, bench.ctl.n_blocks)]
-    references += [ZoneLayout("uniform", "-", 1.0, p, coords, weights, seed=args.seed) for p in args.precision_share]
-    zones_per_question = {src: float(np.mean([len(t.get(i, "own").radii) for i in range(len(questions))]))
+    references += [legacy_zone_layout(f"zone_uniform_ps{p:.3f}", NoZones(coords.shape[1]), 1.0, p, coords, weights, args.seed)
+                   for p in args.precision_share]
+    zones_per_question = {src: float(np.mean([len(t.own(i).radii) for i in range(len(questions))]))
                           for src, t in topics.items()} | {"backbone": len(backbone_zones.radii)}
     with GpuMonitor() as eval_gpu:
-        results = evaluate(references)
+        cells = cells_by_promise(args.precision_share, args.focus_area)
+        cell_pols = [cell_policies(c, coords, weights, topics, backbone_zones, args.seed) for c in cells]
+        # the worker queue always holds the next cell, so no cell starts by waiting for its layouts
+        ref_queue = submit_layouts(pool, references, groups)
+        queued = submit_layouts(pool, cell_pols[0], groups) if cells else []
+        results = evaluate(references, ref_queue)
         done: list[tuple[float, float]] = []
-        for cell in cells_by_promise(args.precision_share, args.focus_area):
-            results |= evaluate(cell_policies(cell, coords, weights, topics, backbone_zones, args.seed))
+        comps: dict = {}
+        progress = Progress(len(cells), "cell")
+        for k, cell in enumerate(cells):
+            upcoming = submit_layouts(pool, cell_pols[k + 1], groups) if k + 1 < len(cells) else []
+            results |= evaluate(cell_pols[k], queued)
+            queued = upcoming
             done.append(cell)
+            comps |= comparisons(results, domains, [cell], args.seed)  # only the new cell: the others are done
             summary = {
                 "model": MODELS[args.model],
                 "revision": fm.REVISIONS[MODELS[args.model]],
@@ -140,10 +171,11 @@ def main(argv: list[str] | None = None) -> Path:
                 "zones_per_question": zones_per_question,
                 "gpu_share": args.gpu_share,
                 "gpu": {"masks": mask_gpu.summary()},
-                "comparisons": comparisons(results, domains, done, args.seed),
+                "comparisons": comps,
                 "configs": summarize(results, questions),
             }
             write_json(out_dir / "summary.json", summary)
+            print(progress.step(f"ps{cell[0]:.3f} fa{cell[1]:.2f}"), flush=True)
     summary["gpu"]["eval"] = eval_gpu.summary()
     write_json(out_dir / "summary.json", summary)
     write_json(out_dir / "raw" / "per_question.json", {"questions": [q.__dict__ for q in questions], "results": results})

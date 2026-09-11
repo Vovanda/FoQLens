@@ -1,11 +1,11 @@
-"""Dilation (prereg/ADDENDUM-06.md): the topic fill widened to the neighbours of its blocks.
+"""Dilation (experiments/E007-dilation/ADDENDUM-06.md): the topic fill widened to the neighbours of its blocks.
 
 Over the generic importance backbone (--share of the precision share) the rest of it is filled
 by the own or the other topic's mask as in ADDENDUM-05 - as it is ("none"), or with every fill block
 followed at once by its structural neighbours ("struct") or by as many index neighbours ("index").
 Outside the precision share: ZERO. Paired bootstrap of the right-letter log-probability.
 
-Writes runs/dilation/<model>/summary.json and raw per-question results.
+Writes runs/E007-dilation/<model>/summary.json and raw per-question results.
 
     uv run python scripts/step3_dilation.py
     uv run python scripts/step3_dilation.py --limit 4 --precision-share 0.95 --out /tmp/dil   # smoke check
@@ -25,8 +25,8 @@ from foqlens.evaluate import LetterChoice
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
-from foqlens.layouts import Backbone, BackboneFill, TopicMeans, Uniform
-from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
+from foqlens.layouts import Backbone, BackboneFill, OtherTopic, OwnTopic, RandomFill, TopicMeans, Uniform
+from foqlens.pipeline import GRADIENT_BATCH, MASK_SOURCES, POOLED_BATCH, Bench, subtract_background
 from foqlens.quality import evaluate_all, summarize
 from foqlens.quant import Level
 from foqlens.stats import paired_bootstrap
@@ -48,11 +48,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--share", type=float, default=SHARE, help="backbone part of the precision share")
     parser.add_argument("--limit", type=int, default=None, help="questions per topic, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--pooled-batch", type=int, default=32)
-    parser.add_argument("--gradient-batch", type=int, default=8)
+    parser.add_argument("--pooled-batch", type=int, default=POOLED_BATCH)
+    parser.add_argument("--gradient-batch", type=int, default=GRADIENT_BATCH)
     parser.add_argument("--eval-batch", type=int, default=32)
     parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
-    parser.add_argument("--out", type=Path, default=Path("runs/dilation"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E007-dilation"))
     return parser.parse_args(argv)
 
 
@@ -71,13 +71,10 @@ def policies_for(args, backbone, means, weights, n_blocks, tables) -> list:
     z = Level.ZERO
     out = [Uniform(Level.BF16, n_blocks), Uniform(z, n_blocks)]
     for a in args.precision_share:
-        out += [Backbone(a, backbone, weights, z), BackboneFill("random", "-", a, args.share, backbone, weights, seed=args.seed, coarse=z)]
+        out += [Backbone(a, backbone, weights, z), BackboneFill(RandomFill(a, args.seed), "-", a, args.share, backbone, weights, coarse=z)]
         for src in MASK_SOURCES:
-            for fill in ("own", "other"):
-                out += [
-                    BackboneFill(fill, src, a, args.share, backbone, weights, means[src], PAIRS, args.seed, z, d, tables[d])
-                    for d in DILATIONS
-                ]
+            for fill in (OwnTopic(means[src]), OtherTopic(means[src], PAIRS)):
+                out += [BackboneFill(fill, src, a, args.share, backbone, weights, z, d, tables[d]) for d in DILATIONS]
     return out
 
 

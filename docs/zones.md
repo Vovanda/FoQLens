@@ -1,11 +1,13 @@
 # Precision share, focus area and expert zones
 
+> **Legacy layout.** This page describes the fixed-budget layout of ADDENDUM-07 to 10: the mean bits are set in advance and the zones are fitted to them. It is replaced by the lens layout ([lens.md](lens.md)): the whole network behind a glass, lenses in the expert zones, memory the result of the lenses.
+
 How precision is laid out over the weights. Two parameters, both in [0, 1] and checked where they enter:
 
 - **precision_share** - how much precision the model gets: the share of the precision range spent, the memory and compute it pays for;
 - **focus_area** - where that precision goes: the area read sharp, from the centers of the query's **expert zones** ([problem statement](problem-statement.md)) to the whole weight map.
 
-Fixed 2026-09-11, names from a tier list 2026-09-12 ([ADDENDUM-10](../prereg/ADDENDUM-10.md)). The lens stays in the project's name as a picture ([visual metaphor](visual-metaphor.md)); the parameters are named by what they do.
+Fixed 2026-09-11, names from a tier list 2026-09-12 ([ADDENDUM-10](../experiments/E009-zones-matrix/ADDENDUM-10.md)). In the lens layout the lens is the mechanism itself ([lens.md](lens.md)); here the parameters of the legacy layout are named by what they do.
 
 ## Precision share - how much
 
@@ -22,7 +24,7 @@ The precision share `p` is the share of the precision range spent. With the leve
 
 ## What was wrong in the early runs
 
-The mask was a flat list of block scores, and the top blocks were opened one by one until the budget was spent. There were no centers and no radii: a topic could only show up as scattered single blocks, and dilation ([results](results-dilation.md)) only regrouped the same budget around those points. The picture the project is built on is different: antinodes at full precision, a stepped falloff around them, the background coarse. That needs centers, distances and radii.
+The mask was a flat list of block scores, and the top blocks were opened one by one until the budget was spent. There were no centers and no radii: a topic could only show up as scattered single blocks, and dilation ([results](../experiments/E007-dilation/results.md)) only regrouped the same budget around those points. The picture the project is built on is different: antinodes at full precision, a stepped falloff around them, the background coarse. That needs centers, distances and radii.
 
 ## Expert zones - in what shape
 
@@ -57,11 +59,11 @@ R_i(f) = r_i * f / (1 - f)        f in [0, 1]
 phi(b) = max_i exp(-d(b, c_i) / R_i)        in (0, 1]
 ```
 
-The sharpness is cut into rings - D8 at the centers, then D6, D4 for the background - read on `log phi = max_i(-d / R_i)`, which keeps the order of far blocks when `R` is small. The edge of the rings is searched so that the mean bits equal the budget of the precision share. D2 is not used as the background: uncalibrated 2 bits break the model ([results](results-residual.md)).
+The sharpness is cut into rings - D8 at the centers, then D6, D4 for the background - read on `log phi = max_i(-d / R_i)`, which keeps the order of far blocks when `R` is small. The edge of the rings is searched so that the mean bits equal the budget of the precision share. D2 is not used as the background: uncalibrated 2 bits break the model ([results](../experiments/E006-read-depths/results.md)).
 
 ### 5. Memory follows the zones
 
-The level of a block is also the depth it stores (depth caps of the resident bench, [results](results-residual.md)): a block in the background keeps only its first slices, a center keeps all four.
+The level of a block is also the depth it stores (depth caps of the resident bench, [results](../experiments/E006-read-depths/results.md)): a block in the background keeps only its first slices, a center keeps all four.
 
 ## What is compared
 

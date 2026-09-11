@@ -2,16 +2,17 @@
 
 Two instruments, both producing one score per block over all controlled modules, in module order:
 
-- BlockScorer - the naive score of prereg/ADDENDUM-01.md: the L2 norm of a block's output,
+- BlockScorer - the naive score of experiments/E001-run1-exploration/ADDENDUM-01.md: the L2 norm of a block's output,
   averaged over the tokens a center mode selects ("norm", "pooled", "attention");
-- GradientScorer - gradient x activation of prereg/ADDENDUM-02.md: the first-order estimate of
+- GradientScorer - gradient x activation of experiments/E002-gradient-score/ADDENDUM-02.md: the first-order estimate of
   the change in the query's own language-model loss if the block's output were zeroed.
 
 Both work on right-padded batches. Background subtraction is done by the caller.
 
 Invariants:
 - Invariant: padding and the first token (<bos>) never contribute to a mask.
-- Invariant: the same texts in the same batch give identical masks.
+- Invariant: the same texts in the same batch give identical masks - with sdpa attention too: the
+  gradient pass runs attention on GRADIENT_ATTENTION, whose backward is deterministic.
 - Invariant (approximate, bf16): a text's mask in a batch points the same way as its mask alone,
   cosine >= 0.99 - batched kernels accumulate differently, which moves token states by up to ~2%.
   The discrete center modes ("norm", "attention") may swap one center of four on near-ties.
@@ -25,12 +26,19 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torch.nn.attention import SDPBackend, sdpa_kernel
 from torch.utils.checkpoint import checkpoint
 
 from foqlens import model as fm
 from foqlens.precision import MixedPrecisionLinear
 
 DEFAULT_TOP_K = 4
+
+# The attention backend of the gradient pass. The default sdpa backend on long sequences is memory-efficient
+# attention, whose backward accumulates with atomics: the same batch gave masks differing by up to 9e-3 of the
+# largest score (E2B, 8 questions of 131 tokens). The math backend is deterministic, at +5% time and +0.8 GiB peak
+# on that batch (RTX 3090 Ti, 2026-09-12). Forward-only passes stay on the default: its forward is deterministic.
+GRADIENT_ATTENTION = SDPBackend.MATH
 MODES = ("norm", "pooled", "attention")
 
 Scored = dict[str, tuple[np.ndarray, list[int]]]  # mode -> (mask vector, token positions used)
@@ -306,7 +314,7 @@ class GradientScorer:
         enc = fm.encode(tokenizer, texts, model.device)
         valid = enc["attention_mask"].clone()
         valid[:, 0] = 0
-        with torch.enable_grad(), TaylorRecorder(self.modules, valid) as rec:
+        with torch.enable_grad(), sdpa_kernel(GRADIENT_ATTENTION), TaylorRecorder(self.modules, valid) as rec:
             hidden = model.model(**enc).last_hidden_state
             # summed per-sequence means: each sequence's gradient is that of its own mean loss
             losses = chunked_sequence_losses(model, hidden, enc["input_ids"], enc["attention_mask"], self.loss_chunk)

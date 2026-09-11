@@ -75,10 +75,12 @@ def test_step3_dilation_smoke(tmp_path):
     assert max(bits.values()) - min(bits.values()) < 0.05  # dilation spends the same budget
 
 
-def test_step3_zones_smoke(tmp_path):
+def test_step3_zones_smoke(tmp_path, capsys):
     sz = load_script("step3_zones")
     out = sz.main(["--limit", "3", "--precision-share", "0.25", "--focus-area", "0.5", "0.0", "--pooled-batch", "4",
                    "--gradient-batch", "2", "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    log = capsys.readouterr().out
+    assert "cell [1/2] ps0.250 fa0.50 (50%), ETA " in log and "cell [2/2] ps0.250 fa0.00 (100%), ETA " in log
     s = json.loads(Path(out).read_text())
     assert {"zone_uniform_ps0.250", "zone_own_gradient_fa0.50_ps0.250", "zone_random_pooled_fa0.00_ps0.250",
             "zone_other_pooled_fa0.50_ps0.250", "zone_fixed_backbone_fa0.50_ps0.250", "uniform_d4"} <= set(s["configs"])

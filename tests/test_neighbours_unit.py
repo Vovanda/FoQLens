@@ -66,18 +66,17 @@ def test_dilated_fill_spends_the_same_budget_on_fewer_seeds():
 
 
 def test_backbone_fill_names_its_dilation_and_needs_a_table_for_it():
-    from foqlens.layouts import BackboneFill, TopicMeans
+    from foqlens.layouts import BackboneFill, OwnTopic, TopicMeans
 
     weights = np.full(4, 10)
     backbone = np.array([9.0, 0.0, 0.0, 0.0])
     scores = np.array([[0, 0, 5.0, 0], [0, 0, 5.0, 0], [0, 5.0, 0, 0], [0, 5.0, 0, 0]])
     means = TopicMeans(scores, ("a", "a", "b", "b"))
-    pairs = {"a": "b", "b": "a"}
     table = np.array([[-1], [-1], [3], [2]])
-    wide = BackboneFill("own", "pooled", 0.75, 1 / 3, backbone, weights, means, pairs, 0, Level.ZERO, "struct", table)
-    plain = BackboneFill("own", "pooled", 0.75, 1 / 3, backbone, weights, means, pairs, 0, Level.ZERO)
+    wide = BackboneFill(OwnTopic(means), "pooled", 0.75, 1 / 3, backbone, weights, Level.ZERO, "struct", table)
+    plain = BackboneFill(OwnTopic(means), "pooled", 0.75, 1 / 3, backbone, weights, Level.ZERO)
     sharp = lambda p: np.flatnonzero(p.levels(np.array([0]))[0] == Level.BF16).tolist()  # noqa: E731
     assert sharp(wide) == [0, 2, 3] and sharp(plain) == [0, 1, 2]
     assert wide.name == "bb0.33_own_pooled_struct_0.750" and plain.name == "bb0.33_own_pooled_0.750"
     with pytest.raises(ValueError):
-        BackboneFill("own", "pooled", 0.75, 1 / 3, backbone, weights, means, pairs, 0, Level.ZERO, "struct")
+        BackboneFill(OwnTopic(means), "pooled", 0.75, 1 / 3, backbone, weights, Level.ZERO, "struct")

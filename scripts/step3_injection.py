@@ -1,11 +1,11 @@
-"""Mask injection (prereg/ADDENDUM-04.md): the mask of topic A on the questions of topic B.
+"""Mask injection (experiments/E004-injection/ADDENDUM-04.md): the mask of topic A on the questions of topic B.
 
 For every question of the paired topics, at every precision share (outside it: ZERO), the question is
 answered under its own mask ("self"), its topic's mask ("own", leave-one-out), the paired topic's
 mask ("other") and random blocks ("random"); uniform bf16 and ZERO are the ends. Paired
 bootstrap of the right-letter log-probability: own - other, own - random, self - own.
 
-Writes runs/injection/<model>/summary.json and raw per-question results.
+Writes runs/E004-injection/<model>/summary.json and raw per-question results.
 
     uv run python scripts/step3_injection.py
     uv run python scripts/step3_injection.py --limit 4 --precision-share 0.95 --out /tmp/inj   # smoke check
@@ -24,8 +24,8 @@ from foqlens.evaluate import LetterChoice
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
-from foqlens.layouts import Directed, Random, TopicMask, TopicMeans, Uniform
-from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
+from foqlens.layouts import Directed, OtherTopic, OwnTopic, Random, TopicMask, TopicMeans, Uniform
+from foqlens.pipeline import GRADIENT_BATCH, MASK_SOURCES, POOLED_BATCH, Bench, subtract_background
 from foqlens.quality import evaluate_all, summarize
 from foqlens.quant import Level
 from foqlens.stats import paired_bootstrap
@@ -43,11 +43,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--precision-share", nargs="+", type=float, default=PRECISION_SHARES)
     parser.add_argument("--limit", type=int, default=None, help="questions per topic, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--pooled-batch", type=int, default=32)
-    parser.add_argument("--gradient-batch", type=int, default=8)
+    parser.add_argument("--pooled-batch", type=int, default=POOLED_BATCH)
+    parser.add_argument("--gradient-batch", type=int, default=GRADIENT_BATCH)
     parser.add_argument("--eval-batch", type=int, default=32)
     parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
-    parser.add_argument("--out", type=Path, default=Path("runs/injection"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E004-injection"))
     return parser.parse_args(argv)
 
 
@@ -58,7 +58,7 @@ def policies_for(precision_shares, scores, domains, weights, n_blocks, seed) -> 
         out.append(Random(a, weights, seed, Level.ZERO))
         for s in MASK_SOURCES:
             out.append(Directed(f"self_{s}", a, scores[s], weights, Level.ZERO))
-            out += [TopicMask(t, s, a, means[s], PAIRS, weights, Level.ZERO) for t in ("own", "other")]
+            out += [TopicMask(t, s, a, weights, Level.ZERO) for t in (OwnTopic(means[s]), OtherTopic(means[s], PAIRS))]
     return out
 
 

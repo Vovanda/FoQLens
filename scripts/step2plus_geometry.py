@@ -1,9 +1,9 @@
 """Step 2+: mask geometry on the sealed step 1 vectors (tests defined in foqlens.geometry).
 
-Reads runs/step1/<model>/raw/vectors_<mode>.npy and raw/queries.json, checks their sha256
+Reads runs/E001-run1-exploration/step1/<model>/raw/vectors_<mode>.npy and raw/queries.json, checks their sha256
 against the values recorded in the sealed step 1 commit, computes mean-pooled middle-layer
 representations of the same queries (inputs, not results) for the linearity test, and writes
-runs/step2plus/<model>/summary.json.
+runs/E001-run1-exploration/step2plus/<model>/summary.json.
 
 Every test is run per center mode and per vector variant: raw masks, and masks with the
 background (the mean mask over all debugging queries) subtracted. Concentration needs
@@ -66,8 +66,8 @@ def geometry_of(means: dict[str, np.ndarray], nonneg: bool) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
-    parser.add_argument("--step1", type=Path, default=Path("runs/step1"))
-    parser.add_argument("--out", type=Path, default=Path("runs/step2plus"))
+    parser.add_argument("--step1", type=Path, default=Path("runs/E001-run1-exploration/step1"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E001-run1-exploration/step2plus"))
     parser.add_argument("--skip-hash-check", action="store_true", help="for smoke checks on other vectors")
     args = parser.parse_args()
 

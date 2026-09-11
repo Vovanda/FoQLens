@@ -34,7 +34,7 @@ GRID = 64
 SMOOTH_CELLS = 1.5  # gaussian sigma of the smoothing, in grid cells
 PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field
 MAX_ZONES = 16
-# Background ... centers. D2 is not used: uncalibrated 2 bits break the model (docs/results-residual.md).
+# Background ... centers. D2 is not used: uncalibrated 2 bits break the model (experiments/E006-read-depths/results.md).
 LEVELS = (Level.D4, Level.D6, Level.D8)
 # A block climbs one level per ring of psi it is inside; the rings are RING_GAP apart in psi.
 RING_GAP = np.log(2.0)

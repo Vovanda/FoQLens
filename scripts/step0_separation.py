@@ -2,7 +2,7 @@
 
 Reads prompts/<domain>.jsonl (one {"text": ...} per line), mean-pools the hidden states of every
 layer for every prompt, and writes per-layer separation metrics to
-runs/step0/<model>/summary.json. Index i in "layers" is hidden_states[i]: 0 is the embeddings,
+runs/E001-run1-exploration/step0/<model>/summary.json. Index i in "layers" is hidden_states[i]: 0 is the embeddings,
 i + 1 is the output of decoder layer i.
 
 This is the one step that is looked at right away (see prereg): it checks that the model is fit
@@ -36,7 +36,7 @@ def main() -> None:
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
     parser.add_argument("--domains", nargs="+", default=["biology", "math"])
     parser.add_argument("--prompts-dir", type=Path, default=Path("prompts"))
-    parser.add_argument("--out", type=Path, default=Path("runs/step0"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E001-run1-exploration/step0"))
     args = parser.parse_args()
 
     texts, labels = [], []

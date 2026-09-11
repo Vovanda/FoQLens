@@ -9,7 +9,7 @@ For every MMLU question (question + options):
    precision share a (share of weights read sharp): the question's own top blocks at bf16 and the rest
    at the coarse level ("directed"), and random blocks within the same precision share ("random").
 
-Writes runs/step3/<model>/summary.json (GPU utilization and memory per phase) and raw results.
+Writes runs/E003-aperture-sweep/<model>/summary.json (GPU utilization and memory per phase) and raw results.
 
     uv run python scripts/step3_quality.py --coarse zero
     uv run python scripts/step3_quality.py --limit 3 --out /tmp/step3     # smoke check
@@ -29,7 +29,7 @@ from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
 from foqlens.layouts import Directed, Random, Uniform
-from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
+from foqlens.pipeline import GRADIENT_BATCH, MASK_SOURCES, POOLED_BATCH, Bench, subtract_background
 from foqlens.quality import evaluate_all, summarize
 from foqlens.quant import Level
 
@@ -53,11 +53,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--coarse", choices=sorted(COARSE), default="zero", help="level of the blocks outside the precision share")
     parser.add_argument("--limit", type=int, default=None, help="questions per domain, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--pooled-batch", type=int, default=32, help="questions per pooled-mask pass")
-    parser.add_argument("--gradient-batch", type=int, default=8, help="questions per gradient pass (backward memory)")
+    parser.add_argument("--pooled-batch", type=int, default=POOLED_BATCH, help="questions per pooled-mask pass")
+    parser.add_argument("--gradient-batch", type=int, default=GRADIENT_BATCH, help="questions per gradient pass (backward memory)")
     parser.add_argument("--eval-batch", type=int, default=32, help="questions per evaluation pass")
     parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
-    parser.add_argument("--out", type=Path, default=Path("runs/step3"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E003-aperture-sweep"))
     return parser.parse_args(argv)
 
 

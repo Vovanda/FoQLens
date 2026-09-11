@@ -63,7 +63,7 @@ Existing work has only the first.
 
 ## Where the address comes from
 
-The key link: **the address is already computed by the model itself**. The activations of the first layers effectively say what the query is about - this signal exists in the pass and nobody reads it today.
+The key link: **the address is already computed by the model itself**. The activations of the first layers effectively say what the query is about - this signal exists in the pass. Contextual sparsity already reads it to skip neurons (GRIFFIN, CoreInfer - [prior art](prior-art.md)); no known work reads it to lay out precision over the weights.
 
 Scheme: run the input through a few first layers at coarse precision → from the intermediate representation, get where to point the magnifier → compute the remaining layers with that mask.
 

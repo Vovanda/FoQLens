@@ -1,10 +1,10 @@
 # Preregistration addendum 01 - how centers are chosen, and the run 1 data
 
-Fixed 2026-09-11, **before any run** of step 0 or step 1. It adds to the [preregistration](PREREGISTRATION.ru.md) (English translation: [PREREGISTRATION.md](PREREGISTRATION.md)) and changes none of its predictions. Like the preregistration, this file is not edited after its commit.
+Fixed 2026-09-11, **before any run** of step 0 or step 1. It adds to the [preregistration](../../prereg/PREREGISTRATION.ru.md) (English translation: [PREREGISTRATION.md](../../prereg/PREREGISTRATION.md)) and changes none of its predictions. Like the preregistration, this file is not edited after its commit.
 
 ## 1. Three ways to choose the centers
 
-The preregistration fixed one instrument for step 1: centers are the top-k tokens by activation norm. The original plan ([docs/plan.md](../docs/plan.md), step 1) allowed two: "by activation norm **or by the share of attention** on them". A check of the bench on 2026-09-11 showed that on E2B the token norms at the middle layer are packed tightly (median 75.2, max 77.4 on one sentence), so choosing by norm may be close to choosing at random. Two more variants are therefore added. All three are computed in the same pass, over the same queries.
+The preregistration fixed one instrument for step 1: centers are the top-k tokens by activation norm. The original plan ([docs/plan.md](../../docs/plan.md), step 1) allowed two: "by activation norm **or by the share of attention** on them". A check of the bench on 2026-09-11 showed that on E2B the token norms at the middle layer are packed tightly (median 75.2, max 77.4 on one sentence), so choosing by norm may be close to choosing at random. Two more variants are therefore added. All three are computed in the same pass, over the same queries.
 
 | Variant | Centers | Block score |
 | --- | --- | --- |
@@ -29,7 +29,7 @@ Three instruments are three chances to "confirm" by luck. The rule:
 
 ## 3. Run 1 data
 
-The source and the reasons for it are in [docs/data-sources.md](../docs/data-sources.md). What matters for the predictions:
+The source and the reasons for it are in [docs/data-sources.md](../../docs/data-sources.md). What matters for the predictions:
 
 - Questions: MMLU-Redux-2.0 at a pinned revision, `error_type == "ok"` only, question text without options or a chat template.
 - **History in the confirmatory phase is the MMLU subject `prehistory`.** The other MMLU history subjects are built on long quoted sources (median ~1200 characters against 78-201 elsewhere), and separation would measure length. Prehistory partly overlaps with biology (human evolution); the confirmatory step 2 prediction for history–geography vs history–math stays as preregistered, and this overlap is noted for reading it.

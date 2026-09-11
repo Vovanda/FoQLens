@@ -1,6 +1,6 @@
 # Results - run 1, exploration (Gemma 4 E2B)
 
-Run 1 exploration on the debugging domains, read against the [preregistration](../prereg/PREREGISTRATION.ru.md) and [addendum 01](../prereg/ADDENDUM-01.md). Opened 2026-09-11, all at once, after the step 1 summary (`c407c45`) and the step 2+ summary (`9e008e3`) had been committed unopened. Data: [docs/data-sources.md](data-sources.md) - biology 95, math 100, chemistry 99, physics 97, biophysics 30 questions.
+Run 1 exploration on the debugging domains, read against the [preregistration](../../prereg/PREREGISTRATION.ru.md) and [addendum 01](ADDENDUM-01.md). Opened 2026-09-11, all at once, after the step 1 summary (`c407c45`) and the step 2+ summary (`9e008e3`) had been committed unopened. Data: [docs/data-sources.md](../../docs/data-sources.md) - biology 95, math 100, chemistry 99, physics 97, biophysics 30 questions.
 
 **This is exploration, not a result.** Three center modes were tried; by addendum 01 one of them is now chosen and only that one is tested on the held-out domains and E4B.
 
@@ -55,7 +55,7 @@ Raw masks are left out here: they are nearly identical, and every geometry test 
 
 ## Confirmation - E2B, held-out domains: **not confirmed**
 
-Run under [THRESHOLDS-01](../prereg/THRESHOLDS-01.md) (committed in `aed8a29` before the run): mode B, background subtracted, history (MMLU `prehistory`) 100, geography 100, math 100 questions, 1000 label permutations.
+Run under [THRESHOLDS-01](THRESHOLDS-01.md) (committed in `aed8a29` before the run): mode B, background subtracted, history (MMLU `prehistory`) 100, geography 100, math 100 questions, 1000 label permutations.
 
 | Claim | Criterion | E2B | Verdict |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ A caveat, recorded but not used to rescue the result: prehistory partly overlaps
 
 ## Diagnostic - do the held-out domains separate in representations? (exploratory)
 
-Not part of any preregistered test; run after the confirmation verdict was committed (`8214822`), with the step 0 script on history and geography ([runs/diagnostic/e2b/summary.json](../runs/diagnostic/e2b/summary.json)). It does not change the verdict.
+Not part of any preregistered test; run after the confirmation verdict was committed (`8214822`), with the step 0 script on history and geography ([runs/E001-run1-exploration/diagnostic/e2b/summary.json](../../runs/E001-run1-exploration/diagnostic/e2b/summary.json)). It does not change the verdict.
 
 **The model itself barely tells these two domains apart.** At the middle layer, centered: cos_in +0.040 / +0.061 against cos_between −0.058, silhouette +0.10, **ARI 0.04** - against ARI 0.98 for biology–math in step 0. No layer gets above ARI 0.06 centered.
 

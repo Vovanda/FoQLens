@@ -4,7 +4,7 @@ Fixed 2026-09-11, **before the run**. Not edited after its commit.
 
 ## 1. Names
 
-The parameters are named by what they do ([docs/zones.md](../docs/zones.md)); the earlier documents read with this table:
+The parameters are named by what they do ([docs/zones.md](../../docs/zones.md)); the earlier documents read with this table:
 
 | Earlier | Now |
 | --- | --- |
@@ -13,7 +13,7 @@ The parameters are named by what they do ([docs/zones.md](../docs/zones.md)); th
 
 ## 2. Why
 
-At one precision (5 bits) the expert zones of the gradient mask beat random zones, the paired topic and no mask for biology-math, not for history-geography ([results](../docs/results-zones.md)). One cell of precision does not say where the address lives or whether it grows with the budget. This run spans both parameters.
+At one precision (5 bits) the expert zones of the gradient mask beat random zones, the paired topic and no mask for biology-math, not for history-geography ([results](../E008-zones-fixed-budget/results.md)). One cell of precision does not say where the address lives or whether it grows with the budget. This run spans both parameters.
 
 ## 3. Design
 

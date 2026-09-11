@@ -8,7 +8,7 @@ Step 3 is no longer a single budget. The mask says *where* to read weights sharp
 
 - **Apertures:** 0.05, 0.1, 0.2, 1/3, 0.5, plus the ends (uniform nf4 and bf16) and uniform int8 at 8 bits.
 - **Layouts at every aperture:** directed by the question's own mask - two sources, the naive pooled score and gradient × activation, each with the background (mean mask over all questions) subtracted - and random blocks of the same aperture.
-- **Questions:** 591 MMLU-Redux questions with answers in six domains ([docs/data-sources.md](../docs/data-sources.md)); the mask of a question is computed from its full prompt (question and options) in a first bf16 pass.
+- **Questions:** 591 MMLU-Redux questions with answers in six domains ([docs/data-sources.md](../../docs/data-sources.md)); the mask of a question is computed from its full prompt (question and options) in a first bf16 pass.
 - **Quality:** accuracy, and the log-probability of the right letter (smoother, used for the tests below).
 
 This is the upper-bound version: the mask comes from a full bf16 pass. The one-pass online version (address from the first layers) follows only if this one works. Memory is not saved in this bench (bf16 and packed copies side by side); the real saving is step 5.

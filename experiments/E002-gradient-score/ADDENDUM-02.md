@@ -1,6 +1,6 @@
 # Preregistration addendum 02 - the second instrument: gradient × activation per block
 
-Fixed 2026-09-11, **before any run of this instrument**. It follows the [preregistration](PREREGISTRATION.ru.md), [addendum 01](ADDENDUM-01.md) and [thresholds 01](THRESHOLDS-01.md), and changes none of their predictions. Not edited after its commit.
+Fixed 2026-09-11, **before any run of this instrument**. It follows the [preregistration](../../prereg/PREREGISTRATION.ru.md), [addendum 01](../E001-run1-exploration/ADDENDUM-01.md) and [thresholds 01](../E001-run1-exploration/THRESHOLDS-01.md), and changes none of their predictions. Not edited after its commit.
 
 ## 1. Why a second instrument
 

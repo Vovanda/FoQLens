@@ -53,7 +53,7 @@ def test_find_zones_finds_both_peaks_and_a_wider_peak_has_a_wider_radius():
 
 
 def test_a_focus_area_or_a_precision_share_outside_zero_to_one_is_refused_where_it_enters():
-    from foqlens.layouts import ZoneLayout
+    from foqlens.layouts import FixedZones, legacy_zone_layout
 
     xy = grid_map(4)
     one = zn.Zones(centers=np.array([[1.0, 1.0]]), radii=np.array([1.0]))
@@ -66,9 +66,9 @@ def test_a_focus_area_or_a_precision_share_outside_zero_to_one_is_refused_where_
         with pytest.raises(ValueError):
             zn.budget_bits(bad)
         with pytest.raises(ValueError):
-            ZoneLayout("fixed", "backbone", bad, 0.25, xy, weights, fixed=one)
+            legacy_zone_layout("z", FixedZones(one), bad, 0.25, xy, weights)
         with pytest.raises(ValueError):
-            ZoneLayout("fixed", "backbone", 0.5, bad, xy, weights, fixed=one)
+            legacy_zone_layout("z", FixedZones(one), 0.5, bad, xy, weights)
     assert zn.check_focus_area(0.0) == 0.0 and zn.check_focus_area(1.0) == 1.0
 
 
@@ -106,7 +106,7 @@ def test_layout_holds_the_precision_share_and_puts_the_top_level_at_the_center()
 
 
 def test_zone_layouts_share_the_precision_share_and_own_puts_d8_on_its_topic():
-    from foqlens.layouts import TopicMeans, TopicZones, ZoneLayout
+    from foqlens.layouts import NoZones, OtherZones, OwnZones, RandomZones, TopicMeans, TopicZones, legacy_zone_layout
 
     xy = grid_map(12)
     weights = np.full(len(xy), 64)
@@ -115,20 +115,35 @@ def test_zone_layouts_share_the_precision_share_and_own_puts_d8_on_its_topic():
     means = TopicMeans(np.stack([field_a, field_a, field_b, field_b]), ("a", "a", "b", "b"))
     topics = TopicZones(means, {"a": "b", "b": "a"}, xy)
     idx = np.array([0, 2])
-    own = ZoneLayout("own", "pooled", 0.5, 0.25, xy, weights, topics)
-    layouts = {
-        "own": own.levels(idx),
-        "other": ZoneLayout("other", "pooled", 0.5, 0.25, xy, weights, topics).levels(idx),
-        "random": ZoneLayout("random", "pooled", 0.5, 0.25, xy, weights, topics).levels(idx),
-        "uniform": ZoneLayout("uniform", "-", 1.0, 0.25, xy, weights).levels(idx),
-    }
+    sources = {"own": OwnZones(topics), "other": OtherZones(topics), "random": RandomZones(topics)}
+    layouts = {k: legacy_zone_layout(k, src, 0.5, 0.25, xy, weights).levels(idx) for k, src in sources.items()}
+    layouts["uniform"] = legacy_zone_layout("uniform", NoZones(2), 1.0, 0.25, xy, weights).levels(idx)
     for name, codes in layouts.items():
         mean = np.array([[Level(int(c)).bits for c in row] for row in codes]).mean(axis=1)
         assert np.all(np.abs(mean - 5.0) <= 2 / len(xy) + 1e-9), name  # one block's step, up to rounding
     center_a = np.linalg.norm(xy - [3, 3], axis=1).argmin()
     assert layouts["own"][0, center_a] == Level.D8 and layouts["other"][0, center_a] != Level.D8
-    assert own.name == "zone_own_pooled_fa0.50_ps0.250"
-    assert ZoneLayout("uniform", "-", 1.0, 0.25, xy, weights).name == "zone_uniform_ps0.250"
+
+
+def test_a_zone_layout_is_its_parts_and_a_new_part_is_a_new_class():
+    from foqlens.layouts import FixedBudget, FixedZones, LogSharpness, ZoneLayout, legacy_zone_layout
+
+    xy = grid_map(10)
+    weights = np.full(len(xy), 64)
+    one = zn.Zones(centers=np.array([[4.0, 4.0]]), radii=np.array([2.0]))
+    legacy = legacy_zone_layout("z", FixedZones(one), 0.5, 0.25, xy, weights, seed=3).levels(np.array([0, 1]))
+    # the legacy layout is exactly log-sharpness at the focus area, rings at the precision share
+    direct = [zn.layout_at_budget(zn.log_sharpness(xy, one, 0.5), weights, zn.budget_bits(0.25),
+                                  np.random.default_rng([3, i, 0, 2]).permutation(len(xy))) for i in (0, 1)]
+    assert np.array_equal(legacy, np.stack(direct))
+
+    class Everywhere:  # a new zone source: one zone at every question's own place, no change to ZoneLayout
+        def zones(self, index: int) -> zn.Zones:
+            return zn.Zones(centers=np.array([[float(index), float(index)]]), radii=np.array([1.0]))
+
+    codes = ZoneLayout("new", Everywhere(), LogSharpness(0.5), FixedBudget(0.25, weights), xy).levels(np.array([0, 9]))
+    corner = {i: np.linalg.norm(xy - [i, i], axis=1).argmin() for i in (0, 9)}
+    assert codes[0, corner[0]] == Level.D8 and codes[1, corner[9]] == Level.D8
 
 
 def test_random_zones_keep_count_and_radii():

@@ -1,4 +1,4 @@
-"""Backbone + topic (prereg/ADDENDUM-05.md): the address on top of the scale.
+"""Backbone + topic (experiments/E005-backbone/ADDENDUM-05.md): the address on top of the scale.
 
 Generic block importance (the mean raw gradient x activation mask over all questions) is kept
 sharp for a part of the precision share; the rest of it is filled by the question's topic
@@ -6,7 +6,7 @@ mask ("own"), the paired topic's ("other") or random blocks. Outside the precisi
 Paired bootstrap of the right-letter log-probability: own - other, own - random fill,
 backbone alone - random blocks.
 
-Writes runs/backbone/<model>/summary.json and raw per-question results.
+Writes runs/E005-backbone/<model>/summary.json and raw per-question results.
 
     uv run python scripts/step3_backbone.py
     uv run python scripts/step3_backbone.py --limit 4 --precision-share 0.95 --shares 0.8 --out /tmp/bb   # smoke check
@@ -25,8 +25,8 @@ from foqlens.evaluate import LetterChoice
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
-from foqlens.layouts import Backbone, BackboneFill, Random, TopicMeans, Uniform
-from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
+from foqlens.layouts import Backbone, BackboneFill, OtherTopic, OwnTopic, Random, RandomFill, TopicMeans, Uniform
+from foqlens.pipeline import GRADIENT_BATCH, MASK_SOURCES, POOLED_BATCH, Bench, subtract_background
 from foqlens.quality import evaluate_all, summarize
 from foqlens.quant import Level
 from foqlens.stats import paired_bootstrap
@@ -46,11 +46,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--shares", nargs="+", type=float, default=SHARES, help="backbone part of the precision share")
     parser.add_argument("--limit", type=int, default=None, help="questions per topic, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--pooled-batch", type=int, default=32)
-    parser.add_argument("--gradient-batch", type=int, default=8)
+    parser.add_argument("--pooled-batch", type=int, default=POOLED_BATCH)
+    parser.add_argument("--gradient-batch", type=int, default=GRADIENT_BATCH)
     parser.add_argument("--eval-batch", type=int, default=32)
     parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
-    parser.add_argument("--out", type=Path, default=Path("runs/backbone"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E005-backbone"))
     return parser.parse_args(argv)
 
 
@@ -60,9 +60,10 @@ def policies_for(args, backbone, means, weights, n_blocks) -> list:
     for a in args.precision_share:
         out += [Random(a, weights, args.seed, z), Backbone(a, backbone, weights, z)]
         for s in args.shares:
-            out.append(BackboneFill("random", "-", a, s, backbone, weights, seed=args.seed, coarse=z))
+            out.append(BackboneFill(RandomFill(a, args.seed), "-", a, s, backbone, weights, coarse=z))
             for src in MASK_SOURCES:
-                out += [BackboneFill(f, src, a, s, backbone, weights, means[src], PAIRS, args.seed, z) for f in ("own", "other")]
+                fills = (OwnTopic(means[src]), OtherTopic(means[src], PAIRS))
+                out += [BackboneFill(f, src, a, s, backbone, weights, coarse=z) for f in fills]
     return out
 
 

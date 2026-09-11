@@ -4,12 +4,12 @@ Reads prompts/calibration/paraphrase.jsonl and unrelated.jsonl (pairs {"a": ...,
 for every pair, computes the cosine between the two texts for:
 
 - the representation: hidden states of the middle decoder layer, mean-pooled over tokens;
-- the mask vectors of all three center modes of prereg/ADDENDUM-01.md, raw and with the
+- the mask vectors of all three center modes of experiments/E001-run1-exploration/ADDENDUM-01.md, raw and with the
   background subtracted (the mean mask over every calibration text).
 
 Paraphrases give the top of the scale, unrelated pairs its floor. The summary holds the
 distribution (mean, std, quantiles) per pair kind and vector kind in
-runs/calibration/<model>/summary.json. Calibration is not a result: the summary is printed.
+runs/E001-run1-exploration/calibration/<model>/summary.json. Calibration is not a result: the summary is printed.
 
     uv run python scripts/calibrate.py
     uv run python scripts/calibrate.py --limit 3 --out /tmp/calibration     # smoke check
@@ -57,7 +57,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
     parser.add_argument("--prompts-dir", type=Path, default=Path("prompts/calibration"))
-    parser.add_argument("--out", type=Path, default=Path("runs/calibration"))
+    parser.add_argument("--out", type=Path, default=Path("runs/E001-run1-exploration/calibration"))
     parser.add_argument("--limit", type=int, default=None, help="pairs per kind, for a smoke check")
     args = parser.parse_args()
 

@@ -1,6 +1,6 @@
-# Results - backbone + topic on E2B (prereg/ADDENDUM-05.md)
+# Results - backbone + topic on E2B (experiments/E005-backbone/ADDENDUM-05.md)
 
-Run 2026-09-11 after ADDENDUM-05 was committed (`e1f8a6d`), on the bench of `573a1af`. 395 questions (biology 95, math 100, history 100, geography 100); outside the aperture every block is removed (ZERO); 121 policies. Raw numbers: [runs/backbone/e2b/summary.json](../runs/backbone/e2b/summary.json).
+Run 2026-09-11 after ADDENDUM-05 was committed (`e1f8a6d`), on the bench of `573a1af`. 395 questions (biology 95, math 100, history 100, geography 100); outside the aperture every block is removed (ZERO); 121 policies. Raw numbers: [runs/E005-backbone/e2b/summary.json](../../runs/E005-backbone/e2b/summary.json).
 
 Uniform bf16: -1.012 mean right-letter log-probability, accuracy 0.547. Every block removed: -1.386 (the uniform guess), accuracy 0.208.
 

@@ -1,8 +1,10 @@
-# Results - expert zones on E2B at a fixed budget (prereg/ADDENDUM-07.md, terms: ADDENDUM-08)
+# Results - expert zones on E2B at a fixed budget (experiments/E008-zones-fixed-budget/ADDENDUM-07.md, terms: ADDENDUM-08)
 
-Run 2026-09-11 on the bench of `8d68874`, after ADDENDUM-07 (`fddb919`) and ADDENDUM-08 (`84cb427`). 395 questions (biology 95, math 100, history 100, geography 100); weight map from the raw gradient masks of all questions; every layout at 5 mean bits (D4 background, D6, D8 centers). Raw numbers: [runs/zones/e2b/summary.json](../runs/zones/e2b/summary.json).
+> **Legacy approach.** A fixed-budget layout, like the matrix ([results](../E009-zones-matrix/results.md)); the lens layout of ADDENDUM-11 replaces it.
 
-**Scale of this run.** The run used the first scale of the regulator, `R = r (1 - s) / s`, where s = 1 collapses the zones and s -> 0 spreads them. The agreed focus is the mirror of it, `R = r f / (1 - f)` with f = 1 - s ([docs/zones.md](zones.md)). The tables below give both.
+Run 2026-09-11 on the bench of `8d68874`, after ADDENDUM-07 (`fddb919`) and ADDENDUM-08 (`84cb427`). 395 questions (biology 95, math 100, history 100, geography 100); weight map from the raw gradient masks of all questions; every layout at 5 mean bits (D4 background, D6, D8 centers). Raw numbers: [runs/E008-zones-fixed-budget/e2b/summary.json](../../runs/E008-zones-fixed-budget/e2b/summary.json).
+
+**Scale of this run.** The run used the first scale of the regulator, `R = r (1 - s) / s`, where s = 1 collapses the zones and s -> 0 spreads them. The agreed focus is the mirror of it, `R = r f / (1 - f)` with f = 1 - s ([docs/zones.md](../../docs/zones.md)). The tables below give both.
 
 References (mean right-letter log-probability): bf16 -1.012, uniform D8 -1.012, uniform D4 -1.138, the 5-bit budget spread without a mask -1.075. Zones per question: pooled 4.7, gradient 3.4, backbone 5.
 

@@ -4,7 +4,7 @@ Fixed 2026-09-11, **before the run**. Not edited after its commit.
 
 ## 1. Why
 
-The injection run ([results](../docs/results-injection.md)) showed that ranking blocks by their background-subtracted score removes the shared foundation first: at apertures 0.9-0.99 every mask-directed layout was worse than random blocks. The masks do carry the topic (a linear probe reads it at 95%), so the fix is structural: a generic importance **backbone** is always read sharp, and only the rest of the aperture is allocated by the topic. The backbone is the scale, the topic is the address.
+The injection run ([results](../E004-injection/results.md)) showed that ranking blocks by their background-subtracted score removes the shared foundation first: at apertures 0.9-0.99 every mask-directed layout was worse than random blocks. The masks do carry the topic (a linear probe reads it at 95%), so the fix is structural: a generic importance **backbone** is always read sharp, and only the rest of the aperture is allocated by the topic. The backbone is the scale, the topic is the address.
 
 ## 2. Design
 

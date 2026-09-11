@@ -4,12 +4,12 @@ Fixed 2026-09-11, **before the run**. Not edited after its commit.
 
 ## 1. Why
 
-The runs so far read a mask as a flat ranking of blocks and opened the top blocks one by one; a topic could only show up as scattered points. The project's picture needs bubbles: centers, radii and a stepped falloff ([docs/bubbles.md](../docs/bubbles.md)). This run tests the address in that shape.
+The runs so far read a mask as a flat ranking of blocks and opened the top blocks one by one; a topic could only show up as scattered points. The project's picture needs bubbles: centers, radii and a stepped falloff ([docs/zones.md](../../docs/zones.md)). This run tests the address in that shape.
 
 ## 2. Design
 
 - Questions and pairs as in ADDENDUM-04 to 06: biology-math and history-geography, 395 questions.
-- **Plane:** the raw gradient x activation masks of all questions of the run, embedded in 2D by co-activation (docs/bubbles.md, section 1). The plane is built without the topic labels.
+- **Plane:** the raw gradient x activation masks of all questions of the run, embedded in 2D by co-activation (docs/zones.md, section 1). The plane is built without the topic labels.
 - **Bubbles of a field:** smoothed on a 64 x 64 grid; one bubble per hill above the 95th percentile of the smoothed field, at most 16; base radius from the hill's area above half height.
 - **Fields:** the question's own topic mask and the paired topic's mask (background subtracted, leave-one-out), pooled and gradient sources; the generic importance backbone (mean raw gradient mask) as a reference.
 - **Layout:** rings of log-sharpness into D4 (background), D6 and D8 (centers) at a fixed mean of 5 bits per weight; regulator s = 0.2, 0.35, 0.5, 0.65, 0.8, 1.0. s = 0 is the uniform limit: no bubbles, the budget spread at random.

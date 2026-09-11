@@ -1,6 +1,6 @@
 # Thresholds 01 - the instrument and the pass criteria for the confirmatory pass
 
-Fixed 2026-09-11, after the run 1 exploration ([results](../docs/results-run1.md)) and **before any run on the held-out domains or on E4B**. Required by the [preregistration](PREREGISTRATION.ru.md) (section 5, item 4) and [addendum 01](ADDENDUM-01.md) (section 2). Not edited after its commit.
+Fixed 2026-09-11, after the run 1 exploration ([results](results.md)) and **before any run on the held-out domains or on E4B**. Required by the [preregistration](../../prereg/PREREGISTRATION.ru.md) (section 5, item 4) and [addendum 01](ADDENDUM-01.md) (section 2). Not edited after its commit.
 
 ## 1. The instrument
 
@@ -11,7 +11,7 @@ Fixed 2026-09-11, after the run 1 exploration ([results](../docs/results-run1.md
 
 ## 2. Why a permutation test and not a number
 
-Calibration ([runs/calibration/e2b/summary.json](../runs/calibration/e2b/summary.json)) showed that the cosine scale depends on the vector kind: raw masks sit at 0.97-0.99 for any two texts, background-subtracted ones spread over ±0.5. A fixed cosine margin would be arbitrary. The threshold is therefore taken from the data itself:
+Calibration ([runs/E001-run1-exploration/calibration/e2b/summary.json](../../runs/E001-run1-exploration/calibration/e2b/summary.json)) showed that the cosine scale depends on the vector kind: raw masks sit at 0.97-0.99 for any two texts, background-subtracted ones spread over ±0.5. A fixed cosine margin would be arbitrary. The threshold is therefore taken from the data itself:
 
 - **margin** of a domain pair = min over the two domains of cos_in − cos_between;
 - **permutation test**: the domain labels inside the pair are shuffled 1000 times (seed 0); p = (1 + #{permuted margin ≥ observed}) / 1001;

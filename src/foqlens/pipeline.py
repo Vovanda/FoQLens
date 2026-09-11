@@ -20,11 +20,20 @@ import torch
 from foqlens import model as fm
 from foqlens.gpu_share import FULL, Throttle
 from foqlens.precision import Controller, install
-from foqlens.quality import compute_masks
+from foqlens.quality import compute_masks, token_batches
 from foqlens.quant import Level
 from foqlens.scoring import BlockScorer, GradientScorer
 
 MASK_SOURCES = ("pooled", "gradient")  # the names of Bench.sources, in order
+# Mask passes are batched by tokens (quality.token_batches): a batch holds at most as many padded tokens as
+# *_BATCH of the run's longest prompts, and at most MAX_BATCH_FACTOR times as many prompts. Measured on E2B
+# (RTX 3090 Ti, 2026-09-12): 8 of the longest prompts are the gradient batch known to fit the 0.8 GPU share
+# (E009, 16.6 GiB reserved), 16 of them reserve 22 GiB. The gradient pass is bound by kernel launches - 16
+# short prompts take the time of 8 - so short prompts gain from larger batches at the same memory.
+# Masks are not batch-invariant in bf16: runs that compare masks keep one batching.
+GRADIENT_BATCH = 8
+POOLED_BATCH = 32
+MAX_BATCH_FACTOR = 4
 
 
 class MaskSource(Protocol):
@@ -87,9 +96,13 @@ class Bench:
     def masks(self, prompts: list[str], sources: list[MaskSource]) -> dict[str, np.ndarray]:
         """Raw masks of every prompt from every source: {source name: [prompts, n_blocks]}."""
         self.ctl.set_all(Level.BF16)
+        lengths = [len(ids) for ids in self.tokenizer(prompts)["input_ids"]]  # the tokens encode() pads to
+        longest = max(lengths, default=1)
         masks = {
-            src.name: compute_masks(lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts),
-                                    prompts, src.batch_size, self.throttle)
+            src.name: compute_masks(
+                lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts), prompts, src.batch_size,
+                self.throttle, groups=token_batches(lengths, src.batch_size * longest, src.batch_size * MAX_BATCH_FACTOR),
+            )
             for src in sources
         }
         # the backward pass leaves a fragmented cache behind; evaluation starts from a clean one

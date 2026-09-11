@@ -1,8 +1,19 @@
 """Precision controller: bit depth per layer, module and block of weight rows.
 
 Every linear module of the text decoder is replaced by a MixedPrecisionLinear. It keeps the
-original bf16 weight and its packed int8 and nf4 copies, and the level is set per block of
-block_rows output rows. A block of rows is the unit of address: "where to sharpen" is given by it.
+original bf16 weight and its packed int8 and nf4 copies; the level is set per block of block_rows
+output rows, either one layout for the whole batch or one layout per sample of the batch.
+
+Hot-path rule: levels live on the CPU as a numpy array, so forward never synchronizes with the
+GPU to find out what to compute. A mixed layout computes the output once per level in use and
+selects rows with torch.where.
+
+Invariants (each one has a test):
+- Invariant: an all-bf16 layout is bit-exact with the original nn.Linear.
+- Invariant: the rows of a block depend only on that block's level.
+- Invariant: with per-sample layouts, sample b is bit-exact with sample b of the same batch run
+  under layout b for every sample - a per-sample layout changes nothing but the selection.
+- Invariant: forward never reads levels from the GPU.
 """
 
 from __future__ import annotations
@@ -10,6 +21,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -31,6 +43,7 @@ CONTROLLED = (
 )
 
 DEFAULT_BLOCK_ROWS = 64
+BITS_BY_CODE = np.array([lv.bits for lv in Level], dtype=np.float64)
 
 
 class MixedPrecisionLinear(nn.Module):
@@ -41,49 +54,62 @@ class MixedPrecisionLinear(nn.Module):
         self.in_features = linear.in_features
         self.out_features = linear.out_features
         self.block_rows = block_rows
+        self.n_blocks = math.ceil(self.out_features / block_rows)
         self.weight = linear.weight
         self.weight.requires_grad_(False)
         self.bias = linear.bias
         self.int8 = Int8Weight.quantize(self.weight.data)
         self.nf4 = Nf4Weight.quantize(self.weight.data)
-        n_blocks = math.ceil(self.out_features / block_rows)
-        self.register_buffer(
-            "levels", torch.full((n_blocks,), int(Level.BF16), dtype=torch.uint8, device=self.weight.device)
-        )
+        self.set_levels(Level.BF16)
 
     @property
-    def n_blocks(self) -> int:
-        return self.levels.numel()
+    def levels(self) -> np.ndarray:
+        """Level code per block: [n_blocks], or [batch, n_blocks] for per-sample layouts. A copy."""
+        return self._levels.copy()
 
-    def block_sizes(self) -> torch.Tensor:
+    def set_levels(self, levels: Level | int | np.ndarray) -> None:
+        """One level for all blocks, a level per block, or a level per block per sample of the batch."""
+        arr = np.asarray(levels, dtype=np.uint8)
+        if arr.ndim == 0:
+            arr = np.full(self.n_blocks, arr, dtype=np.uint8)
+        if arr.ndim not in (1, 2) or arr.shape[-1] != self.n_blocks:
+            raise ValueError(f"levels of shape {arr.shape} for {self.n_blocks} blocks")
+        self._levels = arr.copy()
+        self._used = tuple(Level(int(c)) for c in np.unique(arr))
+        self._rows = None if len(self._used) == 1 else self._row_codes(arr)
+
+    def _row_codes(self, arr: np.ndarray) -> torch.Tensor:
+        """Level code per output row on the GPU: [out] or [batch, 1, out], broadcast over tokens."""
+        rows = np.repeat(arr, self.block_rows, axis=-1)[..., : self.out_features]
+        codes = torch.as_tensor(rows, device=self.weight.device)
+        return codes if arr.ndim == 1 else codes.unsqueeze(1)
+
+    def block_sizes(self) -> np.ndarray:
         """Number of rows in every block; the last one may be partial."""
-        sizes = torch.full((self.n_blocks,), self.block_rows, dtype=torch.long)
+        sizes = np.full(self.n_blocks, self.block_rows, dtype=np.int64)
         sizes[-1] = self.out_features - self.block_rows * (self.n_blocks - 1)
         return sizes
 
-    def dequantized(self, level: Level) -> torch.Tensor:
+    def output_at(self, level: Level, x: torch.Tensor) -> torch.Tensor:
+        """The whole output as if every block were read at this level."""
         if level is Level.BF16:
-            return self.weight
+            return F.linear(x, self.weight, self.bias)
         if level is Level.INT8:
-            return self.int8.dequantize(self.weight.dtype)
-        return self.nf4.dequantize(self.weight.dtype)
-
-    def effective_weight(self) -> torch.Tensor:
-        """The weight forward actually computes with under the current level layout."""
-        used = torch.unique(self.levels).tolist()
-        if len(used) == 1:
-            return self.dequantized(Level(used[0]))
-        rows = self.levels.repeat_interleave(self.block_rows)[: self.out_features]
-        weight = self.weight.clone()
-        for code in used:
-            if code == Level.BF16:
-                continue
-            mask = rows == code
-            weight[mask] = self.dequantized(Level(code))[mask]
-        return weight
+            return self.int8.matmul(x, self.bias)
+        if level is Level.NF4:
+            return self.nf4.matmul(x, self.bias)
+        out = x.new_zeros(*x.shape[:-1], self.out_features)
+        return out if self.bias is None else out + self.bias
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return F.linear(x, self.effective_weight(), self.bias)
+        if self._rows is None:
+            return self.output_at(self._used[0], x)
+        if self._levels.ndim == 2 and x.shape[0] != self._levels.shape[0]:
+            raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {self._levels.shape[0]}")
+        out = self.output_at(self._used[0], x)
+        for level in self._used[1:]:
+            out = torch.where(self._rows == int(level), self.output_at(level, x), out)
+        return out
 
     def extra_repr(self) -> str:
         return f"in={self.in_features}, out={self.out_features}, blocks={self.n_blocks}x{self.block_rows}"
@@ -94,6 +120,11 @@ class Controller:
 
     def __init__(self, modules: dict[str, MixedPrecisionLinear]):
         self.modules = modules
+        self._bounds = np.cumsum([0] + [m.n_blocks for m in modules.values()])
+
+    @property
+    def n_blocks(self) -> int:
+        return int(self._bounds[-1])
 
     def names(self, layer: int | None = None) -> list[str]:
         if layer is None:
@@ -103,40 +134,49 @@ class Controller:
 
     def set_all(self, level: Level) -> None:
         for module in self.modules.values():
-            module.levels.fill_(int(level))
+            module.set_levels(level)
 
     def set_layer(self, layer: int, level: Level) -> None:
         names = self.names(layer)
         if not names:
             raise KeyError(f"no layer {layer}")
         for name in names:
-            self.modules[name].levels.fill_(int(level))
+            self.modules[name].set_levels(level)
 
     def set_module(self, name: str, level: Level) -> None:
-        self.modules[name].levels.fill_(int(level))
+        self.modules[name].set_levels(level)
 
     def set_blocks(self, name: str, blocks: Iterable[int], level: Level) -> None:
-        idx = torch.as_tensor(list(blocks), dtype=torch.long, device=self.modules[name].levels.device)
-        self.modules[name].levels[idx] = int(level)
+        levels = self.modules[name].levels
+        levels[..., list(blocks)] = int(level)
+        self.modules[name].set_levels(levels)
 
-    def layout(self) -> dict[str, list[int]]:
-        """Level of every block of every module - the actual state of the buffers."""
+    def set_layout(self, levels: np.ndarray) -> None:
+        """Levels over all blocks of all modules in module order: [n_blocks] or [batch, n_blocks]."""
+        levels = np.asarray(levels, dtype=np.uint8)
+        if levels.shape[-1] != self.n_blocks:
+            raise ValueError(f"layout of {levels.shape[-1]} blocks for {self.n_blocks}")
+        for (start, stop), module in zip(zip(self._bounds[:-1], self._bounds[1:]), self.modules.values()):
+            module.set_levels(levels[..., start:stop])
+
+    def layout(self) -> dict[str, list]:
+        """Level of every block of every module - the state the modules compute with."""
         return {name: m.levels.tolist() for name, m in self.modules.items()}
 
-    def mean_bits(self) -> float:
+    def mean_bits(self) -> float | np.ndarray:
         """Mean nominal bits per weight over the controlled modules, weighted by weight count.
 
-        Nominal: 16 / 8 / 4 without the overhead of group scales. Embeddings, lm_head and
-        per_layer_model_projection are not controlled and do not enter the mean.
+        A float for one layout, one value per sample for per-sample layouts. Nominal: 16 / 8 / 4
+        without the overhead of group scales. Embeddings, lm_head and per_layer_model_projection
+        are not controlled and do not enter the mean.
         """
-        bits_by_code = torch.tensor([int(lv.bits) for lv in Level], dtype=torch.float64)
-        total_bits = 0.0
-        total_weights = 0
+        total_bits, total_weights = 0.0, 0
         for m in self.modules.values():
-            weights_per_block = m.block_sizes().to(torch.float64) * m.in_features
-            total_bits += float((weights_per_block * bits_by_code[m.levels.long().cpu()]).sum())
+            weights_per_block = m.block_sizes() * m.in_features
+            total_bits = total_bits + (BITS_BY_CODE[m.levels] * weights_per_block).sum(axis=-1)
             total_weights += m.in_features * m.out_features
-        return total_bits / total_weights
+        result = total_bits / total_weights
+        return float(result) if np.ndim(result) == 0 else result
 
 
 def _resolve(parent: nn.Module, dotted: str) -> tuple[nn.Module, str] | None:

@@ -1,0 +1,134 @@
+[
+  {
+    "domain": "biology",
+    "question": "Except for identical twins, no two people are genetically identical. Which of the following statements most accurately describes the main source of variation in humans?",
+    "right": "Shuffling of alleles is responsible for the greatest variation in humans.",
+    "answers": {
+      "bf16": "The random assortment of chromosomes during meiosis\n\nQuestion: Which of the following is a characteristic of a population?\nAnswer: The members of the population are all the same age.\n\nQuestion: Which of the following is a characteristic of a population",
+      "int8": "The random assortment of chromosomes during meiosis\n\nQuestion: Which of the following is a characteristic of a population?\nAnswer: The members of the population are all the same age.\n\nQuestion: Which of the following is a characteristic of a population",
+      "nf4": "The environment\nQuestion: Which of the following is a true statement about the human genome?\nAnswer: The human genome is 99.9% identical to the chimpanzee genome.\nQuestion: Which of the following is a true",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "biology",
+    "question": "Which of the following best summarizes the process of allopatric speciation?",
+    "right": "geographic isolation \u2192 reproductive isolation \u2192 differential changes in allele frequencies \u2192 reproductive barriers \u2192 new species",
+    "answers": {
+      "bf16": "A population is divided by a geographic barrier, and the two populations evolve independently.\n\nQuestion: Which of the following is an example of a prezygotic barrier?\nAnswer: Two species of birds have different mating calls.\n\nQuestion:",
+      "int8": "A population is divided by a geographic barrier, and the two populations evolve independently.\n\nQuestion: Which of the following is an example of a prezygotic barrier?\nAnswer: Two species of birds mate in the same area, but they",
+      "nf4": "A population of a species is divided into two or more populations by a physical barrier.\nQuestion: Which of the following is a possible outcome of a population that is isolated by a physical barrier?\nAnswer: The populations may become reproductively",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "math",
+    "question": "If we express $3x^2 + x - 4$ in the form $a(x - h)^2 + k$, then what is $k$?",
+    "right": "-\\frac{49}{12}",
+    "answers": {
+      "bf16": "$k = -1$\n\nQuestion: If we express $x^2 + 2x + 1$ in the form $a(x - h)^2 + k$, then what is $k$?\nAnswer: $",
+      "int8": "$k = -1$\n\nQuestion: If we express $x^2 + 2x + 1$ in the form $a(x - h)^2 + k$, then what is $k$?\nAnswer: $",
+      "nf4": "$k = 16$\n\nQuestion: If we express $3x^2 + x - 4$ in the form $a(x - h)^2 + k$, then what is $a$?\nAnswer: $",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "math",
+    "question": "The area bounded by the parabola y = x^2 and the lines y = 1 and y = 9 equals",
+    "right": "104/3",
+    "answers": {
+      "bf16": "108\nQuestion: The area bounded by the parabola y = x^2 and the lines y = 1 and y = 9 equals\nAnswer: 108\nQuestion: The area bounded by the parabola y",
+      "int8": "108\nSolution:\nThe area bounded by the parabola y = x^2 and the lines y = 1 and y = 9 is given by\nA = \u222b[1,9] (9 - x^",
+      "nf4": "18\nExplanation: The area bounded by the parabola y = x^2 and the lines y = 1 and y = 9 can be found by setting up a system of equations and solving for the points of intersection. The",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "chemistry",
+    "question": "What is the mass of one molecule of cholesterol (C27H46O, molecular mass = 386)?",
+    "right": "6.41 \u00d7 10^-22 g",
+    "answers": {
+      "bf16": "386 g/mol\n\nQuestion: What is the mass of one molecule of glucose (C6H12O6, molecular mass = 180)?\nAnswer: 180 g/mol\n\nQuestion",
+      "int8": "386 g/mol\n\nQuestion: What is the mass of one molecule of glucose (C6H12O6, molecular mass = 180)?\nAnswer: 180 g/mol\n\nQuestion",
+      "nf4": "386 g/mol\n\nQuestion: What is the mass of one molecule of glucose (C6H12O6, molecular mass = 180)?\nAnswer: 180 g/mol\n\nQuestion",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "chemistry",
+    "question": "Neutral atoms of chlorine are bombarded by high-energy photons, causing the ejection of electrons from the various filled subshells. Electrons originally from which subshell would have the highest velocity after being ejected?",
+    "right": "3p",
+    "answers": {
+      "bf16": "3d\n\nQuestion: Which of the following is the correct order of increasing atomic radius?\nAnswer: 1 < 2 < 3 < 4\n\nQuestion: Which of the following is the correct order of increasing atomic radius",
+      "int8": "3d\n\nQuestion: Which of the following is the correct order of increasing atomic radius?\nAnswer: 1 < 2 < 3 < 4\n\nQuestion: Which of the following is the correct order of increasing atomic radius",
+      "nf4": "The 4p subshell\nExplanation: The 4p subshell has the highest energy level and the highest energy difference between the two levels.",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "physics",
+    "question": "How much work is required to charge a 10 \u00b5F capacitor to a potential difference of 100 V ?",
+    "right": "0.05 J",
+    "answers": {
+      "bf16": "1000 J\nQuestion: A 1000 W heater is connected to a 220 V supply. What is the current in the heater?\nAnswer: 4.5 A\nQuestion: A",
+      "int8": "1000 J\nQuestion: A 100 V battery is connected to a 10 \u00b5F capacitor. How much charge is stored in the capacitor?\nAnswer: 1000 C\nQuestion:",
+      "nf4": "100 J\nExplanation:\nThe work done in charging a capacitor is given by the formula:\nW = 1/2 * C * V^2\nWhere W is the work done, C is the capacitance,",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "physics",
+    "question": "A guitar string creates a sound wave of known frequency. Which of the following describes a correct and practical method of measuring the wavelength of the sound wave with a meterstick?",
+    "right": "Adjust the length of a pipe placed near the string so that resonances are heard. Measure the difference between the pipe lengths for consecutive resonances; this is half the wavelength.",
+    "answers": {
+      "bf16": "Measure the distance between two nodes.\n\nQuestion: A guitar string creates a sound wave of known frequency. Which of the following describes a correct and practical method of measuring the wavelength of the sound wave with a meterstick?\nAnswer: Measure",
+      "int8": "Measure the distance between two nodes.\n\nQuestion: A guitar string creates a sound wave of known frequency. Which of the following describes a correct and practical method of measuring the wavelength of the sound wave with a meterstick?\nAnswer: Measure",
+      "nf4": "The meterstick is held in a fixed position and the string is plucked. The string is then plucked again and the meterstick is moved until the sound is no longer heard. The distance moved is the wavelength of the sound wave.\nFor",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "history",
+    "question": "Which of the following is true about the first apes?",
+    "right": "All of the above.",
+    "answers": {
+      "bf16": "They were small and lived in trees.\n\nQuestion: Which of the following is true about the first apes?\nAnswer: They were small and lived in trees.\n\nQuestion: Which of the following is true about the first apes?",
+      "int8": "They were small and lived in trees.\n\nQuestion: Which of the following is true about the first apes?\nAnswer: They were small and lived in trees.\n\nQuestion: Which of the following is true about the first apes?",
+      "nf4": "A) They were the first to walk upright\nB) They were the first to use tools\nC) They were the first to use fire\nD) They were the first to use language\nAnswer: A) They were the first",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "history",
+    "question": "Which culture, previously-known as the temple-mound builders, based their subsistence primarily on maize and squash agriculture?",
+    "right": "Mississippian",
+    "answers": {
+      "bf16": "The Anasazi\n\nQuestion: Which culture, previously-known as the temple-mound builders, based their subsistence primarily on maize and squash agriculture?\nAnswer: The Anasazi\n\nQuestion: Which culture, previously-known as the temple",
+      "int8": "The Anasazi\n\nQuestion: Which culture, previously-known as the temple-mound builders, based their subsistence primarily on maize and squash agriculture?\nAnswer: The Anasazi\n\nQuestion: Which culture, previously-known as the temple",
+      "nf4": "The Maya\nExplanation: The Maya, previously known as the temple-mound builders, based their subsistence primarily on maize and squash agriculture. They were a civilization that thrived in Mesoamerica, particularly in the Yucatan Peninsula, from around 2",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "geography",
+    "question": "Which one of the following is NOT a centripetal force in a state?",
+    "right": "The existence of strong separatist groups",
+    "answers": {
+      "bf16": "Gravity\n\nQuestion: Which one of the following is NOT a centripetal force in a state?\nAnswer: Gravity\n\nQuestion: Which one of the following is NOT a centripetal force in a state?\nAnswer: Gravity",
+      "int8": "Gravity\n\nQuestion: Which one of the following is NOT a centripetal force in a state?\nAnswer: Gravity\n\nQuestion: Which one of the following is NOT a centripetal force in a state?\nAnswer: Gravity",
+      "nf4": "The force of gravity\n\nQuestion: Which one of the following is NOT a centripetal force in a state?\nAnswer: The force of gravity\n\nQuestion: Which one of the following is NOT a centripetal force in a state",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  },
+  {
+    "domain": "geography",
+    "question": "The tendency for migration to decrease with distance is called",
+    "right": "distance decay.",
+    "answers": {
+      "bf16": "distance decay\n\nQuestion: The tendency for migration to decrease with distance is called\nAnswer: distance decay\n\nQuestion: The tendency for migration to decrease with distance is called\nAnswer: distance decay\n\nQuestion: The tendency for migration to decrease with",
+      "int8": "distance decay\n\nQuestion: The most important factor in determining the location of a settlement is\nAnswer: the availability of resources\n\nQuestion: The most important factor in determining the location of a settlement is\nAnswer: the availability of resources\n\nQuestion",
+      "nf4": "distance decay\n\nQuestion: The tendency for migration to decrease with distance is called\nAnswer: distance decay\n\nQuestion: The tendency for migration to decrease with distance is called\nAnswer: distance decay\n\nQuestion: The tendency for migration to decrease with",
+      "zero": "::::::::::::::::::::::::::::::::::::::::::::::::"
+    }
+  }
+]

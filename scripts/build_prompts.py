@@ -43,9 +43,15 @@ def redux_questions(subject: str) -> list[dict]:
     path = hf_hub_download(REDUX, f"{subject}/data-00000-of-00001.arrow", repo_type="dataset", revision=REDUX_REVISION)
     with open(path, "rb") as f:
         table = pa.ipc.open_stream(f).read_all()
-    rows = table.select(["question", "error_type"]).to_pylist()
+    rows = table.select(["question", "choices", "answer", "error_type"]).to_pylist()
     return [
-        {"text": r["question"].strip(), "source": f"{REDUX}/{subject}@{REDUX_REVISION[:8]}", "row": i}
+        {
+            "text": r["question"].strip(),
+            "choices": [c.strip() for c in r["choices"]],
+            "answer": int(r["answer"]),
+            "source": f"{REDUX}/{subject}@{REDUX_REVISION[:8]}",
+            "row": i,
+        }
         for i, r in enumerate(rows)
         if r["error_type"] == "ok"
     ]

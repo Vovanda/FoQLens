@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import torch
 from torch import nn
-from transformers import AutoTokenizer, Gemma4ForConditionalGeneration, PreTrainedTokenizerBase
+from transformers import AutoTokenizer, BatchEncoding, Gemma4ForConditionalGeneration, PreTrainedTokenizerBase
 
 E2B = "google/gemma-4-E2B"
 E4B = "google/gemma-4-E4B"
@@ -27,8 +27,14 @@ def load(
 
     attn_implementation="eager" is needed wherever attention weights are read (step 1).
     """
+    # bf16 matmuls accumulate partial sums in fp32: halves the batch-size dependence of the
+    # numbers (letter log-probabilities 0.19 -> 0.09 apart between a batch and one by one).
+    torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
     revision = REVISIONS[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
+    # Gemma 4 derives position ids from arange(seq), not from the attention mask, so left padding
+    # would shift the positions of real tokens. Batches are padded on the right.
+    tokenizer.padding_side = "right"
     model = Gemma4ForConditionalGeneration.from_pretrained(
         model_id, revision=revision, dtype=dtype, device_map=device, attn_implementation=attn_implementation
     )
@@ -39,6 +45,18 @@ def load(
 def text_layers(model: Gemma4ForConditionalGeneration) -> nn.ModuleList:
     """Text decoder layers - the only part the bench controls."""
     return model.model.language_model.layers
+
+
+def text_embeddings(model: Gemma4ForConditionalGeneration) -> nn.Module:
+    """The token embedding of the text decoder - where a gradient graph through activations starts."""
+    return model.model.language_model.embed_tokens
+
+
+def encode(tokenizer: PreTrainedTokenizerBase, texts: list[str], device: torch.device | str) -> BatchEncoding:
+    """A right-padded batch on the device (see load: left padding would shift positions)."""
+    if tokenizer.padding_side != "right":
+        raise ValueError("batches must be padded on the right: load the tokenizer with foqlens.model.load")
+    return tokenizer(texts, return_tensors="pt", padding=True).to(device)
 
 
 @torch.no_grad()

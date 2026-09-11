@@ -28,7 +28,7 @@ import numpy as np
 
 from foqlens import model as fm
 from foqlens.precision import install
-from foqlens.scoring import DEFAULT_TOP_K, MODES, BlockScorer, gini, normalized_entropy
+from foqlens.scoring import DEFAULT_TOP_K, MODES, BlockScorer, GradientScorer, gini, normalized_entropy
 from foqlens.separation import permutation_test, separation
 
 MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
@@ -62,8 +62,12 @@ def main() -> None:
     parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K)
     parser.add_argument("--modes", nargs="+", choices=MODES, default=list(MODES), help="center modes to compute")
     parser.add_argument("--permutations", type=int, default=0, help="label permutations per domain pair (0 = none)")
+    parser.add_argument(
+        "--instrument", choices=["centers", "gradient"], default="centers",
+        help="centers: the naive score of ADDENDUM-01 (--modes apply); gradient: gradient x activation of ADDENDUM-02",
+    )
     args = parser.parse_args()
-    modes = tuple(args.modes)
+    modes = ("gradient",) if args.instrument == "gradient" else tuple(args.modes)
 
     # a domain may be given with a subdirectory (heldout/history); its label is the bare name
     queries = []
@@ -73,12 +77,18 @@ def main() -> None:
 
     model_id = MODELS[args.model]
     model, tokenizer = fm.load(model_id, attn_implementation="eager")
-    scorer = BlockScorer(install(model).modules, top_k=args.top_k)
+    modules = install(model).modules
+    if args.instrument == "gradient":
+        scorer = GradientScorer(model, modules)
+        score = lambda text: scorer.score(model, tokenizer, text)  # noqa: E731
+    else:
+        scorer = BlockScorer(modules, top_k=args.top_k)
+        score = lambda text: scorer.score(model, tokenizer, text, modes=modes)  # noqa: E731
 
     vectors = {mode: [] for mode in modes}
     records = []
     for domain, text in queries:
-        scored = scorer.score(model, tokenizer, text, modes=modes)
+        scored = score(text)
         ids = tokenizer(text).input_ids
         record = {"domain": domain, "text": text, "positions": {}, "tokens": {}}
         for mode, (vec, positions) in scored.items():
@@ -112,6 +122,7 @@ def main() -> None:
         "model": model_id,
         "revision": fm.REVISIONS[model_id],
         "attn_implementation": "eager",
+        "instrument": args.instrument,
         "top_k": args.top_k,
         "n_blocks": scorer.n_blocks,
         "permutations": args.permutations,

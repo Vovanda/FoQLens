@@ -14,6 +14,17 @@ Everything in the repository is written in English: docs, code comments, test me
 - **Held-out topics** (`prompts/heldout/`) are not opened and not run while the score is being debugged.
 - **Two baselines** at step 3: uniform quantization and a random mask of the same concentration.
 
+## Engineering standards
+
+We write high-performance code and hold it to the usual engineering principles - not research scripts.
+
+- **Performance is a requirement, not a later fix.** Hot paths run on the GPU without host-device synchronization (no `.item()`, `.tolist()`, `torch.unique` or Python branching on tensor values inside forward passes); work is batched; anything reusable across passes is computed once and cached. Every long run reports GPU utilization; a run below ~80% is a bug to fix before the numbers are trusted.
+- **SOLID.** One responsibility per module and class; extend through new classes behind the same interface (a new mask source is a new scorer, not an `if` in the old one); callers depend on interfaces, not concrete classes; small, focused interfaces.
+- **Clean architecture.** The domain - quantization, precision control, scoring, metrics (`foqlens/*`) - knows nothing about datasets, files or the command line. Infrastructure - model loading, dataset building, run output - sits around it. Scripts in `scripts/` only wire the two together and hold no logic worth testing.
+- **Tests for every behavior**, including performance-critical rewrites: a batched or cached path must match the reference path within the stated tolerance.
+- **Invariants are written down.** Every module states its invariants in its docstring as `Invariant: ...`, exact or approximate with the measured bound, and each has a test. bf16 inference is not batch-invariant (token states move up to ~2% with the batch size), so exact claims are made only where they hold - same inputs in the same batch, per-sample layouts against the same batch - and comparisons between configurations always run on the same batches.
+- No magic numbers in code: named constants with a reason, or a parameter.
+
 ## Stack
 
 - Gemma 4 E2B (debugging) / E4B (confirmation), base checkpoints `google/gemma-4-E2B`, `google/gemma-4-E4B` at the revisions pinned in `foqlens.model.REVISIONS`. Do not take the 26B-A4B MoE.

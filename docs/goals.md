@@ -25,7 +25,7 @@ Done when: related topics (biology–chemistry) overlap more than unrelated ones
 **Step 2+. Mask geometry** - exploration done: mixed; the hand-written biophysics set came out biology-like in both representations and masks, so a better mixed domain is needed before reading it. On step 1 data.
 Additivity, two bundles or a blob, junction zone, isthmus, isthmus ablation, reverse ablation, linearity of representation → mask.
 
-**Step 3. Quality against budget** - in progress. Generic importance beats random allocation by a wide margin; background-subtracted topic masks, alone ([injection](results-injection.md)) or on top of the importance backbone ([backbone](results-backbone.md)), do not beat the other topic's mask or random blocks where the model still works.
+**Step 3. Quality against budget** - in progress. Generic importance beats random allocation by a wide margin; background-subtracted topic masks, alone ([injection](results-injection.md)) or on top of the importance backbone ([backbone](results-backbone.md)), do not beat the other topic's mask or random blocks where the model still works. Shaped as expert zones from the gradient mask ([zones](results-zones.md)), the own topic beats random zones, the paired topic and no mask at the same budget for a polar pair (biology-math) - not yet for a close one (history-geography).
 Done when: the quality-vs-mean-bits curve lies above **both** baselines - uniform and random mask.
 
 **Step 4. Learned score** - beyond solo work. Only if the naive score gave an effect; needs co-authors or a group.

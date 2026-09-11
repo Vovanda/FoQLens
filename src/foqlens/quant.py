@@ -100,8 +100,54 @@ _SLICE_ZERO = _SLICE_LEVELS // 2  # symmetric: codes 0..3 read as -1.5, -0.5, 0.
 _CODES_PER_BYTE = 8 // SLICE_BITS
 
 
+class _SliceReader:
+    """Reading a sliced copy: the slices add up one at a time in fp32; a depth reads the sum so far.
+
+    Subclasses give the empty accumulator, how slice e adds into it, and the scale.
+
+    Invariant: linear_at_depths gives at every depth exactly what matmul gives at that depth - the
+    same additions in the same order, shared instead of repeated.
+    """
+
+    scale: torch.Tensor
+
+    def _accumulator(self) -> torch.Tensor:
+        raise NotImplementedError
+
+    def _add_slice(self, w: torch.Tensor, e: int) -> None:
+        raise NotImplementedError
+
+    def _weight(self, w: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
+        return (w * self.scale).view(w.shape[0], -1).to(dtype)
+
+    def dequantize(self, dtype: torch.dtype, depth: int = N_SLICES) -> torch.Tensor:
+        """The weight read to the first `depth` slices (one fp32 temporary)."""
+        w = self._accumulator()
+        for e in range(depth):
+            self._add_slice(w, e)
+        return self._weight(w, dtype)
+
+    def matmul(self, x: torch.Tensor, bias: torch.Tensor | None = None, depth: int = N_SLICES) -> torch.Tensor:
+        return F.linear(x, self.dequantize(x.dtype, depth), bias)
+
+    def linear_at_depths(self, x: torch.Tensor, bias: torch.Tensor | None, depths: list[int]) -> list[torch.Tensor]:
+        """F.linear at every depth of the ascending `depths`, with the slices unpacked and added once."""
+        w, done, outs = self._accumulator(), 0, []
+        for depth in depths:
+            for e in range(done, depth):
+                self._add_slice(w, e)
+            done = depth
+            outs.append(F.linear(x, self._weight(w, x.dtype), bias))
+        return outs
+
+
+def _slice_delta(codes: torch.Tensor, e: int) -> torch.Tensor:
+    """What slice e adds, in steps of slice 1: (code - 1.5) / 4**e."""
+    return (codes.float() - (_SLICE_ZERO - 0.5)) * float(_SLICE_LEVELS) ** -e
+
+
 @dataclass
-class SlicedWeight:
+class SlicedWeight(_SliceReader):
     """Recursive residual quantization, after MoBiQuant (arXiv 2602.20191).
 
     Slice 1 quantizes the weight to SLICE_BITS bits; slice e quantizes what slices 1..e-1 left,
@@ -129,18 +175,61 @@ class SlicedWeight:
             step = step / _SLICE_LEVELS
         return cls(packed=_pack(torch.stack(codes)), scale=scale)
 
-    def dequantize(self, dtype: torch.dtype, depth: int = N_SLICES) -> torch.Tensor:
-        """The weight read to the first `depth` slices, accumulated one slice at a time (one fp32 temporary)."""
+    def _accumulator(self) -> torch.Tensor:
         out, inp = self.packed.shape[1], self.packed.shape[2] * _CODES_PER_BYTE
-        groups = (out, inp // SLICE_GROUP, SLICE_GROUP)
-        w = torch.zeros(groups, device=self.packed.device, dtype=torch.float32)
-        for e in range(depth):
-            code = _unpack(self.packed[e]).view(groups)
-            w += (code.float() - (_SLICE_ZERO - 0.5)) * float(_SLICE_LEVELS) ** -e
-        return (w * self.scale).view(out, inp).to(dtype)
+        return torch.zeros((out, inp // SLICE_GROUP, SLICE_GROUP), device=self.packed.device, dtype=torch.float32)
 
-    def matmul(self, x: torch.Tensor, bias: torch.Tensor | None = None, depth: int = N_SLICES) -> torch.Tensor:
-        return F.linear(x, self.dequantize(x.dtype, depth), bias)
+    def _add_slice(self, w: torch.Tensor, e: int) -> None:
+        w += _slice_delta(_unpack(self.packed[e]).view(w.shape), e)
+
+    @property
+    def nbytes(self) -> int:
+        """Bytes of the stored slices, without the scales."""
+        return self.packed.numel() * self.packed.element_size()
+
+
+@dataclass
+class CappedSlicedWeight(_SliceReader):
+    """A SlicedWeight whose every row keeps only its first `cap` slices: slice e is stored for the rows with cap > e.
+
+    The memory then follows the layout of depths instead of holding every slice for every row. A row
+    read deeper than its cap gets only the slices it keeps.
+
+    Invariant: a row read no deeper than its cap reads exactly what the full SlicedWeight reads.
+    """
+
+    slices: tuple[torch.Tensor, ...]  # slice e: uint8 [rows kept, in // _CODES_PER_BYTE]
+    blocks: tuple[torch.Tensor, ...]  # slice e: int32 indices of the blocks of rows it is kept for
+    block_rows: int
+    scale: torch.Tensor
+    out_features: int
+
+    @classmethod
+    def from_sliced(cls, sliced: SlicedWeight, block_caps: torch.Tensor, block_rows: int) -> CappedSlicedWeight:
+        """block_caps: [n_blocks] number of slices every block of block_rows rows keeps, 0 ... N_SLICES."""
+        out = sliced.packed.shape[1]
+        blocks = tuple(torch.nonzero(block_caps > e).squeeze(1).to(torch.int32) for e in range(sliced.packed.shape[0]))
+        slices = tuple(sliced.packed[e, _rows_of(kept, block_rows, out)].contiguous() for e, kept in enumerate(blocks))
+        return cls(slices=slices, blocks=blocks, block_rows=block_rows, scale=sliced.scale, out_features=out)
+
+    @property
+    def nbytes(self) -> int:
+        """Bytes of the stored slices, without the scales."""
+        return sum(s.numel() * s.element_size() for s in self.slices)
+
+    def _accumulator(self) -> torch.Tensor:
+        inp = self.slices[0].shape[1] * _CODES_PER_BYTE
+        return torch.zeros((self.out_features, inp // SLICE_GROUP, SLICE_GROUP), device=self.scale.device, dtype=torch.float32)
+
+    def _add_slice(self, w: torch.Tensor, e: int) -> None:
+        codes = _unpack(self.slices[e]).view(-1, *w.shape[1:])
+        w.index_add_(0, _rows_of(self.blocks[e], self.block_rows, self.out_features), _slice_delta(codes, e))
+
+
+def _rows_of(blocks: torch.Tensor, block_rows: int, out_features: int) -> torch.Tensor:
+    """Row indices of the given blocks, in order; the last block may be partial."""
+    rows = (blocks.long()[:, None] * block_rows + torch.arange(block_rows, device=blocks.device)).reshape(-1)
+    return rows[rows < out_features]
 
 
 def _pack(codes: torch.Tensor) -> torch.Tensor:

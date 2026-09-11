@@ -1,15 +1,15 @@
 """Backbone + topic (prereg/ADDENDUM-05.md): the address on top of the scale.
 
 Generic block importance (the mean raw gradient x activation mask over all questions) is kept
-sharp for a share of the aperture; the rest of the aperture is filled by the question's topic
-mask ("own"), the paired topic's ("other") or random blocks. Outside the aperture: ZERO.
+sharp for a part of the precision share; the rest of it is filled by the question's topic
+mask ("own"), the paired topic's ("other") or random blocks. Outside the precision share: ZERO.
 Paired bootstrap of the right-letter log-probability: own - other, own - random fill,
 backbone alone - random blocks.
 
 Writes runs/backbone/<model>/summary.json and raw per-question results.
 
     uv run python scripts/step3_backbone.py
-    uv run python scripts/step3_backbone.py --limit 4 --apertures 0.95 --shares 0.8 --out /tmp/bb   # smoke check
+    uv run python scripts/step3_backbone.py --limit 4 --precision-share 0.95 --shares 0.8 --out /tmp/bb   # smoke check
 """
 
 from __future__ import annotations
@@ -21,8 +21,9 @@ import numpy as np
 
 from foqlens import budget as bg
 from foqlens import model as fm
-from foqlens.evaluate import letter_ids
+from foqlens.evaluate import LetterChoice
 from foqlens.gpu_monitor import GpuMonitor
+from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
 from foqlens.layouts import Backbone, BackboneFill, Random, TopicMeans, Uniform
 from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
@@ -32,7 +33,8 @@ from foqlens.stats import paired_bootstrap
 from foqlens.topics import PAIR_NAMES, PAIRS, SPECS
 
 MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
-APERTURES = [0.99, 0.98, 0.97, 0.95, 0.9, 0.8, 0.5]
+METRIC = LetterChoice  # the quality metric; layouts are compared on METRIC.primary
+PRECISION_SHARES = [0.99, 0.98, 0.97, 0.95, 0.9, 0.8, 0.5]
 SHARES = [0.5, 0.8, 0.95]
 
 
@@ -40,13 +42,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
     parser.add_argument("--prompts-dir", type=Path, default=Path("prompts"))
-    parser.add_argument("--apertures", nargs="+", type=float, default=APERTURES)
-    parser.add_argument("--shares", nargs="+", type=float, default=SHARES, help="backbone share of the aperture")
+    parser.add_argument("--precision-share", nargs="+", type=float, default=PRECISION_SHARES)
+    parser.add_argument("--shares", nargs="+", type=float, default=SHARES, help="backbone part of the precision share")
     parser.add_argument("--limit", type=int, default=None, help="questions per topic, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--pooled-batch", type=int, default=32)
-    parser.add_argument("--gradient-batch", type=int, default=4)
+    parser.add_argument("--gradient-batch", type=int, default=8)
     parser.add_argument("--eval-batch", type=int, default=32)
+    parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
     parser.add_argument("--out", type=Path, default=Path("runs/backbone"))
     return parser.parse_args(argv)
 
@@ -54,7 +57,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def policies_for(args, backbone, means, weights, n_blocks) -> list:
     z = Level.ZERO
     out = [Uniform(Level.BF16, n_blocks), Uniform(z, n_blocks)]
-    for a in args.apertures:
+    for a in args.precision_share:
         out += [Random(a, weights, args.seed, z), Backbone(a, backbone, weights, z)]
         for s in args.shares:
             out.append(BackboneFill("random", "-", a, s, backbone, weights, seed=args.seed, coarse=z))
@@ -64,14 +67,14 @@ def policies_for(args, backbone, means, weights, n_blocks) -> list:
 
 
 def comparisons(results: dict, domains: tuple[str, ...], args) -> dict:
-    lp = {name: np.array([r["logprob"] for r in rows]) for name, rows in results.items()}
+    lp = {name: np.array([r[METRIC.primary] for r in rows]) for name, rows in results.items()}
     out = {}
     for pair in PAIR_NAMES:
         m = np.array([d in pair for d in domains])
         if not m.any():
             continue
         tag = "-".join(pair)
-        for a in args.apertures:
+        for a in args.precision_share:
             out[f"{tag}|backbone|{a:.3f}"] = {"backbone_minus_random": paired_bootstrap(lp[f"backbone_{a:.3f}"][m], lp[f"random_{a:.3f}"][m], seed=args.seed)}
             for s in args.shares:
                 rnd = lp[f"bb{s:.2f}_random_{a:.3f}"][m]
@@ -88,25 +91,26 @@ def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
     questions = [q for spec in SPECS.values() for q in read_questions(args.prompts_dir, spec, args.limit)]
     domains = tuple(q.domain for q in questions)
-    bench = Bench.load(MODELS[args.model])
+    bench = Bench.load(MODELS[args.model], gpu_share=args.gpu_share)
 
     with GpuMonitor() as mask_gpu:
-        raw = bench.masks([q.prompt for q in questions], args.pooled_batch, args.gradient_batch)
+        raw = bench.masks([q.prompt for q in questions], bench.sources(args.pooled_batch, args.gradient_batch))
     backbone = raw["gradient"].mean(axis=0)  # generic importance: the same for every question
     means = {src: TopicMeans(m, domains) for src, m in subtract_background(raw).items()}
     policies = policies_for(args, backbone, means, bg.block_weights(bench.ctl), bench.ctl.n_blocks)
-    ids = letter_ids(bench.tokenizer)
+    metric = METRIC.for_tokenizer(bench.tokenizer)
     with GpuMonitor() as eval_gpu:
-        results = evaluate_all(bench.model, bench.tokenizer, bench.ctl, questions, policies, ids, args.eval_batch)
+        results = evaluate_all(bench.model, bench.tokenizer, bench.ctl, questions, policies, metric, args.eval_batch, throttle=bench.throttle)
 
     out_dir = args.out / args.model
     summary = {
         "model": MODELS[args.model],
         "revision": fm.REVISIONS[MODELS[args.model]],
         "questions": {d: domains.count(d) for d in SPECS},
-        "apertures": args.apertures,
+        "precision_share": args.precision_share,
         "shares": args.shares,
         "coarse": "zero",
+        "gpu_share": args.gpu_share,
         "gpu": {"masks": mask_gpu.summary(), "eval": eval_gpu.summary()},
         "comparisons": comparisons(results, domains, args),
         "configs": summarize(results, questions),

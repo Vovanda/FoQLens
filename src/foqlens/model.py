@@ -22,17 +22,18 @@ SPILL_MARGIN_BYTES = 256 * 2**20
 TOWERS = ("vision_tower", "embed_vision", "audio_tower", "embed_audio")
 
 
-def forbid_spill(device: str = "cuda") -> None:
-    """Cap this process's allocator at the VRAM it holds plus what is free now.
+def forbid_spill(device: str = "cuda", share: float = 1.0) -> None:
+    """Cap this process's allocator at the VRAM it holds plus what is free now, and at `share` of the card.
 
     Invariant: the bench never spills into shared system memory. Past the cap torch raises OOM;
     without it the Windows driver silently moves allocations to system RAM over PCIe and a run
     crawls on (6.4 GB spilled in the first backbone run).
+    Invariant: the bench never holds more than `share` of the card (gpu_share.py).
     """
     index = torch.device(device).index
     index = torch.cuda.current_device() if index is None else index
     free, total = torch.cuda.mem_get_info(index)
-    usable = free + torch.cuda.memory_reserved(index) - SPILL_MARGIN_BYTES
+    usable = min(free + torch.cuda.memory_reserved(index) - SPILL_MARGIN_BYTES, share * total)
     torch.cuda.set_per_process_memory_fraction(max(usable, 0) / total, index)
 
 
@@ -49,16 +50,17 @@ def load(
     dtype: torch.dtype = torch.bfloat16,
     attn_implementation: str | None = None,
     text_only: bool = True,
+    gpu_share: float = 1.0,
 ) -> tuple[Gemma4ForConditionalGeneration, PreTrainedTokenizerBase]:
     """The model at its pinned revision and its tokenizer, in eval mode, with the allocator capped (forbid_spill).
 
     text_only drops the vision and audio towers. attn_implementation="eager" is needed wherever
-    attention weights are read (step 1).
+    attention weights are read (step 1). gpu_share caps the VRAM at that share of the card.
     """
     # bf16 matmuls accumulate partial sums in fp32: halves the batch-size dependence of the
     # numbers (letter log-probabilities 0.19 -> 0.09 apart between a batch and one by one).
     torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
-    forbid_spill(device)
+    forbid_spill(device, gpu_share)
     revision = REVISIONS[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
     # Gemma 4 derives position ids from arange(seq), not from the attention mask, so left padding

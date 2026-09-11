@@ -125,6 +125,45 @@ def test_drop_bf16_keeps_the_depth_outputs_and_refuses_the_dropped_levels():
     assert mixed(x).shape == before.shape
 
 
+def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_slices():
+    mixed = MixedPrecisionLinear(make_linear(out_features=200, in_features=256), block_rows=64)
+    x = make_input()
+    layout = np.array([Level.D8, Level.D4, Level.D2, Level.ZERO], dtype=np.uint8)
+    mixed.set_levels(layout)
+    before = mixed(x)
+    mixed.drop_bf16()
+    mixed.set_caps(np.array([4, 2, 1, 0]))
+    assert torch.equal(mixed(x), before)
+    # slice 0 for blocks 0-2 (192 rows), slice 1 for blocks 0-1, slices 2 and 3 for block 0; 64 bytes a row
+    assert mixed.stored_bytes() == (192 + 128 + 64 + 64) * 256 // 4
+    with pytest.raises(ValueError):
+        mixed.set_levels(np.array([Level.D8, Level.D6, Level.D2, Level.ZERO], dtype=np.uint8))  # block 1 is capped at D4
+    ctl = Controller({"layers.0.a": mixed})
+    expected = (64 * 8 + 64 * 4 + 64 * 2 + 8 * 0) / 200
+    assert ctl.stored_bits() == pytest.approx(expected)
+
+
+def test_reading_several_depths_at_once_is_exact_against_separate_reads():
+    import torch.nn.functional as F
+
+    from foqlens.quant import CappedSlicedWeight
+
+    linear = make_linear(out_features=192)
+    x = make_input()
+    full = SlicedWeight.quantize(linear.weight.data)
+    capped = CappedSlicedWeight.from_sliced(full, torch.tensor([4, 4, 4], device=DEVICE), 64)
+    for store in (full, capped):
+        together = store.linear_at_depths(x, None, [2, 3, 4])
+        separate = [F.linear(x, store.dequantize(x.dtype, d)) for d in (2, 3, 4)]
+        assert all(torch.equal(a, b) for a, b in zip(together, separate)), type(store).__name__
+
+
+def test_caps_need_a_resident_module():
+    mixed = MixedPrecisionLinear(make_linear(), block_rows=64)
+    with pytest.raises(ValueError):
+        mixed.set_caps(np.array([4, 4, 4, 4]))
+
+
 def test_int8_error_is_within_half_a_step():
     weight = make_linear().weight.data
     q = Int8Weight.quantize(weight)

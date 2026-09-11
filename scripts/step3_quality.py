@@ -6,8 +6,8 @@ For every MMLU question (question + options):
    mode B) and "gradient" (gradient x activation); each source's background (the mean mask over
    all questions of the run) is subtracted before ranking.
 2. Evaluation phase, quality under every layout policy: every uniform level; and at every
-   aperture a (share of weights read sharp): the question's own top blocks at bf16 and the rest
-   at the coarse level ("directed"), and random blocks within the same aperture ("random").
+   precision share a (share of weights read sharp): the question's own top blocks at bf16 and the rest
+   at the coarse level ("directed"), and random blocks within the same precision share ("random").
 
 Writes runs/step3/<model>/summary.json (GPU utilization and memory per phase) and raw results.
 
@@ -24,8 +24,9 @@ import numpy as np
 
 from foqlens import budget as bg
 from foqlens import model as fm
-from foqlens.evaluate import letter_ids
+from foqlens.evaluate import LetterChoice
 from foqlens.gpu_monitor import GpuMonitor
+from foqlens.gpu_share import default_share
 from foqlens.io import read_questions, write_json
 from foqlens.layouts import Directed, Random, Uniform
 from foqlens.pipeline import MASK_SOURCES, Bench, subtract_background
@@ -33,11 +34,12 @@ from foqlens.quality import evaluate_all, summarize
 from foqlens.quant import Level
 
 MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
+METRIC = LetterChoice  # the quality metric; layouts are compared on METRIC.primary
 DOMAINS = ["biology", "math", "chemistry", "physics", "heldout/history", "heldout/geography"]
 # 0 and 1 are the uniform coarse and bf16 layouts. With ZERO a random 5% hole already breaks the
 # model, so the grid is logarithmic in the hole 1 - a: 1, 2, 3, 5, 10, 20% and one far probe at 50%,
 # where random layouts are known dead and only a working mask could survive.
-APERTURES = [0.99, 0.98, 0.97, 0.95, 0.9, 0.8, 0.5]
+PRECISION_SHARES = [0.99, 0.98, 0.97, 0.95, 0.9, 0.8, 0.5]
 COARSE = {"nf4": Level.NF4, "zero": Level.ZERO}
 UNIFORM_LEVELS = (Level.BF16, Level.INT8, Level.NF4, Level.ZERO)
 
@@ -47,20 +49,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
     parser.add_argument("--domains", nargs="+", default=DOMAINS)
     parser.add_argument("--prompts-dir", type=Path, default=Path("prompts"))
-    parser.add_argument("--apertures", nargs="+", type=float, default=APERTURES, help="shares of weights read sharp")
-    parser.add_argument("--coarse", choices=sorted(COARSE), default="zero", help="level of the blocks outside the aperture")
+    parser.add_argument("--precision-share", nargs="+", type=float, default=PRECISION_SHARES, help="shares of weights read sharp")
+    parser.add_argument("--coarse", choices=sorted(COARSE), default="zero", help="level of the blocks outside the precision share")
     parser.add_argument("--limit", type=int, default=None, help="questions per domain, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--pooled-batch", type=int, default=32, help="questions per pooled-mask pass")
-    parser.add_argument("--gradient-batch", type=int, default=4, help="questions per gradient pass (backward memory)")
+    parser.add_argument("--gradient-batch", type=int, default=8, help="questions per gradient pass (backward memory)")
     parser.add_argument("--eval-batch", type=int, default=32, help="questions per evaluation pass")
+    parser.add_argument("--gpu-share", type=float, default=default_share(), help="share of the GPU the run takes (foqlens/gpu_share.py)")
     parser.add_argument("--out", type=Path, default=Path("runs/step3"))
     return parser.parse_args(argv)
 
 
-def policies_for(apertures, scores, weights, n_blocks, seed, coarse) -> list:
+def policies_for(precision_shares, scores, weights, n_blocks, seed, coarse) -> list:
     out = [Uniform(level, n_blocks) for level in UNIFORM_LEVELS]
-    for a in apertures:
+    for a in precision_shares:
         out.append(Random(a, weights, seed, coarse))
         out += [Directed(name, a, scores[name], weights, coarse) for name in MASK_SOURCES]
     return out
@@ -69,24 +72,25 @@ def policies_for(apertures, scores, weights, n_blocks, seed, coarse) -> list:
 def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
     questions = [q for spec in args.domains for q in read_questions(args.prompts_dir, spec, args.limit)]
-    bench = Bench.load(MODELS[args.model])  # step 3 reads no attention weights: fused sdpa
+    bench = Bench.load(MODELS[args.model], gpu_share=args.gpu_share)  # step 3 reads no attention weights: fused sdpa
 
     with GpuMonitor() as mask_gpu:
-        raw_masks = bench.masks([q.prompt for q in questions], args.pooled_batch, args.gradient_batch)
+        raw_masks = bench.masks([q.prompt for q in questions], bench.sources(args.pooled_batch, args.gradient_batch))
     scores = subtract_background(raw_masks)
-    policies = policies_for(args.apertures, scores, bg.block_weights(bench.ctl), bench.ctl.n_blocks, args.seed, COARSE[args.coarse])
-    ids = letter_ids(bench.tokenizer)
+    policies = policies_for(args.precision_share, scores, bg.block_weights(bench.ctl), bench.ctl.n_blocks, args.seed, COARSE[args.coarse])
+    metric = METRIC.for_tokenizer(bench.tokenizer)
     with GpuMonitor() as eval_gpu:
-        results = evaluate_all(bench.model, bench.tokenizer, bench.ctl, questions, policies, ids, args.eval_batch)
+        results = evaluate_all(bench.model, bench.tokenizer, bench.ctl, questions, policies, metric, args.eval_batch, throttle=bench.throttle)
 
     out_dir = args.out / args.model
     summary = {
         "model": MODELS[args.model],
         "revision": fm.REVISIONS[MODELS[args.model]],
         "questions": {d: sum(q.domain == d for q in questions) for d in dict.fromkeys(q.domain for q in questions)},
-        "apertures": args.apertures,
+        "precision_share": args.precision_share,
         "coarse": args.coarse,
         "batch": {"pooled": args.pooled_batch, "gradient": args.gradient_batch, "eval": args.eval_batch},
+        "gpu_share": args.gpu_share,
         "gpu": {"masks": mask_gpu.summary(), "eval": eval_gpu.summary()},
         "configs": summarize(results, questions),
     }

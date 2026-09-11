@@ -1,8 +1,12 @@
-"""Step 3 quality: MMLU multiple choice, scored by the letter the model puts most probability on.
+"""Step 3 quality: how well the model answers, behind one interface.
 
-The standard format: the question, the options under A-D, then "Answer:"; the log-probabilities
-of " A" .. " D" at the last real token are compared. Batches are right-padded, and only the
-logits of the last real positions are computed (logits_to_keep).
+A QualityMetric scores a batch of questions - one row of named values per question - and names the
+value layouts are compared on (`primary`, higher is better). Evaluation, summaries and comparisons
+read the values by name, so a new metric is a new class.
+
+LetterChoice is MMLU multiple choice: the question, the options under A-D, then "Answer:"; the
+log-probabilities of " A" .. " D" at the last real token are compared. Batches are right-padded, and
+only the logits of the last real positions are computed (logits_to_keep).
 
 Invariants:
 - Invariant: the same prompts in the same batch give identical log-probabilities.
@@ -13,6 +17,7 @@ Invariants:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
 
 import numpy as np
 import torch
@@ -27,6 +32,15 @@ class Question:
     domain: str
     prompt: str
     answer: int
+
+
+class QualityMetric(Protocol):
+    name: str
+    primary: str  # the value layouts are compared on; higher is better
+
+    def score(self, model, tokenizer, questions: list[Question]) -> list[dict[str, float]]:
+        """One row of named values per question, in order."""
+        ...
 
 
 def mc_prompt(question: str, choices: list[str]) -> str:
@@ -54,3 +68,20 @@ def letter_logprobs_batch(model, tokenizer, prompts: list[str], ids: list[int]) 
 
 def letter_logprobs(model, tokenizer, prompt: str, ids: list[int]) -> np.ndarray:
     return letter_logprobs_batch(model, tokenizer, [prompt], ids)[0]
+
+
+@dataclass(frozen=True)
+class LetterChoice:
+    """MMLU multiple choice: the log-probability of the right letter among A-D, and whether it is the top one."""
+
+    ids: tuple[int, ...]
+    name: str = "letter_choice"
+    primary: str = "logprob"
+
+    @classmethod
+    def for_tokenizer(cls, tokenizer) -> LetterChoice:
+        return cls(tuple(letter_ids(tokenizer)))
+
+    def score(self, model, tokenizer, questions: list[Question]) -> list[dict[str, float]]:
+        logprobs = letter_logprobs_batch(model, tokenizer, [q.prompt for q in questions], list(self.ids))
+        return [{"accuracy": float(lp.argmax() == q.answer), "logprob": float(lp[q.answer])} for lp, q in zip(logprobs, questions)]

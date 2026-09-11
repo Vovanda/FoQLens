@@ -39,7 +39,7 @@ def test_depth_perplexity_smoke(tmp_path):
 
 def test_step3_injection_smoke(tmp_path):
     inj = load_script("step3_injection")
-    out = inj.main(["--limit", "3", "--apertures", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",
+    out = inj.main(["--limit", "3", "--precision-share", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",
                     "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
     summary = json.loads(Path(out).read_text())
     assert summary["questions"] == {"biology": 3, "math": 3, "history": 3, "geography": 3}
@@ -53,19 +53,19 @@ def test_step3_injection_smoke(tmp_path):
 
 def test_step3_backbone_smoke(tmp_path):
     bb = load_script("step3_backbone")
-    out = bb.main(["--limit", "3", "--apertures", "0.95", "--shares", "0.8", "--pooled-batch", "4", "--gradient-batch", "2",
+    out = bb.main(["--limit", "3", "--precision-share", "0.95", "--shares", "0.8", "--pooled-batch", "4", "--gradient-batch", "2",
                    "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
     summary = json.loads(Path(out).read_text())
     assert {"backbone_0.950", "bb0.80_random_0.950", "bb0.80_own_gradient_0.950", "bb0.80_other_pooled_0.950"} <= set(summary["configs"])
     assert "own_minus_other" in summary["comparisons"]["biology-math|gradient|0.80|0.950"]
     assert "backbone_minus_random" in summary["comparisons"]["history-geography|backbone|0.950"]
     bits = {name: c["mean_bits"] for name, c in summary["configs"].items() if name.endswith("0.950")}
-    assert max(bits.values()) - min(bits.values()) < 0.05  # every policy at one aperture spends the same budget
+    assert max(bits.values()) - min(bits.values()) < 0.05  # every policy at one precision share spends the same budget
 
 
 def test_step3_dilation_smoke(tmp_path):
     dl = load_script("step3_dilation")
-    out = dl.main(["--limit", "3", "--apertures", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",
+    out = dl.main(["--limit", "3", "--precision-share", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",
                    "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
     s = json.loads(Path(out).read_text())
     assert {"backbone_0.950", "bb0.80_random_0.950", "bb0.80_own_gradient_0.950", "bb0.80_own_gradient_struct_0.950",
@@ -75,10 +75,23 @@ def test_step3_dilation_smoke(tmp_path):
     assert max(bits.values()) - min(bits.values()) < 0.05  # dilation spends the same budget
 
 
+def test_step3_zones_smoke(tmp_path):
+    sz = load_script("step3_zones")
+    out = sz.main(["--limit", "3", "--precision-share", "0.25", "--focus-area", "0.5", "0.0", "--pooled-batch", "4",
+                   "--gradient-batch", "2", "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    s = json.loads(Path(out).read_text())
+    assert {"zone_uniform_ps0.250", "zone_own_gradient_fa0.50_ps0.250", "zone_random_pooled_fa0.00_ps0.250",
+            "zone_other_pooled_fa0.50_ps0.250", "zone_fixed_backbone_fa0.50_ps0.250", "uniform_d4"} <= set(s["configs"])
+    assert {"own_minus_random", "own_minus_other", "own_minus_uniform"} <= set(s["comparisons"]["biology-math|gradient|ps0.250|fa0.50"])
+    assert s["cells_done"] == [[0.25, 0.5], [0.25, 0.0]]  # the promising cell first
+    bits = [c["mean_bits"] for name, c in s["configs"].items() if name.startswith("zone_")]
+    assert max(abs(b - 5.0) for b in bits) < 0.05  # precision share 0.25 spends 4 + 4 x 0.25 bits
+
+
 def test_step3_quality_smoke(tmp_path):
     step3 = load_script("step3_quality")
     out = step3.main(
-        ["--limit", "2", "--domains", "biology", "heldout/geography", "--apertures", "0.1", "--coarse", "nf4",
+        ["--limit", "2", "--domains", "biology", "heldout/geography", "--precision-share", "0.1", "--coarse", "nf4",
          "--pooled-batch", "2", "--gradient-batch", "2", "--eval-batch", "4",
          "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)]
     )

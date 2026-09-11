@@ -74,6 +74,35 @@ def test_batched_masks_point_the_same_way_as_alone(e2b_eager):
     assert all(p.grad is None for p in model.parameters())
 
 
+SMALL_CHUNK = 16  # the test texts have ~60 positions in a batch: several chunks and a ragged last one
+LOSS_RTOL = 1e-3  # the head's GEMM on a chunk of rows may round differently from the whole matrix
+CHUNKED_MASK_COSINE = 0.999
+
+
+def test_chunked_losses_and_masks_match_the_full_logits(e2b_eager):
+    import torch
+
+    from foqlens import model as fm
+    from foqlens.scoring import TaylorRecorder, chunked_sequence_losses, sequence_losses
+
+    model, tokenizer, ctl = e2b_eager
+    scorer = GradientScorer(model, ctl.modules, loss_chunk=SMALL_CHUNK)  # freezes the parameters first
+    enc = fm.encode(tokenizer, TEXTS, model.device)
+    with torch.no_grad():
+        full = sequence_losses(model(**enc).logits, enc["input_ids"], enc["attention_mask"])
+        chunked = chunked_sequence_losses(model, model.model(**enc).last_hidden_state, enc["input_ids"],
+                                          enc["attention_mask"], SMALL_CHUNK)
+    torch.testing.assert_close(chunked, full, rtol=LOSS_RTOL, atol=0)
+
+    valid = enc["attention_mask"].clone()
+    valid[:, 0] = 0
+    with torch.enable_grad(), TaylorRecorder(ctl.modules, valid) as rec:
+        sequence_losses(model(**enc).logits, enc["input_ids"], enc["attention_mask"]).sum().backward()
+    reference = torch.cat([rec.scores[n] for n in ctl.modules], dim=1).cpu().numpy()
+    for b, got in enumerate(scorer.score_batch(model, tokenizer, TEXTS)):
+        assert cosine(got["gradient"][0], reference[b]) >= CHUNKED_MASK_COSINE, b
+
+
 def test_batched_letter_scores_are_close_to_alone(e2b_eager):
     model, tokenizer, _ = e2b_eager
     ids = letter_ids(tokenizer)

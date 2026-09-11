@@ -19,6 +19,8 @@ Invariants (each one has a test):
   reads bf16 and ZERO holds no int8 or nf4 copy.
 - Invariant: drop_bf16 changes no output of a read depth; afterwards the module holds its sliced
   copy alone, and a level it cannot read is refused when set, not when computed.
+- Invariant: with depth caps a block stores only its first cap slices, reads within its cap
+  exactly as before, and a read deeper than its cap is refused when set.
 """
 
 from __future__ import annotations
@@ -32,7 +34,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from foqlens.model import text_layers
-from foqlens.quant import Int8Weight, Level, Nf4Weight, SlicedWeight
+from foqlens.quant import N_SLICES, SLICE_BITS, CappedSlicedWeight, Int8Weight, Level, Nf4Weight, SlicedWeight
 
 # Linear modules inside a decoder layer. KV-shared layers have no k/v_proj - those are skipped.
 CONTROLLED = (
@@ -52,6 +54,8 @@ BITS_BY_CODE = np.array([lv.bits for lv in Level], dtype=np.float64)
 # Where a level reads from: a packed copy of its own, or the one sliced copy every read depth
 # shares. bf16 reads the weight itself, ZERO reads nothing.
 STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: SlicedWeight for lv in Level if lv.slices}
+# Slices a level reads, by code; the levels that are not read depths count as the full copy.
+SLICES_BY_CODE = np.array([lv.slices if lv.slices or lv is Level.ZERO else N_SLICES for lv in Level], dtype=np.uint8)
 
 
 class MixedPrecisionLinear(nn.Module):
@@ -69,6 +73,7 @@ class MixedPrecisionLinear(nn.Module):
         self._device = linear.weight.device
         self._packed: dict[type, Int8Weight | Nf4Weight | SlicedWeight] = {}
         self.readable: frozenset[Level] = frozenset(Level)
+        self._caps = np.full(self.n_blocks, N_SLICES, dtype=np.uint8)  # slices every block stores
         self.set_levels(Level.BF16)
 
     @property
@@ -87,8 +92,12 @@ class MixedPrecisionLinear(nn.Module):
         if kind is not None and kind not in self._packed:
             self._packed[kind] = kind.quantize(self.weight.data)
 
-    def set_levels(self, levels: Level | int | np.ndarray) -> None:
-        """One level for all blocks, a level per block, or a level per block per sample of the batch."""
+    def set_levels(self, levels: Level | int | np.ndarray, codes: torch.Tensor | None = None) -> None:
+        """One level for all blocks, a level per block, or a level per block per sample of the batch.
+
+        `codes`, when given, are the same levels already on the device (Controller.set_layout uploads a
+        whole layout once instead of once per module).
+        """
         arr = np.asarray(levels, dtype=np.uint8)
         if arr.ndim == 0:
             arr = np.full(self.n_blocks, arr, dtype=np.uint8)
@@ -97,17 +106,22 @@ class MixedPrecisionLinear(nn.Module):
         used = tuple(Level(int(c)) for c in np.unique(arr))
         if not self.readable.issuperset(used):
             raise ValueError(f"levels {[lv.name for lv in used if lv not in self.readable]} are not held by this module")
+        if (SLICES_BY_CODE[arr] > self._caps).any():
+            raise ValueError("a block is read deeper than the depth it stores")
         self._levels = arr.copy()
         self._used = used
         for level in self._used:
             self._materialize(level)
-        self._rows = None if len(self._used) == 1 else self._row_codes(arr)
+        self._rows = None if len(self._used) == 1 else self._row_codes(arr, codes)
 
-    def _row_codes(self, arr: np.ndarray) -> torch.Tensor:
-        """Level code per output row on the GPU: [out] or [batch, 1, out], broadcast over tokens."""
-        rows = np.repeat(arr, self.block_rows, axis=-1)[..., : self.out_features]
-        codes = torch.as_tensor(rows, device=self._device)
-        return codes if arr.ndim == 1 else codes.unsqueeze(1)
+    def _row_codes(self, arr: np.ndarray, codes: torch.Tensor | None = None) -> torch.Tensor:
+        """Level code per output row on the GPU: [out] or [batch, 1, out], broadcast over tokens.
+
+        Blocks are expanded to rows on the device: one small copy of block codes, not of row codes.
+        """
+        blocks = torch.as_tensor(arr, device=self._device) if codes is None else codes
+        rows = blocks.repeat_interleave(self.block_rows, dim=-1)[..., : self.out_features]
+        return rows if arr.ndim == 1 else rows.unsqueeze(1)
 
     def block_sizes(self) -> np.ndarray:
         """Number of rows in every block; the last one may be partial."""
@@ -130,6 +144,36 @@ class MixedPrecisionLinear(nn.Module):
         self.weight = None
         self.readable = self.RESIDENT
 
+    def set_caps(self, caps: np.ndarray) -> None:
+        """Store every block only to its depth cap (slices, 0 ... N_SLICES); the deeper slices leave the GPU.
+
+        Only on a resident module (after drop_bf16), once, from its full sliced copy; the current
+        layout must not read any block deeper than its new cap.
+        """
+        caps = np.asarray(caps, dtype=np.uint8)
+        if self.weight is not None:
+            raise ValueError("depth caps need a resident module: call drop_bf16 first")
+        if caps.shape != (self.n_blocks,) or (caps > N_SLICES).any():
+            raise ValueError(f"caps of shape {caps.shape} for {self.n_blocks} blocks, each 0 ... {N_SLICES}")
+        full = self._packed[SlicedWeight]
+        if not isinstance(full, SlicedWeight):
+            raise ValueError("depth caps are set once, from the full sliced copy")
+        if (SLICES_BY_CODE[self._levels] > caps).any():
+            raise ValueError("the current layout reads a block deeper than its new cap")
+        block_caps = torch.as_tensor(caps, device=self._device)
+        self._packed[SlicedWeight] = CappedSlicedWeight.from_sliced(full, block_caps, self.block_rows)
+        self._caps = caps.copy()
+
+    @property
+    def caps(self) -> np.ndarray:
+        """Slices every block stores. A copy."""
+        return self._caps.copy()
+
+    def stored_bytes(self) -> int:
+        """Bytes of the sliced copy held, without its scales: every slice, or only those under the caps."""
+        store = self._packed.get(SlicedWeight)
+        return 0 if store is None else store.nbytes
+
     def output_at(self, level: Level, x: torch.Tensor) -> torch.Tensor:
         """The whole output as if every block were read at this level."""
         if level is Level.BF16:
@@ -146,10 +190,21 @@ class MixedPrecisionLinear(nn.Module):
             return self.output_at(self._used[0], x)
         if self._levels.ndim == 2 and x.shape[0] != self._levels.shape[0]:
             raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {self._levels.shape[0]}")
-        out = self.output_at(self._used[0], x)
+        outputs = self._outputs_at(self._used, x)
+        out = outputs[self._used[0]]
         for level in self._used[1:]:
-            out = torch.where(self._rows == int(level), self.output_at(level, x), out)
+            out = torch.where(self._rows == int(level), outputs[level], out)
         return out
+
+    def _outputs_at(self, levels: tuple[Level, ...], x: torch.Tensor) -> dict[Level, torch.Tensor]:
+        """output_at for every level; several read depths come from one accumulation of the sliced copy."""
+        depths = [lv for lv in levels if lv.slices]
+        outputs = {lv: self.output_at(lv, x) for lv in levels if not lv.slices}
+        if len(depths) < 2:
+            return outputs | {lv: self.output_at(lv, x) for lv in depths}
+        self._materialize(depths[0])
+        store = self._packed[SlicedWeight]
+        return outputs | dict(zip(depths, store.linear_at_depths(x, self.bias, [lv.slices for lv in depths])))
 
     def extra_repr(self) -> str:
         return f"in={self.in_features}, out={self.out_features}, blocks={self.n_blocks}x{self.block_rows}"
@@ -196,14 +251,33 @@ class Controller:
         levels = np.asarray(levels, dtype=np.uint8)
         if levels.shape[-1] != self.n_blocks:
             raise ValueError(f"layout of {levels.shape[-1]} blocks for {self.n_blocks}")
+        # one copy of the whole layout to the device; every module takes a view of its own columns
+        codes = torch.as_tensor(levels, device=next(iter(self.modules.values()))._device)
         for (start, stop), module in zip(zip(self._bounds[:-1], self._bounds[1:]), self.modules.values()):
-            module.set_levels(levels[..., start:stop])
+            module.set_levels(levels[..., start:stop], codes[..., start:stop])
 
     def drop_bf16(self) -> None:
         """Every module keeps only its sliced copy (MixedPrecisionLinear.drop_bf16); the cache returns the freed memory."""
         for module in self.modules.values():
             module.drop_bf16()
         torch.cuda.empty_cache()
+
+    def set_caps(self, caps: np.ndarray) -> None:
+        """Depth caps over all blocks in module order (see MixedPrecisionLinear.set_caps); the cache returns the freed memory."""
+        caps = np.asarray(caps, dtype=np.uint8)
+        if caps.shape != (self.n_blocks,):
+            raise ValueError(f"caps of shape {caps.shape} for {self.n_blocks} blocks")
+        for (start, stop), module in zip(zip(self._bounds[:-1], self._bounds[1:]), self.modules.values()):
+            module.set_caps(caps[start:stop])
+        torch.cuda.empty_cache()
+
+    def stored_bits(self) -> float:
+        """Mean stored bits per weight of the sliced copies, weighted by weight count: SLICE_BITS per slice kept, no scales."""
+        total_bits, total_weights = 0.0, 0
+        for m in self.modules.values():
+            total_bits += float((m.caps.astype(np.int64) * SLICE_BITS * m.block_sizes() * m.in_features).sum())
+            total_weights += m.in_features * m.out_features
+        return total_bits / total_weights
 
     def layout(self) -> dict[str, list]:
         """Level of every block of every module - the state the modules compute with."""

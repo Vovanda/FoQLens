@@ -25,6 +25,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torch.utils.checkpoint import checkpoint
 
 from foqlens import model as fm
 from foqlens.precision import MixedPrecisionLinear
@@ -141,6 +142,44 @@ def sequence_losses(logits: torch.Tensor, input_ids: torch.Tensor, attention_mas
     return (ce.view_as(mask) * mask).sum(dim=1) / mask.sum(dim=1)
 
 
+# Positions whose vocabulary logits exist at once: 256 x 262k in fp32 is 0.27 GB, against 2+ GB for a whole batch.
+LOSS_CHUNK = 256
+
+
+def head_logits(model: nn.Module, hidden: torch.Tensor) -> torch.Tensor:
+    """The model's own head on hidden states: lm_head, then the final logit softcapping if the model has one."""
+    logits = model.lm_head(hidden)
+    cap = model.config.get_text_config().final_logit_softcapping
+    if cap is not None:
+        logits = torch.tanh(logits / cap) * cap
+    return logits
+
+
+def _chunk_ce(hidden: torch.Tensor, targets: torch.Tensor, model: nn.Module) -> torch.Tensor:
+    return F.cross_entropy(head_logits(model, hidden).float(), targets, reduction="none")
+
+
+def chunked_sequence_losses(
+    model: nn.Module, hidden: torch.Tensor, input_ids: torch.Tensor, attention_mask: torch.Tensor, chunk: int = LOSS_CHUNK
+) -> torch.Tensor:
+    """sequence_losses from the last hidden state, LOSS_CHUNK positions at a time: [batch].
+
+    Every chunk runs under activation checkpointing, so its logits are recomputed in backward and
+    the [batch, seq, vocab] logits never exist - neither in forward nor in backward.
+    """
+    batch, seq = input_ids.shape
+    targets = input_ids[:, 1:].reshape(-1)
+    mask = attention_mask[:, 1:].float()
+    flat = hidden[:, :-1].reshape(-1, hidden.shape[-1])
+    owner = torch.arange(batch, device=hidden.device).repeat_interleave(seq - 1)
+    totals = torch.zeros(batch, device=hidden.device, dtype=torch.float32)
+    for start in range(0, targets.numel(), chunk):
+        end = start + chunk
+        ce = checkpoint(_chunk_ce, flat[start:end], targets[start:end], model, use_reentrant=False)
+        totals = totals.index_add(0, owner[start:end], ce * mask.reshape(-1)[start:end])
+    return totals / mask.sum(dim=1)
+
+
 # --- recording: reduce inside the hooks, never keep whole module outputs ---------------------
 
 
@@ -252,8 +291,9 @@ class BlockScorer:
 class GradientScorer:
     """Gradient x activation per block of each query's own language-model loss."""
 
-    def __init__(self, model: nn.Module, modules: dict[str, MixedPrecisionLinear]):
+    def __init__(self, model: nn.Module, modules: dict[str, MixedPrecisionLinear], loss_chunk: int = LOSS_CHUNK):
         self.modules = modules
+        self.loss_chunk = loss_chunk
         # parameters stay frozen: the graph runs through activations, starting at the embedding output
         model.requires_grad_(False)
         fm.text_embeddings(model).register_forward_hook(lambda _m, _i, out: out.requires_grad_(True))
@@ -267,9 +307,10 @@ class GradientScorer:
         valid = enc["attention_mask"].clone()
         valid[:, 0] = 0
         with torch.enable_grad(), TaylorRecorder(self.modules, valid) as rec:
-            logits = model(**enc).logits
+            hidden = model.model(**enc).last_hidden_state
             # summed per-sequence means: each sequence's gradient is that of its own mean loss
-            sequence_losses(logits, enc["input_ids"], enc["attention_mask"]).sum().backward()
+            losses = chunked_sequence_losses(model, hidden, enc["input_ids"], enc["attention_mask"], self.loss_chunk)
+            losses.sum().backward()
         vectors = torch.cat([rec.scores[n] for n in self.modules], dim=1).cpu().numpy()
         return [{"gradient": (vectors[b], list(range(1, n)))} for b, n in enumerate(_lengths(enc["attention_mask"]))]
 

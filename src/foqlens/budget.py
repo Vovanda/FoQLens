@@ -1,13 +1,13 @@
-"""Step 3: turning masks into a precision layout at a given aperture.
+"""Step 3: turning masks into a layout of levels at a given precision share.
 
-The aperture is the share of weights read sharp (bf16); every other block is read coarse.
-Aperture 0 is a closed lens - everything coarse; aperture 1 is fully open - everything sharp.
-The mask says where to sharpen, the aperture how much. At aperture a with nf4 as the coarse level
-the nominal mean is 4 + 12 a bits. Directed and random layouts use the same rule on the same
-block weights, so at one aperture they spend the same budget.
+The precision share p is the share of the precision range spent: with two levels, the share of
+weights read sharp, every other block read coarse. Share 0 - everything coarse; share 1 - everything
+sharp. The mask says where to sharpen, the precision share how much. At share p with nf4 as the
+coarse level the nominal mean is 4 + 12 p bits. Directed and random layouts use the same rule on the
+same block weights, so at one precision share they spend the same budget.
 
-Invariant: every layout at aperture a holds at least a share a of all weights sharp, and at most
-one block more than needed.
+Invariant: every layout at precision share p holds at least a share p of all weights sharp, and at
+most one block more than needed.
 """
 
 from __future__ import annotations
@@ -34,19 +34,26 @@ def take_until(order: np.ndarray, weights: np.ndarray, amount: float, sharp: np.
     return sharp
 
 
-def select_by_budget(order: np.ndarray, weights: np.ndarray, aperture: float) -> np.ndarray:
-    """Blocks taken in the given order until their weights reach the aperture's share of all weights."""
-    return take_until(order, weights, aperture * weights.sum())
+def check_precision_share(precision_share: float) -> float:
+    """The precision share as given, refused outside [0, 1] (NaN included)."""
+    if not 0.0 <= precision_share <= 1.0:
+        raise ValueError(f"precision share {precision_share} outside [0, 1]")
+    return precision_share
 
 
-def directed(scores: np.ndarray, weights: np.ndarray, aperture: float) -> np.ndarray:
-    """The highest-scoring blocks within the aperture."""
-    return select_by_budget(np.argsort(-scores, kind="stable"), weights, aperture)
+def select_by_budget(order: np.ndarray, weights: np.ndarray, precision_share: float) -> np.ndarray:
+    """Blocks taken in the given order until their weights reach the precision share of all weights."""
+    return take_until(order, weights, check_precision_share(precision_share) * weights.sum())
 
 
-def random_layout(weights: np.ndarray, aperture: float, rng: np.random.Generator) -> np.ndarray:
-    """Random blocks within the same aperture."""
-    return select_by_budget(rng.permutation(len(weights)), weights, aperture)
+def directed(scores: np.ndarray, weights: np.ndarray, precision_share: float) -> np.ndarray:
+    """The highest-scoring blocks within the precision share."""
+    return select_by_budget(np.argsort(-scores, kind="stable"), weights, precision_share)
+
+
+def random_layout(weights: np.ndarray, precision_share: float, rng: np.random.Generator) -> np.ndarray:
+    """Random blocks within the same precision share."""
+    return select_by_budget(rng.permutation(len(weights)), weights, precision_share)
 
 
 def dilate(order: np.ndarray, neighbours: np.ndarray) -> np.ndarray:
@@ -61,15 +68,15 @@ def dilate(order: np.ndarray, neighbours: np.ndarray) -> np.ndarray:
 
 
 def layered(
-    backbone: np.ndarray, fill: np.ndarray, weights: np.ndarray, aperture: float, share: float,
+    backbone: np.ndarray, fill: np.ndarray, weights: np.ndarray, precision_share: float, share: float,
     neighbours: np.ndarray | None = None,
 ) -> np.ndarray:
-    """The backbone's top blocks for `share` of the aperture, the rest of the aperture in the fill's order.
+    """The backbone's top blocks for `share` of the precision share, the rest of it in the fill's order.
 
     With a neighbour table the fill order is dilated: every fill block brings its neighbours along.
     """
-    sharp = directed(backbone, weights, aperture * share)
-    remaining = aperture * weights.sum() - weights[sharp].sum()
+    sharp = directed(backbone, weights, precision_share * share)
+    remaining = precision_share * weights.sum() - weights[sharp].sum()
     order = np.argsort(-fill, kind="stable")
     if neighbours is not None:
         order = dilate(order, neighbours)

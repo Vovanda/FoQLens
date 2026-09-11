@@ -27,10 +27,22 @@ def test_directed_and_random_spend_the_same_budget():
     assert rnd.sum() == 100 and (rnd & top).sum() < 40
 
 
-def test_aperture_zero_is_closed_and_one_is_fully_open():
+def test_precision_share_zero_is_all_coarse_and_one_all_sharp():
     weights = np.full(10, 64)
     assert not bg.directed(np.arange(10.0), weights, 0.0).any()
     assert bg.directed(np.arange(10.0), weights, 1.0).all()
+
+
+def test_a_precision_share_outside_zero_to_one_is_refused():
+    import math
+
+    weights = np.full(10, 64)
+    for precision_share in (-0.1, 1.5, math.nan):
+        with pytest.raises(ValueError):
+            bg.check_precision_share(precision_share)
+        with pytest.raises(ValueError):
+            bg.directed(np.arange(10.0), weights, precision_share)
+    assert bg.check_precision_share(0.0) == 0.0 and bg.check_precision_share(1.0) == 1.0
 
 
 def test_to_levels_keeps_the_shape():
@@ -84,7 +96,7 @@ def test_layered_keeps_the_backbone_and_fills_the_rest_by_the_fill_order():
     weights = np.full(10, 10)
     backbone = np.arange(10, 0, -1, dtype=float)  # blocks 0, 1, 2 ... most important
     fill = np.arange(10, dtype=float)  # blocks 9, 8, 7 ... first by the topic
-    sharp = bg.layered(backbone, fill, weights, aperture=0.4, share=0.5)
+    sharp = bg.layered(backbone, fill, weights, precision_share=0.4, share=0.5)
     assert sharp.tolist() == [True, True] + [False] * 5 + [False, True, True]  # 2 backbone + 2 topic blocks
     assert bg.layered(backbone, fill, weights, 0.4, 1.0).tolist() == bg.directed(backbone, weights, 0.4).tolist()
     assert bg.layered(backbone, fill, weights, 0.4, 0.0).tolist() == bg.directed(fill, weights, 0.4).tolist()
@@ -142,12 +154,42 @@ def test_evaluate_all_names_results_and_logs_every_policy(monkeypatch):
     assert out == {"a": [{"policy": "a"}], "b": [{"policy": "b"}]} and lines == ["[1/2] a", "[2/2] b"]
 
 
-def test_summarize_overall_and_per_domain():
+def test_summarize_averages_whatever_the_metric_names_overall_and_per_domain():
     questions = [Question("x", "p", 0), Question("x", "p", 0), Question("y", "p", 0)]
-    rows = [{"correct": True, "logprob": -0.1, "mean_bits": 8.0}, {"correct": False, "logprob": -2.0, "mean_bits": 8.0},
-            {"correct": True, "logprob": -0.3, "mean_bits": 8.0}]
+    rows = [{"accuracy": 1.0, "logprob": -0.1, "mean_bits": 8.0}, {"accuracy": 0.0, "logprob": -2.0, "mean_bits": 8.0},
+            {"accuracy": 1.0, "logprob": -0.3, "mean_bits": 8.0}]
     s = summarize({"p": rows}, questions)["p"]
-    assert s["accuracy"] == pytest.approx(2 / 3) and s["by_domain"] == {"x": 0.5, "y": 1.0} and s["mean_bits"] == 8.0
+    assert s["accuracy"] == pytest.approx(2 / 3) and s["mean_bits"] == 8.0
+    assert s["by_domain"]["accuracy"] == {"x": 0.5, "y": 1.0} and s["by_domain"]["logprob"]["y"] == pytest.approx(-0.3)
+
+
+def test_letter_choice_scores_the_right_letter(monkeypatch):
+    import foqlens.evaluate as ev
+
+    fake = np.log(np.array([[0.1, 0.6, 0.2, 0.1], [0.7, 0.1, 0.1, 0.1]]))
+    monkeypatch.setattr(ev, "letter_logprobs_batch", lambda model, tok, prompts, ids: fake[: len(prompts)])
+    rows = ev.LetterChoice((1, 2, 3, 4)).score(None, None, [Question("x", "p", 1), Question("y", "q", 2)])
+    assert rows[0] == {"accuracy": 1.0, "logprob": pytest.approx(np.log(0.6))}
+    assert rows[1] == {"accuracy": 0.0, "logprob": pytest.approx(np.log(0.1))}
+    assert ev.LetterChoice.primary == "logprob"
+
+
+def test_a_new_metric_plugs_into_the_evaluation_without_touching_it():
+    from types import SimpleNamespace
+
+    from foqlens.quality import evaluate_policy
+
+    class AnswerLength:
+        name, primary = "answer_length", "length"
+
+        def score(self, model, tokenizer, questions):
+            return [{"length": float(len(q.prompt))} for q in questions]
+
+    ctl = SimpleNamespace(set_layout=lambda layout: None, mean_bits=lambda: 6.0)
+    policy = SimpleNamespace(name="any", levels=lambda idx: np.zeros((len(idx), 3), dtype=np.uint8))
+    questions = [Question("x", "ab", 0), Question("y", "abcd", 0), Question("y", "a", 0)]
+    rows = evaluate_policy(None, None, ctl, questions, policy, AnswerLength(), batch_size=2)
+    assert rows == [{"length": 2.0, "mean_bits": 6.0}, {"length": 4.0, "mean_bits": 6.0}, {"length": 1.0, "mean_bits": 6.0}]
 
 
 def test_read_questions_builds_prompts_and_names_the_domain(tmp_path):
@@ -181,3 +223,21 @@ def test_gpu_monitor_samples_in_the_background_until_exit():
     taken = len(mon.samples)
     assert taken >= 3 and mon.samples[0] == (42.0, 7.0)
     assert len(mon.samples) == taken  # the thread has stopped
+
+
+def test_a_new_mask_source_plugs_into_the_bench_without_touching_it():
+    from types import SimpleNamespace
+
+    from foqlens.pipeline import Bench
+
+    class PromptLength:
+        name, batch_size = "prompt_length", 2
+
+        def score_batch(self, model, tokenizer, texts):
+            return [np.full(3, float(len(t))) for t in texts]
+
+    levels = []
+    bench = Bench(model=None, tokenizer=None, ctl=SimpleNamespace(set_all=levels.append))
+    masks = bench.masks(["a", "bbb", "cc"], [PromptLength()])
+    assert list(masks) == ["prompt_length"] and masks["prompt_length"][:, 0].tolist() == [1.0, 3.0, 2.0]
+    assert levels == [Level.BF16]  # masks are computed with every block at bf16

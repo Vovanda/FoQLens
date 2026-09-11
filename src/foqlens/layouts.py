@@ -171,11 +171,18 @@ class BackboneFill:
     partner: dict | None = None
     seed: int = 0
     coarse: Level = Level.NF4
+    dilation: str = "none"  # name of the neighbour table the fill is widened by (see neighbours.py)
+    neighbours: np.ndarray | None = None
+
+    def __post_init__(self) -> None:
+        if (self.dilation == "none") != (self.neighbours is None):
+            raise ValueError(f"dilation {self.dilation!r} needs a neighbour table exactly when it is not 'none'")
 
     @property
     def name(self) -> str:
         what = "random" if self.fill == "random" else f"{self.fill}_{self.source}"
-        return f"bb{self.share:.2f}_{what}_{self.aperture:.3f}"
+        wide = "" if self.dilation == "none" else f"_{self.dilation}"
+        return f"bb{self.share:.2f}_{what}{wide}_{self.aperture:.3f}"
 
     def _fill(self, i: int) -> np.ndarray:
         if self.fill == "random":
@@ -186,7 +193,10 @@ class BackboneFill:
     def levels(self, indices: np.ndarray) -> np.ndarray:
         return np.stack(
             [
-                bg.to_levels(bg.layered(self.backbone, self._fill(int(i)), self.weights, self.aperture, self.share), lo=self.coarse)
+                bg.to_levels(
+                    bg.layered(self.backbone, self._fill(int(i)), self.weights, self.aperture, self.share, self.neighbours),
+                    lo=self.coarse,
+                )
                 for i in indices
             ]
         )

@@ -63,6 +63,18 @@ def test_step3_backbone_smoke(tmp_path):
     assert max(bits.values()) - min(bits.values()) < 0.05  # every policy at one aperture spends the same budget
 
 
+def test_step3_dilation_smoke(tmp_path):
+    dl = load_script("step3_dilation")
+    out = dl.main(["--limit", "3", "--apertures", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",
+                   "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    s = json.loads(Path(out).read_text())
+    assert {"backbone_0.950", "bb0.80_random_0.950", "bb0.80_own_gradient_0.950", "bb0.80_own_gradient_struct_0.950",
+            "bb0.80_other_pooled_index_0.950"} <= set(s["configs"])
+    assert {"own_minus_other_struct", "struct_minus_none", "struct_minus_index"} <= set(s["comparisons"]["history-geography|gradient|0.950"])
+    bits = {name: c["mean_bits"] for name, c in s["configs"].items() if name.endswith("0.950")}
+    assert max(bits.values()) - min(bits.values()) < 0.05  # dilation spends the same budget
+
+
 def test_step3_quality_smoke(tmp_path):
     step3 = load_script("step3_quality")
     out = step3.main(

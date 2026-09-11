@@ -49,11 +49,31 @@ def random_layout(weights: np.ndarray, aperture: float, rng: np.random.Generator
     return select_by_budget(rng.permutation(len(weights)), weights, aperture)
 
 
-def layered(backbone: np.ndarray, fill: np.ndarray, weights: np.ndarray, aperture: float, share: float) -> np.ndarray:
-    """The backbone's top blocks for `share` of the aperture, the rest of the aperture in the fill's order."""
+def dilate(order: np.ndarray, neighbours: np.ndarray) -> np.ndarray:
+    """The order with every block followed at once by its neighbours (a table padded with -1).
+
+    Each block keeps its first place, so the result is still an order of all blocks.
+    """
+    seq = np.concatenate([order[:, None], neighbours[order]], axis=1).ravel()
+    seq = seq[seq >= 0]
+    _, first = np.unique(seq, return_index=True)
+    return seq[np.sort(first)]
+
+
+def layered(
+    backbone: np.ndarray, fill: np.ndarray, weights: np.ndarray, aperture: float, share: float,
+    neighbours: np.ndarray | None = None,
+) -> np.ndarray:
+    """The backbone's top blocks for `share` of the aperture, the rest of the aperture in the fill's order.
+
+    With a neighbour table the fill order is dilated: every fill block brings its neighbours along.
+    """
     sharp = directed(backbone, weights, aperture * share)
     remaining = aperture * weights.sum() - weights[sharp].sum()
-    return take_until(np.argsort(-fill, kind="stable"), weights, remaining, sharp)
+    order = np.argsort(-fill, kind="stable")
+    if neighbours is not None:
+        order = dilate(order, neighbours)
+    return take_until(order, weights, remaining, sharp)
 
 
 def to_levels(sharp: np.ndarray, hi: Level = Level.BF16, lo: Level = Level.NF4) -> np.ndarray:

@@ -1,0 +1,969 @@
+{
+  "model": "google/gemma-4-E2B",
+  "revision": "d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f",
+  "questions": {
+    "biology": 95,
+    "math": 100,
+    "history": 100,
+    "geography": 100
+  },
+  "apertures": [
+    0.97,
+    0.95,
+    0.9
+  ],
+  "share": 0.8,
+  "coarse": "zero",
+  "neighbours_per_block": {
+    "struct": 2.059287462605385,
+    "index": 2.059287462605385
+  },
+  "gpu": {
+    "masks": {
+      "samples": 84,
+      "utilization_mean": 24.047619047619047,
+      "utilization_median": 17.5,
+      "memory_reserved_peak_mib": 21502.0,
+      "memory_allocated_peak_mib": 15151.83154296875
+    },
+    "eval": {
+      "samples": 334,
+      "utilization_mean": 53.81137724550898,
+      "utilization_median": 54.0,
+      "memory_reserved_peak_mib": 11502.0,
+      "memory_allocated_peak_mib": 9895.1962890625
+    }
+  },
+  "comparisons": {
+    "biology-math|pooled|0.970": {
+      "own_minus_other_none": {
+        "mean": 0.10734282533327738,
+        "lo": 0.0386671091730778,
+        "hi": 0.1769186809945565,
+        "above_zero": true,
+        "n": 195
+      },
+      "own_minus_other_struct": {
+        "mean": 0.09090344665142205,
+        "lo": 0.02547386031884414,
+        "hi": 0.15783025940259296,
+        "above_zero": true,
+        "n": 195
+      },
+      "own_minus_other_index": {
+        "mean": 0.10285080165053025,
+        "lo": 0.010980806552255766,
+        "hi": 0.19590042944806507,
+        "above_zero": true,
+        "n": 195
+      },
+      "struct_minus_none": {
+        "mean": 0.01383321143877812,
+        "lo": -0.026328278426558542,
+        "hi": 0.05532023524722228,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_index": {
+        "mean": 0.016779549324359648,
+        "lo": -0.022445709275033993,
+        "hi": 0.05628491709964012,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "biology-math|pooled|0.950": {
+      "own_minus_other_none": {
+        "mean": 0.09616519075173598,
+        "lo": -0.012607233142241452,
+        "hi": 0.20632227855233046,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_struct": {
+        "mean": 0.10225336773273272,
+        "lo": 0.008132986822762554,
+        "hi": 0.1941432077800616,
+        "above_zero": true,
+        "n": 195
+      },
+      "own_minus_other_index": {
+        "mean": 0.0815492971585347,
+        "lo": -0.05479370352931512,
+        "hi": 0.22285239287293865,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_none": {
+        "mean": 0.01136135206772731,
+        "lo": -0.048965972994382566,
+        "hi": 0.07393485826368515,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_index": {
+        "mean": 0.1034404313717133,
+        "lo": 0.041962648014991714,
+        "hi": 0.1651569495254602,
+        "above_zero": true,
+        "n": 195
+      }
+    },
+    "biology-math|pooled|0.900": {
+      "own_minus_other_none": {
+        "mean": 0.14953104987358434,
+        "lo": -0.000189206774036089,
+        "hi": 0.29688553745834484,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_struct": {
+        "mean": -0.0735568269705161,
+        "lo": -0.2464033939498357,
+        "hi": 0.09365779733810668,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_index": {
+        "mean": 0.05580588181813558,
+        "lo": -0.05018824798556474,
+        "hi": 0.16049875585696632,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_none": {
+        "mean": -0.0770166549927149,
+        "lo": -0.1774830382049848,
+        "hi": 0.019729334966112382,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_index": {
+        "mean": -0.10251688223618727,
+        "lo": -0.22206000686838076,
+        "hi": 0.00873828876668058,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "biology-math|gradient|0.970": {
+      "own_minus_other_none": {
+        "mean": 0.005753332137679442,
+        "lo": -0.035872384148339424,
+        "hi": 0.04629782760682969,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_struct": {
+        "mean": 0.027267282819136596,
+        "lo": -0.019729527385714346,
+        "hi": 0.07238334026139898,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_index": {
+        "mean": -0.03609689119725655,
+        "lo": -0.08202241317106364,
+        "hi": 0.006770252865882444,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_none": {
+        "mean": 0.012493593713793999,
+        "lo": -0.012011371236533308,
+        "hi": 0.03639612001581834,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_index": {
+        "mean": 0.03691123076356374,
+        "lo": -0.0035892386459864863,
+        "hi": 0.08152182768696008,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "biology-math|gradient|0.950": {
+      "own_minus_other_none": {
+        "mean": -0.06006842203533802,
+        "lo": -0.11569337641438229,
+        "hi": -0.0048197915488615815,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_struct": {
+        "mean": -0.02322406449761146,
+        "lo": -0.07524859700065392,
+        "hi": 0.026403843354051687,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_index": {
+        "mean": -0.055888344466877286,
+        "lo": -0.12191227327244213,
+        "hi": 0.010690086283601626,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_none": {
+        "mean": 0.0327939749814761,
+        "lo": -0.011216765148326372,
+        "hi": 0.07779197745574398,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_index": {
+        "mean": 0.06045338481855698,
+        "lo": 0.0058645143331243444,
+        "hi": 0.11551633347088519,
+        "above_zero": true,
+        "n": 195
+      }
+    },
+    "biology-math|gradient|0.900": {
+      "own_minus_other_none": {
+        "mean": -0.2122443259622042,
+        "lo": -0.35125475441750426,
+        "hi": -0.0782077344167883,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_struct": {
+        "mean": -0.1290112548125669,
+        "lo": -0.224830412915669,
+        "hi": -0.03564940448456376,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_other_index": {
+        "mean": 0.0333780587817996,
+        "lo": -0.09673351014809062,
+        "hi": 0.16541955238876815,
+        "above_zero": false,
+        "n": 195
+      },
+      "struct_minus_none": {
+        "mean": 0.15613336501977382,
+        "lo": 0.08014523398608733,
+        "hi": 0.2421566642219057,
+        "above_zero": true,
+        "n": 195
+      },
+      "struct_minus_index": {
+        "mean": 0.005783240993817647,
+        "lo": -0.08654325153392095,
+        "hi": 0.09441650588734027,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "history-geography|pooled|0.970": {
+      "own_minus_other_none": {
+        "mean": -0.009608290651813149,
+        "lo": -0.062310906860977414,
+        "hi": 0.04369282923615535,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_struct": {
+        "mean": 0.006156028197146952,
+        "lo": -0.043096247748588216,
+        "hi": 0.055713858349597974,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_index": {
+        "mean": 0.015050879642367364,
+        "lo": -0.032094252770766614,
+        "hi": 0.06361188780236987,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_none": {
+        "mean": 0.07148258372675627,
+        "lo": 0.03648220541328192,
+        "hi": 0.1072113670184044,
+        "above_zero": true,
+        "n": 200
+      },
+      "struct_minus_index": {
+        "mean": 0.06899474606383592,
+        "lo": 0.03595970927004237,
+        "hi": 0.10081354736455249,
+        "above_zero": true,
+        "n": 200
+      }
+    },
+    "history-geography|pooled|0.950": {
+      "own_minus_other_none": {
+        "mean": 0.0237655065394938,
+        "lo": -0.04220694486051798,
+        "hi": 0.0891141695282422,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_struct": {
+        "mean": 0.036993157607503234,
+        "lo": -0.00940617699350696,
+        "hi": 0.08241499325528275,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_index": {
+        "mean": 0.047936069406569005,
+        "lo": -0.0022071220427751525,
+        "hi": 0.09802735556382684,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_none": {
+        "mean": 0.1129574154689908,
+        "lo": 0.0694362090555951,
+        "hi": 0.15682755906321105,
+        "above_zero": true,
+        "n": 200
+      },
+      "struct_minus_index": {
+        "mean": 0.08813737276941538,
+        "lo": 0.0476681724996306,
+        "hi": 0.12950761541910463,
+        "above_zero": true,
+        "n": 200
+      }
+    },
+    "history-geography|pooled|0.900": {
+      "own_minus_other_none": {
+        "mean": 0.0389154164493084,
+        "lo": -0.04178888569027185,
+        "hi": 0.12056749783083796,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_struct": {
+        "mean": 0.04651758246123791,
+        "lo": -0.027936807755380866,
+        "hi": 0.12171435402892528,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_index": {
+        "mean": 0.06641941174864768,
+        "lo": -0.05376767175039276,
+        "hi": 0.188045862101484,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_none": {
+        "mean": 0.07117869704961777,
+        "lo": -0.003200600450858473,
+        "hi": 0.1482370824310927,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_index": {
+        "mean": 0.14076307019218803,
+        "lo": 0.06521543804090471,
+        "hi": 0.21807195497117932,
+        "above_zero": true,
+        "n": 200
+      }
+    },
+    "history-geography|gradient|0.970": {
+      "own_minus_other_none": {
+        "mean": -0.023927112193778157,
+        "lo": -0.10367751112324185,
+        "hi": 0.05645893066655844,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_struct": {
+        "mean": -0.01589889737777412,
+        "lo": -0.07833648531301879,
+        "hi": 0.0442741710306145,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_index": {
+        "mean": -0.007004582714289427,
+        "lo": -0.0661684302999638,
+        "hi": 0.05335908342339094,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_none": {
+        "mean": 0.07585845810361207,
+        "lo": 0.040605519371340056,
+        "hi": 0.11180966036533935,
+        "above_zero": true,
+        "n": 200
+      },
+      "struct_minus_index": {
+        "mean": 0.06404752382077276,
+        "lo": 0.02348992180568166,
+        "hi": 0.10392577956151218,
+        "above_zero": true,
+        "n": 200
+      }
+    },
+    "history-geography|gradient|0.950": {
+      "own_minus_other_none": {
+        "mean": 0.027136963494122028,
+        "lo": -0.025240442163310943,
+        "hi": 0.07716566198412328,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_struct": {
+        "mean": 0.05167915370315313,
+        "lo": -0.006608728579245505,
+        "hi": 0.10929025154095141,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_index": {
+        "mean": 0.004238124340772629,
+        "lo": -0.0640307173151523,
+        "hi": 0.0723174506220966,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_none": {
+        "mean": -0.001747749336063862,
+        "lo": -0.04248076101951301,
+        "hi": 0.03890147513058034,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_index": {
+        "mean": 0.046850481256842616,
+        "lo": -0.007312181761488319,
+        "hi": 0.10120932480134066,
+        "above_zero": false,
+        "n": 200
+      }
+    },
+    "history-geography|gradient|0.900": {
+      "own_minus_other_none": {
+        "mean": -0.06442812446504831,
+        "lo": -0.164429185513407,
+        "hi": 0.0419543621921911,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_struct": {
+        "mean": 0.03613363076001406,
+        "lo": -0.036950002957135436,
+        "hi": 0.10766550736315547,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_other_index": {
+        "mean": 0.018247274309396745,
+        "lo": -0.05161674495786428,
+        "hi": 0.0876047607809305,
+        "above_zero": false,
+        "n": 200
+      },
+      "struct_minus_none": {
+        "mean": 0.08135066613554955,
+        "lo": 0.0030710209961980583,
+        "hi": 0.15748990904167295,
+        "above_zero": true,
+        "n": 200
+      },
+      "struct_minus_index": {
+        "mean": 0.12462559975683689,
+        "lo": 0.05456924916431308,
+        "hi": 0.19451759100519114,
+        "above_zero": true,
+        "n": 200
+      }
+    }
+  },
+  "configs": {
+    "uniform_bf16": {
+      "accuracy": 0.5468354430379747,
+      "logprob": -1.012348201000898,
+      "mean_bits": 16.0,
+      "by_domain": {
+        "biology": 0.6421052631578947,
+        "math": 0.32,
+        "history": 0.6,
+        "geography": 0.63
+      }
+    },
+    "uniform_zero": {
+      "accuracy": 0.20759493670886076,
+      "logprob": -1.3862943649291992,
+      "mean_bits": 0.0,
+      "by_domain": {
+        "biology": 0.18947368421052632,
+        "math": 0.21,
+        "history": 0.24,
+        "geography": 0.19
+      }
+    },
+    "backbone_0.970": {
+      "accuracy": 0.5113924050632911,
+      "logprob": -1.0628928253073482,
+      "mean_bits": 15.52061347966793,
+      "by_domain": {
+        "biology": 0.5789473684210527,
+        "math": 0.28,
+        "history": 0.58,
+        "geography": 0.61
+      }
+    },
+    "bb0.80_random_0.970": {
+      "accuracy": 0.529113924050633,
+      "logprob": -1.0606352862135708,
+      "mean_bits": 15.520413641034956,
+      "by_domain": {
+        "biology": 0.6,
+        "math": 0.29,
+        "history": 0.65,
+        "geography": 0.58
+      }
+    },
+    "bb0.80_own_pooled_0.970": {
+      "accuracy": 0.4936708860759494,
+      "logprob": -1.1128520571497045,
+      "mean_bits": 15.520490940470529,
+      "by_domain": {
+        "biology": 0.5473684210526316,
+        "math": 0.28,
+        "history": 0.55,
+        "geography": 0.6
+      }
+    },
+    "bb0.80_own_pooled_struct_0.970": {
+      "accuracy": 0.5063291139240507,
+      "logprob": -1.0698292901220767,
+      "mean_bits": 15.520498421061067,
+      "by_domain": {
+        "biology": 0.5473684210526316,
+        "math": 0.22,
+        "history": 0.6,
+        "geography": 0.66
+      }
+    },
+    "bb0.80_own_pooled_index_0.970": {
+      "accuracy": 0.5113924050632911,
+      "logprob": -1.1130469137449053,
+      "mean_bits": 15.52033847891097,
+      "by_domain": {
+        "biology": 0.6210526315789474,
+        "math": 0.22,
+        "history": 0.55,
+        "geography": 0.66
+      }
+    },
+    "bb0.80_other_pooled_0.970": {
+      "accuracy": 0.46835443037974683,
+      "logprob": -1.1609791275538222,
+      "mean_bits": 15.520472773322073,
+      "by_domain": {
+        "biology": 0.4105263157894737,
+        "math": 0.26,
+        "history": 0.6,
+        "geography": 0.6
+      }
+    },
+    "bb0.80_other_pooled_struct_0.970": {
+      "accuracy": 0.4810126582278481,
+      "logprob": -1.117822651480195,
+      "mean_bits": 15.52051017627477,
+      "by_domain": {
+        "biology": 0.3894736842105263,
+        "math": 0.31,
+        "history": 0.61,
+        "geography": 0.61
+      }
+    },
+    "bb0.80_other_pooled_index_0.970": {
+      "accuracy": 0.45569620253164556,
+      "logprob": -1.1714420586824417,
+      "mean_bits": 15.520326723697265,
+      "by_domain": {
+        "biology": 0.42105263157894735,
+        "math": 0.28,
+        "history": 0.55,
+        "geography": 0.57
+      }
+    },
+    "bb0.80_own_gradient_0.970": {
+      "accuracy": 0.46582278481012657,
+      "logprob": -1.1746513925775697,
+      "mean_bits": 15.520451400206248,
+      "by_domain": {
+        "biology": 0.6210526315789474,
+        "math": 0.25,
+        "history": 0.56,
+        "geography": 0.44
+      }
+    },
+    "bb0.80_own_gradient_struct_0.970": {
+      "accuracy": 0.46329113924050636,
+      "logprob": -1.1300743232233614,
+      "mean_bits": 15.520463511638551,
+      "by_domain": {
+        "biology": 0.6,
+        "math": 0.25,
+        "history": 0.54,
+        "geography": 0.47
+      }
+    },
+    "bb0.80_own_gradient_index_0.970": {
+      "accuracy": 0.4481012658227848,
+      "logprob": -1.1807254492057653,
+      "mean_bits": 15.520375881863666,
+      "by_domain": {
+        "biology": 0.5789473684210527,
+        "math": 0.27,
+        "history": 0.51,
+        "geography": 0.44
+      }
+    },
+    "bb0.80_other_gradient_0.970": {
+      "accuracy": 0.47341772151898737,
+      "logprob": -1.16537665163603,
+      "mean_bits": 15.52044249474132,
+      "by_domain": {
+        "biology": 0.6421052631578947,
+        "math": 0.24,
+        "history": 0.43,
+        "geography": 0.59
+      }
+    },
+    "bb0.80_other_gradient_struct_0.970": {
+      "accuracy": 0.47848101265822784,
+      "logprob": -1.1354853122719104,
+      "mean_bits": 15.52047455441506,
+      "by_domain": {
+        "biology": 0.6526315789473685,
+        "math": 0.29,
+        "history": 0.43,
+        "geography": 0.55
+      }
+    },
+    "bb0.80_other_gradient_index_0.970": {
+      "accuracy": 0.4759493670886076,
+      "logprob": -1.1593588407846946,
+      "mean_bits": 15.52032850479025,
+      "by_domain": {
+        "biology": 0.6421052631578947,
+        "math": 0.29,
+        "history": 0.42,
+        "geography": 0.56
+      }
+    },
+    "backbone_0.950": {
+      "accuracy": 0.4708860759493671,
+      "logprob": -1.1098902227946474,
+      "mean_bits": 15.200084423807512,
+      "by_domain": {
+        "biology": 0.5684210526315789,
+        "math": 0.26,
+        "history": 0.52,
+        "geography": 0.54
+      }
+    },
+    "bb0.80_random_0.950": {
+      "accuracy": 0.44050632911392407,
+      "logprob": -1.1345050988978223,
+      "mean_bits": 15.200411788698254,
+      "by_domain": {
+        "biology": 0.5263157894736842,
+        "math": 0.21,
+        "history": 0.53,
+        "geography": 0.5
+      }
+    },
+    "bb0.80_own_pooled_0.950": {
+      "accuracy": 0.4962025316455696,
+      "logprob": -1.1873700737764563,
+      "mean_bits": 15.200420337944584,
+      "by_domain": {
+        "biology": 0.5684210526315789,
+        "math": 0.28,
+        "history": 0.52,
+        "geography": 0.62
+      }
+    },
+    "bb0.80_own_pooled_struct_0.950": {
+      "accuracy": 0.5164556962025316,
+      "logprob": -1.1245676769485957,
+      "mean_bits": 15.200399321047355,
+      "by_domain": {
+        "biology": 0.6210526315789474,
+        "math": 0.28,
+        "history": 0.5,
+        "geography": 0.67
+      }
+    },
+    "bb0.80_own_pooled_index_0.950": {
+      "accuracy": 0.46582278481012657,
+      "logprob": -1.2202597242178796,
+      "mean_bits": 15.200421050381777,
+      "by_domain": {
+        "biology": 0.5052631578947369,
+        "math": 0.19,
+        "history": 0.54,
+        "geography": 0.63
+      }
+    },
+    "bb0.80_other_pooled_0.950": {
+      "accuracy": 0.44556962025316454,
+      "logprob": -1.2468771965726266,
+      "mean_bits": 15.20047270207836,
+      "by_domain": {
+        "biology": 0.3894736842105263,
+        "math": 0.3,
+        "history": 0.56,
+        "geography": 0.53
+      }
+    },
+    "bb0.80_other_pooled_struct_0.950": {
+      "accuracy": 0.4253164556962025,
+      "logprob": -1.1937779003141236,
+      "mean_bits": 15.200437080218647,
+      "by_domain": {
+        "biology": 0.30526315789473685,
+        "math": 0.25,
+        "history": 0.57,
+        "geography": 0.57
+      }
+    },
+    "bb0.80_other_pooled_index_0.950": {
+      "accuracy": 0.42025316455696204,
+      "logprob": -1.2847896655526343,
+      "mean_bits": 15.200543945797776,
+      "by_domain": {
+        "biology": 0.3894736842105263,
+        "math": 0.28,
+        "history": 0.51,
+        "geography": 0.5
+      }
+    },
+    "bb0.80_own_gradient_0.950": {
+      "accuracy": 0.43037974683544306,
+      "logprob": -1.198563513829361,
+      "mean_bits": 15.20042069416318,
+      "by_domain": {
+        "biology": 0.5263157894736842,
+        "math": 0.24,
+        "history": 0.5,
+        "geography": 0.46
+      }
+    },
+    "bb0.80_own_gradient_struct_0.950": {
+      "accuracy": 0.4278481012658228,
+      "logprob": -1.1832590195149937,
+      "mean_bits": 15.20050298065911,
+      "by_domain": {
+        "biology": 0.5789473684210527,
+        "math": 0.25,
+        "history": 0.43,
+        "geography": 0.46
+      }
+    },
+    "bb0.80_own_gradient_index_0.950": {
+      "accuracy": 0.41012658227848103,
+      "logprob": -1.2368248582263537,
+      "mean_bits": 15.20049585628717,
+      "by_domain": {
+        "biology": 0.5368421052631579,
+        "math": 0.24,
+        "history": 0.48,
+        "geography": 0.39
+      }
+    },
+    "bb0.80_other_gradient_0.950": {
+      "accuracy": 0.45569620253164556,
+      "logprob": -1.1826497173785597,
+      "mean_bits": 15.200225130153372,
+      "by_domain": {
+        "biology": 0.6631578947368421,
+        "math": 0.28,
+        "history": 0.39,
+        "geography": 0.5
+      }
+    },
+    "bb0.80_other_gradient_struct_0.950": {
+      "accuracy": 0.4430379746835443,
+      "logprob": -1.1979606351190353,
+      "mean_bits": 15.200469139892387,
+      "by_domain": {
+        "biology": 0.6526315789473685,
+        "math": 0.26,
+        "history": 0.4,
+        "geography": 0.47
+      }
+    },
+    "bb0.80_other_gradient_index_0.950": {
+      "accuracy": 0.4379746835443038,
+      "logprob": -1.2113802954342359,
+      "mean_bits": 15.200506542845083,
+      "by_domain": {
+        "biology": 0.5789473684210527,
+        "math": 0.27,
+        "history": 0.39,
+        "geography": 0.52
+      }
+    },
+    "backbone_0.900": {
+      "accuracy": 0.4253164556962025,
+      "logprob": -1.2446730458330881,
+      "mean_bits": 14.400450260306739,
+      "by_domain": {
+        "biology": 0.47368421052631576,
+        "math": 0.27,
+        "history": 0.46,
+        "geography": 0.5
+      }
+    },
+    "bb0.80_random_0.900": {
+      "accuracy": 0.3822784810126582,
+      "logprob": -1.3506800174524511,
+      "mean_bits": 14.40037011112239,
+      "by_domain": {
+        "biology": 0.42105263157894735,
+        "math": 0.25,
+        "history": 0.38,
+        "geography": 0.48
+      }
+    },
+    "bb0.80_own_pooled_0.900": {
+      "accuracy": 0.4177215189873418,
+      "logprob": -1.3709195382987396,
+      "mean_bits": 14.400500130910336,
+      "by_domain": {
+        "biology": 0.47368421052631576,
+        "math": 0.26,
+        "history": 0.4,
+        "geography": 0.54
+      }
+    },
+    "bb0.80_own_pooled_struct_0.900": {
+      "accuracy": 0.389873417721519,
+      "logprob": -1.3729005720041976,
+      "mean_bits": 14.400322377830378,
+      "by_domain": {
+        "biology": 0.42105263157894735,
+        "math": 0.24,
+        "history": 0.4,
+        "geography": 0.5
+      }
+    },
+    "bb0.80_own_pooled_index_0.900": {
+      "accuracy": 0.3822784810126582,
+      "logprob": -1.3935634125165548,
+      "mean_bits": 14.400438861311633,
+      "by_domain": {
+        "biology": 0.3157894736842105,
+        "math": 0.28,
+        "history": 0.36,
+        "geography": 0.57
+      }
+    },
+    "bb0.80_other_pooled_0.900": {
+      "accuracy": 0.3392405063291139,
+      "logprob": -1.4644426725144628,
+      "mean_bits": 14.400484101073465,
+      "by_domain": {
+        "biology": 0.24210526315789474,
+        "math": 0.23,
+        "history": 0.5,
+        "geography": 0.38
+      }
+    },
+    "bb0.80_other_pooled_struct_0.900": {
+      "accuracy": 0.3493670886075949,
+      "logprob": -1.360140914366215,
+      "mean_bits": 14.400348738006565,
+      "by_domain": {
+        "biology": 0.35789473684210527,
+        "math": 0.25,
+        "history": 0.44,
+        "geography": 0.35
+      }
+    },
+    "bb0.80_other_pooled_index_0.900": {
+      "accuracy": 0.30886075949367087,
+      "logprob": -1.4547432335400128,
+      "mean_bits": 14.400380797680306,
+      "by_domain": {
+        "biology": 0.18947368421052632,
+        "math": 0.26,
+        "history": 0.46,
+        "geography": 0.32
+      }
+    },
+    "bb0.80_own_gradient_0.900": {
+      "accuracy": 0.34177215189873417,
+      "logprob": -1.443798370640489,
+      "mean_bits": 14.400381153898902,
+      "by_domain": {
+        "biology": 0.3473684210526316,
+        "math": 0.26,
+        "history": 0.34,
+        "geography": 0.42
+      }
+    },
+    "bb0.80_own_gradient_struct_0.900": {
+      "accuracy": 0.35443037974683544,
+      "logprob": -1.3255296632836138,
+      "mean_bits": 14.400281056473112,
+      "by_domain": {
+        "biology": 0.3894736842105263,
+        "math": 0.25,
+        "history": 0.39,
+        "geography": 0.39
+      }
+    },
+    "bb0.80_own_gradient_index_0.900": {
+      "accuracy": 0.31139240506329113,
+      "logprob": -1.391486250486555,
+      "mean_bits": 14.400361561876062,
+      "by_domain": {
+        "biology": 0.37894736842105264,
+        "math": 0.27,
+        "history": 0.27,
+        "geography": 0.33
+      }
+    },
+    "bb0.80_other_gradient_0.900": {
+      "accuracy": 0.389873417721519,
+      "logprob": -1.3063976910059587,
+      "mean_bits": 14.400273932101173,
+      "by_domain": {
+        "biology": 0.4842105263157895,
+        "math": 0.25,
+        "history": 0.43,
+        "geography": 0.4
+      }
+    },
+    "bb0.80_other_gradient_struct_0.900": {
+      "accuracy": 0.39746835443037976,
+      "logprob": -1.2801360720521004,
+      "mean_bits": 14.400135006848299,
+      "by_domain": {
+        "biology": 0.5789473684210527,
+        "math": 0.26,
+        "history": 0.34,
+        "geography": 0.42
+      }
+    },
+    "bb0.80_other_gradient_index_0.900": {
+      "accuracy": 0.3189873417721519,
+      "logprob": -1.417203152573467,
+      "mean_bits": 14.400277494287145,
+      "by_domain": {
+        "biology": 0.5157894736842106,
+        "math": 0.22,
+        "history": 0.22,
+        "geography": 0.33
+      }
+    }
+  }
+}

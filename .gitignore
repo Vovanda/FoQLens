@@ -1,0 +1,20 @@
+# окружение
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# локальное состояние сессий Claude
+.claude/session-context/
+.claude/settings.local.json
+
+# сырые артефакты прогонов: тензоры активаций и масок не коммитятся,
+# коммитятся только сводки (json/csv/png) рядом с ними
+runs/**/raw/
+*.pt
+*.npy
+*.npz
+*.safetensors
+
+# кеш моделей, если HF_HOME направлен внутрь репо
+hf-cache/

@@ -1,286 +1,286 @@
-# План работ по шагам и предрегистрация
+# Step-by-step plan and preregistration
 
-Собрано 10.09.2026, перенесено в FoQLens 11.09.2026. Что конкретно делать по [постановке](problem-statement.md), в порядке выполнения. Каждый шаг отсекает следующий: не сработало - дальше не идти. Сводка статусов - в [целях](goals.md).
+Assembled 2026-09-10, moved into FoQLens 2026-09-11. What exactly to do for the [problem statement](problem-statement.md), in order of execution. Each step gates the next: if it fails, do not go further. The status summary is in the [goals](goals.md).
 
-## Стек и модель
+## Stack and model
 
-- **Gemma 4, плотные варианты: 2.3B (E2B) для отладки, 4.5B (E4B) для подтверждения.** Apache 2.0. Модель знакома по опыту.
-- **26B A4B не брать** - MoE. Разделение там уже сделано роутером, будешь мерить его, а не проявление зон.
-- **transformers + bitsandbytes.** Не ollama и не llama.cpp - прячут логиты и активации.
-- **lm-evaluation-harness (EleutherAI)** как прогонщик бенчмарков: MMLU, ARC, HellaSwag, GSM8K одной командой, числа сравнимы с опубликованными, baseline считать не надо.
-- Железо: RTX 3090 Ti 24 ГБ - с запасом.
+- **Gemma 4, dense variants: 2.3B (E2B) for debugging, 4.5B (E4B) for confirmation.** Apache 2.0. The model is familiar from experience.
+- **Do not take 26B A4B** - it is MoE. The split there is already done by the router; you would measure the router, not emerging zones.
+- **transformers + bitsandbytes.** Not ollama and not llama.cpp - they hide logits and activations.
+- **lm-evaluation-harness (EleutherAI)** as the benchmark runner: MMLU, ARC, HellaSwag, GSM8K in one command, numbers comparable to published ones, no baseline to compute.
+- Hardware: RTX 3090 Ti 24 GB - with headroom.
 
-**Качество модели вторично**: меряется дельта к самой себе, абсолютный уровень в ней сокращается. Единственное ограничение - модель не должна быть настолько слаба, что представления по темам не разделяются. 0.6B не брать, с 1.7–2.3B нормально.
-
----
-
-## Шаг 0. Разделяются ли темы в представлениях
-
-**Десять минут работы, без этого дальше нет смысла.**
-
-Взять активации с промежуточного слоя на ~10 биологических и ~10 математических вопросах. Посмотреть, кластеризуются ли они.
-
-- Разделяются → модель годится, скор можно строить поверх.
-- Не разделяются → взять следующую по размеру. Дело не в схеме.
-
-## Шаг 1. Устойчивость и разделимость масок
-
-**Главный отсекающий эксперимент. До всякого квантования.**
-
-Простейший вариант скора, без обучения: взять самые весомые токены (по норме активации или по доле внимания на них) как **центры экспертности**, развернуть в скор по блокам через то, какие блоки на этих токенах сильнее откликаются. Всё считается на первом проходе.
-
-Замер: 10 запросов по биологии, 10 по математике. Косинус между векторами скоров.
-
-- Внутри темы маски похожи, между темами расходятся → центры реальны, идти дальше.
-- Маски у всех запросов примерно одинаковы → скор ловит что-то общее для модели, а не тему. **Вариант отсекается за час.**
-
-## Шаг 2. Пересечение зон
-
-Прямая проверка тезиса про общее основание.
-
-Маски для родственных тем (биология и химия) должны перекрываться сильнее, чем для несвязанных (биология и математика).
-
-Если да - компактность через отказ от дублирования подтверждена как эффект, а не как рассуждение.
-
-## Шаг 3. Качество против бюджета
-
-Только если шаги 1–2 прошли.
-
-Схема прохода: первые N слоёв на базовой точности → из промежуточного представления скор по блокам → блоки с высоким скором читаются глубоко, остальные на базе.
-
-На старте можно жульничать: хранить три отдельные копии (bf16 / int8 / nf4) вместо остатков. Механика та же, памяти больше. На 4.5B влезает.
-
-Замер: качество против **среднего** числа бит. Baseline - равномерное квантование того же среднего. Кривая выше базлайна → схема работает.
-
-## Шаг 4. Обучаемый скор
-
-Только если неучёный дал эффект.
-
-Маленькая матрица из промежуточного представления в вектор скоров, обучается на итоговом качестве через мягкую глубину, при инференсе округляется.
-
-Прямое обучение маски не работает - битность дискретна, градиента через неё нет. Отсюда мягкая версия.
-
-Побочка в пользу постановки: при непрерывной обучаемой маске **зоны не назначаются, а сходятся сами** - перекрытия возникают там, где выгодно.
-
-## Шаг 5. Остатки вместо копий
-
-Инженерная оптимизация, не проверка гипотезы.
-
-База в 2 бита плюс уровни остатка (разница между настоящим весом и тем, что дал базовый слой). 2/4/6 бит из одного набора данных, без трёх копий и без перепаковки. Заострение перестаёт стоить отдельной памяти.
-
-Побочный плюс: не надо перенарезать блоки по смыслу - раскладка остаётся выровненной, направленность выражается **глубиной чтения**, а не формой области.
+**Model quality is secondary**: what is measured is the delta against the model itself, and the absolute level cancels out. The only constraint is that the model must not be so weak that representations do not separate by topic. Do not take 0.6B; 1.7–2.3B is fine.
 
 ---
 
-## Что честно ожидать
+## Step 0. Do topics separate in representations
 
-**Экономии памяти нет и не будет** - при трёх копиях она отрицательная. Реальная экономия байт требует остатков и работы в потрохах инференса; это задача существующих работ, там решено без нас.
+**Ten minutes of work; without it there is no point going further.**
 
-Дома честно показывается:
-- **скорость** - вычисление идёт в низкой точности независимо от того, что хранится;
-- **качество при фиксированном бюджете** - если группы читаются по смыслу, тот же средний бит описывает модель лучше;
-- **компактность по числу параметров** - через пересечение зон, а не через биты на вес;
-- **форма кривой деградации** - см. эксперимент 2 про входы по железу, ценности и приоритет деградации (личная база знаний, `main/writing`).
+Take activations from a middle layer on ~10 biology and ~10 math questions. See whether they cluster.
 
-## Главный открытый вопрос
+- They separate → the model is fit, the score can be built on top.
+- They do not → take the next size up. The scheme is not the problem.
 
-Скор блока: **насколько этот блок нужен для этого смысла**. Наивная версия через нормы почти наверняка окажется слишком грубой - она про величину влияния, а не про специфичность, и подсветит крупные блоки вместо относящихся к теме. Выяснится на шаге 1.
+## Step 1. Stability and separability of masks
 
-Это та же дыра из постановки, но в форме, где её можно щупать: не «где область в пространстве весов», а «как посчитать скаляр на блок». Схема готова, вопрос открыт.
+**The main kill-switch experiment. Before any quantization.**
 
----
+The simplest score, without training: take the heaviest tokens (by activation norm or by the share of attention on them) as **centers of expertise**, and expand them into a per-block score through which blocks respond more strongly on these tokens. Everything is computed on the first pass.
 
-## Шаг 2+. Геометрия масок - тесты на тех же данных
+Measurement: 10 biology queries, 10 math queries. Cosine between score vectors.
 
-Всё ниже считается на данных шага 1, отдельной работы почти нет. Но именно эти тесты превращают «зоны есть» в утверждения о том, как они устроены и нужны ли.
+- Masks are similar within a topic and diverge between topics → the centers are real, go further.
+- Masks are roughly the same for all queries → the score catches something common to the model, not the topic. **The variant is killed within an hour.**
 
-Основной инструмент - **смешанные запросы**: биофизика против чистой биологии и чистой физики.
+## Step 2. Overlapping zones
 
-### Аддитивность масок
+A direct test of the shared-foundation thesis.
 
-Ложится ли маска биофизики в линейную комбинацию масок биологии и физики.
+Masks for related topics (biology and chemistry) should overlap more than for unrelated ones (biology and math).
 
-- **Аддитивны** → зоны ведут себя как базис, маску под сложный запрос можно собирать из компонент, перекрытие становится буквально пересечением носителей. Схема проще и предсказуемее.
-- **Не аддитивны** → на стыке есть блоки, не поднимающиеся ни на одной компоненте по отдельности. Эксперт стыка - самостоятельное образование, а не сумма частей. Вероятнее, и сильнее для постановки: аддитивность означала бы, что темы хранятся независимо, а вся суть в том, что они переплетены.
+If so, compactness through refusing to duplicate is confirmed as an effect, not as an argument.
 
-### Форма носителя: два пучка или размытое пятно
+## Step 3. Quality against budget
 
-Вопрос не про значения, а про то, как выглядит маска геометрически.
+Only if steps 1–2 passed.
 
-Отсортировать скоры по убыванию, посмотреть концентрацию - коэффициент Джини или энтропия распределения скора.
+Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → high-scoring blocks are read deep, the rest at base.
 
-- **Два пучка** - масса в малой доле блоков, между сгустками провал. Зоны реальны как объекты, лупа наводится в два места.
-- **Плоское пятно** - скор поднялся везде понемногу. Зон нет, есть градиент, резать нечего, конструкция про области рушится.
+At the start it is fine to cheat: keep three separate copies (bf16 / int8 / nf4) instead of residuals. Same mechanics, more memory. Fits for 4.5B.
 
-Различающий признак: у биофизики концентрация примерно как у биологии, но масса вдвое шире → это два пучка.
+Measurement: quality against the **mean** number of bits. Baseline - uniform quantization at the same mean. Curve above the baseline → the scheme works.
 
-### Совпадают ли пучки с чистыми зонами
+## Step 4. Learned score
 
-Пересечь верхние блоки маски биофизики с верхними блоками биологии и физики.
+Only if the untrained one gave an effect.
 
-- Почти целиком состоят из них → пучки совпадают с зонами.
-- Есть третья группа, не встречающаяся ни в одной чистой → **специфичная зона стыка**.
+A small matrix from the intermediate representation to a score vector, trained on the final quality through soft depth, rounded at inference.
 
-### Есть ли перешеек
+Training the mask directly does not work - bit depth is discrete, no gradient flows through it. Hence the soft version.
 
-Блоки между пучками со скором выше фона, но ниже центров.
+A side effect in favor of the statement: with a continuous learnable mask **zones are not assigned but converge by themselves** - overlaps appear where they pay off.
 
-Провал до нуля → перешейка нет, ветка закрыта.
+## Step 5. Residuals instead of copies
 
-### Нужен ли перешеек - абляция
+An engineering optimization, not a test of the hypothesis.
 
-**Самый сильный инструмент во всей схеме.** Огрубить перешеек, оставив оба пучка точными.
+A 2-bit base plus residual levels (the difference between the real weight and what the base layer gave). 2/4/6 bits from one data set, without three copies and without repacking. Sharpening stops costing separate memory.
 
-Прогноз: чистые задачи не пострадают, смешанные упадут.
-
-Если так - перешеек несёт функцию, и это прямое измеренное подтверждение мостиков между зонами. Абляция превращает наблюдение «зоны есть» в утверждение «зоны нужны».
-
-Содержательный смысл: если огрубить перешеек наравне с фоном, оба эксперта сохранятся по отдельности, но соединить их будет нечем - модель ответит про биологию и про физику, а про биофизику распадётся на два.
-
-### Стоит ли усиливать перешеек - обратная абляция
-
-Дать перешейку точность выше фона при том же среднем бюджете.
-
-Растут смешанные задачи → появляется **третья ручка** помимо шкалы (насколько) и адреса (где): усиление связей.
-
-### Линейность отображения представление → маска
-
-Сравнить косинусы между представлениями трёх запросов и отдельно между их масками.
-
-Два разных «между» не путать: вектор биофизики почти наверняка окажется посередине **в пространстве представлений** - это обычное свойство эмбеддингов. Из этого не следует, что маска тоже посередине **в пространстве блоков**.
-
-- **Вектор посередине, маска бимодальна** → отображение нелинейное и содержательное: близость смыслов не переносится в близость блоков механически, перешеек не артефакт усреднения, а отдельная структура. Интереснее.
-- **Обе картины совпали** → отображение почти линейное, конструкция проще ожидаемого.
-
-Оба исхода полезны. Это заодно первый прямой замер того самого перехода из пространства представлений в пространство весов - главной дыры постановки.
+A side benefit: no need to re-cut blocks by meaning - the layout stays aligned, and direction is expressed by **read depth**, not by the shape of the region.
 
 ---
 
-## Ожидаемая топология идеальной системы
+## What to honestly expect
 
-**Записано до прогонов, 10.09.2026.** Это предрегистрация: результат меряется против неё, а не подгоняется под неё задним числом. Переформулировать после того, как увидел данные, - обесценить весь стенд.
+**There are no memory savings and there will be none** - with three copies they are negative. Real byte savings need residuals and work inside the inference internals; that is the job of existing work and is solved there without us.
 
-Семь свойств, которые система должна показать, если постановка верна:
+What can honestly be shown at home:
+- **speed** - computation runs at low precision regardless of what is stored;
+- **quality at a fixed budget** - if groups are read by meaning, the same mean bit describes the model better;
+- **compactness in parameter count** - through overlapping zones, not through bits per weight;
+- **the shape of the degradation curve** - see experiment 2 on hardware inputs, value and degradation priority (author's private notes).
 
-**1. Не аддитивна.** Маски не складываются линейно. Основание: если бы складывались, темы хранились бы независимо, и вся конструкция про переплетение была бы лишней - хватило бы MoE. Аддитивность означала бы, что модель не использует общее основание, а держит копии.
+## The main open question
 
-**2. Сильно перекрывающаяся.** Родственные зоны делят значительную часть носителя. Это источник компактности и то, что отличает схему от роутера.
+The block score: **how much this block is needed for this meaning**. The naive version through norms will almost certainly be too coarse - it is about the magnitude of influence, not specificity, and will light up large blocks instead of topic-related ones. Step 1 will tell.
 
-**3. С перешейками, несущими функцию.** Между зонами не пустота, а рабочий канал. Проверяется абляцией: огрубить перешеек → чистые задачи целы, смешанные падают.
-
-**4. Разреженная.** На любой конкретный запрос заострена малая доля блоков. Иначе резать нечего и выигрыша по бюджету не будет.
-
-**5. Иерархичная.** Общее основание шире и поднимается чаще, чем специфика: зона «естественные науки» перекрывает и биологию, и физику. Следует из критерия компрессии. Проверка: часть блоков поднимается почти на всех темах домена, другая - только на одной.
-
-**6. Отображение представление → маска нелинейное.** Близость смыслов не переносится в близость блоков механически.
-
-**7. Неравномерная по размеру зон.** Частые темы занимают больше и лежат точнее - им досталось больше данных. Хвостовые темы узкие и хрупкие.
-
-## Методическая дисциплина стенда
-
-Стенд дешёвый и вопросов на нём помещается много - одни прогоны, десяток выводов. Два условия, без которых это обесценится:
-
-- **Прогнозы записаны заранее** (сделано выше и по каждому тесту в разделе «Шаг 2+»). При проверке семи гипотез на одних данных часть «подтвердится» случайно. Лечится только тем, что ожидание зафиксировано до просмотра.
-- **Отложенный набор тем.** Скор отлаживается на одних доменах (биология, математика, химия, физика), проверяется на других, которых при отладке не касался (история, география). Домены - школьные предметы. Иначе легко подогнать скор под конкретные примеры и не заметить.
+It is the same hole as in the problem statement, but in a form you can probe: not "where is the region in weight space" but "how to compute a scalar per block". The scheme is ready; the question is open.
 
 ---
 
-## Шаг −1. Предрегистрация в git - делать первым
+## Step 2+. Mask geometry - tests on the same data
 
-**До первого запуска. Это единственное, что реально связывает руки.**
+Everything below is computed on step 1 data; there is almost no separate work. But exactly these tests turn "zones exist" into statements about how they are built and whether they are needed.
 
-Смысл: коммит с датой не переписать задним числом. То же, что реестр рисков - даты дают доказуемый порядок.
+The main tool is **mixed queries**: biophysics against pure biology and pure physics.
 
-**Что кладётся в репо до прогонов:**
-- ожидаемая топология, семь пунктов;
-- прогнозы по каждому тесту из «Шаг 2+» и шагов 0–3, в виде направлений (что больше чего), а не чисел;
-- код прогонов;
-- список отложенных тем, помеченный как не тронутый при отладке.
+### Mask additivity
 
-**Порядок коммитов:** предрегистрация → запуск → результаты отдельными коммитами. История показывает, что предсказания были раньше данных.
+Does the biophysics mask fit a linear combination of the biology and physics masks.
 
-**Про пороги - важная оговорка.** Числовые пороги заранее не ставятся, и требовать их было бы ошибкой: **это разведочный эксперимент**, его цель - впервые увидеть, как эти величины себя ведут. Шкала косинусов зависит от размерности вектора скоров, нормировки и реального разброса - любая цифра, названная до прогона, будет с потолка, а предрегистрация с потолочными порогами хуже, чем без них.
+- **Additive** → zones behave like a basis, a mask for a complex query can be assembled from components, and overlap becomes literally an intersection of supports. The scheme is simpler and more predictable.
+- **Not additive** → at the junction there are blocks that rise on neither component alone. The junction expert is an entity of its own, not a sum of parts. More likely, and stronger for the statement: additivity would mean topics are stored independently, while the whole point is that they are intertwined.
 
-Фиксируются **направления, а не значения**:
-- косинус внутри темы строго больше, чем между темами, на всех парах доменов;
-- родственные пары (биология–химия) ложатся между этими двумя уровнями;
-- маска концентрирована, а не плоская.
+### Support shape: two bundles or a blurred blob
 
-Этого достаточно, чтобы результат мог не сойтись - больше от предрегистрации ничего не требуется.
+The question is not about values but about what the mask looks like geometrically.
 
-**Числа появляются после первого прогона**, когда шкала известна, и идут во второй - подтверждающий - заход на отложенных темах. Там они осмысленны. Полезно перед основными замерами сделать калибровку: заведомо несвязанные тексты и заведомо парафразы, чтобы увидеть рабочий диапазон косинуса. Записывать откалиброванные пороги - отдельным коммитом, после калибровки и до подтверждающих замеров.
+Sort the scores in descending order and look at the concentration - the Gini coefficient or the entropy of the score distribution.
 
-**Статья - после шага 1, не до.** До результата это анонс, а анонс без данных - тот самый жанр, который разобран в истории с Навье - Стоксом (пресс-релиз против выложенной Lean-формализации). После шага 1 есть что показать в любом случае: подтвердилось или отбросилось - оба исхода содержательны.
+- **Two bundles** - the mass is in a small share of blocks, with a gap between the clusters. Zones are real as objects; the magnifier points at two places.
+- **A flat blob** - the score rose a little everywhere. There are no zones, only a gradient; nothing to cut, the region construction collapses.
 
-## Что именно проверяет каждый прогноз - инструмент или топологию
+The distinguishing sign: biophysics has roughly the concentration of biology but twice the spread → two bundles.
 
-Разделение, без которого предрегистрация читается неверно.
+### Do the bundles coincide with the pure zones
 
-**Прогнозы про инструмент** (тривиальный скор через норму активации): маски разделяются по темам, маски концентрированы.
+Intersect the top blocks of the biophysics mask with the top blocks of biology and physics.
 
-Если не сошлись - вывод **только про скор**: нормой активации тему не поймать. Про топологию это не говорит ничего: слепой инструмент покажет одинаковые маски при любом устройстве модели.
+- They consist almost entirely of those → the bundles coincide with the zones.
+- There is a third group found in neither pure one → **a specific junction zone**.
 
-Не тупик, а смена инструмента. Следующие кандидаты по возрастанию цены: градиент выхода по блоку вместо нормы; влияние через удаление блока (абляция); обучаемая версия скора.
+### Is there an isthmus
 
-**Прогнозы про топологию** (аддитивность, перешейки, иерархия, неравномерность зон) читаются **только при живом инструменте**. Пока скор не подтверждён, их результаты интерпретировать нельзя.
+Blocks between the bundles with a score above the background but below the centers.
 
-**Про «не сошлось - значит упростили».** Такая трактовка допустима для уточняющих пунктов, но не для несущих - иначе конструкция становится непадаемой и превращается в метафору.
+A drop to zero → there is no isthmus, the branch is closed.
 
-- **Несущие**: разделимость масок и концентрация. Не сошлись при заведомо рабочем скоре - зон нет, держать нечего.
-- **Уточняющие**: аддитивность, перешейки, иерархия, неравномерность. Могут не сойтись без ущерба для постановки - это и есть «упростили, поправимо».
+### Is the isthmus needed - ablation
 
-## Ставки на исход шага 1 (зафиксировано до прогонов)
+**The strongest tool in the whole scheme.** Coarsen the isthmus while keeping both bundles precise.
 
-Прогнозы расходятся, и это полезнее общего согласия - их разрешает один дешёвый замер.
+Prediction: pure tasks do not suffer, mixed ones drop.
 
-**Володя:** тривиального скора хватит на **измеримый существенный прирост** уже в наивной постановке.
+If so, the isthmus carries a function, and that is a direct measured confirmation of bridges between zones. Ablation turns the observation "zones exist" into the statement "zones are needed".
 
-**Claude:** разделение будет, но **грязное**. Скор через норму активации подсветит и тему, и просто крупные блоки - разделение видно, но слабое. Это промежуточный исход, вероятнее обоих крайних.
+The substance: if the isthmus is coarsened down to the background, both experts survive separately but there is nothing to connect them - the model will answer about biology and about physics, while biophysics falls apart into two.
 
-**Что разрешает спор - вычитание фона.** Усреднить скор по многим разным запросам, смотреть отклонение от среднего, а не абсолютное значение.
+### Is it worth strengthening the isthmus - reverse ablation
 
-- Качество после вычитания **не изменилось** → сигнал был чистым, прав Володя.
-- Качество после вычитания **резко улучшилось** → сырой скор ловил в основном фон, прав Claude.
+Give the isthmus precision above the background at the same mean budget.
 
-Вычитание фона стоит держать в плане как заранее заготовленный следующий шаг: оно дёшево и убирает ровно тот артефакт, который портит наивную версию. При промежуточном исходе это правильный ход - не менять инструмент целиком, а сначала вычесть фон.
+Mixed tasks improve → a **third knob** appears besides the scale (how much) and the address (where): strengthening connections.
 
-## Обязательный контроль: случайная маска
+### Linearity of the representation → mask mapping
 
-**Baseline не один, а два.** Без второго результат неинтерпретируем.
+Compare the cosines between the representations of the three queries and, separately, between their masks.
 
-1. **Равномерное квантование** того же среднего числа бит.
-2. **Случайная маска той же концентрации** - те же доли блоков читаются глубоко, но выбраны случайно.
+Do not mix up two different "betweens": the biophysics vector will almost certainly land in the middle **in representation space** - an ordinary property of embeddings. It does not follow that the mask is also in the middle **in block space**.
 
-**Зачем.** Даже грубое неслучайное попадание выгоднее равномерного огрубления просто потому, что равномерная схема тратит биты на всё подряд, включая заведомо ненужное для этого запроса. То есть **любая неоднородность бьёт равномерность**, и победа над первым baseline ничего не доказывает.
+- **The vector is in the middle, the mask is bimodal** → the mapping is non-linear and meaningful: closeness of meanings does not transfer into closeness of blocks mechanically, the isthmus is not an averaging artifact but a structure of its own. More interesting.
+- **Both pictures agree** → the mapping is nearly linear, the construction is simpler than expected.
 
-Разрешение:
-- бьёт равномерную, но **не бьёт случайную** → выигрыш даёт сама неоднородность, а не попадание в зоны. Скор не работает, даже если цифры выглядят хорошо;
-- бьёт **обе** → центры действительно заострили экспертные области, а не сгладили что попало.
+Both outcomes are useful. This is also the first direct measurement of that very transition from representation space to weight space - the main hole of the statement.
 
-Это прямая проверка условия «центры реально заострили нужное, а не рандом».
+---
 
-## Граница одиночной работы
+## Expected topology of the ideal system
 
-**Обучаемый скор (шаг 4) вынесен за пределы того, что делается в одиночку.** Это не «прогнать модель и посмотреть», а обучение с нестандартным градиентом через мягкую глубину: параметризация, лосс, стабильность, режим. Отдельная профессия; на одной 3090 Ti и одним человеком уходит не в недели, а в месяцы.
+**Written before the runs, 2026-09-10.** This is the preregistration: the result is measured against it, not fitted to it afterwards. Rewording it after seeing the data would devalue the whole bench.
 
-**Конструкция от этого не рушится.** Вся проверяемая часть делается на неучёных скорах: разделимость, концентрация, перекрытия, форма носителя, перешейки, абляции, качество против двух baseline. Обучаемая версия улучшает результат, а не создаёт его.
+Seven properties the system should show if the statement is right:
 
-Если наивный скор даст сигнал - обучаемый становится ровно тем, ради чего нужны соавторы, руководитель или группа. Это естественная граница: своими руками до шага 3, дальше нужен кто-то ещё.
+**1. Not additive.** Masks do not add linearly. Reason: if they did, topics would be stored independently, and the whole construction about intertwining would be unnecessary - MoE would be enough. Additivity would mean the model does not use a shared foundation but keeps copies.
 
-## Про сроки
+**2. Strongly overlapping.** Related zones share a significant part of their support. This is the source of compactness and what distinguishes the scheme from a router.
 
-День - это только шаг 0 плюс наивный скор на паре доменов, то есть ответ «есть ли вообще сигнал».
+**3. With isthmuses that carry a function.** Between zones there is not emptiness but a working channel. Tested by ablation: coarsen the isthmus → pure tasks intact, mixed ones drop.
 
-Реально до показываемого результата - **порядка двух недель**: набор запросов по нескольким доменам с отложенной частью, инфраструктура прогонов и логирования, калибровка шкалы, два baseline, повторы на устойчивость, затем геометрия масок и абляции. Плюс то, что ломается по дороге - на смеси transformers, квантования и работы с промежуточными активациями ломается регулярно.
+**4. Sparse.** For any given query a small share of blocks is sharpened. Otherwise there is nothing to cut and no budget gain.
 
-Шаги 4 и 5 в эти две недели не входят вообще.
+**5. Hierarchical.** The shared foundation is wider and rises more often than specifics: the "natural sciences" zone covers both biology and physics. Follows from the compression criterion. Test: some blocks rise on almost all topics of a domain, others on one only.
 
-## Порядок работы: слепой анализ
+**6. The representation → mask mapping is non-linear.** Closeness of meanings does not transfer into closeness of blocks mechanically.
 
-Стенд пишется целиком, **все прогоны идут разом, анализ только после**.
+**7. Uneven in zone size.** Frequent topics take more space and lie more precisely - they got more data. Tail topics are narrow and fragile.
 
-Это не про интригу, а про метод: невозможно подкрутить следующий замер под то, что увидел в предыдущем. По ходу прогонов смотреть только на то, что скрипт не упал - никаких графиков и агрегатов.
+## Method discipline of the bench
 
-Сырые результаты складываются в файлы. Открываются все сразу, после того как отработало всё. Порядок вскрытия значения не имеет - переделывать уже нечего.
+The bench is cheap and fits many questions - one set of runs, a dozen conclusions. Two conditions without which this is worthless:
 
-**Единственное исключение - шаг 0**, разделяются ли активации по темам вообще. Это не результат, а проверка пригодности модели: если представления по темам не разделены, весь остальной стенд бессмыслен. Смотреть отдельно и в первый же вечер, до написания всего остального.
+- **Predictions are written in advance** (done above and for every test in "Step 2+"). When seven hypotheses are tested on the same data, some will "confirm" by chance. The only cure is that the expectation is fixed before looking.
+- **A held-out set of topics.** The score is debugged on some domains (biology, math, chemistry, physics) and checked on others not touched during debugging (history, geography). The domains are school subjects. Otherwise it is easy to fit the score to specific examples without noticing.
+
+---
+
+## Step −1. Preregistration in git - do it first
+
+**Before the first run. This is the only thing that really ties your hands.**
+
+The point: a dated commit cannot be rewritten after the fact. Same as a risk register - dates give a provable order.
+
+**What goes into the repo before the runs:**
+- the expected topology, seven items;
+- predictions for every test in "Step 2+" and steps 0–3, as directions (what is greater than what), not numbers;
+- the run code;
+- the list of held-out topics, marked as untouched during debugging.
+
+**Commit order:** preregistration → run → results in separate commits. The history shows the predictions came before the data.
+
+**On thresholds - an important caveat.** Numeric thresholds are not set in advance, and demanding them would be a mistake: **this is an exploratory experiment**, its purpose is to see for the first time how these quantities behave. The cosine scale depends on the dimension of the score vector, the normalization and the real spread - any number named before the run would be pulled out of thin air, and a preregistration with made-up thresholds is worse than none.
+
+What is fixed is **directions, not values**:
+- the within-topic cosine is strictly greater than the between-topic one, on all domain pairs;
+- related pairs (biology–chemistry) fall between these two levels;
+- the mask is concentrated, not flat.
+
+This is enough for the result to be able to fail - nothing more is required from a preregistration.
+
+**Numbers appear after the first run**, once the scale is known, and go into the second - confirmatory - pass on held-out topics. There they are meaningful. Before the main measurements it is useful to calibrate: known-unrelated texts and known paraphrases, to see the working range of the cosine. The calibrated thresholds are recorded in a separate commit, after calibration and before the confirmatory measurements.
+
+**A paper after step 1, not before.** Before a result it is an announcement, and an announcement without data is exactly the genre discussed in the Navier–Stokes story (a press release versus a published Lean formalization). After step 1 there is something to show either way: confirmed or rejected - both outcomes are meaningful.
+
+## What each prediction tests - the instrument or the topology
+
+A distinction without which the preregistration is misread.
+
+**Predictions about the instrument** (a trivial score through the activation norm): masks separate by topic, masks are concentrated.
+
+If they fail, the conclusion is **only about the score**: the activation norm cannot catch the topic. It says nothing about the topology: a blind instrument will show identical masks for any structure of the model.
+
+Not a dead end but a change of instrument. The next candidates by increasing cost: the output gradient per block instead of the norm; influence through removing the block (ablation); a learned version of the score.
+
+**Predictions about the topology** (additivity, isthmuses, hierarchy, uneven zones) are read **only with a working instrument**. Until the score is confirmed, their results cannot be interpreted.
+
+**On "it failed - so we simplified".** This reading is allowed for refining items but not for load-bearing ones - otherwise the construction becomes unfalsifiable and turns into a metaphor.
+
+- **Load-bearing**: mask separability and concentration. If they fail with a known-working score, there are no zones and nothing to hold on to.
+- **Refining**: additivity, isthmuses, hierarchy, uneven zones. They may fail without harm to the statement - that is the "simplified, fixable" case.
+
+## Bets on the outcome of step 1 (fixed before the runs)
+
+The predictions diverge, which is more useful than agreement - one cheap measurement resolves them.
+
+**Vladimir:** the trivial score is enough for a **measurable, substantial gain** already in the naive setup.
+
+**Claude:** there will be separation, but **dirty**. A score through the activation norm will light up both the topic and simply large blocks - separation is visible but weak. This intermediate outcome is more likely than either extreme.
+
+**What resolves the dispute - background subtraction.** Average the score over many different queries and look at the deviation from the mean, not the absolute value.
+
+- Quality after subtraction **did not change** → the signal was clean, Vladimir is right.
+- Quality after subtraction **improved sharply** → the raw score caught mostly background, Claude is right.
+
+Background subtraction is worth keeping in the plan as a prepared next step: it is cheap and removes exactly the artifact that spoils the naive version. With an intermediate outcome it is the right move - not to change the instrument entirely but to subtract the background first.
+
+## Mandatory control: a random mask
+
+**There is not one baseline but two.** Without the second the result cannot be interpreted.
+
+1. **Uniform quantization** at the same mean number of bits.
+2. **A random mask of the same concentration** - the same share of blocks is read deep, but chosen at random.
+
+**Why.** Even a coarse non-random hit beats uniform coarsening simply because the uniform scheme spends bits on everything, including what is clearly useless for this query. So **any non-uniformity beats uniformity**, and a win over the first baseline proves nothing.
+
+Resolution:
+- beats uniform but **not random** → the gain comes from non-uniformity itself, not from hitting the zones. The score does not work, even if the numbers look good;
+- beats **both** → the centers really sharpened the expert regions, not smoothed whatever was there.
+
+This is the direct test of "the centers really sharpened what is needed, not at random".
+
+## The boundary of solo work
+
+**The learned score (step 4) is taken outside what is done alone.** It is not "run the model and look" but training with a non-standard gradient through soft depth: parameterization, loss, stability, regime. A profession of its own; on one 3090 Ti and one person it takes not weeks but months.
+
+**The construction does not collapse because of this.** The whole testable part is done on untrained scores: separability, concentration, overlaps, support shape, isthmuses, ablations, quality against two baselines. The learned version improves the result, it does not create it.
+
+If the naive score gives a signal, the learned one becomes exactly what co-authors, a supervisor or a group are needed for. This is a natural boundary: by hand up to step 3, beyond that someone else is needed.
+
+## On timing
+
+One day is only step 0 plus the naive score on a couple of domains, i.e. the answer to "is there a signal at all".
+
+Realistically, a showable result takes **about two weeks**: a query set over several domains with a held-out part, run and logging infrastructure, scale calibration, two baselines, repeats for stability, then mask geometry and ablations. Plus what breaks along the way - on a mix of transformers, quantization and work with intermediate activations things break regularly.
+
+Steps 4 and 5 are not part of these two weeks at all.
+
+## Order of work: blind analysis
+
+The bench is written in full, **all runs go at once, analysis only afterwards**.
+
+This is not about suspense but about method: you cannot tune the next measurement to what you saw in the previous one. During the runs look only at whether the script crashed - no plots and no aggregates.
+
+Raw results are written to files. They are all opened at once, after everything has run. The order of opening does not matter - there is nothing left to redo.
+
+**The only exception is step 0**, whether activations separate by topic at all. It is not a result but a check that the model is fit: if representations do not separate by topic, the rest of the bench is pointless. Look at it separately and on the very first evening, before writing everything else.

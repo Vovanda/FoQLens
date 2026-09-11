@@ -1,20 +1,21 @@
-# окружение
+# environment
 .venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# локальное состояние сессий Claude
+# local Claude session state
 .claude/session-context/
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 
-# сырые артефакты прогонов: тензоры активаций и масок не коммитятся,
-# коммитятся только сводки (json/csv/png) рядом с ними
+# raw run artifacts: activation and mask tensors are not committed,
+# only the summaries (json/csv/png) next to them are
 runs/**/raw/
 *.pt
 *.npy
 *.npz
 *.safetensors
 
-# кеш моделей, если HF_HOME направлен внутрь репо
+# model cache, if HF_HOME points inside the repo
 hf-cache/

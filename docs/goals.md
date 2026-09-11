@@ -1,38 +1,38 @@
-# Цели
+# Goals
 
-Цели FoQLens в порядке выполнения. Каждая следующая открывается только если прошла предыдущая. Детали, замеры и обоснования - в [плане работ](plan.md). Обновлено 11.09.2026.
+FoQLens goals in order of execution. Each next goal opens only if the previous one passed. Details, measurements and reasoning are in the [plan](plan.md). Updated 2026-09-11.
 
-## Главная цель
+## Main goal
 
-Показать, что точность, распределённая по весам под смысл запроса, даёт лучшее качество при том же среднем числе бит, чем равномерное квантование и чем случайная маска той же концентрации.
+Show that precision allocated over the weights by the meaning of the query gives better quality at the same mean bit budget than uniform quantization, and than a random mask of the same concentration.
 
-## Цели по шагам
+## Goals by step
 
-**Шаг −1. Предрегистрация в git** - статус: не начато.
-Готово, когда: в репо до первого запуска лежат семь свойств ожидаемой топологии, прогнозы-направления по всем тестам, код прогонов, список отложенных тем.
+**Step −1. Preregistration in git** - status: done.
+Done when: before the first run the repo holds the seven properties of the expected topology, direction predictions for every test, the run code, and the list of held-out topics.
 
-**Шаг 0. Темы разделяются в представлениях** - не начато.
-Готово, когда: активации промежуточного слоя на ~10 био и ~10 мат вопросах кластеризуются. Нет → следующая модель.
+**Step 0. Topics separate in representations** - not started.
+Done when: mid-layer activations on ~10 biology and ~10 math questions cluster. If not → the next model.
 
-**Шаг 1. Маски разделимы и концентрированы** - не начато. Главный отсекающий.
-Готово, когда: косинус масок внутри темы строго больше, чем между темами. Нет → вычесть фон, потом менять скор (градиент → абляция блока).
+**Step 1. Masks are separable and concentrated** - not started. The main kill switch.
+Done when: mask cosine within a topic is strictly greater than between topics. If not → subtract the background, then change the score (gradient → block ablation).
 
-**Шаг 2. Зоны пересекаются** - не начато.
-Готово, когда: родственные темы (био–химия) перекрываются сильнее несвязанных (био–математика).
+**Step 2. Zones overlap** - not started.
+Done when: related topics (biology–chemistry) overlap more than unrelated ones (biology–math).
 
-**Шаг 2+. Геометрия масок** - не начато. На данных шага 1.
-Аддитивность, два пучка или пятно, зона стыка, перешеек, абляция перешейка, обратная абляция, линейность представление → маска.
+**Step 2+. Mask geometry** - not started. On step 1 data.
+Additivity, two bundles or a blob, junction zone, isthmus, isthmus ablation, reverse ablation, linearity of representation → mask.
 
-**Шаг 3. Качество против бюджета** - не начато.
-Готово, когда: кривая качества от среднего бита выше **обоих** baseline - равномерного и случайной маски.
+**Step 3. Quality against budget** - not started.
+Done when: the quality-vs-mean-bits curve lies above **both** baselines - uniform and random mask.
 
-**Шаг 4. Обучаемый скор** - вне одиночной работы. Только если наивный скор дал эффект; нужны соавторы или группа.
+**Step 4. Learned score** - beyond solo work. Only if the naive score gave an effect; needs co-authors or a group.
 
-**Шаг 5. Остатки вместо копий** - инженерия, не проверка гипотезы.
+**Step 5. Residuals instead of copies** - engineering, not a test of the hypothesis.
 
-## Границы
+## Boundaries
 
-- Своими руками - до шага 3 включительно, порядка двух недель плотной работы.
-- Экономию памяти не показываем: при трёх копиях её нет.
-- Статья - после шага 1, не до.
-- Анализ слепой: все прогоны разом, вскрытие после. Исключение - шаг 0.
+- Hands-on up to step 3 inclusive, about two weeks of dense work.
+- No memory savings are claimed: with three copies there are none.
+- A paper after step 1, not before.
+- Blind analysis: all runs at once, opened afterwards. The exception is step 0.

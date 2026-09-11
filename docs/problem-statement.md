@@ -1,79 +1,79 @@
-# Постановка - экспертные зоны как результат, а не вход
+# Problem statement - expert zones as an outcome, not an input
 
-Развитие постановки про регулятор точности до архитектурной ветки. Собрано 10.09.2026, перенесено в FoQLens 11.09.2026. Основа - заметка про регулятор точности (личная база знаний, `main/writing`, в репо не переносилась).
+The precision-controller problem developed into an architectural branch. Assembled 2026-09-10, moved into FoQLens 2026-09-11. Based on the author's private note on the precision controller (not included in the repo).
 
-**Статус: связная постановка с двумя названными дырами, не решение.** Обе дыры - тяжёлые исследовательские вопросы, а не детали реализации.
+**Status: a coherent problem statement with two named holes, not a solution.** Both holes are hard research questions, not implementation details.
 
-## Отличие от всего существующего
+## What differs from everything that exists
 
-Все известные работы квантуют по **заранее заданным единицам**: слой, канал, токен, эксперт. Границы фиксированы архитектурой, регулятор только выбирает битность внутри них.
+All known work quantizes by **units fixed in advance**: layer, channel, token, expert. The boundaries are fixed by the architecture; the controller only picks the bit depth inside them.
 
-Здесь **граница не задана**. Точность назначается области в пространстве весов, и **эксперт не выделен заранее, а проявляется** как то, что осталось заострённым, когда всё вокруг огрубили. Экспертная зона - результат распределения точности, а не вход роутера.
+Here **the boundary is not given**. Precision is assigned to a region in weight space, and **the expert is not carved out in advance but emerges** as what stays sharp when everything around it is coarsened. An expert zone is the result of how precision is distributed, not a router's input.
 
-Это снимает нужду в роутере, а не заменяет его лучшим роутером.
+This removes the need for a router rather than replacing it with a better one.
 
-## Лупа, а не два уровня
+## A magnifier, not two levels
 
-Квантование должно быть **неоднородным и направленным**: центр резкий, к периферии грубеет, вокруг заострённой зоны - переходная область.
+Quantization should be **non-uniform and directed**: sharp at the center, coarser toward the periphery, with a transition region around the sharpened zone.
 
-Резкая граница дала бы обрыв на стыке - ровно то, за что критикуется MoE. Градиент резкости даёт **мостики между зонами** без отдельного механизма.
+A hard boundary would give a cliff at the junction - exactly what MoE is criticized for. A gradient of sharpness gives **bridges between zones** without a separate mechanism.
 
-**Оговорка (11.09.2026):** плавность спада - не гарантия, а предмет замера. Качество может уходить не плавно, а ступенчато по типам знаний.
+**Caveat (2026-09-11):** a smooth falloff is not a guarantee but a subject of measurement. Quality may drop in steps by kind of knowledge rather than smoothly.
 
-## Самопересечение зон - главный аргумент за компактность
+## Zones overlapping themselves - the main argument for compactness
 
-В MoE эксперт занимает свои параметры целиком, оверлапа нет: два родственных навыка платят за общее основание дважды.
+In MoE an expert owns its parameters entirely, there is no overlap: two related skills pay for their common foundation twice.
 
-Если зоны пересекаются, общая часть хранится один раз и держится точной для обоих. **Компактность не от сжатия, а от отказа от дублирования.**
+If zones overlap, the shared part is stored once and kept precise for both. **Compactness comes not from compression but from refusing to duplicate.**
 
-И это же объясняет мостики: перейти от стихов к анализу можно, потому что зоны делят кусок, а не потому что кто-то соединил двух экспертов.
+The same explains the bridges: you can move from poetry to analysis because the zones share a piece, not because someone connected two experts.
 
-## Путь развития формы
+## How the shape develops
 
-Начать с параметризованного овала → произвольные овалы → произвольные формы с перемычками.
+Start with a parameterized oval → arbitrary ovals → arbitrary shapes with bridges.
 
-Важно: форма задаётся **десятком чисел, а не картой на каждый блок**. Иначе управляющих параметров станет больше, чем весов.
+Important: the shape is given by **a dozen numbers, not a map over every block**. Otherwise there would be more control parameters than weights.
 
-## Форму определяет сама модель
+## The model defines the shape itself
 
-Развилка, которую надо держать в голове: **прямое обучение маски не работает** - битность дискретна, градиента через неё нет. Два обхода:
+A fork to keep in mind: **learning the mask directly does not work** - bit depth is discrete, no gradient flows through it. Two ways around:
 
-1. **Мягкая маска** - точность непрерывна при обучении, округляется при инференсе. Ближе к лупе: непрерывная маска и есть градиент резкости.
-2. **Предсказатель формы** по входу, обучаемый на итоговом качестве.
+1. **A soft mask** - precision is continuous during training and rounded at inference. Closer to the magnifier: a continuous mask is exactly the gradient of sharpness.
+2. **A shape predictor** from the input, trained on the final quality.
 
-Побочка первого варианта работает на постановку: если маска непрерывна и обучаема, **зоны не назначаются, а сходятся сами** - перекрытия возникают там, где выгодно, а не там, где нарисовано.
+A side effect of the first option works in favor of the statement: if the mask is continuous and learnable, **zones are not assigned but converge by themselves** - overlaps appear where they pay off, not where they were drawn.
 
-## Огрубление режет точность, но не структуру
+## Coarsening cuts precision, not structure
 
-Пример: «сколько пальцев у человека». Нужен не просто грубый ответ, а грубый **с сохранённой оговоркой про исключения**: 20 - центр воронки, генетические особенности - её край, и край должен уцелеть.
+Example: "how many fingers does a person have". What is needed is not just a coarse answer but a coarse answer **with the caveat about exceptions preserved**: 20 is the center of the funnel, genetic variations are its edge, and the edge must survive.
 
-Довод против равномерного огрубления: оно сносит хвост распределения первым, потому что хвост хранится тонко. Наивное «вопрос простой - режем всё» даёт уверенное «двадцать» без края.
+The argument against uniform coarsening: it removes the tail of the distribution first, because the tail is stored thinly. The naive "simple question - cut everything" gives a confident "twenty" with no edge.
 
-Направленная лупа этого избегает: биологическая зона заострена, остальное огрублено, хвост внутри зоны цел.
+A directed magnifier avoids this: the biology zone is sharp, the rest is coarse, the tail inside the zone is intact.
 
-## Две задачи контроллера, а не одна
+## Two jobs for the controller, not one
 
-Из того же примера: «сколько пальцев» и «докажи теорему» требуют не разной степени резкости, а **резкости в разных местах**.
+From the same example: "how many fingers" and "prove the theorem" need not a different degree of sharpness but **sharpness in different places**.
 
-Значит контроллер решает:
-- **насколько** заострить - шкала;
-- **где** заострить - адрес.
+So the controller decides:
+- **how much** to sharpen - the scale;
+- **where** to sharpen - the address.
 
-В существующих работах есть только первое.
+Existing work has only the first.
 
-## Откуда брать адрес
+## Where the address comes from
 
-Ключевая связка: **адрес уже вычисляется самой моделью**. Активации первых слоёв фактически говорят, о чём речь - этот сигнал есть в проходе и сейчас никем не читается.
+The key link: **the address is already computed by the model itself**. The activations of the first layers effectively say what the query is about - this signal exists in the pass and nobody reads it today.
 
-Схема: прогнать вход через несколько первых слоёв на грубой точности → из промежуточного представления получить, куда наводить лупу → остальные слои считать с этой маской.
+Scheme: run the input through a few first layers at coarse precision → from the intermediate representation, get where to point the magnifier → compute the remaining layers with that mask.
 
-**Прикидка сначала, заострение потом.** Это буквально способ мышления из [«Не надо думать лишнего»](https://sawking.tech/blog/ne-nado-dumat-lishnego): отойти, посмотреть целиком грубо, потом всмотреться туда, где надо.
+**Estimate first, sharpen later.** This is literally the way of thinking from ["Don't overthink"](https://sawking.tech/blog/ne-nado-dumat-lishnego) (in Russian): step back, look at the whole coarsely, then look closely where it matters.
 
-Следствие: отдельного контроллера обучать не нужно - маска выводится из того, что модель и так посчитала. Контроллер становится функцией от промежуточного состояния.
+Consequence: there is no separate controller to train - the mask is derived from what the model has already computed. The controller becomes a function of the intermediate state.
 
-## Две дыры - предмет исследовательской работы
+## Two holes - the subject of research
 
-1. **В каком пространстве заданы области.** По какой метрике веса «рядом»? Соседство по индексу в матрице ничего не значит. Квантование сегодня работает по тензорам и группам с общим масштабом на группу - структуры, описывающей произвольную связную форму, просто нет.
-2. **Как отобразить представление в маску по весам.** Адрес нужен в пространстве весов, активации живут в пространстве представлений. Переход между ними не определён.
+1. **In what space are the regions defined.** By what metric are weights "close"? Adjacency by index in a matrix means nothing. Quantization today works on tensors and groups with a shared scale per group - there is simply no structure that describes an arbitrary connected shape.
+2. **How to map a representation into a mask over weights.** The address is needed in weight space; activations live in representation space. The transition between them is undefined.
 
-Вторая дыра - сужение первой: не «в каком пространстве области вообще», а «как из представления получить область». Это прогресс в постановке, но не её закрытие.
+The second hole narrows the first: not "in what space are regions at all" but "how to get a region from a representation". That is progress in the statement, not its closure.

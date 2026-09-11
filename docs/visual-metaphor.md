@@ -1,22 +1,22 @@
-# Визуальная метафора
+# Visual metaphor
 
-Как FoQLens рисуется. Зафиксировано 11.09.2026.
+How FoQLens is drawn. Fixed 2026-09-11.
 
-## Почему Lens
+## Why Lens
 
-Механически модель ничем не смотрит - она распределяет точность по весам. Линза в имени оправдана картинкой: поле, огрублённое везде, кроме мест, где нужна резкость.
+Mechanically the model does not look through anything - it distributes precision over the weights. The lens in the name is justified by the picture: a field coarsened everywhere except where sharpness is needed.
 
-## Картинка - пиксель-арт поле весов
+## The picture - a pixel-art field of weights
 
-Размер пикселя и палитра привязаны к битности:
+Pixel size and palette are tied to bit depth:
 
-- **2 бита** - крупные квадраты (16px), 4 цвета. Фон.
-- **4 бита** - квадраты меньше (8px), 16 цветов. Край зоны и перешеек.
-- **8 бит** - 4px.
-- **16 бит** - 2px, полный цвет. **Только в пучностях.**
+- **2 bits** - large squares (16px), 4 colors. Background.
+- **4 bits** - smaller squares (8px), 16 colors. The edge of a zone and the isthmus.
+- **8 bits** - 4px.
+- **16 bits** - 2px, full color. **Only in the antinodes.**
 
-Правила:
-- 16 бит только в центрах (пучностях), дальше вниз ступенями.
-- Перешеек выше фона, но ниже центров - не заливать его точностью центра.
-- Край ступенчатый, не плавный: форма спада - предмет замера, картинка её не утверждает.
-- В разных пучностях разное знание (например, слева цветовой узор, справа кольца). На фоне оба огрублены до неузнаваемости, узнаются только там, где хватает бит.
+Rules:
+- 16 bits only in the centers (antinodes), then stepping down.
+- The isthmus is above the background but below the centers - do not fill it with the centers' precision.
+- The edge is stepped, not smooth: the shape of the falloff is a subject of measurement, the picture does not assert it.
+- Different antinodes hold different knowledge (for example, a color pattern on the left, rings on the right). On the background both are coarsened beyond recognition; they are recognizable only where there are enough bits.

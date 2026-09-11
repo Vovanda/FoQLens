@@ -27,6 +27,16 @@ def test_reference_answers_smoke(tmp_path):
     assert (tmp_path / "e2b" / "answers.md").read_text().startswith("# Reference answers")
 
 
+def test_depth_perplexity_smoke(tmp_path):
+    dp = load_script("depth_perplexity")
+    out = dp.main(["--per-domain", "1", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    s = json.loads(Path(out).read_text())
+    assert set(s["perplexity"]) == {"bf16", "int8", "nf4", "d2", "d4", "d6", "d8"} and s["texts"] == 4
+    assert s["resident"]["d8"] == s["perplexity"]["d8"]  # the resident copy reads exactly the same weights
+    memory = s["resident"]["memory_allocated_mib"]
+    assert memory["resident"] < memory["bf16"]
+
+
 def test_step3_injection_smoke(tmp_path):
     inj = load_script("step3_injection")
     out = inj.main(["--limit", "3", "--apertures", "0.95", "--pooled-batch", "4", "--gradient-batch", "2",

@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from foqlens.precision import Controller, MixedPrecisionLinear
-from foqlens.quant import NF4_BLOCKSIZE, Int8Weight, Level
+from foqlens.quant import N_SLICES, NF4_BLOCKSIZE, SLICE_GROUP, Int8Weight, Level, Nf4Weight, SlicedWeight
 
 pytestmark = pytest.mark.gpu
 
@@ -64,13 +64,65 @@ def test_zero_level_removes_the_block_and_costs_no_bits():
 
 def test_packed_copies_exist_only_for_levels_in_use():
     mixed = MixedPrecisionLinear(make_linear(), block_rows=64)
-    assert mixed.packed_levels == ()
+    assert mixed.storages == ()
     mixed.set_levels(np.array([[0, 3, 0, 3], [3, 0, 3, 0]], dtype=np.uint8))
-    assert mixed.packed_levels == ()  # a bf16 / ZERO bench holds no quantized copy
+    assert mixed.storages == ()  # a bf16 / ZERO bench holds no quantized copy
     mixed.set_levels(Level.NF4)
-    assert mixed.packed_levels == (Level.NF4,)
+    assert mixed.storages == (Nf4Weight,)
     mixed.set_levels(np.array([0, 1, 2, 3], dtype=np.uint8))
-    assert mixed.packed_levels == (Level.NF4, Level.INT8)
+    assert mixed.storages == (Nf4Weight, Int8Weight)
+    mixed.set_levels(np.array([Level.D2, Level.D8, Level.D4, Level.ZERO], dtype=np.uint8))
+    assert mixed.storages == (Nf4Weight, Int8Weight, SlicedWeight)  # one sliced copy serves every depth
+
+
+def test_sliced_error_shrinks_by_the_step_of_each_slice():
+    weight = make_linear().weight.data
+    sliced = SlicedWeight.quantize(weight)
+    groups = weight.float().view(weight.shape[0], -1, SLICE_GROUP)
+    for depth in range(1, N_SLICES + 1):
+        err = (sliced.dequantize(torch.float32, depth).view_as(groups) - groups).abs()
+        bound = sliced.scale / 2 / 4 ** (depth - 1)
+        assert torch.all(err <= bound * (1 + 1e-4)), depth
+
+
+def test_sliced_depth_reads_only_its_own_slices_and_costs_one_byte_per_weight():
+    weight = make_linear().weight.data
+    sliced = SlicedWeight.quantize(weight)
+    shallow = SlicedWeight(packed=sliced.packed[:2].clone(), scale=sliced.scale)
+    assert torch.equal(shallow.dequantize(torch.float32, 2), sliced.dequantize(torch.float32, 2))
+    assert sliced.packed.dtype == torch.uint8 and sliced.packed.numel() == weight.numel()
+    assert sliced.scale.numel() == weight.numel() // SLICE_GROUP
+
+
+def test_depth_levels_switch_only_their_block_and_cost_their_bits():
+    mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
+    x = make_input()
+    before = mixed(x)
+    mixed.set_levels(np.array([0, Level.D4, 0, 0], dtype=np.uint8))
+    after = mixed(x)
+    assert torch.equal(after[..., :64], before[..., :64]) and torch.equal(after[..., 128:], before[..., 128:])
+    assert not torch.equal(after[..., 64:128], before[..., 64:128])
+    ctl = Controller({"layers.0.a": mixed})
+    for level, bits in ((Level.D2, 2), (Level.D4, 4), (Level.D6, 6), (Level.D8, 8)):
+        ctl.set_all(level)
+        assert ctl.mean_bits() == bits
+
+
+def test_drop_bf16_keeps_the_depth_outputs_and_refuses_the_dropped_levels():
+    mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
+    x = make_input()
+    layout = np.array([Level.D8, Level.D4, Level.ZERO, Level.D2], dtype=np.uint8)
+    mixed.set_levels(Level.NF4)  # a copy the resident module must let go
+    mixed.set_levels(layout)
+    before = mixed(x)
+    mixed.drop_bf16()
+    assert torch.equal(mixed(x), before)
+    assert mixed.weight is None and mixed.storages == (SlicedWeight,)
+    for level in (Level.BF16, Level.INT8, Level.NF4):
+        with pytest.raises(ValueError):
+            mixed.set_levels(level)
+    mixed.set_levels(Level.D6)
+    assert mixed(x).shape == before.shape
 
 
 def test_int8_error_is_within_half_a_step():

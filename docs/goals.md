@@ -30,7 +30,7 @@ Done when: the quality-vs-mean-bits curve lies above **both** baselines - unifor
 
 **Step 4. Learned score** - beyond solo work. Only if the naive score gave an effect; needs co-authors or a group.
 
-**Step 5. Residuals instead of copies** - engineering, not a test of the hypothesis.
+**Step 5. Residuals instead of copies** - engineering, not a test of the hypothesis. Status: first version done ([results](results-residual.md)) - one sliced copy read at 2 / 4 / 6 / 8 bits, the bf16 weights can leave the GPU (-1.63 GiB on E2B, D8 as good as int8).
 
 ## Boundaries
 

@@ -20,6 +20,7 @@ from foqlens.quant import Level
 
 MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
 DOMAINS = ["biology", "math", "chemistry", "physics", "heldout/history", "heldout/geography"]
+LEVELS = (Level.BF16, Level.INT8, Level.NF4, Level.ZERO)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -50,14 +51,14 @@ def main(argv: list[str] | None = None) -> Path:
     for spec in args.domains:
         for q in read_jsonl(args.prompts_dir / f"{spec}.jsonl", args.per_domain):
             answers = {}
-            for level in Level:
+            for level in LEVELS:
                 ctl.set_all(level)
                 answers[level.name.lower()] = generate_answer(model, tokenizer, question_prompt(q["text"]), args.max_new_tokens)
             rows.append({"domain": Path(spec).name, "question": q["text"], "right": q["choices"][q["answer"]], "answers": answers})
     out_dir = args.out / args.model
     write_json(out_dir / "answers.json", rows)
     (out_dir / "answers.md").write_text(to_markdown(rows), encoding="utf-8")
-    print(f"{len(rows)} questions x {len(Level)} levels -> {out_dir / 'answers.md'}")
+    print(f"{len(rows)} questions x {len(LEVELS)} levels -> {out_dir / 'answers.md'}")
     return out_dir / "answers.json"
 
 

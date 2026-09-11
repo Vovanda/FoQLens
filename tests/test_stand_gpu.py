@@ -101,6 +101,18 @@ def test_mean_bits_follows_the_layout(stand):
     assert 4.0 < ctl.mean_bits() < 16.0
 
 
+def test_each_read_depth_costs_less_than_the_shallower_one(stand):
+    model, tokenizer, ctl, _, _, ref_ppl = stand
+    ppl = {}
+    for level in (Level.D2, Level.D4, Level.D6, Level.D8, Level.NF4):
+        ctl.set_all(level)
+        ppl[level] = fm.perplexity(model, tokenizer, TEXT)
+    print({lv.name: round(p, 3) for lv, p in ppl.items()}, "bf16", round(ref_ppl, 3))
+    assert ppl[Level.D2] > ppl[Level.D4] > ppl[Level.D6] > ppl[Level.D8]
+    assert ppl[Level.D2] > ppl[Level.NF4]  # 2 bits read are worse than 4
+    assert abs(ppl[Level.D8] - ref_ppl) < abs(ppl[Level.NF4] - ref_ppl)
+
+
 def test_coarser_weights_cost_perplexity(stand):
     model, tokenizer, ctl, _, _, ref_ppl = stand
     ctl.set_all(Level.NF4)

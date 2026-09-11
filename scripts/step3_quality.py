@@ -39,6 +39,7 @@ DOMAINS = ["biology", "math", "chemistry", "physics", "heldout/history", "heldou
 # where random layouts are known dead and only a working mask could survive.
 APERTURES = [0.99, 0.98, 0.97, 0.95, 0.9, 0.8, 0.5]
 COARSE = {"nf4": Level.NF4, "zero": Level.ZERO}
+UNIFORM_LEVELS = (Level.BF16, Level.INT8, Level.NF4, Level.ZERO)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -58,7 +59,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def policies_for(apertures, scores, weights, n_blocks, seed, coarse) -> list:
-    out = [Uniform(level, n_blocks) for level in Level]
+    out = [Uniform(level, n_blocks) for level in UNIFORM_LEVELS]
     for a in apertures:
         out.append(Random(a, weights, seed, coarse))
         out += [Directed(name, a, scores[name], weights, coarse) for name in MASK_SOURCES]

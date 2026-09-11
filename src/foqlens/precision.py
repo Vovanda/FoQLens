@@ -17,6 +17,8 @@ Invariants (each one has a test):
 - Invariant: forward never reads levels from the GPU.
 - Invariant: a packed copy exists only for a level some layout has used - a bench that only
   reads bf16 and ZERO holds no int8 or nf4 copy.
+- Invariant: drop_bf16 changes no output of a read depth; afterwards the module holds its sliced
+  copy alone, and a level it cannot read is refused when set, not when computed.
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from foqlens.model import text_layers
-from foqlens.quant import Int8Weight, Level, Nf4Weight
+from foqlens.quant import Int8Weight, Level, Nf4Weight, SlicedWeight
 
 # Linear modules inside a decoder layer. KV-shared layers have no k/v_proj - those are skipped.
 CONTROLLED = (
@@ -47,8 +49,9 @@ CONTROLLED = (
 
 DEFAULT_BLOCK_ROWS = 64
 BITS_BY_CODE = np.array([lv.bits for lv in Level], dtype=np.float64)
-# Levels read from a packed copy of the weight; bf16 reads the weight itself, ZERO reads nothing.
-PACKED = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight}
+# Where a level reads from: a packed copy of its own, or the one sliced copy every read depth
+# shares. bf16 reads the weight itself, ZERO reads nothing.
+STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: SlicedWeight for lv in Level if lv.slices}
 
 
 class MixedPrecisionLinear(nn.Module):
@@ -63,7 +66,9 @@ class MixedPrecisionLinear(nn.Module):
         self.weight = linear.weight
         self.weight.requires_grad_(False)
         self.bias = linear.bias
-        self._packed: dict[Level, Int8Weight | Nf4Weight] = {}
+        self._device = linear.weight.device
+        self._packed: dict[type, Int8Weight | Nf4Weight | SlicedWeight] = {}
+        self.readable: frozenset[Level] = frozenset(Level)
         self.set_levels(Level.BF16)
 
     @property
@@ -72,14 +77,15 @@ class MixedPrecisionLinear(nn.Module):
         return self._levels.copy()
 
     @property
-    def packed_levels(self) -> tuple[Level, ...]:
-        """Levels whose packed copy of the weight is held, in the order they were first used."""
+    def storages(self) -> tuple[type, ...]:
+        """Kinds of quantized copies of the weight that are held, in the order they were first needed."""
         return tuple(self._packed)
 
     def _materialize(self, level: Level) -> None:
-        """Quantize the weight into the level on its first use; bf16 and ZERO need no copy."""
-        if level in PACKED and level not in self._packed:
-            self._packed[level] = PACKED[level].quantize(self.weight.data)
+        """Quantize the weight into the level's storage on its first use; bf16 and ZERO need no copy."""
+        kind = STORAGE.get(level)
+        if kind is not None and kind not in self._packed:
+            self._packed[kind] = kind.quantize(self.weight.data)
 
     def set_levels(self, levels: Level | int | np.ndarray) -> None:
         """One level for all blocks, a level per block, or a level per block per sample of the batch."""
@@ -88,8 +94,11 @@ class MixedPrecisionLinear(nn.Module):
             arr = np.full(self.n_blocks, arr, dtype=np.uint8)
         if arr.ndim not in (1, 2) or arr.shape[-1] != self.n_blocks:
             raise ValueError(f"levels of shape {arr.shape} for {self.n_blocks} blocks")
+        used = tuple(Level(int(c)) for c in np.unique(arr))
+        if not self.readable.issuperset(used):
+            raise ValueError(f"levels {[lv.name for lv in used if lv not in self.readable]} are not held by this module")
         self._levels = arr.copy()
-        self._used = tuple(Level(int(c)) for c in np.unique(arr))
+        self._used = used
         for level in self._used:
             self._materialize(level)
         self._rows = None if len(self._used) == 1 else self._row_codes(arr)
@@ -97,7 +106,7 @@ class MixedPrecisionLinear(nn.Module):
     def _row_codes(self, arr: np.ndarray) -> torch.Tensor:
         """Level code per output row on the GPU: [out] or [batch, 1, out], broadcast over tokens."""
         rows = np.repeat(arr, self.block_rows, axis=-1)[..., : self.out_features]
-        codes = torch.as_tensor(rows, device=self.weight.device)
+        codes = torch.as_tensor(rows, device=self._device)
         return codes if arr.ndim == 1 else codes.unsqueeze(1)
 
     def block_sizes(self) -> np.ndarray:
@@ -106,13 +115,29 @@ class MixedPrecisionLinear(nn.Module):
         sizes[-1] = self.out_features - self.block_rows * (self.n_blocks - 1)
         return sizes
 
+    # What a module still reads after drop_bf16: the depths of its sliced copy, and nothing.
+    RESIDENT = frozenset({Level.ZERO, *(lv for lv in Level if lv.slices)})
+
+    def drop_bf16(self) -> None:
+        """Keep only the sliced copy: the bf16 weight and every other copy leave the GPU.
+
+        Afterwards the module reads ZERO and the read depths only; the current layout must be one of those.
+        """
+        if not self.RESIDENT.issuperset(self._used):
+            raise ValueError("switch to ZERO or read depths before dropping bf16")
+        self._materialize(Level.D8)
+        self._packed = {SlicedWeight: self._packed[SlicedWeight]}
+        self.weight = None
+        self.readable = self.RESIDENT
+
     def output_at(self, level: Level, x: torch.Tensor) -> torch.Tensor:
         """The whole output as if every block were read at this level."""
         if level is Level.BF16:
             return F.linear(x, self.weight, self.bias)
-        if level in PACKED:
+        if level in STORAGE:
             self._materialize(level)
-            return self._packed[level].matmul(x, self.bias)
+            store = self._packed[STORAGE[level]]
+            return store.matmul(x, self.bias, level.slices) if level.slices else store.matmul(x, self.bias)
         out = x.new_zeros(*x.shape[:-1], self.out_features)
         return out if self.bias is None else out + self.bias
 
@@ -173,6 +198,12 @@ class Controller:
             raise ValueError(f"layout of {levels.shape[-1]} blocks for {self.n_blocks}")
         for (start, stop), module in zip(zip(self._bounds[:-1], self._bounds[1:]), self.modules.values()):
             module.set_levels(levels[..., start:stop])
+
+    def drop_bf16(self) -> None:
+        """Every module keeps only its sliced copy (MixedPrecisionLinear.drop_bf16); the cache returns the freed memory."""
+        for module in self.modules.values():
+            module.drop_bf16()
+        torch.cuda.empty_cache()
 
     def layout(self) -> dict[str, list]:
         """Level of every block of every module - the state the modules compute with."""

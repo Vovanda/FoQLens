@@ -3,12 +3,12 @@ title: "E008 - Expert zones at a fixed 5-bit budget"
 date: 2026-09-11
 weight: 8
 hypotheses: [H3.1, H3.2]
-statuses: [legacy]
+statuses: [reset]
 params:
   fixed: "2026-09-11 - ADDENDUM-07 fddb919, terms ADDENDUM-08 84cb427"
   run: "2026-09-11 - a4ead2f"
   results: "aafe21c"
-  verdict: "S1 and S3 hold for biology-math; S2 not met; history-geography not separated"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E008 - Expert zones, fixed budget

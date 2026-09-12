@@ -72,7 +72,11 @@ def letter_logprobs(model, tokenizer, prompt: str, ids: list[int]) -> np.ndarray
 
 @dataclass(frozen=True)
 class LetterChoice:
-    """MMLU multiple choice: the log-probability of the right letter among A-D, and whether it is the top one."""
+    """MMLU multiple choice: the log-probability of the right letter among A-D, and whether it is the top one.
+
+    `picked` is the index of the letter that won, kept so that a run can tell a model that answers from
+    one that leans on a letter: a lean shows as a skew in how often each index comes out on top.
+    """
 
     ids: tuple[int, ...]
     name: str = "letter_choice"
@@ -84,4 +88,5 @@ class LetterChoice:
 
     def score(self, model, tokenizer, questions: list[Question]) -> list[dict[str, float]]:
         logprobs = letter_logprobs_batch(model, tokenizer, [q.prompt for q in questions], list(self.ids))
-        return [{"accuracy": float(lp.argmax() == q.answer), "logprob": float(lp[q.answer])} for lp, q in zip(logprobs, questions)]
+        return [{"accuracy": float(lp.argmax() == q.answer), "logprob": float(lp[q.answer]), "picked": float(lp.argmax())}
+                for lp, q in zip(logprobs, questions)]

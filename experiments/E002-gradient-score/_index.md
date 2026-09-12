@@ -3,10 +3,10 @@ title: "E002 - Gradient x activation as the block score"
 date: 2026-09-11
 weight: 2
 hypotheses: [H1]
-statuses: [not-run]
+statuses: [reset]
 params:
   fixed: "2026-09-11 - ADDENDUM-02 3b338ef"
-  verdict: "never checked on its own; the instrument is a mask source from E004 on"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E002 - Gradient x activation

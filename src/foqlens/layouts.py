@@ -327,6 +327,24 @@ class RandomZones:
 
 
 @dataclass(frozen=True)
+class MovedZones:
+    """The query's own zones, carried elsewhere on the map as one rigid figure (zones.moved_zones).
+
+    The control for a layout whose memory is a result: same count, same radii, same distances between
+    the zones, another place. What it tests is the address alone.
+    """
+
+    topics: TopicZones
+    weights: np.ndarray | None = None   # block sizes: with them the landing is matched by cost
+    reach: float = 1.0
+    seed: int = 0
+
+    def zones(self, index: int) -> zones.Zones:
+        return zones.moved_zones(self.topics.own(index), self.topics.coords, _rng(self.seed, index, 0.0, salt=7),
+                                 self.weights, self.reach)
+
+
+@dataclass(frozen=True)
 class FixedZones:
     """One set of zones for every question (the backbone's)."""
 

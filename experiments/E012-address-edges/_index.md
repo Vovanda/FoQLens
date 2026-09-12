@@ -3,12 +3,12 @@ title: "E012 - The edges of the address"
 date: 2026-09-12
 weight: 12
 hypotheses: [H3.1, H3.2]
-statuses: [not-run]
+statuses: [reset]
 params:
   fixed: "2026-09-12 - ADDENDUM-13"
   run: "-"
   results: "-"
-  verdict: "not run: the question moved to E013 - which settings cost the fewest errors, with uniform quantization as the reference instead of random zones"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E012 - The edges of the address

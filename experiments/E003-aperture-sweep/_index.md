@@ -3,10 +3,10 @@ title: "E003 - Step 3 as an aperture sweep"
 date: 2026-09-11
 weight: 3
 hypotheses: [H3]
-statuses: [not-run]
+statuses: [reset]
 params:
   fixed: "2026-09-11 - ADDENDUM-03 01d021b"
-  verdict: "not run; replaced by the injection (E004) and backbone (E005) designs"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E003 - Aperture sweep

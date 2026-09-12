@@ -3,12 +3,12 @@ title: "E006 - Read depths from one sliced copy"
 date: 2026-09-11
 weight: 6
 hypotheses: []
-statuses: [done]
+statuses: [reset]
 params:
   fixed: "- (engineering, docs/plan.md step 5; no prediction)"
   run: "2026-09-11 - c35709b"
   results: "ddf5dbc"
-  verdict: "D8 as good as int8; without bf16 the bench frees 1.63 GiB on E2B"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E006 - Read depths

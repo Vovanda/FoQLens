@@ -3,12 +3,12 @@ title: "E011 - Depth caps: when storage follows the queries"
 date: 2026-09-12
 weight: 11
 hypotheses: []
-statuses: [done]
+statuses: [reset]
 params:
   fixed: "2026-09-12 - ADDENDUM-12"
   run: "2026-09-12 - c1bd457"
   results: "c1bd457"
-  verdict: "caps save storage only for a narrow profile: one topic stores 4.0 bits of 8, 395 mixed questions store 6.5; addressing saves reading, not the file"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E011 - Depth caps

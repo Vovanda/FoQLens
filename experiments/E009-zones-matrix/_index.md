@@ -3,12 +3,12 @@ title: "E009 - Expert zones over precision share x focus area"
 date: 2026-09-11
 weight: 9
 hypotheses: [H3.1, H3.2]
-statuses: [legacy]
+statuses: [reset]
 params:
   fixed: "2026-09-11 - ADDENDUM-09 ac10204, names ADDENDUM-10 db61af1"
   run: "2026-09-11/12 - 6105b67"
   results: "ee046a4"
-  verdict: "M1-M3 hold for biology-math, M1 for history-geography; the address is strongest at 4.5-5 bits"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E009 - Zones matrix

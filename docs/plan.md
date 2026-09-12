@@ -244,20 +244,16 @@ The predictions diverge, which is more useful than agreement - one cheap measure
 
 Background subtraction is worth keeping in the plan as a prepared next step: it is cheap and removes exactly the artifact that spoils the naive version. With an intermediate outcome it is the right move - not to change the instrument entirely but to subtract the background first.
 
-## Mandatory control: a random mask
+## The baseline: uniform quantization at the same memory
 
-**There is not one baseline but two.** Without the second the result cannot be interpreted.
+**One baseline, and it is uniform quantization at the same number of bits.** That is what a deployment would otherwise do, and it is the only comparison whose outcome changes a decision.
 
-1. **Uniform quantization** at the same memory.
-2. **A random mask of the same shape** - the same share of blocks read deep, chosen at random; for the lens layout, random lenses of the same number and size around random blocks of the weight map.
+**A random mask is not a baseline here.** It was written into this plan as mandatory, and it is dropped, 2026-09-13, for two reasons measured on the bench rather than argued:
 
-**Why.** Even a coarse non-random hit beats uniform coarsening simply because the uniform scheme spends bits on everything, including what is clearly useless for this query. So **any non-uniformity beats uniformity**, and a win over the first baseline proves nothing.
+- **It does not cost the same.** Zones of the same count and radii around random blocks overlap less, so they store and read more - 5.72 bits against 4.28 at focus area 0.5. A control that spends a third more and answers worse says nothing about the address.
+- **Beating it proves nothing anyone needs.** Nobody ships a model quantized by random mask. Being better than deliberate damage is not a result; being better than uniform quantization at the same cost is.
 
-Resolution:
-- beats uniform but **not random** → the gain comes from non-uniformity itself, not from hitting the zones. The score does not work, even if the numbers look good;
-- beats **both** → the centers really sharpened the expert regions, not smoothed whatever was there.
-
-This is the direct test of "the centers really sharpened what is needed, not at random".
+Where a control for shape is genuinely needed, it is the query's own zones carried elsewhere on the map as a rigid figure, landed where they cover the same weight - same count, same radii, same distances, same cost (`foqlens.zones.moved_zones`). That isolates *where the lenses point* without changing what they cost.
 
 ## The boundary of solo work
 

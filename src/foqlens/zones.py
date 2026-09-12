@@ -53,6 +53,7 @@ READ_LEVELS = (Level.D2, Level.D4, Level.D6, Level.D8)
 # the zone's area; further than that it is a second zone, and the size belongs to the focus area.
 MAX_STOP = 1.5
 HALO_STOP = 1.5
+PLACES_TRIED = 40  # landings a moved figure tries before taking the one that costs what the original did
 # A block climbs one level per ring of psi it is inside; the rings are RING_GAP apart in psi.
 RING_GAP = np.log(2.0)
 SEARCH_STEPS = 60
@@ -115,6 +116,52 @@ def random_zones(zones: Zones, coords: np.ndarray, rng: np.random.Generator) -> 
     """The same number of zones with the same radii, centered on random blocks of the weight map."""
     at = rng.choice(len(coords), size=len(zones.radii), replace=False)
     return Zones(centers=coords[at].copy(), radii=zones.radii.copy())
+
+
+def moved_zones(zones: Zones, coords: np.ndarray, rng: np.random.Generator,
+                weights: np.ndarray | None = None, reach: float = 1.0) -> Zones:
+    """The same zones somewhere else on the map: turned around their own center and put down elsewhere.
+
+    The honest control for a layout whose memory is a result. Random centers of the same radii
+    (random_zones) spend more, because a query's zones overlap each other and scattered ones do not -
+    a control that costs more and answers worse says nothing about the address. Moving the zones as
+    one rigid figure keeps their count, their radii and every distance between them, and changes only
+    where they sit, so what is compared is the place and nothing else.
+
+    With `weights` the landing is chosen so that the figure covers about as much weight as it did
+    where it came from - blocks are not spread evenly over the map, and a query's zones sit where they
+    are sparse, so a plain landing costs a fifth more.
+
+    Invariant: the moved figure keeps the pairwise distances of the original, up to floating point.
+    """
+    if len(zones.radii) == 0:
+        return zones
+    shifted = zones.centers - zones.centers.mean(axis=0)
+    if coords.shape[1] == 2:  # a rotation exists on the plane the weight map is drawn on
+        angle = rng.uniform(0, 2 * np.pi)
+        turn = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+        shifted = shifted @ turn.T
+    if weights is None:
+        return Zones(centers=shifted + coords[rng.integers(len(coords))], radii=zones.radii.copy())
+    # Blocks do not lie evenly on the map, so the same figure covers more of them in some places than
+    # in others - and a query's zones sit where they are sparse. Of PLACES_TRIED landings the one whose
+    # covered weight is closest to the original is taken, so the control spends what the layout spends.
+    want = _covered(zones, coords, weights, reach)
+    best, distance = None, np.inf
+    for _ in range(PLACES_TRIED):
+        moved = Zones(centers=shifted + coords[rng.integers(len(coords))], radii=zones.radii.copy())
+        gap = abs(_covered(moved, coords, weights, reach) - want)
+        if gap < distance:
+            best, distance = moved, gap
+    return best
+
+
+def _covered(zones: Zones, coords: np.ndarray, weights: np.ndarray, reach: float) -> float:
+    """The weight of the blocks the zones reach, as a share of all weight."""
+    if len(zones.radii) == 0:
+        return 0.0
+    inside = (np.linalg.norm(coords[:, None, :] - zones.centers[None], axis=-1) <= zones.radii * reach).any(axis=1)
+    return float(weights[inside].sum() / weights.sum())
 
 
 def log_sharpness(coords: np.ndarray, zones: Zones, focus_area: float) -> np.ndarray:

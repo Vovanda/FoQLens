@@ -3,12 +3,12 @@ title: "E001 - Run 1: separation, masks, overlap, geometry, confirmation"
 date: 2026-09-11
 weight: 1
 hypotheses: [H0, H1, H2, H2+]
-statuses: [done]
+statuses: [reset]
 params:
   fixed: "2026-09-11 - preregistration be66b77, ADDENDUM-01 39e90ab, THRESHOLDS-01 aed8a29"
   run: "2026-09-11 - step0 3118130, calibration ac393f5, step1 c407c45, step2plus 9e008e3, confirm 8214822, diagnostic c9f8cb2"
   results: "d20428c"
-  verdict: "H0 yes; H1 and H2 pass in exploration, fail on the held-out pair with the naive score"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E001 - Run 1

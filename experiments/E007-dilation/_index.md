@@ -3,12 +3,12 @@ title: "E007 - Dilation of the topic fill"
 date: 2026-09-11
 weight: 7
 hypotheses: [H3.1]
-statuses: [done]
+statuses: [reset]
 params:
   fixed: "2026-09-11 - ADDENDUM-06 a2f93f7"
   run: "2026-09-11 - 427613d"
   results: "01d208e"
-  verdict: "W1 not supported; W2 supported for both pairs; W3 for history-geography"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E007 - Dilation

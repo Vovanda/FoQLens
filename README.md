@@ -60,13 +60,36 @@ All predictions were [preregistered](prereg/) in git before each run, as directi
 
 ## Status
 
-- **Step 0** ([results](experiments/E001-run1-exploration/results.md)): topics separate in the model's representations (ARI 0.98).
-- **Step 1**: the naive block score failed the preregistered confirmation on the held-out topics; a linear probe still reads the topic from the masks (0.95).
-- **Step 3**, on Gemma 4 E2B, 395 questions:
-  - generic block importance carries most of the budget ([backbone](experiments/E005-backbone/results.md)); flat topic masks added nothing on top of it ([injection](experiments/E004-injection/results.md), [dilation](experiments/E007-dilation/results.md));
-  - legacy fixed-budget layout, checked along the way because it was cheap: expert zones from the gradient mask, fitted to a preset mean of bits, beat random zones, the paired topic and no mask for a polar pair (biology-math), most of all when bits are scarce, not for a close pair (history-geography) ([zones](experiments/E008-zones-fixed-budget/results.md), [matrix](experiments/E009-zones-matrix/results.md));
-  - next, the test of the idea itself: a glass over the network with lenses in the expert zones, memory following the lenses (ADDENDUM-11, in preparation).
-- **Memory**: one stored copy of the weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant); without the bf16 weights the bench frees 1.63 GiB on E2B, and every block can store only the depth it is read to ([results](experiments/E006-read-depths/results.md)). The slices are unpacked before the multiplication: speed and energy savings would need a kernel that reads only the bits it needs.
+**Reset, 2026-09-13. Nothing is claimed.**
+
+The bench spent its first weeks measuring, and then found that it could not measure. Three things were wrong at
+once, each enough on its own to void a result:
+
+- **the questions** - four options scored by which of A-D the model ranks highest; it is right under *every*
+  ordering of the options on only 31% of them, and on the mathematics subject on 3%, because those questions are
+  answered by calculating and the format allows one token to do it in;
+- **the mask** - the gradient of the model's language-model loss on the prompt, which shows which blocks the
+  *text* lights up, never which blocks the *answer* needs; reordering the options changes the text, so the
+  address moves with it;
+- **the comparisons** - built on those two, so whichever way they came out they were reading a coin toss.
+
+Every verdict the bench produced is therefore withdrawn - the favourable readings and the unfavourable ones
+alike - and every hypothesis is back to untested ([docs/hypotheses.md](docs/hypotheses.md)). The runs, their
+code, their raw numbers and their preregistrations stay: they are the baseline to beat, not evidence.
+
+**What is being rebuilt, in order:** a corpus measured rather than chosen, where the model answers from
+knowledge ([docs/corpus.md](docs/corpus.md)); a metric with nothing to lean on - the model reads a passage and
+writes the answer, scored as SQuAD scores it; a mask that is asked about the answer instead of the text. Then
+the hypotheses, from the first.
+
+**The question all of it serves:** over what interval of the regulator's settings the model stays usable, and
+how much memory that interval actually saves - if any.
+
+**Engineering that stands regardless**, because it does not depend on the questions: one stored copy of the
+weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), 1.63 GiB freed on E2B without the bf16
+copy, and each block storing only the depth it is read to
+([E006](experiments/E006-read-depths/_index.md)). The slices are unpacked before the multiplication, so speed
+and energy would need a kernel that reads only the bits it needs.
 
 ## Reproduce
 

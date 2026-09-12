@@ -3,12 +3,12 @@ title: "E010 - Lens layout"
 date: 2026-09-12
 weight: 10
 hypotheses: [H3, H3.1, H3.2, H4]
-statuses: [done]
+statuses: [reset]
 params:
   fixed: "2026-09-12 - ADDENDUM-11"
   run: "2026-09-12 - 73b4216"
   results: "781bf7a, random zones 84d1b9f"
-  verdict: "the mechanism works and beats generic importance (L6, both pairs); the address does not beat the same memory without a mask (L3)"
+  verdict: "reset 2026-09-13 - nothing is claimed from this run until the corpus, the metric and the mask are ones the bench trusts (docs/corpus.md)"
 ---
 
 # E010 - Lens layout

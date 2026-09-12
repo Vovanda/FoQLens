@@ -138,3 +138,36 @@ def test_the_layout_is_still_its_three_parts():
     assert isinstance(layout.field, LiftField) and isinstance(layout.rule, GradedLevels)
     by_parts = ZoneLayout("t", layout.source, LiftField(AS_FOUND, 1.0), GradedLevels(Level.D2, layout.rule.stops), LINE)
     assert np.array_equal(layout.levels(np.array([0])), by_parts.levels(np.array([0])))
+
+
+def test_moved_zones_keep_the_figure_and_change_only_its_place():
+    """The honest control: same count, same radii, same distances between the zones, another place."""
+    rng = np.random.default_rng(0)
+    coords = rng.normal(size=(400, 2))
+    figure = Zones(centers=np.array([[0.0, 0.0], [0.4, 0.1], [-0.2, 0.5]]), radii=np.array([0.2, 0.3, 0.1]))
+    moved = zones.moved_zones(figure, coords, rng)
+    pairwise = lambda c: np.linalg.norm(c[:, None] - c[None], axis=-1)
+    assert len(moved.radii) == len(figure.radii)
+    assert np.allclose(moved.radii, figure.radii)
+    assert np.allclose(pairwise(moved.centers), pairwise(figure.centers))
+    assert not np.allclose(moved.centers, figure.centers)
+
+
+def test_a_moved_figure_can_be_landed_where_it_costs_the_same():
+    """Blocks are not spread evenly, so the landing is chosen by how much weight the figure covers."""
+    rng = np.random.default_rng(1)
+    dense = rng.normal(size=(300, 2)) * 0.1                      # a crowded patch
+    sparse = rng.normal(size=(100, 2)) * 1.5 + np.array([4, 4])  # and a thin one
+    coords = np.concatenate([dense, sparse])
+    weights = np.ones(len(coords))
+    figure = Zones(centers=np.array([[4.0, 4.0]]), radii=np.array([0.6]))   # sitting in the thin patch
+    covered = lambda z: zones._covered(z, coords, weights, 1.0)
+    plain = [covered(zones.moved_zones(figure, coords, np.random.default_rng(s))) for s in range(8)]
+    matched = [covered(zones.moved_zones(figure, coords, np.random.default_rng(s), weights)) for s in range(8)]
+    want = covered(figure)
+    assert np.mean([abs(c - want) for c in matched]) < np.mean([abs(c - want) for c in plain])
+
+
+def test_moved_zones_of_no_zones_stay_empty():
+    empty = Zones(centers=np.zeros((0, 2)), radii=np.zeros(0))
+    assert len(zones.moved_zones(empty, LINE, np.random.default_rng(0)).radii) == 0

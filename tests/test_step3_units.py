@@ -289,9 +289,20 @@ def test_letter_choice_scores_the_right_letter(monkeypatch):
     fake = np.log(np.array([[0.1, 0.6, 0.2, 0.1], [0.7, 0.1, 0.1, 0.1]]))
     monkeypatch.setattr(ev, "letter_logprobs_batch", lambda model, tok, prompts, ids: fake[: len(prompts)])
     rows = ev.LetterChoice((1, 2, 3, 4)).score(None, None, [Question("x", "p", 1), Question("y", "q", 2)])
-    assert rows[0] == {"accuracy": 1.0, "logprob": pytest.approx(np.log(0.6))}
-    assert rows[1] == {"accuracy": 0.0, "logprob": pytest.approx(np.log(0.1))}
+    assert rows[0] == {"accuracy": 1.0, "logprob": pytest.approx(np.log(0.6)), "picked": 1.0}
+    assert rows[1] == {"accuracy": 0.0, "logprob": pytest.approx(np.log(0.1)), "picked": 0.0}
     assert ev.LetterChoice.primary == "logprob"
+
+
+def test_the_picked_letter_is_the_top_one_whether_or_not_it_is_right(monkeypatch):
+    """A model that leans on a letter shows as a skew in `picked`; accuracy alone cannot tell."""
+    import foqlens.evaluate as ev
+
+    fake = np.log(np.array([[0.1, 0.1, 0.7, 0.1], [0.1, 0.1, 0.6, 0.2]]))
+    monkeypatch.setattr(ev, "letter_logprobs_batch", lambda model, tok, prompts, ids: fake[: len(prompts)])
+    rows = ev.LetterChoice((1, 2, 3, 4)).score(None, None, [Question("x", "p", 0), Question("y", "q", 2)])
+    assert [r["picked"] for r in rows] == [2.0, 2.0]        # both leaned to C
+    assert [r["accuracy"] for r in rows] == [0.0, 1.0]      # one of them was right anyway
 
 
 def test_a_new_metric_plugs_into_the_evaluation_without_touching_it():

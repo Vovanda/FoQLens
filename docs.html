@@ -133,28 +133,33 @@ const SHELF = [
     ["problem", "docs/problem-statement.md", "Problem statement"],
     ["goals", "docs/goals.md", "Goals"],
     ["plan", "docs/plan.md", "Plan"],
-    ["hypotheses", "docs/hypotheses.md", "Hypotheses"],
+    ["hypotheses", "docs/hypotheses.md", "Hypotheses - all untested"],
+  ]},
+  { group: "What the bench measures on", docs: [
+    ["corpus", "docs/corpus.md", "The corpus, and why the first one failed"],
+    ["invariants", "docs/invariants.md", "Invariants"],
+    ["data", "docs/data-sources.md", "Data sources"],
   ]},
   { group: "Around it", docs: [
     ["zones", "docs/zones.md", "Expert zones (legacy layout)"],
     ["metaphor", "docs/visual-metaphor.md", "Visual metaphor"],
     ["prior-art", "docs/prior-art.md", "Prior art"],
     ["reading", "docs/reading-notes.md", "Reading notes"],
-    ["data", "docs/data-sources.md", "Data sources"],
   ]},
   { group: "Preregistration", docs: [
     ["prereg", "prereg/PREREGISTRATION.md", "Preregistration (English)"],
     ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
     ["addendum-11", "experiments/E010-lens-layout/ADDENDUM-11.md", "E010 - the lens layout"],
+    ["addendum-14", "experiments/E013-regulator-map/ADDENDUM-14.md", "E013 - the map of the regulator"],
+    ["addendum-16", "experiments/E015-topic-pairs/ADDENDUM-16.md", "E015 - three topic pairs"],
   ]},
-  { group: "Results", docs: [
+  { group: "Runs - verdicts withdrawn", docs: [
     ["e001", "experiments/E001-run1-exploration/results.md", "E001 - separation and masks"],
-    ["e004", "experiments/E004-injection/results.md", "E004 - mask injection"],
-    ["e005", "experiments/E005-backbone/results.md", "E005 - backbone"],
     ["e006", "experiments/E006-read-depths/results.md", "E006 - read depths"],
-    ["e007", "experiments/E007-dilation/results.md", "E007 - dilation"],
-    ["e008", "experiments/E008-zones-fixed-budget/results.md", "E008 - zones at a fixed budget"],
-    ["e009", "experiments/E009-zones-matrix/results.md", "E009 - the zones matrix"],
+    ["e011", "experiments/E011-depth-caps/results.md", "E011 - depth caps"],
+    ["e010", "experiments/E010-lens-layout/results.md", "E010 - the lens layout"],
+    ["e013", "experiments/E013-regulator-map/results.md", "E013 - the map of the regulator"],
+    ["e014", "experiments/E014-moved-zones/results.md", "E014 - the zones carried elsewhere"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));

@@ -1,0 +1,623 @@
+{
+  "model": "google/gemma-4-E2B",
+  "revision": "d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f",
+  "questions": {
+    "biology": 95,
+    "math": 100,
+    "history": 100,
+    "geography": 100
+  },
+  "floor": [
+    "d4"
+  ],
+  "focus_area": [
+    0.7,
+    0.75,
+    0.8
+  ],
+  "focus_strength": [
+    0.5,
+    1.0
+  ],
+  "combine": "sum",
+  "random_zones": false,
+  "moved_zones": true,
+  "cells_done": [
+    [
+      "d4",
+      0.7,
+      1.0
+    ],
+    [
+      "d4",
+      0.75,
+      1.0
+    ],
+    [
+      "d4",
+      0.8,
+      1.0
+    ],
+    [
+      "d4",
+      0.7,
+      0.5
+    ],
+    [
+      "d4",
+      0.75,
+      0.5
+    ],
+    [
+      "d4",
+      0.8,
+      0.5
+    ]
+  ],
+  "zones_per_question": {
+    "gradient": 3.6860759493670887,
+    "backbone": 5
+  },
+  "gpu_share": 0.8,
+  "gpu": {
+    "masks": {
+      "samples": 27,
+      "utilization_mean": 36.7037037037037,
+      "utilization_median": 36.0,
+      "memory_reserved_peak_mib": 18117.0,
+      "memory_allocated_peak_mib": 16534.478515625
+    },
+    "eval": {
+      "samples": 238,
+      "utilization_mean": 69.05882352941177,
+      "utilization_median": 97.0,
+      "memory_reserved_peak_mib": 14287.0,
+      "memory_allocated_peak_mib": 12042.34326171875
+    }
+  },
+  "comparisons": {
+    "biology-math|d4|fa0.70|fs1.00": {
+      "own_minus_moved": {
+        "mean": 0.0011846546465769793,
+        "lo": -0.03484387763346044,
+        "hi": 0.039130910241928614,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.03076923076923077,
+        "lo": -0.02564102564102564,
+        "hi": 0.08717948717948718,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "history-geography|d4|fa0.70|fs1.00": {
+      "own_minus_moved": {
+        "mean": 0.027477884609252216,
+        "lo": -0.00190936400485225,
+        "hi": 0.05867157830810174,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.01,
+        "lo": -0.035,
+        "hi": 0.055,
+        "above_zero": false,
+        "n": 200
+      }
+    },
+    "biology-math|d4|fa0.75|fs1.00": {
+      "own_minus_moved": {
+        "mean": 0.03506749335389871,
+        "lo": 0.004404116563785535,
+        "hi": 0.06870844283642677,
+        "above_zero": true,
+        "n": 195
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.07179487179487179,
+        "lo": 0.015384615384615385,
+        "hi": 0.13333333333333333,
+        "above_zero": true,
+        "n": 195
+      }
+    },
+    "history-geography|d4|fa0.75|fs1.00": {
+      "own_minus_moved": {
+        "mean": 0.02675868253223598,
+        "lo": -0.0008675745399668803,
+        "hi": 0.05555514002498239,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_moved_accuracy": {
+        "mean": -0.015,
+        "lo": -0.05,
+        "hi": 0.02,
+        "above_zero": false,
+        "n": 200
+      }
+    },
+    "biology-math|d4|fa0.80|fs1.00": {
+      "own_minus_moved": {
+        "mean": 0.022125109767493528,
+        "lo": -0.00042756124519002634,
+        "hi": 0.045858348133639454,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_moved_accuracy": {
+        "mean": -0.005128205128205128,
+        "lo": -0.046153846153846156,
+        "hi": 0.041025641025641026,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "history-geography|d4|fa0.80|fs1.00": {
+      "own_minus_moved": {
+        "mean": 0.001941592236980796,
+        "lo": -0.011727205530391076,
+        "hi": 0.014606849731411783,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.005,
+        "lo": -0.01,
+        "hi": 0.02,
+        "above_zero": false,
+        "n": 200
+      }
+    },
+    "biology-math|d4|fa0.70|fs0.50": {
+      "own_minus_moved": {
+        "mean": -0.0028634664721978015,
+        "lo": -0.03849563484868178,
+        "hi": 0.03441883958780612,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.03076923076923077,
+        "lo": -0.02564102564102564,
+        "hi": 0.08205128205128205,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "history-geography|d4|fa0.70|fs0.50": {
+      "own_minus_moved": {
+        "mean": 0.018973151734098793,
+        "lo": -0.010633393716765567,
+        "hi": 0.05085211183573119,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.02,
+        "lo": -0.02,
+        "hi": 0.06,
+        "above_zero": false,
+        "n": 200
+      }
+    },
+    "biology-math|d4|fa0.75|fs0.50": {
+      "own_minus_moved": {
+        "mean": 0.028015699638770177,
+        "lo": -0.004225512441629782,
+        "hi": 0.06291089580322687,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.046153846153846156,
+        "lo": -0.015384615384615385,
+        "hi": 0.1076923076923077,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "history-geography|d4|fa0.75|fs0.50": {
+      "own_minus_moved": {
+        "mean": 0.011736747194081545,
+        "lo": -0.014613209028495474,
+        "hi": 0.03912339878384954,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_moved_accuracy": {
+        "mean": -0.04,
+        "lo": -0.075,
+        "hi": -0.005,
+        "above_zero": false,
+        "n": 200
+      }
+    },
+    "biology-math|d4|fa0.80|fs0.50": {
+      "own_minus_moved": {
+        "mean": 0.01858149282156657,
+        "lo": -0.003180004387544707,
+        "hi": 0.042544699051918884,
+        "above_zero": false,
+        "n": 195
+      },
+      "own_minus_moved_accuracy": {
+        "mean": 0.020512820512820513,
+        "lo": -0.020512820512820513,
+        "hi": 0.06153846153846154,
+        "above_zero": false,
+        "n": 195
+      }
+    },
+    "history-geography|d4|fa0.80|fs0.50": {
+      "own_minus_moved": {
+        "mean": -0.00420046788174659,
+        "lo": -0.012738358944421633,
+        "hi": 0.00348085450741928,
+        "above_zero": false,
+        "n": 200
+      },
+      "own_minus_moved_accuracy": {
+        "mean": -0.005,
+        "lo": -0.025,
+        "hi": 0.01,
+        "above_zero": false,
+        "n": 200
+      }
+    }
+  },
+  "lifted": {
+    "lens_own_d4_fa0.70_fs1.00": {
+      "blocks": 0.44106660286488364,
+      "weight": 1.0
+    },
+    "lens_own_d4_fa0.75_fs1.00": {
+      "blocks": 0.707996165007935,
+      "weight": 1.0
+    },
+    "lens_own_d4_fa0.80_fs1.00": {
+      "blocks": 0.9539611612383513,
+      "weight": 1.0
+    },
+    "lens_own_d4_fa0.70_fs0.50": {
+      "blocks": 0.44106660286488364,
+      "weight": 1.0
+    },
+    "lens_own_d4_fa0.75_fs0.50": {
+      "blocks": 0.707996165007935,
+      "weight": 1.0
+    },
+    "lens_own_d4_fa0.80_fs0.50": {
+      "blocks": 0.9539611612383513,
+      "weight": 1.0
+    }
+  },
+  "configs": {
+    "uniform_bf16": {
+      "accuracy": 0.5468354430379747,
+      "logprob": -1.012348201000898,
+      "mean_bits": 16.0,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6421052631578947,
+          "math": 0.32,
+          "history": 0.6,
+          "geography": 0.63
+        },
+        "logprob": {
+          "biology": -0.8690916233941128,
+          "math": -1.3845340204238892,
+          "history": -0.9685916675720364,
+          "geography": -0.8200126637332141
+        }
+      }
+    },
+    "uniform_d4": {
+      "accuracy": 0.49873417721518987,
+      "logprob": -1.1377147890250139,
+      "mean_bits": 4.0,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.5578947368421052,
+          "math": 0.3,
+          "history": 0.56,
+          "geography": 0.58
+        },
+        "logprob": {
+          "biology": -1.060180713236332,
+          "math": -1.392193962931633,
+          "history": -1.077458336725831,
+          "geography": -1.0171494394168257
+        }
+      }
+    },
+    "uniform_d6": {
+      "accuracy": 0.5215189873417722,
+      "logprob": -1.0138812930193506,
+      "mean_bits": 6.0,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6105263157894737,
+          "math": 0.28,
+          "history": 0.58,
+          "geography": 0.62
+        },
+        "logprob": {
+          "biology": -0.8728267922997475,
+          "math": -1.3926510119438171,
+          "history": -0.9659530052915215,
+          "geography": -0.817041637506336
+        }
+      }
+    },
+    "uniform_d8": {
+      "accuracy": 0.5518987341772152,
+      "logprob": -1.0121208532795876,
+      "mean_bits": 8.0,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6631578947368421,
+          "math": 0.32,
+          "history": 0.6,
+          "geography": 0.63
+        },
+        "logprob": {
+          "biology": -0.8644233922130967,
+          "math": -1.3841315144300461,
+          "history": -0.977124998094514,
+          "geography": -0.815418635327369
+        }
+      }
+    },
+    "floor_d4": {
+      "accuracy": 0.49873417721518987,
+      "logprob": -1.1377147890250139,
+      "mean_bits": 4.0,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.5578947368421052,
+          "math": 0.3,
+          "history": 0.56,
+          "geography": 0.58
+        },
+        "logprob": {
+          "biology": -1.060180713236332,
+          "math": -1.392193962931633,
+          "history": -1.077458336725831,
+          "geography": -1.0171494394168257
+        }
+      }
+    },
+    "lens_own_d4_fa0.70_fs1.00": {
+      "accuracy": 0.5341772151898734,
+      "logprob": -1.0450177705457693,
+      "mean_bits": 5.176134333595154,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6421052631578947,
+          "math": 0.28,
+          "history": 0.57,
+          "geography": 0.65
+        },
+        "logprob": {
+          "biology": -0.9205849510078368,
+          "math": -1.3936366111040115,
+          "history": -0.9994630239903927,
+          "geography": -0.8601648551039398
+        }
+      }
+    },
+    "lens_moved_d4_fa0.70_fs1.00": {
+      "accuracy": 0.5139240506329114,
+      "logprob": -1.059515453021549,
+      "mean_bits": 5.206536922948136,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6526315789473685,
+          "math": 0.21,
+          "history": 0.58,
+          "geography": 0.62
+        },
+        "logprob": {
+          "biology": -0.9554111596392958,
+          "math": -1.3628617894649506,
+          "history": -1.024596787393093,
+          "geography": -0.8899868609197438
+        }
+      }
+    },
+    "lens_own_d4_fa0.75_fs1.00": {
+      "accuracy": 0.5594936708860759,
+      "logprob": -1.0127527466727586,
+      "mean_bits": 5.873974090440339,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6947368421052632,
+          "math": 0.34,
+          "history": 0.57,
+          "geography": 0.64
+        },
+        "logprob": {
+          "biology": -0.89167906251785,
+          "math": -1.3776459628343583,
+          "history": -0.9710314054787159,
+          "geography": -0.8046008716523647
+        }
+      }
+    },
+    "lens_moved_d4_fa0.75_fs1.00": {
+      "accuracy": 0.5316455696202531,
+      "logprob": -1.0436132472055621,
+      "mean_bits": 6.224953691582377,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6210526315789474,
+          "math": 0.27,
+          "history": 0.6,
+          "geography": 0.64
+        },
+        "logprob": {
+          "biology": -0.9627582260456524,
+          "math": -1.3785023695230485,
+          "history": -0.968361318409443,
+          "geography": -0.8607883237861097
+        }
+      }
+    },
+    "lens_own_d4_fa0.80_fs1.00": {
+      "accuracy": 0.5392405063291139,
+      "logprob": -1.0051147925938608,
+      "mean_bits": 6.65069266706207,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6421052631578947,
+          "math": 0.3,
+          "history": 0.6,
+          "geography": 0.62
+        },
+        "logprob": {
+          "biology": -0.8540540640291415,
+          "math": -1.3697498959302903,
+          "history": -0.9706337679270655,
+          "geography": -0.8184684060607106
+        }
+      }
+    },
+    "lens_moved_d4_fa0.80_fs1.00": {
+      "accuracy": 0.5392405063291139,
+      "logprob": -1.0170203998142595,
+      "mean_bits": 7.217848377335236,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6736842105263158,
+          "math": 0.28,
+          "history": 0.59,
+          "geography": 0.62
+        },
+        "logprob": {
+          "biology": -0.8803659876024252,
+          "math": -1.387897532582283,
+          "history": -0.9761878848448395,
+          "geography": -0.816797473616898
+        }
+      }
+    },
+    "lens_own_d4_fa0.70_fs0.50": {
+      "accuracy": 0.5392405063291139,
+      "logprob": -1.0545421028179647,
+      "mean_bits": 4.8792241737064375,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6526315789473685,
+          "math": 0.28,
+          "history": 0.59,
+          "geography": 0.64
+        },
+        "logprob": {
+          "biology": -0.9292986292195947,
+          "math": -1.4067901837825776,
+          "history": -0.9999957125261426,
+          "geography": -0.8758217120636255
+        }
+      }
+    },
+    "lens_moved_d4_fa0.70_fs0.50": {
+      "accuracy": 0.5139240506329114,
+      "logprob": -1.0627351518932588,
+      "mean_bits": 4.918067674409078,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6526315789473685,
+          "math": 0.22,
+          "history": 0.57,
+          "geography": 0.62
+        },
+        "logprob": {
+          "biology": -0.963940134683722,
+          "math": -1.368296993970871,
+          "history": -1.0207179627195,
+          "geography": -0.8930457653384656
+        }
+      }
+    },
+    "lens_own_d4_fa0.75_fs0.50": {
+      "accuracy": 0.549367088607595,
+      "logprob": -1.02088432786161,
+      "mean_bits": 5.410441880264242,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6526315789473685,
+          "math": 0.35,
+          "history": 0.56,
+          "geography": 0.64
+        },
+        "logprob": {
+          "biology": -0.9080915457912182,
+          "math": -1.3808689111471175,
+          "history": -0.9755499816685915,
+          "geography": -0.8133872337359935
+        }
+      }
+    },
+    "lens_moved_d4_fa0.75_fs0.50": {
+      "accuracy": 0.5468354430379747,
+      "logprob": -1.0406575199334493,
+      "mean_bits": 5.4922666278388395,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6210526315789474,
+          "math": 0.29,
+          "history": 0.63,
+          "geography": 0.65
+        },
+        "logprob": {
+          "biology": -0.9606386528007294,
+          "math": -1.3855797737836837,
+          "history": -0.9635214678011834,
+          "geography": -0.8488892419915647
+        }
+      }
+    },
+    "lens_own_d4_fa0.80_fs0.50": {
+      "accuracy": 0.529113924050633,
+      "logprob": -1.0105120051109904,
+      "mean_bits": 5.907397992351987,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6105263157894737,
+          "math": 0.31,
+          "history": 0.58,
+          "geography": 0.62
+        },
+        "logprob": {
+          "biology": -0.867697148946555,
+          "math": -1.378598626255989,
+          "history": -0.9721035710535944,
+          "geography": -0.8165079313796013
+        }
+      }
+    },
+    "lens_moved_d4_fa0.80_fs0.50": {
+      "accuracy": 0.5215189873417722,
+      "logprob": -1.017558327956196,
+      "mean_bits": 5.929270036850813,
+      "by_domain": {
+        "accuracy": {
+          "biology": 0.6105263157894737,
+          "math": 0.27,
+          "history": 0.6,
+          "geography": 0.61
+        },
+        "logprob": {
+          "biology": -0.8932112522717369,
+          "math": -1.390594139099121,
+          "history": -0.965471734534949,
+          "geography": -0.8147388321347535
+        }
+      }
+    }
+  }
+}

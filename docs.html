@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FoQLens - documentation</title>
+<meta name="description" content="The documents of the FoQLens bench: the filter mechanism, the goals, the plan, the hypotheses and the results of every experiment.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==== TOKENS ==== */
+:root {
+  --ground: #0e1526;
+  --ground-deep: #090e1a;
+  --panel: #141d33;
+  --line: #24314f;
+  --text: #e6ecf5;
+  --muted: #93a2bc;
+  --focus: #f2c14e;
+  --measure: 74ch;
+  --radius: 10px;
+  --rail: 270px;
+}
+
+/* ==== BASE ==== */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font: 400 17px/1.65 "IBM Plex Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--text); text-decoration-color: var(--line); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--focus); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+/* ==== SHELL ==== */
+.shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); width: min(100% - 2.5rem, 1180px); margin-inline: auto; padding-block: 2rem 5rem; }
+
+.rail { position: sticky; top: 2rem; align-self: start; max-height: calc(100vh - 4rem); overflow-y: auto; }
+.rail h2 { font-size: 0.8rem; font-weight: 500; color: var(--muted); margin: 1.6rem 0 0.5rem; }
+.rail h2:first-of-type { margin-top: 1.2rem; }
+.rail ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+.rail a { display: block; padding: 0.32rem 0.6rem; border-radius: 6px; text-decoration: none; font-size: 0.95rem; color: var(--muted); }
+.rail a:hover { background: var(--panel); color: var(--text); }
+.rail a[aria-current="page"] { background: var(--panel); color: var(--text); box-shadow: inset 2px 0 0 var(--focus); }
+.home { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; font-size: 1.05rem; }
+.home svg { width: 26px; height: 26px; }
+
+/* ==== DOCUMENT ==== */
+.doc { min-width: 0; }
+.doc > :first-child { margin-top: 0; }
+.doc h1 { font-size: clamp(1.7rem, 1.2rem + 1.6vw, 2.3rem); line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 1rem; }
+.doc h2 { font-size: 1.35rem; margin: 2.4rem 0 0.8rem; letter-spacing: -0.01em; }
+.doc h3 { font-size: 1.1rem; margin: 1.8rem 0 0.6rem; }
+.doc p, .doc li { max-width: var(--measure); }
+.doc p { margin: 0 0 1em; }
+.doc ul, .doc ol { padding-left: 1.3rem; }
+.doc li { margin-bottom: 0.35em; }
+.doc blockquote { margin: 1.2rem 0; padding: 0.2rem 0 0.2rem 1.1rem; border-left: 2px solid var(--focus); color: var(--muted); }
+.doc hr { border: 0; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+.doc code { font-family: "IBM Plex Mono", monospace; font-size: 0.88em; background: var(--ground-deep); border: 1px solid var(--line); border-radius: 4px; padding: 0.08em 0.35em; }
+.doc pre { background: var(--ground-deep); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; overflow-x: auto; }
+.doc pre code { background: none; border: 0; padding: 0; font-size: 0.85rem; line-height: 1.7; }
+.doc table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1.2rem 0; }
+.doc th, .doc td { text-align: left; padding: 0.6rem 0.9rem 0.6rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
+.doc img { max-width: 100%; }
+.doc .table-scroll { overflow-x: auto; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: baseline; margin-bottom: 1.8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
+.meta a { font-family: "IBM Plex Mono", monospace; font-size: 0.95em; }
+.state { color: var(--muted); }
+.state b { color: var(--text); font-weight: 500; }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: 1fr; gap: 1.5rem; padding-block: 1.5rem 3.5rem; }
+  .rail { position: static; max-height: none; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+  .rail ul { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 0.3rem; }
+  .rail h2 { margin: 1rem 0 0.4rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Documents">
+    <a class="home" href="./">
+      <svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#f2c14e" stroke-width="11" stroke-linecap="round">
+        <circle cx="42" cy="42" r="30"/><path d="M64 64 L86 86"/>
+      </svg>
+      FoQLens
+    </a>
+    <div id="menu"></div>
+  </nav>
+
+  <main class="doc" id="doc">
+    <p class="state">Loading…</p>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
+<script>
+/* ==== THE SHELF ==== */
+// Every document the site shows, by the path it has in the repository - the page renders the same
+// files the bench is written from, so a doc is never a second copy that drifts.
+const REPO = "https://github.com/Vovanda/FoQLens/blob/main/";
+const SHELF = [
+  { group: "The idea", docs: [
+    ["lens", "docs/lens.md", "The filter and its lenses"],
+    ["problem", "docs/problem-statement.md", "Problem statement"],
+    ["goals", "docs/goals.md", "Goals"],
+    ["plan", "docs/plan.md", "Plan"],
+    ["hypotheses", "docs/hypotheses.md", "Hypotheses"],
+  ]},
+  { group: "Around it", docs: [
+    ["zones", "docs/zones.md", "Expert zones (legacy layout)"],
+    ["metaphor", "docs/visual-metaphor.md", "Visual metaphor"],
+    ["prior-art", "docs/prior-art.md", "Prior art"],
+    ["reading", "docs/reading-notes.md", "Reading notes"],
+    ["data", "docs/data-sources.md", "Data sources"],
+  ]},
+  { group: "Preregistration", docs: [
+    ["prereg", "prereg/PREREGISTRATION.md", "Preregistration (English)"],
+    ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
+    ["addendum-11", "experiments/E010-lens-layout/ADDENDUM-11.md", "E010 - the lens layout"],
+  ]},
+  { group: "Results", docs: [
+    ["e001", "experiments/E001-run1-exploration/results.md", "E001 - separation and masks"],
+    ["e004", "experiments/E004-injection/results.md", "E004 - mask injection"],
+    ["e005", "experiments/E005-backbone/results.md", "E005 - backbone"],
+    ["e006", "experiments/E006-read-depths/results.md", "E006 - read depths"],
+    ["e007", "experiments/E007-dilation/results.md", "E007 - dilation"],
+    ["e008", "experiments/E008-zones-fixed-budget/results.md", "E008 - zones at a fixed budget"],
+    ["e009", "experiments/E009-zones-matrix/results.md", "E009 - the zones matrix"],
+  ]},
+];
+const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
+const DEFAULT_DOC = "lens";
+
+/* ==== MENU ==== */
+const menu = document.getElementById("menu");
+const doc = document.getElementById("doc");
+
+menu.innerHTML = SHELF.map((group) => `
+  <h2>${group.group}</h2>
+  <ul>${group.docs.map(([id, , title]) => `<li><a href="#${id}" data-id="${id}">${title}</a></li>`).join("")}</ul>
+`).join("");
+
+function markCurrent(id) {
+  for (const link of menu.querySelectorAll("a")) {
+    if (link.dataset.id === id) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  }
+}
+
+/* ==== RENDERING ==== */
+// Front matter is Hugo's, not the reader's: the title line survives, the rest is dropped.
+function stripFrontMatter(text) {
+  if (!text.startsWith("---")) return text;
+  const end = text.indexOf("\n---", 3);
+  if (end < 0) return text;
+  const head = text.slice(3, end);
+  const body = text.slice(end + 4).replace(/^\s*\n/, "");
+  if (body.startsWith("# ")) return body;   // the body already opens with its own title
+  const title = head.match(/^title:\s*"?(.+?)"?\s*$/m);
+  return (title ? `# ${title[1]}\n\n` : "") + body;
+}
+
+// Links between documents stay inside the site when the target is a document the shelf holds.
+const byPath = new Map([...BY_ID.values()].map((d) => [d.path, d]));
+function resolveLink(href, fromPath) {
+  if (/^[a-z]+:|^#/.test(href)) return null;
+  const base = fromPath.split("/").slice(0, -1);
+  for (const part of href.split("#")[0].split("/")) {
+    if (part === "..") base.pop();
+    else if (part !== "." && part !== "") base.push(part);
+  }
+  const target = byPath.get(base.join("/"));
+  const hash = href.includes("#") ? "#" + href.split("#")[1] : "";
+  return target ? `#${target.id}` : REPO + base.join("/") + hash;
+}
+
+async function show(id) {
+  const entry = BY_ID.get(id) ?? BY_ID.get(DEFAULT_DOC);
+  markCurrent(entry.id);
+  doc.innerHTML = '<p class="state">Loading…</p>';
+  let text;
+  try {
+    const response = await fetch(entry.path);
+    if (!response.ok) throw new Error(String(response.status));
+    text = await response.text();
+  } catch {
+    doc.innerHTML = `<p class="state">This document did not load. Read it in the repository: <a href="${REPO}${entry.path}">${entry.path}</a></p>`;
+    return;
+  }
+  const body = document.createElement("div");
+  body.innerHTML = marked.parse(stripFrontMatter(text));
+  for (const link of body.querySelectorAll("a[href]")) {
+    const resolved = resolveLink(link.getAttribute("href"), entry.path);
+    if (resolved) link.setAttribute("href", resolved);
+  }
+  for (const table of body.querySelectorAll("table")) {
+    const scroll = document.createElement("div");
+    scroll.className = "table-scroll";
+    table.replaceWith(scroll);
+    scroll.append(table);
+  }
+  doc.innerHTML = `<p class="meta"><span>${entry.path}</span> <a href="${REPO}${entry.path}">source on GitHub</a></p>`;
+  doc.append(...body.childNodes);
+  document.title = `${entry.title} - FoQLens`;
+  doc.focus?.();
+}
+
+addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1) || DEFAULT_DOC);
+</script>
+</body>
+</html>

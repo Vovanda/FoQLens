@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="preload">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,267 +8,150 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-/* ==== TOKENS ==== */
-:root {
-  /* the ladder: a colour and a pixel size per rung, as in docs/visual-metaphor.md */
-  --rung-2: #3d5a80;
-  --rung-4: #5e8ca8;
-  --rung-6: #9fd3c7;
-  --rung-8: #f2c14e;
-
-  --ground: #0e1526;
-  --ground-deep: #090e1a;
-  --panel: #141d33;
-  --line: #24314f;
-  --text: #e6ecf5;
-  --muted: #93a2bc;
-  --focus: var(--rung-8);
-
-  --measure: 68ch;
-  --gap: 1.5rem;
-  --radius: 10px;
-}
-
-/* ==== BASE ==== */
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-
-body {
-  margin: 0;
-  background: var(--ground);
-  color: var(--text);
-  font: 400 17px/1.6 "IBM Plex Sans", system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3 { font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 0.6em; }
-h2 { font-size: clamp(1.4rem, 1rem + 1.4vw, 2rem); }
-h3 { font-size: 1.05rem; }
-p { margin: 0 0 1em; max-width: var(--measure); }
-a { color: var(--text); text-decoration-color: var(--line); text-underline-offset: 3px; }
-a:hover { text-decoration-color: var(--focus); }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
-code, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.92em; }
-
-.wrap { width: min(100% - 2.5rem, 1080px); margin-inline: auto; }
-section { padding-block: clamp(3rem, 7vw, 5.5rem); border-top: 1px solid var(--line); }
-section:first-of-type { border-top: 0; }
-
-/* ==== TOP BAR ==== */
-.bar {
-  position: sticky; top: 0; z-index: 5;
-  display: flex; align-items: center; gap: clamp(0.6rem, 2vw, 1.5rem);
-  padding: 0.6rem clamp(1rem, 4vw, 2rem);
-  background: color-mix(in srgb, var(--ground-deep) 82%, transparent);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(12px);
-  font-size: 0.95rem;
-}
-.bar__mark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; margin-right: auto; }
-.bar__mark svg { width: 22px; height: 22px; flex: none; }
-.bar a { text-decoration: none; color: var(--muted); padding: 0.3rem 0.55rem; border-radius: 6px; }
-.bar a:hover { color: var(--text); background: var(--panel); }
-.bar a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 0; }
-.bar__mark, .bar__mark:hover { color: var(--text); background: none; }
-
-/* ==== HERO: the filter itself ==== */
-.hero { position: relative; min-height: min(90svh, 820px); display: grid; }
-.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
-.hero__veil {
-  position: absolute; inset: 0;
-  background: radial-gradient(120% 80% at 50% 35%, transparent 30%, var(--ground-deep) 100%);
-  pointer-events: none;
-}
-.hero__inner {
-  position: relative; z-index: 1;
-  display: grid; align-content: center; justify-items: center;
-  gap: clamp(1rem, 3vw, 2rem);
-  padding: clamp(2rem, 6vw, 4rem) 1.25rem;
-  text-align: center;
-  pointer-events: none;
-}
-.hero__inner > * { pointer-events: auto; }
-.logo-head { margin: 0; }
-.logo { display: block; width: min(440px, 80vw); height: auto; filter: drop-shadow(0 8px 30px rgba(9, 14, 26, 0.9)); }
-.hero__line { max-width: 46ch; margin: 0; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem); color: var(--text); }
-.hero__line b { font-weight: 600; color: var(--focus); }
-
-/* ==== CONTROLS ==== */
-.panel {
-  display: grid; gap: 1rem 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-  align-items: center;
-  padding: 1.1rem 1.3rem;
-  background: color-mix(in srgb, var(--panel) 88%, transparent);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  backdrop-filter: blur(14px);
-  width: min(100%, 760px);
-  text-align: left;
-}
-.control { display: grid; gap: 0.35rem; }
-.control span { font-size: 0.82rem; color: var(--muted); display: flex; justify-content: space-between; gap: 1rem; }
-.control .num { color: var(--text); }
-input[type="range"] { width: 100%; accent-color: var(--focus); }
-select {
-  font: inherit; font-size: 0.95rem; color: var(--text);
-  background: var(--ground); border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.5rem;
-}
-.readout { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; border-top: 1px solid var(--line); padding-top: 0.9rem; font-size: 0.9rem; color: var(--muted); }
-.readout b { font-weight: 500; color: var(--text); font-family: "IBM Plex Mono", monospace; }
-.hint { margin: 0; font-size: 0.85rem; color: var(--muted); }
-.hint kbd { font-family: "IBM Plex Mono", monospace; font-size: 0.9em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0.05em 0.35em; }
-
-/* ==== CONTENT ==== */
-.lede { font-size: clamp(1.05rem, 1rem + 0.5vw, 1.3rem); }
-.cols { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-.rules { font-family: "IBM Plex Mono", monospace; font-size: 0.86rem; line-height: 1.75; margin: 0; padding: 1.2rem 1.3rem; overflow-x: auto; background: var(--ground-deep); border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); }
-.rules b { color: var(--text); font-weight: 500; }
-
-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-th, td { text-align: left; padding: 0.7rem 0.8rem 0.7rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
-.scroller { overflow-x: auto; }
-.tag { display: inline-block; font-size: 0.78rem; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
-.tag--open { color: var(--rung-6); }
-.tag--yes { color: var(--rung-8); }
-.tag--no { color: #e08d79; }
-.tag--legacy { color: var(--muted); }
-
-footer { border-top: 1px solid var(--line); padding-block: 2.5rem 4rem; color: var(--muted); font-size: 0.9rem; }
-footer p { max-width: var(--measure); }
-
-@media (max-width: 700px) {
-  body { font-size: 16px; }
-  /* on a phone the reading comes first and the field last: the name, then the controls a thumb can
-     hit, then a clear area to tap lenses into */
-  .hero { min-height: auto; display: flex; flex-direction: column; }
-  .hero canvas { position: static; order: 2; width: 100%; height: 52svh; }
-  .hero__veil { display: none; }
-  .hero__inner { order: 1; align-content: start; padding: 1.5rem 1.25rem 1.25rem; gap: 0.9rem; }
-  .logo { width: min(260px, 62vw); }
-  .hero__line { font-size: 0.95rem; }
-  /* one control, one line: the label on the left, the field on the right */
-  .panel { gap: 0.7rem 1rem; grid-template-columns: 1fr; }
-  .control { grid-template-columns: 8.5rem 1fr; align-items: center; gap: 0.8rem; }
-  .control:has(select) { grid-template-columns: 8.5rem minmax(6.5rem, auto); }
-  .control span { font-size: 0.9rem; display: block; }
-  .control input, .control select { width: 100%; }
-  .control select { padding: 0.4rem 0.5rem; }
-  /* a thumb needs a taller track than a mouse */
-  .control input[type="range"] { height: 2rem; }
-  .panel { padding: 0.85rem 1rem; gap: 0.7rem 1.2rem; }
-  .control span { font-size: 0.78rem; }
-  .readout { gap: 0.3rem 1rem; padding-top: 0.7rem; font-size: 0.84rem; }
-  .cols { gap: 0.5rem; }
-  .rules { font-size: 0.76rem; padding: 1rem 0.9rem; }
-  th, td { padding-right: 0.6rem; }
-}
-@media (min-width: 1600px) {
-  .wrap { width: min(100% - 4rem, 1240px); }
-  body { font-size: 18px; }
-}
-@media (pointer: coarse) {
-  .hero__inner { padding-bottom: 2rem; }
-}
-</style>
+<link rel="stylesheet" href="site/site.css?v=35">
+<link rel="stylesheet" href="site/front.css?v=35">
+<script>
+/* The theme is set before the first paint, from the reader's own choice or, by default, from the
+   device - a class applied later would show one palette and then swap to the other. */
+try { document.documentElement.setAttribute("data-theme", localStorage.getItem("foqlens.theme") || "auto"); }
+catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
+</script>
 </head>
 <body>
 
-<nav class="bar">
+<div id="main">
+<!-- ==== HERO: the page is the filter ==== -->
+<div id="cols">
+  <aside id="sidebar" aria-label="Sections of this page">
+    <div class="side-head">
+      <span class="side-title">About</span>
+      <button id="side-theme" type="button" title="Theme: follows the device" aria-label="Theme">◐</button>
+      <button id="side-swap" type="button" title="Move the panel to the other side" aria-label="Move the panel to the other side">⇄</button>
+      <button id="side-close" type="button" title="Close" aria-label="Close the panel">✕</button>
+    </div>
+    <!-- The panel of the documentation page, with this page's own sections in it: the same shelf,
+         the same style, the contents of the page it stands on. -->
+    <div class="side-body"><div id="menu">
+        <h2>On this page</h2>
+        <ul>
+          <li><a href="#map">The field</a></li>
+          <li><a href="#idea">Precision where the question is</a></li>
+          <li><a href="#mechanism">The mechanism</a></li>
+          <li><a href="#hypotheses">What is claimed</a></li>
+          <li><a href="#roadmap">Where the work is</a></li>
+        </ul>
+      </div></div>
+  </aside>
+
+  <div id="below">
+    <div class="bar">
+      <div class="wrap bar-inner">
+        <button id="burger" type="button" aria-expanded="false" aria-controls="sidebar" title="Sections of this page">≡</button>
   <a class="bar__mark" href="./">
-    <svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#f2c14e" stroke-width="11" stroke-linecap="round">
-      <circle cx="42" cy="42" r="30"/><path d="M64 64 L86 86"/>
+    <!-- the magnifier of Lucide's "search" (ISC), at its own proportions: r 8 at (11,11), the handle
+         leaving the ring at 16.65 and ending at 21 -->
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="var(--focus)" stroke-width="2.4" stroke-linecap="butt">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
     </svg>
     FoQLens
   </a>
+        <span class="spacer"></span>
   <a href="./" aria-current="page">About</a>
   <a href="docs.html">Docs</a>
-  <a href="https://github.com/Vovanda/FoQLens">GitHub</a>
-</nav>
-
-<!-- ==== HERO: the page is the filter ==== -->
-<header class="hero">
-  <canvas id="map" aria-label="The weight map of Gemma 4 E2B: 14 708 blocks behind the glass, sharp inside the lenses you place."></canvas>
-  <div class="hero__veil"></div>
-  <div class="hero__inner">
-    <h1 class="logo-head"><svg class="logo" viewBox="0 0 560 140" role="img" aria-label="FoQLens">
-      <defs>
-        <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#e6ecf5"/>
-          <stop offset="65%" stop-color="#9fd3c7"/>
-          <stop offset="100%" stop-color="#f2c14e"/>
-        </linearGradient>
-      </defs>
-      <g font-family="IBM Plex Sans, sans-serif" font-size="104" font-weight="600" fill="url(#sheen)">
-        <text x="6" y="104">F</text>
-        <text x="62" y="104">o</text>
-        <!-- Q sits on the right half of the o: the query decides where the lens goes -->
-        <text x="196" y="104">L</text>
-        <text x="252" y="104">e</text>
-        <text x="312" y="104">n</text>
-        <text x="374" y="104">s</text>
-      </g>
-      <!-- Q is the magnifier itself, held over the right half of the o: the query decides where to look -->
-      <g fill="none" stroke-linecap="round">
-        <circle cx="136" cy="62" r="44" stroke="#0e1526" stroke-width="19"/>
-        <path d="M167 93 L196 122" stroke="#0e1526" stroke-width="24"/>
-        <circle cx="136" cy="62" r="44" stroke="#f2c14e" stroke-width="12"/>
-        <path d="M167 93 L196 122" stroke="#f2c14e" stroke-width="17"/>
-        <path d="M108 36 a40 40 0 0 1 22 -12" stroke="#ffe6a8" stroke-width="5" opacity="0.7"/>
-      </g>
-    </svg></h1>
-
-    <p class="hero__line">The weights sit behind a glass. <b>Lenses open where the query needs to see.</b> Place one.</p>
-
-    <div class="panel">
-      <label class="control">
-        <span>Glass <b class="num" id="glassOut">D4</b></span>
-        <input type="range" id="glass" min="0" max="3" step="1" value="1" aria-describedby="glassOut">
-      </label>
-      <label class="control">
-        <span>Lens size <b class="num" id="areaOut">0.50</b></span>
-        <input type="range" id="area" min="0.05" max="0.85" step="0.05" value="0.5">
-      </label>
-      <label class="control">
-        <span>Lens strength <b class="num" id="strengthOut">1.00</b></span>
-        <input type="range" id="strength" min="0" max="1" step="0.05" value="1">
-      </label>
-      <label class="control">
-        <span>Where lenses overlap</span>
-        <select id="combine">
-          <option value="sum">their power adds up</option>
-          <option value="max">the strongest wins</option>
-        </select>
-      </label>
-      <p class="readout">
-        <span>Memory <b id="bitsOut">-</b> bits per weight</span>
-        <span><b id="shareOut">-</b> of bf16</span>
-        <span>Lenses <b id="lensOut">0</b></span>
-      </p>
+  <a href="https://github.com/Vovanda/FoQLens" target="_blank" rel="noopener">GitHub</a>
+      </div>
     </div>
 
-    <p class="hint" id="hint">Click the field to place a lens · drag to move it · scroll over it to resize · click it again to remove · <kbd>R</kbd> clears all</p>
-  </div>
-</header>
+    <header class="hero wrap">
+      <canvas id="map" aria-label="The weight map of Gemma 4 E2B: 14 708 blocks behind the glass, sharp inside the lenses you place."></canvas>
+      <div class="hero__veil"></div>
 
-<main>
+      <!-- The field starts right under the bar and the regulator lies on top of it, so nothing
+           pushes the map down: the plate and the line under it are labels on the surface, and only
+           the plate itself takes the pointer - the rest of the field stays clickable. -->
+      <div class="hero__top">
+      <div class="panel" role="group" aria-label="The regulator">
+        <label class="control">
+          <span>Base precision <b class="num" id="floorOut">D2 · 2 bits</b></span>
+          <input type="range" id="floor" min="0" max="5" step="1" value="1" aria-describedby="floorOut">
+        </label>
+        <label class="control">
+          <span>Focus area <b class="num" id="areaOut">0.50</b></span>
+          <input type="range" id="area" min="0.05" max="0.85" step="0.05" value="0.5">
+        </label>
+        <label class="control">
+          <span>Focus strength <b class="num" id="strengthOut">1.00</b></span>
+          <input type="range" id="strength" min="0" max="1" step="0.05" value="1">
+        </label>
+        <label class="control">
+          <span>Combine <i>where lenses overlap</i></span>
+          <select id="combine">
+            <option value="sum">sum · adds up</option>
+            <option value="max">max · strongest</option>
+          </select>
+        </label>
+        <p class="readout">
+          <span>Memory <b id="bitsOut">-</b> bits</span>
+          <span><b id="shareOut">-</b> of bf16</span>
+          <span>Lenses <b id="lensOut">0</b></span>
+        </p>
+      </div>
+        <p class="hero__hint" id="hint">Click to place a lens · <b>drag to move</b> · scroll to resize · <b>click to remove</b> · <kbd>R</kbd> clears</p>
+      </div>
+
+      <div class="hero__inner">
+        <h1 class="logo-head"><svg class="logo" viewBox="0 0 560 140" role="img" aria-label="FoQLens">
+          <defs>
+            <!-- in the canvas's own coordinates, not in each shape's box: by default every letter,
+                 the ring and the handle would each get a full copy of the ramp, and the sheen read
+                 as a repeating pattern instead of one light crossing the whole mark -->
+            <linearGradient id="sheen" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="560" y2="140">
+              <stop offset="0%" stop-color="var(--sheen-1)"/>
+              <stop offset="65%" stop-color="var(--sheen-2)"/>
+              <stop offset="100%" stop-color="var(--sheen-3)"/>
+            </linearGradient>
+          </defs>
+          <g font-family="IBM Plex Sans, sans-serif" font-size="104" font-weight="600" fill="url(#sheen)">
+            <text x="6" y="104">F</text>
+            <text x="62" y="104">o</text>
+            <!-- Q sits on the right half of the o: the query decides where the lens goes -->
+            <text x="186" y="104">L</text>
+            <text x="242" y="104">e</text>
+            <text x="302" y="104">n</text>
+            <text x="364" y="104">s</text>
+          </g>
+          <!-- Q is a magnifier held over the right half of the o: the query decides where to look.
+               It has to read as a letter of this wordmark rather than as an icon dropped into it -
+               the magnifier of Lucide's "search" (ISC) at the metrics of the type: one stroke weight
+               of 13 for ring and handle, the weight the 600 stems carry at this size; the ring
+               inside the cap height (29 to 103 over a 104 baseline); the handle crossing the
+               baseline the way the tail of a Q does, cut flat because IBM Plex cuts its stems flat;
+               and the sheen of the letters, so one light crosses the whole word. -->
+          <g stroke-linecap="butt" stroke-width="13" fill="none" stroke="url(#sheen)">
+            <path d="M162 92 L188 118"/>
+            <circle cx="136" cy="66" r="37"/>
+          </g>
+        </svg></h1>
+
+        <p class="hero__line">The weights sit behind a glass. <b>Lenses open where the query needs to see.</b> Place one.</p>
+
+      </div>
+    </header>
+
+    <main>
   <!-- ==== THE IDEA ==== -->
   <section id="idea">
     <div class="wrap">
       <h2>Precision where the question is, not everywhere</h2>
       <p class="lede">A question about biology and a question about a proof do not need more or less precision. They need precision in different places.</p>
+      <!-- Set in two balanced columns rather than two boxes: the browser splits the text so both
+           sides end level, and nothing has to be moved by hand when a paragraph is edited. -->
       <div class="cols">
-        <div>
-          <p>Every quantization scheme decides precision per fixed unit - the model, a layer, a channel, a token, an expert. The boundaries come from the architecture; a controller only picks how many bits each unit gets.</p>
-          <p>FoQLens asks the model itself which weights matter for <em>this</em> query, places those blocks on a map, and reads the rest coarsely. Mixture of Experts is the rigid special case of the same idea: experts with hard edges, fixed at training, opened by a router.</p>
-        </div>
-        <div>
-          <p>The field above is not decoration. It is the real weight map of Gemma 4 E2B from run E009 - 14 708 blocks of 64 output rows each, placed so that blocks lighting up together lie close, colored from the first layer to the last.</p>
-          <p>Coarse pixels are weights read at few bits; sharp ones are read at many. Memory is not a budget you set - it is what your lenses cost.</p>
-        </div>
+        <p>Every quantization scheme decides precision per fixed unit - the model, a layer, a channel, a token, an expert. The boundaries come from the architecture; a controller only picks how many bits each unit gets.</p>
+        <p>FoQLens asks the model itself which weights matter for <em>this</em> query, places those blocks on a map, and reads the rest coarsely. Mixture of Experts is the rigid special case of the same idea: experts with hard edges, fixed at training, opened by a router.</p>
+        <p>The mechanism is <b>FoQZones</b> - focusable quantization zones. Call it a Mixture of Zones if you like, though there is no router here and there will not be one. FoQLens is the project and the model that carries the regulator; the lens is the picture of it, and the field above is that picture made interactive.</p>
+        <p>The field above is decoration. Its points come from a run, but what is drawn is a fragment flattened onto a plane, spread and thinned until it reads - a picture, and nothing to measure with. Every number on this page comes from the runs.</p>
+        <p>Coarse pixels are weights read at few bits; sharp ones are read at many. Memory is not a budget you set - it is what your zones cost.</p>
       </div>
     </div>
   </section>
@@ -277,437 +160,100 @@ footer p { max-width: var(--measure); }
   <section id="mechanism">
     <div class="wrap">
       <h2>The mechanism</h2>
-      <p>Three controls, each doing one thing: the <b>glass</b> - what everything outside the lenses keeps; <b>focus_area</b> - how large the lenses are; <b>focus_strength</b> - how far their centers rise above the glass. The rules below are what the field above runs; the full text is in <a href="docs.html#lens">docs/lens.md</a>.</p>
+      <p>Three controls, each doing one thing: the <b>base precision</b> - what the whole network is read at before any zone is lifted, called <code>floor</code> in the runs and the scripts; <b>focus area</b> - how large the zones are; <b>focus strength</b> - how far their centers rise above it. The rules below are what the field above runs; the full text is in <a href="docs.html#lens">docs/lens.md</a>.</p>
+      <p>A fourth input is not a control but a choice, and it is not settled: the <b>metric</b> <code>d</code> on blocks, in which a zone is a ball. The rules hold in any metric. What runs today is the Euclidean distance on a two-dimensional layout of the weight map - the same layout drawn above - which keeps 18% of the variance of the co-activation distance it stands for, and the zones are found on it by image processing. So their shape is a property of the picture, not of the model. Naming the metric is <a href="https://github.com/Vovanda/FoQLens/issues/4" target="_blank" rel="noopener">issue #4</a>.</p>
       <pre class="rules"><b>ladder</b>      ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          the levels this model can be read at; ℓ₀ = ZERO
-<b>glass</b>       G = ℓ_γ                     any rung
+<b>base</b>        G = ℓ_γ                     any rung; floor in the scripts
+<b>metric</b>      d(a, b)                     a distance on blocks - an input, not a fixed choice
 
 1 <b>radius</b>    R_i = r_i · f / (1 − f)
-2 <b>ceiling</b>   κ = γ + ⌊g · (m − γ)⌋       g = 0: the lens is the glass;  g = 1: the top rung
+2 <b>ceiling</b>   κ = γ + ⌊g · (m − γ)⌋       g = 0: the lens is the base;   g = 1: the top rung
 3 <b>profile</b>   stops s_κ &lt; … &lt; s_(γ+1)     where each ring ends, in radii
-4 <b>lift</b>      L_i(b) = max(0, 1 − ρ_i(b) / s_last)
+4 <b>lift</b>      ρ_i(b) = d(b, c_i) / R_i,   L_i(b) = max(0, 1 − ρ_i(b) / s_last)
 5 <b>combine</b>   L(b) = min(1, Σ L_i)  or  max L_i
 6 <b>level</b>     ρ* = s_last · (1 − L(b))    the ring that ρ* falls into; outside every lens: G
 7 <b>memory</b>    bits = Σ w_b · bits(b) / Σ w_b</pre>
-      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy of residual slices is read at 2, 4, 6 or 8 bits, so the ladder is ZERO, D2, D4, D6, D8.</p>
+      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy of residual slices is read at 2, 4, 6 or 8 bits, and the stored weight itself is the rung above them - so the ladder is ZERO, D2, D4, D6, D8, bf16, and the regulator runs over all six.</p>
     </div>
   </section>
 
-  <!-- ==== WHERE THIS STANDS ==== -->
-  <section id="standing">
+  <!-- ==== HYPOTHESES ==== -->
+  <section id="hypotheses">
     <div class="wrap">
-      <h2>Where this stands: nothing has been tested yet</h2>
-      <p class="lede">The bench has been reset. Not one hypothesis carries a verdict, in either direction, and the runs that produced verdicts have had them withdrawn rather than reworded.</p>
-      <div class="cols">
-        <div>
-          <p>Three things were wrong at once, and each alone is enough to void a measurement.</p>
-          <p><b>The questions.</b> Four options, scored by which of A-D the model ranks highest. On only 31% of them is it right under every ordering of the options; on the mathematics subject, 3%, because those questions are answered by calculating and the format allows one token to do it in. More than half the set is a coin toss no layout can move.</p>
-          <p><b>The mask.</b> It is the gradient of the model's language-model loss on the prompt - it shows which blocks the <em>text</em> lights up, not which blocks the <em>answer</em> needs. Nothing in it ever asked about the answer. Reordering the four options changes the text, so the mask moves with it: same question, same meaning, a different address.</p>
-          <p><b>The comparisons.</b> Built on those two, so whichever way they came out, they were reading the coin toss.</p>
-        </div>
-        <div>
-          <p><b>What is not being claimed any more.</b> Everything: that the query's lenses beat uniform quantization at the same memory, that quality holds at a third of the memory, that one topic's mask beats another's, and the negative readings just as much. Two configurations agreeing on a set answered by guessing means they guess alike - not that quality held.</p>
-          <p><b>What is being rebuilt, in order.</b> First data the bench can trust: a corpus measured rather than chosen, where the model's answers come from knowledge, and a metric with nothing to lean on - the model reads a passage and writes the answer, scored the way SQuAD scores it. Then the mask, which has to be asked about the answer rather than about the text. Only then the hypotheses, from the first.</p>
-          <p>The runs, their code, their raw numbers and their preregistrations all stay in the repository. They are what re-testing will be measured against - not evidence, but a baseline to beat.</p>
-          <p><a href="docs.html#corpus">What a corpus has to satisfy</a> · <a href="docs.html#hypotheses">the hypotheses, all untested</a></p>
-        </div>
+      <h2>What is claimed</h2>
+      <p>Each is fixed in git as a direction before the run that tests it. None is settled: the bench reached a point where its own test set could not tell a layout from a coin toss, so every verdict was withdrawn and the list went back to untested.</p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Id</th><th>Claim</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="num">H1</td><td>The mask of a query is separable by topic and concentrated - there is an address to read at all</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H2</td><td>Zones of related topics overlap more than zones of unrelated ones</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H3</td><td>Precision laid out by the query beats the same memory spread any other way</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H4</td><td><b>The main one.</b> A model read through the query's lenses is <em>better</em> than the same model in full - the glass damps what the query does not need</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H5</td><td>The lens model beats a Mixture of Experts built from the same weights - continuous zones against hard-edged experts</td><td><span class="tag tag--open">untested</span></td></tr>
+          </tbody>
+        </table>
       </div>
+      <p>The full list, with the experiments behind each: <a href="docs.html#hypotheses">docs/hypotheses.md</a>.</p>
     </div>
   </section>
-</main>
+
+  <!-- ==== ROADMAP ==== -->
+  <section id="roadmap">
+    <div class="wrap">
+      <h2>Where the work is</h2>
+      <p class="lede">Building the data the idea will be tested on.</p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="num">0-2</td><td>Topics separate in the model; the mask is separable and concentrated; zones of related topics overlap</td><td><span class="tag tag--open">to re-test</span></td></tr>
+            <tr><td class="num">2.5</td><td><b>A corpus and a metric that can carry a verdict</b>, and whatever holds across them</td><td><span class="tag tag--yes">now</span></td></tr>
+            <tr><td class="num">3</td><td>Precision follows meaning: the interval of settings where the model stays usable, and what memory it saves</td><td><span class="tag tag--open">next</span></td></tr>
+            <tr><td class="num">5</td><td>Memory follows the lenses - one stored copy read at 2 / 4 / 6 / 8 bits, 1.63 GiB freed on E2B</td><td><span class="tag tag--yes">built</span></td></tr>
+            <tr><td class="num">6</td><td>The regulator answers to the machine: load, heat, memory</td><td><span class="tag tag--open">after 3</span></td></tr>
+            <tr><td class="num">7</td><td>An agent on the lens model against the same model in full</td><td><span class="tag tag--open">after 3</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The corpus being built now</h3>
+      <p>A layout can only be measured where the model answers from knowledge rather than from the arrangement of the options. So the questions are picked by measurement - the share the model gets right under <em>every</em> ordering of its options - and the metric drops the options: the model reads a passage and writes the answer, scored the way SQuAD scores it.</p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>Regime</th><th>Where the answer is</th><th>What lenses should do</th></tr></thead>
+          <tbody>
+            <tr><td>Reading</td><td>in the passage - SQuAD v2</td><td>little: the knowledge came in with the prompt</td></tr>
+            <tr><td>Knowledge</td><td>only in the weights - ARC-Challenge, ReClor</td><td>decide - the regime the idea is about</td></tr>
+            <tr><td>Two steps</td><td>split across two passages - HotpotQA</td><td>matter, and less than in the second</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>If the lenses help as much where the answer sits in the context as where it is only in the weights, the mechanism is not doing what it claims - and that is the test the old corpus could not run. How a corpus is chosen: <a href="docs.html#corpus">docs/corpus.md</a>.</p>
+    </div>
+  </section>
+
+    </main>
 
 <footer>
   <div class="wrap">
     <p>FoQLens is the research of <a href="https://sawking.tech/cv">Vladimir Savkin</a> - a systems architect, not a professional scientist, which is why the bench commits every prediction before the run. Code, preregistrations and raw numbers: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
+    <p>Made at <a href="https://sawking.tech">sawking.tech</a>.</p>
   </div>
 </footer>
+  </div>
+</div>
+</div>
 
+<script src="site/panel.js?v=35"></script>
+<script src="site/sections.js?v=35"></script>
+<script src="site/field.js?v=35"></script>
 <script>
-/* ==== LADDER ==== */
-// One rung per level the bench can read a block at, coarse first (docs/lens.md).
-// Sizes are shares of the room one block has on screen, not pixels: a phone gives a block a tenth of
-// the area a monitor does, and fixed pixels turned the field into one solid blot there.
-const LADDER = [
-  { name: "ZERO", bits: 0, light: 0,    size: 0 },
-  { name: "D2",   bits: 2, light: 0.30, size: 0.30 },
-  { name: "D4",   bits: 4, light: 0.42, size: 0.34 },
-  { name: "D6",   bits: 6, light: 0.58, size: 0.38 },
-  { name: "D8",   bits: 8, light: 0.74, size: 0.42 },
-];
-const LENS_TILE = 0.38;     // a block under a lens starts here and grows with the lift
-const LENS_GROWTH = 0.5;    // how much of the block's room a lens adds at full lift
-// A block's colour belongs to its place on the map, not to the lens that happens to cover it: blocks
-// that lie together read together, so a region keeps its hue whether a lens is over it or not, and
-// removing a lens repaints nothing.
-const HUE_SPAN = 280;       // degrees of hue the map is spread over
-const HUE_TURN = 190;       // where the span starts, so one corner of the map reads cyan
-const HUE_TILT = 0.62;      // how much of the span the horizontal axis carries, the rest is vertical
-const GLASS_SAT = 0.34;     // how much colour a block keeps behind the glass
-const LENS_SAT = 0.95;      // and how much it takes at the center of a lens
-const ZOOM = 0.17;          // a lens magnifies what it reads: blocks spread from its center with the lift
-
-// hsl to rgb, kept small: hue from the place, lightness from the rung, saturation from the lift.
-function hsl(h, s, l) {
-  const a = s * Math.min(l, 1 - l);
-  const f = (n) => {
-    const k = (n + h / 30) % 12;
-    return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
-  };
-  return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4))];
-}
-
-// The hue of a place: it runs along the diagonal of the map, so neighbours share a colour, far
-// regions differ, and nowhere is there a seam - an angle around the center would have one, along the
-// ray where it wraps. It does not move when a lens is added, removed or dragged.
-function hueAt(x, y) {
-  return HUE_TURN + HUE_SPAN * (HUE_TILT * x + (1 - HUE_TILT) * y);
-}
-
-// A block is painted by where it lies; the rung it is read at sets how light it is and the lift over
-// it how vivid. Behind the glass that leaves a dim but coloured field, never a grey one.
-function paintOf(x, y, light, lift) {
-  const [r, g, b] = hsl(hueAt(x, y), GLASS_SAT + (LENS_SAT - GLASS_SAT) * lift, light);
-  return `rgb(${r}, ${g}, ${b})`;
-}
-// How the glass looks at each rung: what is behind it is blurred by that much and veiled in that colour.
-// The veil is not the page's own background - a glass has to read as a surface, not as an unlit field.
-const GLASS_LOOK = [
-  { blur: 0,   veil: "rgba(9, 14, 26, 0.94)" },     // ZERO: emptiness, nothing behind it
-  { blur: 2.8, veil: "rgba(11, 17, 32, 0.66)" },
-  { blur: 2.0, veil: "rgba(11, 17, 32, 0.50)" },
-  { blur: 1.1, veil: "rgba(11, 17, 32, 0.32)" },
-];
-const BF16_BITS = 16;
-const BASE_RADIUS = 0.09;   // a new lens covers this share of the map before focus_area scales it
-// Zones of a query come out with different radii (docs/zones.md); a placed lens takes the next of these.
-const LENS_RADII = [1, 0.62, 1.35, 0.8, 1.1, 0.5];
-const HALO_STOP = 1.5;      // behind a ZERO glass the lowest rung is pushed past the edge (docs/lens.md)
-const PICK_SLACK = 1.25;    // clicking this much past a lens edge still grabs it
-
-/* ==== STATE ==== */
-const el = (id) => document.getElementById(id);
-const canvas = el("map");
-const ctx = canvas.getContext("2d");
-const controls = { glass: el("glass"), area: el("area"), strength: el("strength"), combine: el("combine") };
-const lenses = [];
-let points = null;      // Float32Array [x0, y0, x1, y1, …] in the unit square
-let depth = null;       // Float32Array, 0 at the first layer, 1 at the last
-let view = { w: 0, h: 0, scale: 1, dx: 0, dy: 0, room: 1 };
-let drag = null;
-const field = document.createElement("canvas");   // the blocks as they are, before the glass
-const fieldCtx = field.getContext("2d");
-const lift = document.createElement("canvas");    // how much the lenses lift each point, white to black
-const liftCtx = lift.getContext("2d");
-const sharp = document.createElement("canvas");   // one sharpening layer, masked by the lift
-const sharpCtx = sharp.getContext("2d");
-// Layers from the glass's blur down to none, each faded by the lift: they add up where the lift is
-// strong, so sharpness grows toward the center of a lens instead of jumping at its edge.
-const SHARPEN = [{ blur: 1.6, alpha: 0.5 }, { blur: 0.8, alpha: 0.65 }, { blur: 0, alpha: 1 }];
-
-/* ==== GEOMETRY ==== */
-// The map is drawn "cover": square data, rectangular canvas, no distortion.
-function fitView() {
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.round(rect.width * dpr);
-  canvas.height = Math.round(rect.height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  for (const [buffer, context] of [[field, fieldCtx], [lift, liftCtx], [sharp, sharpCtx]]) {
-    buffer.width = canvas.width;
-    buffer.height = canvas.height;
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  // the map fills the canvas with a margin; x and y keep one scale, so no zone is squashed
-  const scale = Math.max(rect.width, rect.height) * 0.92;   // tighter: more blocks per lens, denser field
-  // the room a block has: the side of its share of the canvas, so the field reads the same everywhere
-  const room = points ? Math.sqrt((rect.width * rect.height) / (points.length / 2)) : 1;
-  view = { w: rect.width, h: rect.height, scale, dx: (rect.width - scale) / 2, dy: (rect.height - scale) / 2, room };
-}
-// one scale for x and y, so a lens is a circle on screen as it is on the map
-const toScreen = (x, y) => [view.dx + x * view.scale, view.dy + y * view.scale];
-const toMap = (sx, sy) => [(sx - view.dx) / view.scale, (sy - view.dy) / view.scale];
-function pointerMap(e) {
-  const rect = canvas.getBoundingClientRect();
-  return toMap(e.clientX - rect.left, e.clientY - rect.top);
-}
-
-/* ==== THE RULES OF docs/lens.md ==== */
-function layout() {
-  const glassIndex = Number(controls.glass.value);          // 0 = ZERO … 3 = D6
-  const area = Number(controls.area.value);
-  const strength = Number(controls.strength.value);
-  const top = LADDER.length - 1;
-  const ceiling = glassIndex + Math.floor(strength * (top - glassIndex));   // rule 2
-  const radius = BASE_RADIUS * area / (1 - area);                           // rule 1
-  // rule 3: even stops from the ceiling down to the first rung above the glass; a ZERO glass
-  // pushes the lowest rung past the edge as the ring that softens the step into emptiness.
-  const rings = [];
-  const halo = glassIndex === 0 && ceiling > 1;
-  const inner = halo ? ceiling - 1 : ceiling - glassIndex;
-  for (let i = 0; i < inner; i++) rings.push({ level: ceiling - i, stop: (i + 1) / inner });
-  if (halo) rings.push({ level: 1, stop: HALO_STOP });
-  const last = rings.length ? rings[rings.length - 1].stop : 1;
-  return { glassIndex, ceiling, radius, rings, last, sum: controls.combine.value === "sum" };
-}
-
-// The level of a block and the lift it carries: the lift decides how vivid the block is drawn, the
-// nearest lens whose center it magnifies from.
-const held = { level: 0, owner: -1, lift: 0 };
-function levelOf(x, y, L) {
-  held.owner = -1;
-  held.lift = 0;
-  if (!lenses.length || L.ceiling === L.glassIndex) return (held.level = L.glassIndex);
-  let lift = 0, best = 0;                                                   // rules 4 and 5
-  for (let i = 0; i < lenses.length; i++) {
-    const r = L.radius * lenses[i].scale;
-    const one = 1 - Math.hypot(x - lenses[i].x, y - lenses[i].y) / r / L.last;
-    if (one <= 0) continue;
-    lift = L.sum ? lift + one : Math.max(lift, one);
-    if (one > best) { best = one; held.owner = i; }
-  }
-  if (lift <= 0) return (held.level = L.glassIndex);
-  held.lift = Math.min(1, lift);
-  const rhoStar = L.last * (1 - held.lift);                                 // rule 6
-  for (const ring of L.rings) if (ring.stop >= rhoStar) return (held.level = ring.level);
-  return (held.level = L.glassIndex);
-}
-
-/* ==== DRAWING ==== */
-// Every block at the rung its lenses give it: size and colour per rung, depth in the network as tint.
-function drawField(L) {
-  fieldCtx.clearRect(0, 0, view.w, view.h);
-  let bits = 0;
-  for (let i = 0; i < depth.length; i++) {
-    const x = points[i * 2], y = points[i * 2 + 1];
-    const level = levelOf(x, y, L);
-    const rung = LADDER[level];
-    bits += rung.bits;
-    if (!rung.size) continue;
-    let [sx, sy] = toScreen(x, y);
-    if (held.owner >= 0 && held.lift > 0) {
-      // the lens magnifies: blocks spread from its center, none at the edge, most where it is strongest
-      const [cx, cy] = toScreen(lenses[held.owner].x, lenses[held.owner].y);
-      const zoom = 1 + ZOOM * held.lift;
-      sx = cx + (sx - cx) * zoom;
-      sy = cy + (sy - cy) * zoom;
-    }
-    if (sx < -6 || sy < -6 || sx > view.w + 6 || sy > view.h + 6) continue;
-    const lifted = level > L.glassIndex;
-    fieldCtx.fillStyle = paintOf(x, y, rung.light, lifted ? held.lift : 0);
-    fieldCtx.globalAlpha = lifted ? 1 : 0.55 + 0.3 * depth[i];
-    // a lens magnifies what it reads: the blocks under it grow toward its center
-    const size = lifted ? (LENS_TILE + LENS_GROWTH * held.lift) * view.room : rung.size * view.room;
-    fieldCtx.fillRect(sx - size / 2, sy - size / 2, size, size);
-  }
-  fieldCtx.globalAlpha = 1;
-  return bits / depth.length;
-}
-
-function lensPath(target, L) {
-  target.beginPath();
-  for (const lens of lenses) {
-    const [sx, sy] = toScreen(lens.x, lens.y);
-    const r = L.radius * lens.scale * L.last * view.scale;
-    target.moveTo(sx + r, sy);
-    target.arc(sx, sy, r, 0, Math.PI * 2);
-  }
-}
-
-// How much of the glass is lifted at every point - the same sum of lifts that sets the levels (rules 4-5),
-// painted as white where the lenses are strongest. Two lenses that overlap brighten their isthmus by
-// themselves, so the bridge between two zones shows up without a rule of its own.
-function drawLift(L) {
-  liftCtx.globalCompositeOperation = "source-over";
-  liftCtx.fillStyle = "#000";
-  liftCtx.fillRect(0, 0, view.w, view.h);
-  liftCtx.globalCompositeOperation = L.sum ? "lighter" : "lighten";
-  for (const lens of lenses) {
-    const [sx, sy] = toScreen(lens.x, lens.y);
-    const r = L.radius * lens.scale * L.last * view.scale;
-    const cone = liftCtx.createRadialGradient(sx, sy, 0, sx, sy, r);
-    cone.addColorStop(0, "#fff");
-    cone.addColorStop(1, "#000");
-    liftCtx.fillStyle = cone;
-    liftCtx.fillRect(sx - r, sy - r, r * 2, r * 2);
-  }
-  liftCtx.globalCompositeOperation = "source-over";
-}
-
-function draw() {
-  if (!points) return;
-  const L = layout();
-  const meanBits = drawField(L);
-  const look = GLASS_LOOK[L.glassIndex];
-  drawLift(L);
-
-  // behind the glass: the field blurred and veiled in the glass's own colour
-  ctx.clearRect(0, 0, view.w, view.h);
-  ctx.filter = look.blur ? `blur(${look.blur}px)` : "none";
-  ctx.drawImage(field, 0, 0, view.w, view.h);
-  ctx.filter = "none";
-  ctx.fillStyle = look.veil;
-  ctx.fillRect(0, 0, view.w, view.h);
-  const sheen = ctx.createLinearGradient(0, 0, view.w, view.h);
-  sheen.addColorStop(0, "rgba(198, 220, 255, 0.03)");
-  sheen.addColorStop(0.5, "rgba(198, 220, 255, 0.004)");
-  sheen.addColorStop(1, "rgba(120, 150, 200, 0.025)");
-  ctx.fillStyle = sheen;
-  ctx.fillRect(0, 0, view.w, view.h);
-
-  if (!lenses.length) return report(meanBits);
-
-  // through the lenses: the same field, sharper the stronger the lift - so the edge of a lens is a
-  // fade, not a cut, and the sharpest point is the center
-  for (const step of SHARPEN) {
-    sharpCtx.globalCompositeOperation = "source-over";
-    sharpCtx.clearRect(0, 0, view.w, view.h);
-    sharpCtx.filter = step.blur ? `blur(${step.blur}px)` : "none";
-    sharpCtx.drawImage(field, 0, 0, view.w, view.h);
-    sharpCtx.filter = "none";
-    // this layer survives in proportion to the lift: full at a lens center, gone outside
-    sharpCtx.globalCompositeOperation = "destination-in";
-    sharpCtx.drawImage(lift, 0, 0, view.w, view.h);
-    sharpCtx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = step.alpha;
-    ctx.drawImage(sharp, 0, 0, view.w, view.h);
-  }
-  ctx.globalAlpha = 1;
-
-  // the light a lens gathers, strongest at its center
-  ctx.globalCompositeOperation = "lighter";
-  for (let i = 0; i < lenses.length; i++) {
-    const [sx, sy] = toScreen(lenses[i].x, lenses[i].y);
-    const r = L.radius * lenses[i].scale * L.last * view.scale;
-    // the glow takes the colour of the place the lens sits on, like the blocks under it
-    const [gr, gg, gb] = hsl(hueAt(lenses[i].x, lenses[i].y), 0.75, 0.62);
-    const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-    glow.addColorStop(0, `rgba(${gr}, ${gg}, ${gb}, 0.16)`);
-    glow.addColorStop(0.5, `rgba(${gr}, ${gg}, ${gb}, 0.05)`);
-    glow.addColorStop(1, `rgba(${gr}, ${gg}, ${gb}, 0)`);
-    ctx.fillStyle = glow;
-    ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
-  }
-  ctx.globalCompositeOperation = "source-over";
-  report(meanBits);
-}
-
-function report(meanBits) {
-  el("bitsOut").textContent = meanBits.toFixed(2);
-  el("shareOut").textContent = Math.round((meanBits / BF16_BITS) * 100) + "%";
-  el("lensOut").textContent = String(lenses.length);
-  el("glassOut").textContent = LADDER[Number(controls.glass.value)].name;
-  el("areaOut").textContent = Number(controls.area.value).toFixed(2);
-  el("strengthOut").textContent = Number(controls.strength.value).toFixed(2);
-}
-
-let queued = false;
-function render() {
-  if (queued) return;
-  queued = true;
-  requestAnimationFrame(() => { queued = false; draw(); });
-}
-
-/* ==== INTERACTION ==== */
-function newLens(x, y) {
-  return { x, y, scale: LENS_RADII[lenses.length % LENS_RADII.length] };
-}
-
-function lensAt(x, y) {
-  const L = layout();
-  for (let i = lenses.length - 1; i >= 0; i--) {
-    const r = L.radius * lenses[i].scale * L.last * PICK_SLACK;
-    if (Math.hypot(x - lenses[i].x, y - lenses[i].y) <= r) return i;  // map units: the lens is a circle there
-  }
-  return -1;
-}
-
-const byFinger = () => matchMedia("(pointer: coarse)").matches;
-
-canvas.addEventListener("pointerdown", (e) => {
-  const [x, y] = pointerMap(e);
-  const hit = lensAt(x, y);
-  if (byFinger()) {
-    // a finger taps: the lens appears or goes at once, and the page is left free to scroll
-    if (hit >= 0) lenses.splice(hit, 1);
-    else lenses.push(newLens(x, y));
-    render();
-    return;
-  }
-  if (hit >= 0) {
-    drag = { index: hit, ox: lenses[hit].x - x, oy: lenses[hit].y - y, moved: false };
-    if (canvas.hasPointerCapture || e.pointerId !== undefined) try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic pointer */ }
-  } else {
-    lenses.push(newLens(x, y));
-    render();
-  }
-});
-
-canvas.addEventListener("pointermove", (e) => {
-  if (!drag) return;
-  const [x, y] = pointerMap(e);
-  const lens = lenses[drag.index];
-  if (Math.hypot(x + drag.ox - lens.x, y + drag.oy - lens.y) > 0.002) drag.moved = true;
-  lens.x = x + drag.ox;
-  lens.y = y + drag.oy;
-  render();
-});
-
-canvas.addEventListener("pointerup", () => {
-  if (drag && !drag.moved) lenses.splice(drag.index, 1);   // a click on a lens removes it
-  drag = null;
-  render();
-});
-
-canvas.addEventListener("wheel", (e) => {
-  const [x, y] = pointerMap(e);
-  const hit = lensAt(x, y);
-  if (hit < 0) return;
-  e.preventDefault();
-  lenses[hit].scale = Math.min(3, Math.max(0.3, lenses[hit].scale * (e.deltaY < 0 ? 1.12 : 0.89)));
-  render();
-}, { passive: false });
-
-addEventListener("keydown", (e) => {
-  if (e.key === "r" || e.key === "R") { lenses.length = 0; render(); }
-});
-
-// a touch screen has no wheel and no keyboard: the hint says what a finger can do, and the sliders
-// become numbers - a value is easier to hit and to read than a thumb on a 4 mm track
-if (matchMedia("(pointer: coarse)").matches) {
-  document.body.classList.add("by-finger");
-  el("hint").textContent = "Tap the field below to place a lens · tap it again to remove";
-  // the glass is a choice of four levels, not a quantity: a finger picks it by name
-  const glass = document.createElement("select");
-  glass.id = controls.glass.id;
-  for (let i = 0; i < GLASS_LOOK.length; i++) {
-    glass.append(new Option(LADDER[i].name, String(i), false, String(i) === controls.glass.value));
-  }
-  controls.glass.replaceWith(glass);
-  controls.glass = glass;
-  glass.addEventListener("input", render);
-}
-
-for (const control of Object.values(controls)) control.addEventListener("input", render);
-addEventListener("resize", () => { fitView(); render(); });
-
-/* ==== DATA ==== */
-// The weight map of run E009: 14 708 blocks as uint16 pairs, x and y over the unit square.
-fetch("site/weight-map.bin")
-  .then((r) => r.arrayBuffer())
-  .then((buf) => {
-    const raw = new Uint16Array(buf);
-    points = new Float32Array(raw.length);
-    for (let i = 0; i < raw.length; i++) points[i] = raw[i] / 65535;
-    depth = new Float32Array(raw.length / 2);
-    for (let i = 0; i < depth.length; i++) depth[i] = i / (depth.length - 1);
-    fitView();   // again, now that the number of blocks is known: it sets the size of a tile
-    // one lens to start, so the mechanism is visible before anything is touched
-    lenses.push({ x: 0.28, y: 0.34, scale: 1.3 }, { x: 0.54, y: 0.22, scale: 0.68 });
-    render();
-  })
-  .catch(() => { el("bitsOut").textContent = "no data"; });
-
-// The lenses, for a smoke check from the console: place a few and see what the glass does with them.
-window.foqlens = { lenses, render };
+/* Transitions come back only once the panel and the sheet stand where storage says - two frames
+   later, so the browser has laid the page out and painted it at rest. This lives in the page, next
+   to the class it removes: from a cached script it might never run, and the page would keep every
+   animation switched off. */
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove("preload")));
 </script>
 </body>
 </html>

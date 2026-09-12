@@ -22,3 +22,6 @@ hf-cache/
 
 # nvcc output, rebuilt from the .cu next to it
 *.ptx
+
+# browser artefacts from smoke runs
+.playwright-mcp/

@@ -26,6 +26,41 @@ We write high-performance code and hold it to the usual engineering principles -
 - **Invariants are written down.** Every module states its invariants in its docstring as `Invariant: ...`, exact or approximate with the measured bound, and each has a test. bf16 inference is not batch-invariant (token states move up to ~2% with the batch size), so exact claims are made only where they hold - same inputs in the same batch, per-sample layouts against the same batch - and comparisons between configurations always run on the same batches.
 - No magic numbers in code: named constants with a reason, or a parameter.
 
+## The site (`index.html`, `docs.html`, `site/*`)
+
+The same standards as the bench, in the shape the front end takes them. They are the ones already in
+force on the sibling project ([Work-Life-Schedule](https://github.com/Vovanda/Work-Life-Schedule)).
+
+- **Semantics first.** `<button>` for an action, a real element for what it is. An icon button carries
+  an `aria-label`, a decorative shape carries `aria-hidden`, and focus is always visible.
+- **No colour outside the palette.** Every colour is a token in `:root`, and both themes are
+  assignments of those tokens - a hex inside a rule is a bug. The same holds for the field drawn on
+  the canvas: its palettes live at the top of `site/field.js`, one set per theme.
+- **The theme is the device's** unless the reader says otherwise, and it is applied before the first
+  paint - a page that picks it later shows one palette and swaps to the other in front of the reader.
+- **Layout by flex and grid, not by margins.** Geometry stays the same across states: the mark of the
+  current page is drawn with `outline` or an inset shadow, never by a border that shifts everything.
+- **Flat selectors**, nesting no deeper than two levels. `!important` means the order of the rules is
+  broken and is to be fixed there - the one exception is `.preload`, which switches every transition
+  off while the page lays itself out.
+- **Animate `transform` and `opacity` only**, and respect `prefers-reduced-motion`.
+- **Do not move with a script what CSS can do.** What the script may do is publish a measurement the
+  stylesheet cannot take itself (the gutter, the panel's shift).
+- **One thing does one thing.** A function computes or draws, never both. The top of the file reads
+  like a table of contents; sections carry `/* ==== NAME ==== */` headers, and a new rule goes into
+  its section, not onto the end of the file.
+- **Do not duplicate knowledge.** The ladder lives in `LADDER`, a colour in a token, the controls in
+  `DEFAULTS`. One entity, one word, everywhere: the level outside the lenses is `floor` in the panel,
+  in the scripts and in `docs/lens.md`; the glass is the picture of it, not a second name for it.
+- **A comment says why.** What a line does is visible in the line.
+- **Static files are versioned** (`site/field.js?v=N`) and the version is bumped with every change to
+  `site/*`: without it a browser serves a stale copy and the page you are shown is not the page you
+  wrote. One version per page, never a half-bumped one.
+- **The page only reads.** Nothing on the site writes data of the bench.
+- **Never say it is done without looking.** Smoke it at 390, 768, 1200 and 1700 px in both themes;
+  `node --check site/*.js` for syntax, `pytest tests/test_site_unit.py` for the frame the two pages
+  share. A screenshot after the change, not after the complaint.
+
 ## Stack
 
 - Gemma 4 E2B (debugging) / E4B (confirmation), base checkpoints `google/gemma-4-E2B`, `google/gemma-4-E4B` at the revisions pinned in `foqlens.model.REVISIONS`. Do not take the 26B-A4B MoE.

@@ -1,0 +1,320 @@
+/* The frame of every page: tokens, base, the bar, the sheet and the panel, the hero.
+   One file so the pages cannot drift apart - that is what happened when each had its own copy. */
+/* ==== TOKENS ==== */
+:root {
+  /* the ladder: a colour and a pixel size per rung, as in docs/visual-metaphor.md */
+  --rung-2: #3d5a80;
+  --rung-4: #5e8ca8;
+  --rung-6: #9fd3c7;
+  --rung-8: #f2c14e;
+  --refuted: #e08d79;   /* the one colour outside the ladder: a verdict that did not hold */
+
+  --ground: #0e1526;
+  --ground-deep: #090e1a;
+  --panel: #141d33;
+  --line: #24314f;
+  --text: #e6ecf5;
+  --muted: #93a2bc;
+  --focus: var(--rung-8);
+  /* the accent as text: amber holds up on a dark ground, but on white it needs to go gold to stay
+     readable - same hue, enough contrast to read at body size */
+  --focus-text: var(--rung-8);
+
+  /* The light palette, named once and assigned below: the page has two themes, and a second copy of
+     these values would drift from the first. Only the assignment repeats, not the colours. */
+  --l-ground: #f4f6fb;
+  --l-ground-deep: #e8ecf6;
+  --l-panel: #ffffff;
+  --l-panel-2: #eef2fa;
+  --l-line: #ccd6e8;
+  --l-text: #14203a;
+  --l-muted: #5a6a8a;
+  --l-focus: var(--rung-8);        /* the same amber in both themes - the accent belongs to the ladder */
+  --l-focus-text: #9a6c0c;         /* gold: the amber of the ladder, deep enough to read on white */
+  --l-sheen-1: #16233f; --l-sheen-2: #24645a; --l-sheen-3: #d9a11f;
+
+  /* the sheen of the wordmark: light letters at night, dark ones by day - on a near-white field the
+     pale gradient was invisible */
+  --sheen-1: #e6ecf5; --sheen-2: #9fd3c7; --sheen-3: #f2c14e;
+  /* the lens of the wordmark: amber on the dark ground, the ink of the letters on the light one -
+     amber on near-white read as a highlighter mark rather than as a letter */
+
+  --measure: 68ch;
+  --gap: 1.5rem;
+  --radius: 10px;
+
+  /* the sheet-and-panel layout: its own set of names, kept apart from the page palette */
+  --app-bg: var(--ground);
+  --panel-2: #1b2540;
+  --ink: var(--text);
+  --barh: 53px;
+  --panelw: 272px;
+  --maxw: 920px;   /* narrow enough that an open panel still leaves the sheet a margin */
+  --gut: 20px;
+}
+
+/* The theme: "auto" follows the device, "light" and "dark" are the reader's own choice. The
+   attribute is set on <html> before the first paint, so the page never flashes the wrong palette.
+   One block of assignments, used by both the explicit choice and the device's. */
+:root[data-theme="light"] {
+  --ground: var(--l-ground); --ground-deep: var(--l-ground-deep);
+  --panel: var(--l-panel); --panel-2: var(--l-panel-2);
+  --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text);
+  --sheen-1: var(--l-sheen-1); --sheen-2: var(--l-sheen-2); --sheen-3: var(--l-sheen-3);
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] {
+    --ground: var(--l-ground); --ground-deep: var(--l-ground-deep);
+    --panel: var(--l-panel); --panel-2: var(--l-panel-2);
+    --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text);
+    --sheen-1: var(--l-sheen-1); --sheen-2: var(--l-sheen-2); --sheen-3: var(--l-sheen-3);
+  }
+}
+
+/* ==== BASE ==== */
+* { box-sizing: border-box; }
+/* No clipping here, however tempting: overflow on <html> makes it the scroll container and the
+   sticky panel stops sticking. A page wider than the window is fixed where it is made - the panel
+   hides under the sheet instead of being parked past its edge (panel.js, applyShift). */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0; overflow-x: hidden;
+  background: var(--ground);
+  color: var(--text);
+  font: 400 17px/1.6 "IBM Plex Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 0.6em; }
+h2 { font-size: clamp(1.4rem, 1rem + 1.4vw, 2rem); }
+h3 { font-size: 1.05rem; }
+p { margin: 0 0 1em; max-width: var(--measure); }
+a { color: var(--text); text-decoration-color: var(--line); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--focus); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+code, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.92em; }
+
+/* The measure of the content and the gutter it keeps from the edge - the padding is what stops
+   the text touching the border when an open panel narrows the sheet. */
+/* The content column is drawn: a rule down each side, running the height of the page. Sections
+   sit one under another, so their sides join into two unbroken lines. */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut);
+        border-inline: 1px solid var(--line); }
+/* Separators run at the width of the content, never across the whole sheet: a full-width rule
+   reaches under the panel standing beside it and cuts the page in two. */
+section { padding-block: 0 clamp(3rem, 7vw, 5.5rem); }
+section > .wrap { padding-top: clamp(3rem, 7vw, 5.5rem); }
+section + section > .wrap { border-top: 1px solid var(--line); }
+
+/* ==== TOP BAR ==== */
+/* The bar and the panel's head are one line across the page: same height, same ground, same rule
+   under them. The height belongs to --barh and nothing else may add to it - the padding lives on
+   .bar-inner, so that a stray padding here cannot push the two out of step. */
+.bar { font-size: 0.95rem; }
+.bar__mark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; }
+.bar__mark svg { width: 22px; height: 22px; flex: none; }
+/* The bar is navigation, not a caption: its links carry the text colour and a little weight, so
+   they read as places to go. Muted grey made them look disabled, on the light theme especially. */
+.bar a { text-decoration: none; color: var(--text); font-weight: 500; padding: 0.3rem 0.55rem; border-radius: 6px; }
+.bar a:hover { color: var(--text); background: var(--panel); }
+.bar a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 0; }
+.bar__mark, .bar__mark:hover { color: var(--text); background: none; }
+
+/* ==== LAYOUT: the sheet and the panel ========================================================
+   A push panel, by the rules of the site layout spec: it slides out and moves the whole frame -
+   header included - because moving only the middle would let the panel lie over the header, leaving
+   the page both shifted and covered at once. The page yields the panel's width minus the free
+   gutter, never less than zero; on a wide screen it yields nothing, there being nothing to yield.
+
+   Layer order: the sheet sits above the panel, so the panel comes out from under its edge; the bar
+   runs at the sheet's width and sits higher still; the footer is above the panel as well, or the
+   panel would land on top of it.
+
+   #below is the sheet - opaque, above the panel, so a closed panel hides exactly under its edge.
+   #sidebar is the panel: a sticky column the browser keeps in place by itself, with no recomputing
+   on scroll. Wide window (body.wide): the side gutter is wider than the panel, so the panel simply
+   stands in it and the sheet never moves. Narrow: the panel sits under the sheet with a negative
+   margin, taking no space, and opening slides the two apart to meet.
+
+   The panel pushes the content, it never covers it - no scrim, no click trap, closed by the button
+   that opened it. */
+/* Nothing moves while the page is laying itself out. The panel's place comes from storage and is
+   applied by a script, so without this the sheet and the panel slid apart on every refresh - the
+   opening animation played for a state that was never closed. The class comes off after the first
+   frames, once everything stands where it belongs. */
+.preload *, .preload *::before, .preload *::after { transition: none !important; animation: none !important; }
+
+#main{position:relative;z-index:10}
+  #cols{display:flex;align-items:flex-start}
+  /* The sheet is the page: capped at --maxw and centred, so the rules down the sides of the content
+     are the edges of the sheet itself. Left to fill the window it grew two blank margins with no
+     edge to them, and the panel's zone showed as a third. */
+  #below{position:relative;z-index:2;width:100%;max-width:var(--maxw);margin:0 auto;min-height:100vh;
+    background:var(--app-bg);
+    transform:translateX(var(--shift,0px));transition:transform .25s}
+  /* The panel is glass: what is behind it shows through, softened. It keeps its place in the layer
+     order - under the sheet, sliding out from its edge - so it is the panel that takes the clicks
+     landing on it. */
+  #sidebar{position:sticky;top:0;height:100vh;width:var(--panelw);flex:none;order:2;z-index:1;
+    display:flex;flex-direction:column;border-left:1px solid var(--line);
+    background:color-mix(in srgb,var(--panel) 72%,transparent);backdrop-filter:blur(16px);
+    margin-left:calc(-1 * var(--panelw));
+    transform:translateX(var(--panel-shift,0px));transition:transform .25s}
+  body.side-left #sidebar{order:0;margin-left:0;margin-right:calc(-1 * var(--panelw));
+    border-left:0;border-right:1px solid var(--line)}
+  body.no-anim #sidebar,body.no-anim #below{transition:none}
+  body.wide #sidebar{margin-left:0;margin-right:0}
+  body.wide.side-left #sidebar{margin-left:var(--gapend,0px);margin-right:0}
+  /* the button lives on the side the panel comes from, so the hand goes where the panel will be */
+  /* the bar is the flex row the ordering depends on: without it `order` does nothing at all */
+  .bar{position:sticky;top:0;z-index:30;min-height:var(--barh);box-sizing:border-box;
+    background:color-mix(in srgb,var(--ground-deep) 82%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar-inner{display:flex;align-items:center;gap:10px;padding-top:9px;padding-bottom:9px;flex-wrap:nowrap}
+  #burger{order:9}
+  body.side-left #burger{order:-1}
+  body.wide #below{flex:0 0 auto;width:var(--bw);max-width:none;margin:0;transform:none}
+  body.wide .wrap{width:var(--maxw);max-width:none;margin-left:var(--cl,0px);margin-right:0}
+  body.wide .bar .wrap,body.wide .doc{padding-inline:var(--gut)}
+  body.wide .ribbon .wrap{margin-left:var(--gutter,0px)}
+  body.wide .bar{width:var(--maxw);margin-left:var(--cl,0px)}
+  body.wide .bar .wrap{width:100%;margin-left:0}
+  body.wide #burger{display:none}
+  .spacer{flex:1}
+  /* the head of the panel: the title takes the room, the two buttons sit against the far edge */
+  .side-head{flex:none;display:flex;align-items:center;gap:6px;padding:10px 12px;
+    min-height:var(--barh);box-sizing:border-box;
+    background:color-mix(in srgb,var(--ground-deep) 82%,transparent);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line)}
+  .side-head #side-swap{margin-left:auto}
+  #burger,#side-theme,#side-swap,#side-close{flex:none;width:34px;height:34px;font-size:16px;line-height:1;
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:8px;
+    cursor:pointer;font-family:inherit}
+  #burger:hover,#side-theme:hover,#side-swap:hover,#side-close:hover{background:var(--panel-2)}
+  #side-theme,#side-swap,#side-close{width:28px;height:28px;font-size:13px}
+  .side-head #side-theme{margin-left:auto}
+  body.wide #side-close{display:none}
+  .side-title{flex:1;min-width:0;font-weight:600;font-size:15px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  /* The bar never wraps. What gives way on a narrow screen is, in order: the word beside the mark -
+     the magnifier still says whose site this is - then the gutter, then the link to the repository,
+     which the footer carries anyway. The links that move around the site itself always stay. */
+  @media (max-width: 560px) {
+    :root{--gut:12px}
+    .bar__mark{font-size:0;gap:0}
+    .bar a[href^="https://github.com"]{display:none}
+  }
+  .side-body{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 16px}
+  .side-body > .side-h:first-child{margin-top:2px}
+  /* The shelf of documents inside the panel. It lives here rather than with the documentation page,
+     because both pages carry the same panel and a second copy of these rules would drift. */
+  .side-body h2 { font-size: 0.8rem; font-weight: 500; color: var(--muted); margin: 1.6rem 0 0.5rem; }
+  .side-body h2:first-of-type { margin-top: 0; }
+  .side-body ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+  .side-body a { display: block; padding: 0.32rem 0.6rem; border-radius: 6px; text-decoration: none; font-size: 0.95rem; color: var(--muted); }
+  .side-body a:hover { background: var(--panel); color: var(--text); }
+  .side-body a[aria-current="page"] { background: var(--panel); color: var(--text); box-shadow: inset 2px 0 0 var(--focus); }
+
+/* ==== HERO: the filter itself ==== */
+/* The field is an upright sheet, 9:16, the same shape on every screen: on a phone it takes the
+   width of the column, on a monitor it stands in the middle of it at the height of the screen.
+   One ratio everywhere - two of them made the map a strip on one device and a tower on the other.
+   It is inside the content column like every other block: run to the edges of the sheet it lay
+   over the panel standing beside the page.
+
+   Two rows over the map: what stands at the head of the field takes its own height, the mark is
+   centred in what is left - so a plate and a mark never sit on top of each other. */
+.hero { position: relative; aspect-ratio: 9 / 16; padding-inline: 0;
+        width: 100%;
+        display: grid; grid-template-rows: auto 1fr; }
+/* From a tablet up the field is a 16:9 band across the whole window - the side zones as well as the
+   column, so the map runs under the panel standing in the gutter. The breakout is the gutter itself
+   (panel.js publishes it), never 50vw: the sheet slides sideways when the panel opens, and a vw
+   breakout would slide with it and leave a gap. */
+/* From a tablet up the field is a 16:9 band. It stays inside the centre column like every other
+   block: spread into the side zones it ran under the panel, and since the sheet sits above the
+   panel the map took the clicks meant for it - the panel read as click-through glass. */
+@media (min-width: 760px) { body .hero { aspect-ratio: 1 / 1; } }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+/* The veil only has to keep the text over the map readable. Centred at 35% of the height it was
+   built for a wide band; on a square field that put its dark end over the bottom third of the map
+   and read as an empty patch. Centred and wider, it darkens the corners and leaves the map. */
+.hero__veil {
+  position: absolute; inset: 0;
+  background: radial-gradient(135% 110% at 50% 50%, transparent 55%, var(--ground-deep) 100%);
+  pointer-events: none;
+}
+/* Dragging a lens must not select the name under the cursor: the hero is a control surface, and
+   the text in it is a label on that surface rather than something to copy. */
+.hero { user-select: none; -webkit-user-select: none; }
+/* The mark is centred in what the regulator leaves of the sheet, a shade above the middle - dead
+   centre read as low, the way a title block always does. The rows do the balancing: a padding in
+   per cent would measure itself against the width. */
+.hero__inner {
+  position: relative; z-index: 1; grid-row: 2; min-height: 0;
+  display: grid; grid-template-rows: 1fr auto auto 1.3fr; justify-items: center;
+  gap: clamp(0.8rem, 2vw, 1.4rem);
+  padding: clamp(1rem, 3vw, 2rem) 1.25rem;
+  text-align: center;
+  pointer-events: none;
+}
+.hero__inner > * { pointer-events: auto; }
+.logo-head { margin: 0; grid-row: 2; }
+.logo { display: block; width: min(440px, 80vw); height: auto;
+        filter: drop-shadow(0 2px 10px var(--ground)) drop-shadow(0 0 18px var(--ground)); }
+.hero__line { grid-row: 3; max-width: 46ch; margin: 0; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem); color: var(--text);
+             text-shadow: 0 0 6px var(--ground), 0 0 16px var(--ground), 0 1px 3px var(--ground); }
+.hero__line b { font-weight: 600; color: var(--focus-text); }
+
+/* ==== CONTENT ==== */
+.lede { font-size: clamp(1.05rem, 1rem + 0.5vw, 1.3rem); }
+/* Two balanced columns of running text: the browser fills them to the same height by itself, which
+   a grid of two boxes cannot do - there one side always ends short. One column below 640px. */
+.cols { columns: 2; column-gap: var(--gap); }
+/* A paragraph may run over the fold between the columns: forbidding it leaves whole paragraphs to
+   be shuffled about, and one side always ends short of the other. */
+.cols > p { margin-top: 0; }
+@media (max-width: 640px) { .cols { columns: 1; } }
+.rules { font-family: "IBM Plex Mono", monospace; font-size: 0.86rem; line-height: 1.75; margin: 0; padding: 1.2rem 1.3rem; overflow-x: auto; background: var(--ground-deep); border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); }
+.rules b { color: var(--text); font-weight: 500; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.7rem 0.8rem 0.7rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
+.scroller { overflow-x: auto; }
+.tag { display: inline-block; font-size: 0.78rem; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.tag--open { color: var(--rung-6); }
+.tag--yes { color: var(--rung-8); }
+.tag--no { color: var(--refuted); }
+.tag--legacy { color: var(--muted); }
+
+/* The rule above the footer runs at the width of the content, not of the window: a line across
+   the whole page would cut the sheet off from the panel standing beside it. */
+footer { padding-block: 0 4rem; color: var(--muted); font-size: 0.9rem; }
+footer .wrap { border-top: 1px solid var(--line); padding-top: 2.5rem; }
+footer p { max-width: var(--measure); }
+
+@media (max-width: 700px) {
+  body { font-size: 16px; }
+  .logo { width: min(230px, 56vw); }
+  .hero__line { font-size: 0.92rem; max-width: 30ch; }
+  /* The mark stays in the middle of the field on every screen: it is the centre of the picture,
+     and parking it at the top edge on a phone read as a header that had slipped. */
+  .hero__inner { padding: 1.25rem; gap: 0.6rem; }
+  .control input[type="range"] { height: 2rem; }   /* a thumb needs a taller track than a mouse */
+  .cols { gap: 0.5rem; }
+  .rules { font-size: 0.76rem; padding: 1rem 0.9rem; }
+  th, td { padding-right: 0.6rem; }
+}
+/* A big screen widens the sheet itself, not just .wrap inside it: the sheet is capped by --maxw and
+   in the wide layout .wrap is set back to --maxw, so widening only .wrap left a 2K monitor with a
+   narrower column than a laptop. */
+@media (min-width: 1600px) {
+  :root { --maxw: 1240px; }
+  body { font-size: 18px; }
+}
+@media (pointer: coarse) {
+  .hero__inner { padding-bottom: 2rem; }
+}

@@ -1,0 +1,66 @@
+/* Only the front page: the regulator's controls. */
+/* ==== CONTROLS ==== */
+/* The regulator and the instruction lie on top of the field, at its head: the map starts right
+   under the bar and nothing pushes it down. Only the plate takes the pointer - the rest of the
+   band stays clickable, because placing lenses is what the page is for. */
+.hero__top {
+  position: relative; z-index: 2; grid-row: 1;
+  display: grid; justify-items: center; gap: 0.6rem;
+  padding: clamp(0.5rem, 1.6vw, 0.9rem) 0.8rem 0;
+  pointer-events: none;
+}
+.hero__top > * { pointer-events: auto; }
+
+.panel {
+  margin-inline: auto;
+  display: grid; gap: 0.45rem 1.3rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  padding: 0.7rem 0.9rem;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+  width: min(100%, 560px);
+  text-align: left;
+}
+/* One label line and one track of a fixed height per control: the rows of the two columns then
+   start and end together whatever sits in them. */
+.control { display: grid; grid-template-rows: auto 1.6rem; gap: 0.2rem; align-content: start; }
+.control span { font-size: 0.78rem; color: var(--muted); display: flex; justify-content: space-between; align-items: baseline; gap: 0.8rem; white-space: nowrap; }
+.control .num { color: var(--text); font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; }
+.control i { font-style: normal; font-size: 0.72rem; opacity: 0.75; }
+input[type="range"] { width: 100%; height: 1.6rem; margin: 0; accent-color: var(--focus); }
+select {
+  font: inherit; font-size: 0.82rem; color: var(--text); width: 100%; height: 1.6rem; padding: 0 0.4rem;
+  background: var(--ground); border: 1px solid var(--line); border-radius: 6px;
+}
+.readout { grid-column: 1 / -1; margin: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.15rem 1.2rem; border-top: 1px solid var(--line); padding-top: 0.45rem; font-size: 0.8rem; color: var(--muted); }
+.readout b { font-weight: 500; color: var(--text); font-family: "IBM Plex Mono", monospace; }
+/* Text stands on a moving map, so it carries a halo of the page's own ground - dark at night, near
+   white by day. Without it the words dissolved into the blocks under them. */
+.hero__hint {
+  margin: 0; max-width: 60ch; pointer-events: none;
+  text-align: center; color: var(--text);
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem);
+  text-shadow: 0 0 6px var(--ground), 0 0 16px var(--ground), 0 1px 3px var(--ground);
+}
+.hero__hint b { font-weight: 600; color: var(--focus-text); }
+.hero__hint kbd { font-family: "IBM Plex Mono", monospace; font-size: 0.9em; border: 1px solid var(--line);
+                  border-bottom-width: 2px; border-radius: 4px; padding: 0.05em 0.35em; }
+
+/* Wide enough for a third column: the readings and the hint stand beside the settings instead of
+   under them, and the plate loses two rows of height - the field keeps them. */
+@media (min-width: 760px) {
+  .panel { width: min(100%, 760px); grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(9rem, 0.6fr); }
+  .readout { grid-column: 3; grid-row: 1 / -1; align-content: center; flex-direction: column; justify-content: center;
+             border-top: 0; border-left: 1px solid var(--line); padding: 0 0 0 1.1rem; }
+}
+
+/* On a phone the plate has to leave the field room to be played with: the gloss on the labels goes
+   first, it explains a control the slider under it already shows. */
+@media (max-width: 700px) {
+  .panel { gap: 0.35rem 0.9rem; padding: 0.6rem 0.7rem; }
+  .control i { display: none; }
+  .readout { gap: 0.1rem 0.9rem; }
+}

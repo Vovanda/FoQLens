@@ -1,0 +1,137 @@
+{
+  "model": "google/gemma-4-E2B",
+  "revision": "d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f",
+  "dataset": "edinburgh-dawg/mmlu-redux-2.0@372ea425",
+  "orders": [
+    [
+      0,
+      1,
+      2,
+      3
+    ],
+    [
+      2,
+      0,
+      1,
+      3
+    ],
+    [
+      3,
+      2,
+      1,
+      0
+    ],
+    [
+      1,
+      3,
+      0,
+      2
+    ],
+    [
+      0,
+      2,
+      3,
+      1
+    ],
+    [
+      0,
+      2,
+      1,
+      3
+    ]
+  ],
+  "seed": 0,
+  "metric": "letter_choice",
+  "subjects": {
+    "arc_easy": {
+      "source": "allenai/ai2_arc@210d026f",
+      "questions": 2365,
+      "accuracy": 0.8235377026074701,
+      "core": 0.6689217758985201,
+      "never_right": 0.05623678646934461,
+      "calculation": 0.008879492600422832,
+      "core_among_knowledge": 0.6749146757679181
+    },
+    "marketing": {
+      "source": "edinburgh-dawg/mmlu-redux-2.0@372ea425",
+      "questions": 96,
+      "accuracy": 0.8159722222222222,
+      "core": 0.6458333333333334,
+      "never_right": 0.052083333333333336,
+      "calculation": 0.0,
+      "core_among_knowledge": 0.6458333333333334
+    },
+    "world_religions": {
+      "source": "edinburgh-dawg/mmlu-redux-2.0@372ea425",
+      "questions": 99,
+      "accuracy": 0.7811447811447811,
+      "core": 0.6262626262626263,
+      "never_right": 0.08080808080808081,
+      "calculation": 0.06060606060606061,
+      "core_among_knowledge": 0.6344086021505376
+    },
+    "high_school_psychology": {
+      "source": "edinburgh-dawg/mmlu-redux-2.0@372ea425",
+      "questions": 96,
+      "accuracy": 0.7447916666666666,
+      "core": 0.5729166666666666,
+      "never_right": 0.10416666666666667,
+      "calculation": 0.020833333333333332,
+      "core_among_knowledge": 0.5851063829787234
+    },
+    "logical_fallacies": {
+      "source": "edinburgh-dawg/mmlu-redux-2.0@372ea425",
+      "questions": 74,
+      "accuracy": 0.7274774774774775,
+      "core": 0.5675675675675675,
+      "never_right": 0.17567567567567569,
+      "calculation": 0.0,
+      "core_among_knowledge": 0.5675675675675675
+    },
+    "miscellaneous": {
+      "source": "edinburgh-dawg/mmlu-redux-2.0@372ea425",
+      "questions": 90,
+      "accuracy": 0.7351851851851852,
+      "core": 0.5666666666666667,
+      "never_right": 0.1,
+      "calculation": 0.05555555555555555,
+      "core_among_knowledge": 0.5882352941176471
+    },
+    "arc_challenge": {
+      "source": "allenai/ai2_arc@210d026f",
+      "questions": 1165,
+      "accuracy": 0.6253218884120172,
+      "core": 0.41545064377682406,
+      "never_right": 0.1648068669527897,
+      "calculation": 0.045493562231759654,
+      "core_among_knowledge": 0.42535971223021585
+    },
+    "openbookqa": {
+      "source": "allenai/openbookqa@388097ea",
+      "questions": 500,
+      "accuracy": 0.595,
+      "core": 0.34,
+      "never_right": 0.15,
+      "calculation": 0.008,
+      "core_among_knowledge": 0.3407258064516129
+    },
+    "reclor": {
+      "source": "metaeval/reclor@0414b39b",
+      "questions": 500,
+      "accuracy": 0.44166666666666665,
+      "core": 0.148,
+      "never_right": 0.232,
+      "calculation": 0.0,
+      "core_among_knowledge": 0.148
+    },
+    "hellaswag": {
+      "source": "Rowan/hellaswag@218ec52e",
+      "questions": 10042,
+      "accuracy": 0.36996282281086107,
+      "core": 0.07219677355108545,
+      "never_right": 0.15813582951603267,
+      "calculation": 0.0,
+      "core_among_knowledge": 0.07219677355108545
+    }
+  }
+}

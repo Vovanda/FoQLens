@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="preload">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,120 +8,145 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-/* ==== TOKENS ==== */
-:root {
-  --ground: #0e1526;
-  --ground-deep: #090e1a;
-  --panel: #141d33;
-  --line: #24314f;
-  --text: #e6ecf5;
-  --muted: #93a2bc;
-  --focus: #f2c14e;
-  --measure: 74ch;
-  --radius: 10px;
-  --rail: 270px;
-}
-
-/* ==== BASE ==== */
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--ground);
-  color: var(--text);
-  font: 400 17px/1.65 "IBM Plex Sans", system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-a { color: var(--text); text-decoration-color: var(--line); text-underline-offset: 3px; }
-a:hover { text-decoration-color: var(--focus); }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
-
-/* ==== TOP BAR ==== */
-.bar {
-  position: sticky; top: 0; z-index: 5;
-  display: flex; align-items: center; gap: clamp(0.6rem, 2vw, 1.5rem);
-  padding: 0.6rem clamp(1rem, 4vw, 2rem);
-  background: color-mix(in srgb, var(--ground-deep) 82%, transparent);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(12px);
-  font-size: 0.95rem;
-}
-.bar__mark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; margin-right: auto; }
-.bar__mark svg { width: 22px; height: 22px; flex: none; }
-.bar a { text-decoration: none; color: var(--muted); padding: 0.3rem 0.55rem; border-radius: 6px; }
-.bar a:hover { color: var(--text); background: var(--panel); }
-.bar a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 0; }
-.bar__mark, .bar__mark:hover { color: var(--text); background: none; }
-
-/* ==== SHELL ==== */
-.shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); width: min(100% - 2.5rem, 1180px); margin-inline: auto; padding-block: 2rem 5rem; }
-
-.rail { position: sticky; top: 4.5rem; align-self: start; max-height: calc(100vh - 4rem); overflow-y: auto; }
-.rail h2 { font-size: 0.8rem; font-weight: 500; color: var(--muted); margin: 1.6rem 0 0.5rem; }
-.rail h2:first-of-type { margin-top: 0; }
-.rail ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
-.rail a { display: block; padding: 0.32rem 0.6rem; border-radius: 6px; text-decoration: none; font-size: 0.95rem; color: var(--muted); }
-.rail a:hover { background: var(--panel); color: var(--text); }
-.rail a[aria-current="page"] { background: var(--panel); color: var(--text); box-shadow: inset 2px 0 0 var(--focus); }
-
-/* ==== DOCUMENT ==== */
-.doc { min-width: 0; }
-.doc > :first-child { margin-top: 0; }
-.doc h1 { font-size: clamp(1.7rem, 1.2rem + 1.6vw, 2.3rem); line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 1rem; }
-.doc h2 { font-size: 1.35rem; margin: 2.4rem 0 0.8rem; letter-spacing: -0.01em; }
-.doc h3 { font-size: 1.1rem; margin: 1.8rem 0 0.6rem; }
-.doc p, .doc li { max-width: var(--measure); }
-.doc p { margin: 0 0 1em; }
-.doc ul, .doc ol { padding-left: 1.3rem; }
-.doc li { margin-bottom: 0.35em; }
-.doc blockquote { margin: 1.2rem 0; padding: 0.2rem 0 0.2rem 1.1rem; border-left: 2px solid var(--focus); color: var(--muted); }
-.doc hr { border: 0; border-top: 1px solid var(--line); margin: 2.5rem 0; }
-.doc code { font-family: "IBM Plex Mono", monospace; font-size: 0.88em; background: var(--ground-deep); border: 1px solid var(--line); border-radius: 4px; padding: 0.08em 0.35em; }
-.doc pre { background: var(--ground-deep); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; overflow-x: auto; }
-.doc pre code { background: none; border: 0; padding: 0; font-size: 0.85rem; line-height: 1.7; }
-.doc table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1.2rem 0; }
-.doc th, .doc td { text-align: left; padding: 0.6rem 0.9rem 0.6rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
-.doc th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
-.doc img { max-width: 100%; }
-.doc .table-scroll { overflow-x: auto; }
-
-.meta { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: baseline; margin-bottom: 1.8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
-.meta a { font-family: "IBM Plex Mono", monospace; font-size: 0.95em; }
-.state { color: var(--muted); }
-.state b { color: var(--text); font-weight: 500; }
-
-@media (max-width: 860px) {
-  .shell { grid-template-columns: 1fr; gap: 1.5rem; padding-block: 1.5rem 3.5rem; }
-  .rail { position: static; max-height: none; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
-  .rail ul { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 0.3rem; }
-  .rail h2 { margin: 1rem 0 0.4rem; }
-}
-</style>
+<link rel="stylesheet" href="site/site.css?v=35">
+<link rel="stylesheet" href="site/docs.css?v=35">
+<script>
+/* The theme is set before the first paint, from the reader's own choice or, by default, from the
+   device - a class applied later would show one palette and then swap to the other. */
+try { document.documentElement.setAttribute("data-theme", localStorage.getItem("foqlens.theme") || "auto"); }
+catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
+</script>
 </head>
 <body>
-<nav class="bar">
+<div id="main">
+<div id="cols">
+  <aside id="sidebar" aria-label="Documents">
+    <div class="side-head">
+      <span class="side-title">Documents</span>
+      <button id="side-theme" type="button" title="Theme: follows the device" aria-label="Theme">◐</button>
+      <button id="side-swap" type="button" title="Move the panel to the other side" aria-label="Move the panel to the other side">⇄</button>
+      <button id="side-close" type="button" title="Close" aria-label="Close the panel">✕</button>
+    </div>
+    <div class="side-body"><div id="menu">
+      <!-- Rendered here as well as by the script: without it a crawler, a link preview or a
+           reader with no JavaScript gets an empty page. The script replaces this on load.
+           Keep in step with SHELF below. -->
+        <h2>The idea</h2>
+        <ul>
+          <li><a href="#lens" data-id="lens">The filter and its lenses</a></li>
+          <li><a href="#problem" data-id="problem">Problem statement</a></li>
+          <li><a href="#goals" data-id="goals">Goals</a></li>
+          <li><a href="#plan" data-id="plan">Plan</a></li>
+          <li><a href="#hypotheses" data-id="hypotheses">Hypotheses - all untested</a></li>
+        </ul>
+        <h2>What the bench measures on</h2>
+        <ul>
+          <li><a href="#corpus" data-id="corpus">The corpus, and why the first one failed</a></li>
+          <li><a href="#invariants" data-id="invariants">Invariants</a></li>
+          <li><a href="#data" data-id="data">Data sources</a></li>
+        </ul>
+        <h2>Around it</h2>
+        <ul>
+          <li><a href="#zones" data-id="zones">Expert zones (legacy layout)</a></li>
+          <li><a href="#metaphor" data-id="metaphor">Visual metaphor</a></li>
+          <li><a href="#prior-art" data-id="prior-art">Prior art</a></li>
+          <li><a href="#reading" data-id="reading">Reading notes</a></li>
+        </ul>
+        <h2>Preregistration</h2>
+        <ul>
+          <li><a href="#prereg" data-id="prereg">Preregistration (English)</a></li>
+          <li><a href="#prereg-ru" data-id="prereg-ru">Пререгистрация (original)</a></li>
+          <li><a href="#addendum-11" data-id="addendum-11">E010 - the lens layout</a></li>
+          <li><a href="#addendum-14" data-id="addendum-14">E013 - the map of the regulator</a></li>
+          <li><a href="#addendum-16" data-id="addendum-16">E015 - three topic pairs</a></li>
+        </ul>
+        <h2>Runs - verdicts withdrawn</h2>
+        <ul>
+          <li><a href="#e001" data-id="e001">E001 - separation and masks</a></li>
+          <li><a href="#e006" data-id="e006">E006 - read depths</a></li>
+          <li><a href="#e011" data-id="e011">E011 - depth caps</a></li>
+          <li><a href="#e010" data-id="e010">E010 - the lens layout</a></li>
+          <li><a href="#e013" data-id="e013">E013 - the map of the regulator</a></li>
+          <li><a href="#e014" data-id="e014">E014 - the zones carried elsewhere</a></li>
+        </ul>
+      </div></div>
+  </aside>
+
+  <div id="below">
+    <div class="bar">
+      <div class="wrap bar-inner">
+        <button id="burger" type="button" aria-expanded="false" aria-controls="sidebar" title="Documents">≡</button>
   <a class="bar__mark" href="./">
-    <svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#f2c14e" stroke-width="11" stroke-linecap="round">
-      <circle cx="42" cy="42" r="30"/><path d="M64 64 L86 86"/>
+    <!-- the magnifier of Lucide's "search" (ISC), at its own proportions: r 8 at (11,11), the handle
+         leaving the ring at 16.65 and ending at 21 -->
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="var(--focus)" stroke-width="2.4" stroke-linecap="butt">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
     </svg>
     FoQLens
   </a>
+        <span class="spacer"></span>
   <a href="./">About</a>
   <a href="docs.html" aria-current="page">Docs</a>
-  <a href="https://github.com/Vovanda/FoQLens">GitHub</a>
-</nav>
+  <a href="https://github.com/Vovanda/FoQLens" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
 
-<div class="shell">
-  <nav class="rail" aria-label="Documents">
-    <div id="menu"></div>
-  </nav>
+    <main class="doc wrap" id="doc">
+      <h1>The documents of the bench</h1>
+      <p>FoQLens is a precision regulator for language models: the weights sit behind a glass and lenses open where the query needs to see. This is the documentation of the bench that tests it - the mechanism, the goals, the plan, every preregistration and every run.</p>
+      <p>Pick a document on the left. Each is a markdown file in the repository, and every link below goes to its source.</p>
+      <h3>The idea</h3>
+      <ul>
+        <li><a href="#lens">The filter and its lenses</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/lens.md">docs/lens.md</a></span></li>
+        <li><a href="#problem">Problem statement</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/problem-statement.md">docs/problem-statement.md</a></span></li>
+        <li><a href="#goals">Goals</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/goals.md">docs/goals.md</a></span></li>
+        <li><a href="#plan">Plan</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/plan.md">docs/plan.md</a></span></li>
+        <li><a href="#hypotheses">Hypotheses - all untested</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/hypotheses.md">docs/hypotheses.md</a></span></li>
+      </ul>
+      <h3>What the bench measures on</h3>
+      <ul>
+        <li><a href="#corpus">The corpus, and why the first one failed</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/corpus.md">docs/corpus.md</a></span></li>
+        <li><a href="#invariants">Invariants</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/invariants.md">docs/invariants.md</a></span></li>
+        <li><a href="#data">Data sources</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/data-sources.md">docs/data-sources.md</a></span></li>
+      </ul>
+      <h3>Around it</h3>
+      <ul>
+        <li><a href="#zones">Expert zones (legacy layout)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/zones.md">docs/zones.md</a></span></li>
+        <li><a href="#metaphor">Visual metaphor</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/visual-metaphor.md">docs/visual-metaphor.md</a></span></li>
+        <li><a href="#prior-art">Prior art</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/prior-art.md">docs/prior-art.md</a></span></li>
+        <li><a href="#reading">Reading notes</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/reading-notes.md">docs/reading-notes.md</a></span></li>
+      </ul>
+      <h3>Preregistration</h3>
+      <ul>
+        <li><a href="#prereg">Preregistration (English)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/prereg/PREREGISTRATION.md">prereg/PREREGISTRATION.md</a></span></li>
+        <li><a href="#prereg-ru">Пререгистрация (original)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/prereg/PREREGISTRATION.ru.md">prereg/PREREGISTRATION.ru.md</a></span></li>
+        <li><a href="#addendum-11">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/ADDENDUM-11.md">experiments/E010-lens-layout/ADDENDUM-11.md</a></span></li>
+        <li><a href="#addendum-14">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/ADDENDUM-14.md">experiments/E013-regulator-map/ADDENDUM-14.md</a></span></li>
+        <li><a href="#addendum-16">E015 - three topic pairs</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E015-topic-pairs/ADDENDUM-16.md">experiments/E015-topic-pairs/ADDENDUM-16.md</a></span></li>
+      </ul>
+      <h3>Runs - verdicts withdrawn</h3>
+      <ul>
+        <li><a href="#e001">E001 - separation and masks</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E001-run1-exploration/results.md">experiments/E001-run1-exploration/results.md</a></span></li>
+        <li><a href="#e006">E006 - read depths</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-read-depths/results.md">experiments/E006-read-depths/results.md</a></span></li>
+        <li><a href="#e011">E011 - depth caps</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E011-depth-caps/results.md">experiments/E011-depth-caps/results.md</a></span></li>
+        <li><a href="#e010">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/results.md">experiments/E010-lens-layout/results.md</a></span></li>
+        <li><a href="#e013">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/results.md">experiments/E013-regulator-map/results.md</a></span></li>
+        <li><a href="#e014">E014 - the zones carried elsewhere</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E014-moved-zones/results.md">experiments/E014-moved-zones/results.md</a></span></li>
+      </ul>
+    </main>
 
-  <main class="doc" id="doc">
-    <p class="state">Loading…</p>
-  </main>
+    <footer>
+      <div class="wrap">
+        <p>FoQLens is the research of <a href="https://sawking.tech/cv">Vladimir Savkin</a> - a systems architect, not a professional scientist, which is why the bench commits every prediction before the run. Code, preregistrations and raw numbers: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
+        <p>Made at <a href="https://sawking.tech">sawking.tech</a>.</p>
+      </div>
+    </footer>
+  </div>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
+<script src="site/panel.js?v=35"></script>
 <script>
 /* ==== THE SHELF ==== */
 // Every document the site shows, by the path it has in the repository - the page renders the same
@@ -241,6 +266,13 @@ async function show(id) {
 
 addEventListener("hashchange", () => show(location.hash.slice(1)));
 show(location.hash.slice(1) || DEFAULT_DOC);
+</script>
+<script>
+/* Transitions come back only once the panel and the sheet stand where storage says - two frames
+   later, so the browser has laid the page out and painted it at rest. This lives in the page, next
+   to the class it removes: from a cached script it might never run, and the page would keep every
+   animation switched off. */
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove("preload")));
 </script>
 </body>
 </html>

@@ -4,6 +4,13 @@ Hi, I'm Vladimir Savkin. I hold master's degrees in mathematical software and in
 
 **Can a language model spend its precision where the question is, instead of everywhere?**
 
+**[vovanda.github.io/FoQLens](https://vovanda.github.io/FoQLens/)** - the idea, with the controls of the
+regulator to move: base precision, the size and strength of the zones, how overlaps combine, and what
+the setting costs in bits per weight. The field they act on is decoration - a fragment of a run
+flattened onto a plane and smoothed until it reads.
+[The documents](https://vovanda.github.io/FoQLens/docs.html) - the mechanism, the preregistration and
+every run - are on the same site.
+
 The larger goal is a universal **precision regulator** - one mechanism that sets how finely a model works right now and makes it adaptive: to the task, to the machine it runs on and to the value of the query ([the idea](https://sawking.tech/blog/kvantovaniie-vsio-chto-vam-nuzhno)). One set of weights serves every device and every load: it runs lean on a phone or on a hot, busy server, and opens to full precision exactly where a query needs it. Under pressure it degrades gracefully - the background coarsens first, what the query needs stays sharp.
 
 Mixture of Experts is its rigid special case: experts with hard edges fixed at training, opened by a router. The regulator makes experts continuous - zones emerge from the query itself, related topics share them, and the junction between two topics is sharpened instead of falling between two experts.

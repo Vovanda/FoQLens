@@ -56,8 +56,25 @@ code, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0
 section { padding-block: clamp(3rem, 7vw, 5.5rem); border-top: 1px solid var(--line); }
 section:first-of-type { border-top: 0; }
 
+/* ==== TOP BAR ==== */
+.bar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: clamp(0.6rem, 2vw, 1.5rem);
+  padding: 0.6rem clamp(1rem, 4vw, 2rem);
+  background: color-mix(in srgb, var(--ground-deep) 82%, transparent);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  font-size: 0.95rem;
+}
+.bar__mark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; margin-right: auto; }
+.bar__mark svg { width: 22px; height: 22px; flex: none; }
+.bar a { text-decoration: none; color: var(--muted); padding: 0.3rem 0.55rem; border-radius: 6px; }
+.bar a:hover { color: var(--text); background: var(--panel); }
+.bar a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 0; }
+.bar__mark, .bar__mark:hover { color: var(--text); background: none; }
+
 /* ==== HERO: the filter itself ==== */
-.hero { position: relative; min-height: min(96svh, 860px); display: grid; }
+.hero { position: relative; min-height: min(90svh, 820px); display: grid; }
 .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 .hero__veil {
   position: absolute; inset: 0;
@@ -147,6 +164,18 @@ footer p { max-width: var(--measure); }
 </style>
 </head>
 <body>
+
+<nav class="bar">
+  <a class="bar__mark" href="./">
+    <svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#f2c14e" stroke-width="11" stroke-linecap="round">
+      <circle cx="42" cy="42" r="30"/><path d="M64 64 L86 86"/>
+    </svg>
+    FoQLens
+  </a>
+  <a href="./" aria-current="page">About</a>
+  <a href="docs.html">Docs</a>
+  <a href="https://github.com/Vovanda/FoQLens">GitHub</a>
+</nav>
 
 <!-- ==== HERO: the page is the filter ==== -->
 <header class="hero">

@@ -19,4 +19,7 @@ Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `do
 | [E007](E007-dilation/_index.md) | Dilation of the topic fill | 2026-09-11 | H3.1 | done | structural groups are real; no address |
 | [E008](E008-zones-fixed-budget/_index.md) | Expert zones at a fixed 5-bit budget | 2026-09-11 | H3.1, H3.2 | legacy | address for biology-math only |
 | [E009](E009-zones-matrix/_index.md) | Expert zones over precision share x focus area | 2026-09-11 | H3.1, H3.2 | legacy | M1-M3 for biology-math, M1 for history-geography |
-| E010 | Lens layout: frosted glass with lenses in the expert zones ([docs/lens.md](../docs/lens.md)) | - | H3, H3.1, H3.2 | planned | - |
+| [E010](E010-lens-layout/_index.md) | Lens layout: a floor over the network, zones lifted over it ([docs/lens.md](../docs/lens.md)) | 2026-09-12 | H3, H3.1, H3.2, H4 | done | own zones beat generic importance on both pairs; not the same memory without a mask |
+| [E011](E011-depth-caps/_index.md) | Depth caps: what storage costs when many queries share one copy | 2026-09-12 | - | done | caps pay off only for a narrow profile: one topic stores 4.0 bits of 8, 395 mixed questions 6.5 |
+| [E012](E012-address-edges/_index.md) | The edges of the address: a scan behind an empty floor | 2026-09-12 | H3.1, H3.2 | not-run | the question moved to E013: random zones spend more memory, so they are not an honest reference |
+| [E013](E013-regulator-map/_index.md) | The map of the regulator: which settings cost the fewest errors | 2026-09-12 | H3 | fixed | - |

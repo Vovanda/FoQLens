@@ -90,6 +90,26 @@ def test_step3_zones_smoke(tmp_path, capsys):
     assert max(abs(b - 5.0) for b in bits) < 0.05  # precision share 0.25 spends 4 + 4 x 0.25 bits
 
 
+def test_step3_lenses_smoke(tmp_path, capsys):
+    sl = load_script("step3_lenses")
+    out = sl.main(["--limit", "3", "--floor", "d4", "zero", "--focus-area", "0.5", "--focus-strength", "1.0",
+                   "--pooled-batch", "4", "--gradient-batch", "2", "--eval-batch", "6",
+                   "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
+    log = capsys.readouterr().out
+    assert "cell [1/2] d4 fa0.50 fs1.00 (50%), ETA " in log and "cell [2/2] zero fa0.50 fs1.00 (100%), ETA " in log
+    s = json.loads(Path(out).read_text())
+    assert {"lens_own_d4_fa0.50_fs1.00", "lens_other_d4_fa0.50_fs1.00", "lens_backbone_d4_fa0.50_fs1.00",
+            "lens_nomask_d4_fa0.50_fs1.00", "floor_d4", "floor_zero", "uniform_bf16"} <= set(s["configs"])
+    assert {"own_minus_other", "own_minus_nomask", "own_minus_backbone", "own_minus_floor", "own_minus_bf16"}         <= set(s["comparisons"]["biology-math|d4|fa0.50|fs1.00"])
+    assert s["cells_done"] == [["d4", 0.5, 1.0], ["zero", 0.5, 1.0]]  # the D4 floor first
+    cfg = s["configs"]
+    # no budget: the layout costs what its zones ask for, and the shuffled control costs exactly the same
+    assert cfg["lens_own_d4_fa0.50_fs1.00"]["mean_bits"] == pytest.approx(cfg["lens_nomask_d4_fa0.50_fs1.00"]["mean_bits"])
+    assert cfg["floor_d4"]["mean_bits"] == pytest.approx(4.0)
+    assert cfg["floor_zero"]["mean_bits"] == pytest.approx(0.0)
+    assert 4.0 < cfg["lens_own_d4_fa0.50_fs1.00"]["mean_bits"] < 8.0
+
+
 def test_step3_quality_smoke(tmp_path):
     step3 = load_script("step3_quality")
     out = step3.main(

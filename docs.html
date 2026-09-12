@@ -36,18 +36,33 @@ a { color: var(--text); text-decoration-color: var(--line); text-underline-offse
 a:hover { text-decoration-color: var(--focus); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
 
+/* ==== TOP BAR ==== */
+.bar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: clamp(0.6rem, 2vw, 1.5rem);
+  padding: 0.6rem clamp(1rem, 4vw, 2rem);
+  background: color-mix(in srgb, var(--ground-deep) 82%, transparent);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  font-size: 0.95rem;
+}
+.bar__mark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; margin-right: auto; }
+.bar__mark svg { width: 22px; height: 22px; flex: none; }
+.bar a { text-decoration: none; color: var(--muted); padding: 0.3rem 0.55rem; border-radius: 6px; }
+.bar a:hover { color: var(--text); background: var(--panel); }
+.bar a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--focus); border-radius: 0; }
+.bar__mark, .bar__mark:hover { color: var(--text); background: none; }
+
 /* ==== SHELL ==== */
 .shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); width: min(100% - 2.5rem, 1180px); margin-inline: auto; padding-block: 2rem 5rem; }
 
-.rail { position: sticky; top: 2rem; align-self: start; max-height: calc(100vh - 4rem); overflow-y: auto; }
+.rail { position: sticky; top: 4.5rem; align-self: start; max-height: calc(100vh - 4rem); overflow-y: auto; }
 .rail h2 { font-size: 0.8rem; font-weight: 500; color: var(--muted); margin: 1.6rem 0 0.5rem; }
-.rail h2:first-of-type { margin-top: 1.2rem; }
+.rail h2:first-of-type { margin-top: 0; }
 .rail ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
 .rail a { display: block; padding: 0.32rem 0.6rem; border-radius: 6px; text-decoration: none; font-size: 0.95rem; color: var(--muted); }
 .rail a:hover { background: var(--panel); color: var(--text); }
 .rail a[aria-current="page"] { background: var(--panel); color: var(--text); box-shadow: inset 2px 0 0 var(--focus); }
-.home { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; font-size: 1.05rem; }
-.home svg { width: 26px; height: 26px; }
 
 /* ==== DOCUMENT ==== */
 .doc { min-width: 0; }
@@ -84,14 +99,20 @@ a:hover { text-decoration-color: var(--focus); }
 </style>
 </head>
 <body>
+<nav class="bar">
+  <a class="bar__mark" href="./">
+    <svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#f2c14e" stroke-width="11" stroke-linecap="round">
+      <circle cx="42" cy="42" r="30"/><path d="M64 64 L86 86"/>
+    </svg>
+    FoQLens
+  </a>
+  <a href="./">About</a>
+  <a href="docs.html" aria-current="page">Docs</a>
+  <a href="https://github.com/Vovanda/FoQLens">GitHub</a>
+</nav>
+
 <div class="shell">
   <nav class="rail" aria-label="Documents">
-    <a class="home" href="./">
-      <svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#f2c14e" stroke-width="11" stroke-linecap="round">
-        <circle cx="42" cy="42" r="30"/><path d="M64 64 L86 86"/>
-      </svg>
-      FoQLens
-    </a>
     <div id="menu"></div>
   </nav>
 

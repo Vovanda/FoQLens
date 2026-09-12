@@ -66,11 +66,39 @@ Yes - they are two axes of the same storage.
 - **In a kernel.** A tiled GEMM loops over the output rows in tiles; a depth per tile - how many planes the tile fetches - is the lens layout itself, and the FoQLens block of 64 rows fits a tile. Their token permutation (§4.3) groups the other axis. What is new for their kernel is a different tile depth per question when a batch mixes queries.
 - **What FoQLens would take as is.** Their calibration of the base slice (Appendix B, C.1) for a glass at 2 bits, and their shared always-on first slice (§4.2) as the glass under the lenses.
 
+### Calibrating the base slice (Appendix B, C.1, Algorithm 1) - read 2026-09-12 for the D2 floor
+
+- Appendix B, "Quantizer design": "we adopt a floor-aligned mapping following the truncation-ready quantization principle [14], where a lower precision code is obtained by simply dropping least significant bits (LSB) rather than re-rounding." and "The floor operator enforces hierarchical nesting of integer codes, so switching bit width corresponds to adding or dropping bit slices without changing previously formed higher order bits."
+- Appendix B, same section: "Let [the calibrated parameters] be the calibrated parameters of the first slice. After assigning [b] bits to slice [e], the next slice refines the resolution as [s / 2^b]. Finally, while the first slice uses the calibrated zero point [z], slices fix [the zero point] for [e > 1], placing the midpoint code at the center of the integer range".
+- Algorithm 1, Stage 1: "First slice (FS) stabilization ... First slice-only forward pass ... match FP reference output ... Update [the quantization parameters]". Stage 2 then trains slices and router jointly.
+- Appendix C.1: "the base bit slice uses wbits=2 ... our default configuration uses four bit slices with slice_bits_list = 2 2 2 2. Training proceeds for epochs=20 and nsamples=128, with batch_size=1 for all models."
+- Appendix C.1: "For each layer, we optimize three parameter groups with AdamW: learnable weight clipping parameters (LWC), learnable equivalent transformation parameters (LET), and MoBiQuant parameters ... We typically use lwc_lr in the range 1e-3 to 1e-2".
+- §4.2, "Joint optimization": "We freeze all weights from the pretrained LLM and calibrate only [the quantizer and router parameters]." and §4.3 of the main text: "we adopt a layer-wise calibration strategy from [25]" - OmniQuant.
+- Appendix B, "Bias and Error Bounds": truncation noise is zero-mean and "strictly smaller than one half step of the coarser quantizer ... cannot flip any bit of the coarse code".
+
+**What this means for the FoQLens floor at D2.** The part FoQLens needs is Stage 1 alone: no router, no token routing - a layer-wise fit of the first slice's clipping and zero point against the layer's full-precision output, with the pretrained weights frozen. The rest of the ladder follows: slices 2 to 4 are the residuals of the calibrated first slice, so D4, D6 and D8 are rebuilt too and will not be bit for bit with the current ones. The test after calibration is therefore "D2 works and the deeper reads are no worse", not "the deeper reads are unchanged".
+
+## OmniQuant
+
+Shao, Chen, Zhang, Xu, Zhao, Li, Zhang, Gao, Qiao, Luo. *OmniQuant: Omnidirectionally Calibrated Quantization for Large Language Models.* arXiv 2308.13137, ICLR 2024. Read 2026-09-12 from the arXiv HTML for the calibration MoBiQuant builds on - it is the source of the learnable weight clipping the D2 floor needs.
+
+- **Learnable weight clipping (LWC).** The quantizer is the usual affine one, `Wq = clamp(round(W / h) + z, 0, 2^N - 1)`, but its range is learned through two factors in [0, 1]: `h = (gamma max(W) - beta min(W)) / (2^N - 1)` and `z = -round(beta min(W) / h)`. Clipping the range is what a 2-bit weight needs: with the full range each step is so coarse that the bulk of the distribution collapses into one or two codes.
+- **Block-wise objective.** `arg min ||F(W, X) - F(Qw(W; T1, T2), Qa(X, T2))||` over one transformer block at a time, sequentially - the same layer-wise strategy MoBiQuant cites as "[25]".
+- **Calibration setup.** 128 segments of 2048 tokens from WikiText2; the full-precision weights stay frozen and only the clipping strengths and the transformation factors are trained; AdamW with no weight decay, learning rate 5e-3 for LWC; 20 epochs, 40 for 2-bit; one A100-40G.
+- **What it buys at 2 bits.** LLaMA-2-7B at W2A16 with groups of 128: perplexity 11.06, against 36.77 for GPTQ - the two-bit weight becomes usable, which is exactly what the FoQLens floor at D2 is missing (ours diverges at 9.4e6, [E006](../experiments/E006-read-depths/results.md)).
+
+**What FoQLens takes.** LWC alone, on the first slice: learn `gamma` and `beta` per group of the base slice against the block's full-precision output, weights frozen. LET is for activation quantization and is not needed - the bench quantizes weights only. The scale refinement of the deeper slices follows from the calibrated first one, so the whole ladder is rebuilt with it.
+
 ### What FoQLens takes
 
 1. **The bench now.** Slices never change after quantization, so the weight of every read depth can be built once and kept (a bench mode behind a flag, bit for bit with the current reads), instead of unpacking four slices of 275 modules on every batch. See issue "Bench: build the depth weights once".
 2. **The kernel later.** The output is linear in the slices (Eq. 3 and 6): the output of each slice can be computed once and summed with a mask per output row - in FoQLens the mask is the lens layout, per question and per block of rows. With a kernel that fetches only the required planes (§4.3, par. 1-2), memory, speed and energy follow the lenses.
-3. **A glass at 2 bits.** A 2-bit base works when it is calibrated (Table 1, Appendix B, C.1); ours diverges uncalibrated (perplexity 9.4e6, [E006](../experiments/E006-read-depths/results.md)). Calibrating the first slice would let the frosted glass sit at D2 and halve its memory.
+3. **A glass at 2 bits - tried and dropped for this storage.** A 2-bit base works when it is calibrated (Table 1, Appendix B, C.1); ours diverges uncalibrated (perplexity 9.4e6, [E006](../experiments/E006-read-depths/results.md)). Measured 2026-09-12 on E2B, it cannot be fixed by calibrating the first slice while the ladder stays: the residual slices reach only half a step of the first one, so anything that sharpens D2 leaves a remainder they cannot cover.
+   - clipping the range to 0.8 of the group's absmax: the D2 error falls from 0.396 to 0.355 of the weights' rms, and the D8 error rises from 0.006 to 0.081 - thirteen times worse;
+   - levels fitted by Lloyd-Max to the model's own weights: D2 0.350, D8 0.059;
+   - a group of 8 weights instead of 64: D2 0.302, but the scales then cost 4 bits per weight, more than the slices;
+   - overlapping slices (each refining by 2 instead of 4): D8 recovers to 0.040 at the price of three bits of depth.
+   It is not a few bad layers either: the whole net at D2 reads perplexity 2.5e6, and holding the last four layers at D4 only brings it to 3.8e4, against 11.1 for D4 everywhere. Two bits over four even levels are simply too coarse for Gemma 4 E2B; the floor of a layout stays D4. What is left untried is fitting the clipping against a block's output rather than its weights - the gain on the weights is 10-12%, and a working D2 needs multiples of that.
 4. **The shared first slice is the glass.** Their always-on first slice (§4.2) is our glass: the minimum every block is read at, with the lenses adding slices on top.
 5. **Precision varies by block** (§5.3) even under a per-token router - support for addressing precision by block, as FoQLens does.
 6. **Mixed depths in a big batch are open** (Appendix F) - exactly the case of the FoQLens bench, where every question in a batch has its own layout.

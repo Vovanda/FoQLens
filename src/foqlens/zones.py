@@ -6,10 +6,14 @@ standing above PEAK_QUANTILE is one zone, with a center at its top and a base ra
 the disc with the area of the hill above half height.
 
 The focus area f in [0, 1] sets every radius, R = r f / (1 - f): at 0 the zones shrink to their
-centers (a hard edge), at 0.5 they are as found, at 1 they cover the whole map (no mask). A block's
-log-sharpness is the strongest zone at its place, psi = max_i (-d_i / R_i). The layout spends a
-given precision share p - a mean of bits between the D4 background and the D8 centers, 4 + 4p -
-over the rings of psi.
+centers (a hard edge), at 0.5 they are as found, at 1 they cover the whole map (no mask).
+
+Two layouts read those zones. The legacy one (E008, E009) spends a given precision share p over the
+rings of the log-sharpness psi = max_i (-d_i / R_i): a mean of bits between the D4 background and
+the D8 centers, 4 + 4p. The graded one (E010, docs/lens.md) has no budget: precision_lift gives every
+block how far it is lifted over the floor, 1 at a zone's center and 0 at its reach, and
+levels_from_lift turns that into levels between a floor and a ceiling along the profile's stops.
+Memory is what the layout costs, not what it was given.
 
 Invariants:
 - Invariant: a focus area outside [0, 1] (NaN included) is refused where it enters; so is a precision share (budget.py).
@@ -18,10 +22,15 @@ Invariants:
   the precision share spent evenly, without a mask.
 - Invariant: every layout at precision share p holds the weighted mean bits at 4 + 4p, up to one block's step.
 - Invariant: random zones keep the number and the radii of the zones they control; only the centers move.
+- Invariant: precision_lift is 0 outside every zone's reach and 1 at a center; combining lifts never
+  lowers a block below the strongest single lift.
+- Invariant: levels_from_lift gives the floor at lift 0 and the ceiling at lift 1, never below the
+  floor, and a block one stop further out is at most one level lower.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -34,8 +43,16 @@ GRID = 64
 SMOOTH_CELLS = 1.5  # gaussian sigma of the smoothing, in grid cells
 PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field
 MAX_ZONES = 16
-# Background ... centers. D2 is not used: uncalibrated 2 bits break the model (experiments/E006-read-depths/results.md).
+# Background ... centers of the legacy layout. D2 is not used there: uncalibrated 2 bits break the
+# model (experiments/E006-read-depths/results.md).
 LEVELS = (Level.D4, Level.D6, Level.D8)
+# The ladder of the graded layout: every level a block can be read at, coarse first. What a model can
+# actually carry is a choice of the run, not of the layout - a floor of D4 leaves D2 out of the rings.
+READ_LEVELS = (Level.D2, Level.D4, Level.D6, Level.D8)
+# A stop past 1 puts a ring outside the zone's radius. On a 2D map a ring out to 1.5 covers 1.25 of
+# the zone's area; further than that it is a second zone, and the size belongs to the focus area.
+MAX_STOP = 1.5
+HALO_STOP = 1.5
 # A block climbs one level per ring of psi it is inside; the rings are RING_GAP apart in psi.
 RING_GAP = np.log(2.0)
 SEARCH_STEPS = 60
@@ -113,6 +130,93 @@ def log_sharpness(coords: np.ndarray, zones: Zones, focus_area: float) -> np.nda
     d = np.linalg.norm(coords[:, None, :] - zones.centers[None], axis=-1)
     scale = 1.0 if focus_area == 0.0 else focus_area / (1.0 - focus_area)
     return (-d / (zones.radii * scale)).max(axis=1)
+
+
+def precision_lift(
+    coords: np.ndarray, zones: Zones, focus_area: float, reach: float = 1.0, combine: str = "sum",
+) -> np.ndarray:
+    """How far every block is lifted over the floor, 0 ... 1 (docs/lens.md, rules 1, 4 and 5).
+
+    One zone lifts a block by 1 - d / (R reach), clipped at 0, so the lift is 1 at its center and
+    fades to 0 at `reach` radii - the outermost stop of the profile. Zones that cover the same block
+    combine by `combine`: "sum" adds their lifts, capped at 1, as thin lenses in contact do; "max"
+    takes the strongest alone.
+    """
+    check_focus_area(focus_area)
+    if len(zones.radii) == 0 or focus_area == 0.0 or reach <= 0.0:
+        return np.zeros(len(coords))
+    if focus_area == 1.0:
+        return np.ones(len(coords))
+    radii = zones.radii * (focus_area / (1.0 - focus_area)) * reach
+    d = np.linalg.norm(coords[:, None, :] - zones.centers[None], axis=-1)
+    lifts = np.clip(1.0 - d / radii, 0.0, None)
+    if combine == "sum":
+        return np.minimum(lifts.sum(axis=1), 1.0)
+    if combine == "max":
+        return lifts.max(axis=1)
+    raise ValueError(f"unknown combine {combine!r}, expected 'sum' or 'max'")
+
+
+def levels_from_lift(lift: np.ndarray, floor: Level, ceiling: Level, stops: Sequence[tuple[Level, float]]) -> np.ndarray:
+    """Level codes [n_blocks] from the lift over the floor (docs/lens.md, rules 3 and 6).
+
+    `stops` are the profile from the ceiling down, each the outer edge of that level's ring as a
+    share of the reach. A block at lift l sits at rho* = reach (1 - l) and takes the level of the
+    first stop that reaches it; past the last stop it is the floor.
+    """
+    check_stops(stops, floor, ceiling)
+    reach = stops[-1][1]
+    lift = np.clip(lift, 0.0, 1.0)
+    rho = reach * (1.0 - lift)
+    codes = np.full(len(lift), int(floor), dtype=np.uint8)
+    inside = lift > 0.0  # a block no zone reaches stays at the floor, whatever the outermost stop is
+    for level, stop in reversed(stops):
+        codes[inside & (rho <= stop)] = int(level)
+    return codes
+
+
+def check_stops(stops: Sequence[tuple[Level, float]], floor: Level, ceiling: Level) -> None:
+    """Refuse a profile that is not a falloff from the ceiling down to the floor."""
+    if not stops:
+        raise ValueError("a profile needs at least one stop")
+    if stops[0][0] is not ceiling:
+        raise ValueError(f"the profile starts at {stops[0][0].name}, not at the ceiling {ceiling.name}")
+    for (level, stop), (nxt, after) in zip(stops, stops[1:]):
+        if nxt >= level:
+            raise ValueError(f"the profile does not fall: {level.name} then {nxt.name}")
+        if after <= stop:
+            raise ValueError(f"the stops do not grow: {stop} then {after}")
+    for level, stop in stops:
+        if level < floor:
+            raise ValueError(f"the profile reads {level.name} below the floor {floor.name}")
+        if not 0.0 < stop <= MAX_STOP:
+            raise ValueError(f"stop {stop} outside (0, {MAX_STOP}]")
+
+
+def even_stops(floor: Level, ceiling: Level, ladder: Sequence[Level] = READ_LEVELS, halo: bool = False) -> tuple[tuple[Level, float], ...]:
+    """The default profile: the rungs from the ceiling down to the floor, evenly spaced over the radius.
+
+    Behind an empty floor the lowest rung goes past the edge instead, to HALO_STOP - the ring that
+    softens the step from a lens into nothing (docs/lens.md).
+    """
+    rungs = [lv for lv in reversed(ladder) if floor < lv <= ceiling]
+    if not rungs:
+        return ()
+    inner = rungs[:-1] if halo else rungs
+    stops = [(lv, (i + 1) / len(inner)) for i, lv in enumerate(inner)] if inner else []
+    return tuple(stops + ([(rungs[-1], HALO_STOP)] if halo else []))
+
+
+def ceiling_of(focus_strength: float, floor: Level, ladder: Sequence[Level] = READ_LEVELS) -> Level:
+    """The level at a zone's center: focus_strength of the way from the floor to the top (rule 2)."""
+    if not 0.0 <= focus_strength <= 1.0:
+        raise ValueError(f"focus strength {focus_strength} outside [0, 1]")
+    above = [lv for lv in ladder if lv > floor]
+    if not above:
+        return floor
+    # rule 2: the ceiling is floor(g k) rungs above the floor, so half the way up a D4 floor is D6
+    rungs = min(int(focus_strength * len(above)), len(above))
+    return above[rungs - 1] if rungs else floor
 
 
 def _levels_of(psi: np.ndarray, edge: float, rings: int) -> np.ndarray:

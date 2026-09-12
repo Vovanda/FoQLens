@@ -14,7 +14,10 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest"]
+dev = [
+    "ninja>=1.13.2",
+    "pytest",
+]
 eval = ["lm-eval"]
 
 [build-system]

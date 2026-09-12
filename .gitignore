@@ -19,3 +19,6 @@ runs/**/raw/
 
 # model cache, if HF_HOME points inside the repo
 hf-cache/
+
+# nvcc output, rebuilt from the .cu next to it
+*.ptx

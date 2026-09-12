@@ -393,6 +393,75 @@ class ZoneLayout:
         return np.stack([self.rule.levels(self.field.field(self.coords, self.source.zones(int(i))), int(i)) for i in indices])
 
 
+@dataclass(frozen=True)
+class LiftField:
+    """The field of the graded layout: how far every block is lifted over the floor (zones.precision_lift)."""
+
+    focus_area: float
+    reach: float = 1.0
+    combine: str = "sum"
+
+    def __post_init__(self) -> None:
+        zones.check_focus_area(self.focus_area)
+
+    def field(self, coords: np.ndarray, zones_: zones.Zones) -> np.ndarray:
+        return zones.precision_lift(coords, zones_, self.focus_area, self.reach, self.combine)
+
+
+@dataclass(frozen=True)
+class GradedLevels:
+    """The rule of the graded layout: the lift becomes levels along a profile (zones.levels_from_lift)."""
+
+    floor: Level
+    stops: tuple[tuple[Level, float], ...]
+
+    def levels(self, field: np.ndarray, index: int) -> np.ndarray:
+        return zones.levels_from_lift(field, self.floor, self.stops[0][0], self.stops) if self.stops             else np.full(len(field), int(self.floor), dtype=np.uint8)
+
+
+def graded_zone_layout(
+    name: str, source: ZoneSource, focus_area: float, focus_strength: float, coords: np.ndarray,
+    floor: Level = Level.D4, combine: str = "sum", halo: bool = False,
+    stops: tuple[tuple[Level, float], ...] | None = None,
+) -> ZoneLayout:
+    """The layout of E010 (ADDENDUM-11, docs/lens.md): a floor everywhere, zones graded up to a ceiling.
+
+    The ceiling is focus_strength of the way from the floor to the top of the ladder; the profile is
+    even by default, with the lowest rung pushed past the edge when `halo` is on. There is no budget:
+    what the layout costs is what its zones ask for.
+    """
+    ceiling = zones.ceiling_of(focus_strength, floor)
+    profile = stops if stops is not None else zones.even_stops(floor, ceiling, halo=halo)
+    reach = profile[-1][1] if profile else 1.0
+    return ZoneLayout(name, source, LiftField(focus_area, reach, combine), GradedLevels(floor, profile), coords)
+
+
+@dataclass(frozen=True)
+class ShuffledLevels:
+    """The levels of another policy, shuffled over the blocks: the same memory with no mask at all.
+
+    The control of ADDENDUM-11 and of the preregistration's second baseline: it holds the layout's
+    mean bits and its mix of levels exactly, and only forgets where they belong. Blocks differ in how
+    many weights they hold, so the shuffle stays inside groups of equal weight - otherwise the control
+    would quietly spend a little more or less memory than the layout it controls.
+    """
+
+    name: str
+    of: LayoutPolicy
+    weights: np.ndarray
+    seed: int = 0
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        levels = self.of.levels(indices)
+        out = levels.copy()
+        groups = [np.flatnonzero(self.weights == w) for w in np.unique(self.weights)]
+        for row, i in enumerate(indices):
+            rng = _rng(self.seed, int(i), 0.0, salt=5)
+            for group in groups:
+                out[row, group] = levels[row, rng.permutation(group)]
+        return out
+
+
 def legacy_zone_layout(
     name: str, source: ZoneSource, focus_area: float, precision_share: float, coords: np.ndarray, weights: np.ndarray,
     seed: int = 0,

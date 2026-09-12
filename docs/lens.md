@@ -55,7 +55,7 @@ The picture is a multi-lens objective: a glass over the whole network, and lense
 | ZERO | 0.5 | `κ = 2`, D4 | `D4:1 D2:1.5` | ZERO |
 | any | 0 | `κ = γ` | none | the glass everywhere |
 
-No rung is fixed in the rules: every level follows from the ladder and the controls. What E2B needs - D2 is garbage uncalibrated ([E006](../experiments/E006-read-depths/results.md)), so D2 is used only as a glass and as the ring pushed past a lens edge - is configuration of a run, not a rule.
+No rung is fixed in the rules: every level follows from the ladder and the controls. What E2B needs is configuration of a run, not a rule: D2 is garbage on this model ([E006](../experiments/E006-read-depths/results.md)), and calibrating it was measured and dropped ([reading notes](reading-notes.md)), so D2 serves only as a floor to test against and as the ring pushed past a lens edge.
 
 ## The glass
 

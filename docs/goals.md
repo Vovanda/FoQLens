@@ -1,6 +1,6 @@
 # Goals
 
-FoQLens goals in order of execution. Each next goal opens only if the previous one passed. Details, measurements and reasoning are in the [plan](plan.md); every experiment is in [experiments/](../experiments/_index.md), every hypothesis in [hypotheses.md](hypotheses.md). Updated 2026-09-12.
+FoQLens goals in order of execution. Each next goal opens only if the previous one passed. Details, measurements and reasoning are in the [plan](plan.md); every experiment is in [experiments/](../experiments/_index.md), every hypothesis in [hypotheses.md](hypotheses.md). Updated 2026-09-13.
 
 ## Main goal
 
@@ -32,9 +32,9 @@ The input from the machine (a governor that lowers precision under load or heat)
 Before every run the repo holds its hypotheses and predictions, fixed as directions; the main preregistration is in [prereg/](../prereg/), each experiment's addenda in its folder.
 
 **Step 0. Topics separate in representations** - done on E2B: **yes** ([E001](../experiments/E001-run1-exploration/_index.md)).
-At the middle layer k-means ARI 0.98 for biology-math ([`runs/E001-run1-exploration/step0/e2b/summary.json`](../runs/E001-run1-exploration/step0/e2b/summary.json)). The held-out pair (history-geography) barely separates even here (ARI 0.04).
+At the middle layer k-means ARI 0.98 for biology-math (the run's summary was deleted with the corpus; the number is in [E001 results](../experiments/E001-run1-exploration/results.md)). The held-out pair (history-geography) barely separates even here (ARI 0.04).
 
-**Step 1. Masks are separable and concentrated** - **not confirmed with the naive score** ([E001](../experiments/E001-run1-exploration/_index.md)): exploration passed weakly, the held-out confirmation failed. The gradient score ([E002](../experiments/E002-gradient-score/_index.md)) replaced it as the mask source but was never checked on its own. Load-bearing.
+**Step 1. Masks are separable and concentrated** - **not confirmed with the naive score** ([E001](../experiments/E001-run1-exploration/_index.md)): exploration passed weakly, the held-out confirmation failed. The gradient score (E002, deleted with the corpus) replaced it as the mask source but was never checked on its own. Load-bearing.
 
 **Step 2. Zones overlap** - exploration passed, confirmation failed ([E001](../experiments/E001-run1-exploration/_index.md)). Read again when an instrument passes step 1.
 
@@ -43,7 +43,7 @@ At the middle layer k-means ARI 0.98 for biology-math ([`runs/E001-run1-explorat
 **Step 2.5. Exploration, before any hypothesis is stated again** - in progress, 2026-09-13.
 What the model is actually competent at and on which corpora; what a gradient mask tracks and whether anything about it is stable; what the regulator's settings do to an answer a person would accept. This step states no predictions and settles nothing. **Its output is a list of invariants** - properties that survive a change of corpus, of metric or of settings ([invariants.md](invariants.md)) - and the hypotheses worth preregistering are then written about those. A property seen once under one setup does not qualify; that is the mistake this whole reset came from. The hypotheses that follow it are expected to differ from the ones listed today ([hypotheses.md](hypotheses.md)).
 
-**Step 3. Precision follows the meaning** - **not started.** Eight runs were made ([E004](../experiments/E004-injection/_index.md), [E005](../experiments/E005-backbone/_index.md), [E007](../experiments/E007-dilation/_index.md) through [E014](../experiments/E014-moved-zones/_index.md)) and none of them measured what it set out to; their code, data and preregistrations remain as the baseline to beat. Before this step is attempted again: a corpus and a metric that can carry a verdict ([corpus.md](corpus.md)), and a mask that is asked about the answer rather than about the prompt.
+**Step 3. Precision follows the meaning** - **not started.** Eight runs were made ([E004](../experiments/E004-injection/_index.md), [E005](../experiments/E005-backbone/_index.md), [E007](../experiments/E007-dilation/_index.md) through [E014](../experiments/E014-moved-zones/_index.md)) and none of them measured what it set out to; their code and preregistrations remain as a record. Before this step is attempted again: a corpus and a metric that can carry a verdict ([corpus.md](corpus.md)), and a mask that is asked about the answer rather than about the prompt.
 Done when: the interval of settings over which the model stays usable is named, and the memory that interval saves against uniform quantization is named with it - including the honest outcome that it saves nothing.
 
 **Step 4. Learned score** - beyond solo work; only if the untrained scores give an effect.
@@ -52,8 +52,8 @@ Done when: the interval of settings over which the model stays usable is named, 
 
 **Step 6. The regulator reacts to the machine** - after step 3: precision lowered under load or heat, the zones of the query kept sharpest.
 
-**Step 7. Agents on the lens model - the main hypothesis** - once the FoQLens model exists (lenses with the address taken online from the first layers). An agent solves a hard multi-step task - designing a software architecture, for example - on the lens model and on the same model in bf16; compared are the quality of the result and what it cost (memory, compute, tokens).
-Done when: the agent on the lens model is at least as good as on the full model at a lower cost - and the hypothesis expects better.
+**Step 7. Agents on the FoQLens model - the main hypothesis** - once the model exists (zones with the address taken online from the first layers). An agent solves a hard multi-step task - designing a software architecture, for example - as a chain of a draft and refinements, on the zone model, on the same model at native precision and on uniform quantization at the same memory; compared are the result of the chain and what it cost (memory, compute, tokens).
+Done when: the chains are compared; [H4](hypotheses.md) expects the zone model to end better than native precision at a lower cost.
 
 ## Order and boundaries
 

@@ -15,5 +15,5 @@ params:
 
 The fixed-budget zone layout over 4 precision shares x 6 focus areas, run because it was cheap on the bench already built.
 
-- Preregistration: [ADDENDUM-09](ADDENDUM-09.md), names [ADDENDUM-10](ADDENDUM-10.md). Results: [results.md](results.md). Runs: `runs/E009-zones-matrix/`.
+- Preregistration: [ADDENDUM-09](ADDENDUM-09.md), names [ADDENDUM-10](ADDENDUM-10.md). Results deleted with the corpus (`1e89a81`). Runs: `runs/E009-zones-matrix/`.
 - Legacy, checked along the way: it is not the test of the idea; the lens layout (E010, [docs/lens.md](../../docs/lens.md)) is.

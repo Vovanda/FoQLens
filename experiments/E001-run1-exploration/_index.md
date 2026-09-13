@@ -18,4 +18,4 @@ The first pass of steps 0-2+ on Gemma 4 E2B with the naive block score, then the
 - Preregistration: [main](../../prereg/PREREGISTRATION.ru.md) (steps 0-2+), [ADDENDUM-01](ADDENDUM-01.md) (three center modes), [THRESHOLDS-01](THRESHOLDS-01.md) (instrument and pass criteria for the confirmation).
 - Results: [results.md](results.md).
 - Runs: `runs/E001-run1-exploration/` - `step0`, `calibration`, `step1`, `step2plus`, `confirm`, `diagnostic`.
-- Verdict: topics separate in representations (ARI 0.98); masks separate in their means after background subtraction and zones overlap in exploration, but neither holds on the held-out pair (history-geography p 0.85), which barely separates in the model's own representations.
+- Verdict at the time, withdrawn 2026-09-13: topics separate in representations (ARI 0.98); masks separate in their means after background subtraction and zones overlap in exploration, but neither holds on the held-out pair (history-geography p 0.85), which barely separates in the model's own representations.

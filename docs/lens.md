@@ -73,7 +73,7 @@ slices at all. There is no `D16` because eight slices would come to the same 16 
 weight already occupies, while costing an unpacking the stored weight does not need. What is not on
 the ladder and could be - D10 and D12, the fifth and sixth slice - has not been measured.
 
-No rung is fixed in the rules: every level follows from the ladder and the controls. What E2B needs is configuration of a run, not a rule: D2 is garbage on this model ([E006](../experiments/E006-read-depths/_index.md)), and calibrating it was measured and dropped ([reading notes](reading-notes.md)), so D2 serves only as a base to test against and as the ring pushed past a lens edge.
+No rung is fixed in the rules: every level follows from the ladder and the controls. What E2B needs is configuration of a run, not a rule: uniform D2 by round-to-nearest, without calibration, breaks E2B ([E006](../experiments/E006-read-depths/_index.md)), and calibrating the first slice within this storage was tried and dropped ([reading notes](reading-notes.md)), so D2 serves only as a base to test against and as the ring pushed past a lens edge.
 
 ## The base precision
 

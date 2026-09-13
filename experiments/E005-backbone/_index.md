@@ -15,5 +15,5 @@ params:
 
 Generic block importance for a share of the aperture, the rest filled by the own topic, the other topic or random blocks.
 
-- Preregistration: [ADDENDUM-05](ADDENDUM-05.md). Results: [results.md](results.md). Runs: `runs/E005-backbone/`.
-- Verdict: static importance carries the budget; an untrained topic address adds nothing on top of it where the model still answers.
+- Preregistration: [ADDENDUM-05](ADDENDUM-05.md). Results and runs deleted with the corpus (`1e89a81`).
+- Verdict at the time, withdrawn 2026-09-13: static importance carries the budget; an untrained topic address adds nothing on top of it where the model still answers.

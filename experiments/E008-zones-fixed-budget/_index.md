@@ -15,5 +15,5 @@ params:
 
 Expert zones from the query's mask on the weight map, fitted to a preset mean of 5 bits.
 
-- Preregistration: [ADDENDUM-07](ADDENDUM-07.md), terms [ADDENDUM-08](ADDENDUM-08.md). Results: [results.md](results.md). Runs: `runs/E008-zones-fixed-budget/`.
+- Preregistration: [ADDENDUM-07](ADDENDUM-07.md), terms [ADDENDUM-08](ADDENDUM-08.md). Results deleted with the corpus (`1e89a81`). Runs: `runs/E008-zones-fixed-budget/`.
 - Legacy: the fixed budget is not the project's picture; the lens layout (E010, [docs/lens.md](../../docs/lens.md)) replaces it.

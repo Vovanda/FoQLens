@@ -15,5 +15,5 @@ params:
 
 The topic fill widened to structural neighbours (same neuron, same stream coordinate) against index neighbours.
 
-- Preregistration: [ADDENDUM-06](ADDENDUM-06.md). Results: [results.md](results.md). Runs: `runs/E007-dilation/`.
-- Verdict: the model's blocks work in structural groups, but width is not why the topic address failed.
+- Preregistration: [ADDENDUM-06](ADDENDUM-06.md). Results and runs deleted with the corpus (`1e89a81`).
+- Verdict at the time, withdrawn 2026-09-13: the model's blocks work in structural groups, but width is not why the topic address failed.

@@ -16,6 +16,6 @@ params:
 
 Set to what does the model make the fewest mistakes, and what does that cost in memory. The engineer's question, measured as an error rate over a map of floor, size and strength, against uniform quantization at the same bits.
 
-- Preregistration: [ADDENDUM-14](ADDENDUM-14.md). Results: [results.md](results.md). Runs: `runs/E013-regulator-map/`.
-- Corrected by the shuffle check: three quarters of the win over uniform quantization was the order of the answer options ([results](results.md#what-the-shuffle-did-to-this-page), `runs/reference/shuffle-answers/`).
-- Random zones are not a reference here: they overlap less, so they spend more memory and answer worse ([E011](../E011-depth-caps/results.md)).
+- Preregistration: [ADDENDUM-14](ADDENDUM-14.md). Results and runs deleted with the corpus (`1e89a81`).
+- Corrected by the shuffle check before the reset: three quarters of the win over uniform quantization was the order of the answer options (`runs/reference/shuffle-answers/`).
+- Random zones are not a reference here: they overlap less, so they spend more memory ([E011](../E011-depth-caps/_index.md)).

@@ -1,6 +1,6 @@
 # Results - read depths and the resident bench on E2B (docs/plan.md, step 5)
 
-Measured 2026-09-11 on the bench of `03a9881` with `scripts/depth_perplexity.py`. Mean perplexity over 40 question texts (biology, math, chemistry, physics, 10 each). Raw numbers: [runs/E006-read-depths/e2b/summary.json](../../runs/E006-read-depths/e2b/summary.json).
+Measured 2026-09-11 on the bench of `03a9881` with `scripts/depth_perplexity.py`. Mean perplexity over 40 question texts (biology, math, chemistry, physics, 10 each). Raw numbers: `runs/E006-read-depths/e2b/summary.json`, deleted with the corpus in `1e89a81` and kept in git history.
 
 ## Storage
 

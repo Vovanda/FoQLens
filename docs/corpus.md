@@ -58,9 +58,7 @@ looks like a layout that answers better.
 **The metric becomes context QA.** The model is given a passage and a question, writes the answer
 itself, and is scored the way SQuAD scores it: exact match after normalization, and token F1 against
 the reference. No options to lean on, nothing to reorder, a continuous scale, and the answer is in
-the passage - so the question is whether the model can read, not whether it happens to know. It is
-also the shape a precision regulator is actually for: retrieval-augmented answering rather than a
-quiz. Code: `src/foqlens/extractive.py`.
+the passage - so the question is whether the model can read, not whether it happens to know. Code: `src/foqlens/extractive.py`.
 
 **Three regimes, so that the claim can fail.** The bench's claim is that precision should follow the
 query because the knowledge a query needs sits in particular weights. That claim predicts different
@@ -102,7 +100,7 @@ The old set occupied the bottom half of this table, and one of its four subjects
 ## What this does not fix
 
 A better corpus makes a verdict possible; it does not make one favourable. Two things are known to be
-wrong independently of it, and both are measured on the current mask rather than on the questions:
+wrong independently of it, both measured on the current mask with the letter-choice metric the reset withdrew, which leaves them as directions:
 
 - **The address moves with the shape of the prompt.** Reordering the options - same question, same
   meaning - changes accuracy by 6.3 points and memory by a whole bit, while bf16 and uniform

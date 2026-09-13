@@ -15,6 +15,6 @@ params:
 
 The control E010 lacked: the query's own zones moved as one rigid figure - same count, same radii, same distances - to another place on the map, landed where it covers the same weight. It separates "the address" from "any structure of this shape".
 
-- Addendum: [ADDENDUM-15](ADDENDUM-15.md). Results: [results.md](results.md). Runs: `runs/E014-moved-zones/`.
-- The control spends 0.4 to 8.5% more memory than the query's own zones, against the 33% the random-zone control spent - honest enough to keep as a standard reference.
-- Confirming run under a fixed prediction: [E015](../E015-topic-pairs/).
+- Addendum: [ADDENDUM-15](ADDENDUM-15.md). Results and runs deleted with the corpus (`1e89a81`).
+- At the time the control spent 0.4 to 8.5% more memory than the query's own zones, against the 33% the random-zone control spent.
+- A confirming run under a fixed prediction, E015, was prepared and deleted with the corpus, never run.

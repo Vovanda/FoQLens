@@ -33,12 +33,12 @@ The unit is fixed in advance (the whole model, layer, channel, token, expert) an
 - **PMPD** (Chen et al., 2024, arXiv 2410.13461). Precision lowered progressively along the decoded sequence; the unit is the phase, not a place in the weights.
 - **DynaExq** (Chu et al., 2025, arXiv 2511.15015). Hot experts, estimated from router traces, get high precision - from aggregate traffic, not per input.
 
-No work was found that gives different bits to different blocks inside a dense layer per query, by meaning, at a fixed mean-bits budget. The search covered the web and arXiv, not exhaustively.
+No work was found that gives different bits to different blocks inside a dense layer per query, by meaning. The search covered the web and arXiv, not exhaustively.
 
 ## Contextual sparsity - which weights to compute per input
 
 - **Deja Vu** (Liu et al., ICML 2023, arXiv 2310.17157). Per input, a trained lookahead predictor keeps some attention heads and MLP neurons and skips the rest.
-- **PowerInfer** (Song et al., SOSP 2024, arXiv 2312.12456). Neuron activity follows a power law: hot neurons stay on the GPU, cold input-dependent ones go to the CPU, chosen by trained predictors. Hot neurons are a static importance split - the same signal as the backbone of FoQLens ([E005-backbone](../experiments/E005-backbone/_index.md)).
+- **PowerInfer** (Song et al., SOSP 2024, arXiv 2312.12456). Neuron activity follows a power law: hot neurons stay on the GPU, cold input-dependent ones go to the CPU, chosen by trained predictors. Hot neurons are a static importance split - the signal the withdrawn [E005](../experiments/E005-backbone/_index.md) used as its backbone.
 - **TEAL** (Liu et al., ICLR 2025, arXiv 2408.14690). Training-free sparsity of hidden states by magnitude, 40-50%.
 - **CoreInfer** (Wang et al., 2024, arXiv 2410.18311). Sentence-level core neurons whose activation patterns follow the semantics, chosen from the model's own activations - the closest in spirit, but keep or drop instead of bits.
 - **GRIFFIN** (Dong et al., 2024, arXiv 2404.01365). Training-free: feed-forward neurons chosen once per sequence from the prompt's own activations.
@@ -56,7 +56,7 @@ The difference from FoQLens: a weight is computed or skipped; there is no step b
 
 ## Static importance - which weights matter for every query
 
-- **AWQ** (Lin et al., MLSys 2024, arXiv 2306.00978), **OWQ** (Lee et al., AAAI 2024, arXiv 2306.02272), **SpQR** (Dettmers et al., 2023, arXiv 2306.03078). Salient channels and outlier weights, found with calibration activations, are protected. This is the generic importance that carries most of the budget in FoQLens ([E005-backbone](../experiments/E005-backbone/_index.md)).
+- **AWQ** (Lin et al., MLSys 2024, arXiv 2306.00978), **OWQ** (Lee et al., AAAI 2024, arXiv 2306.02272), **SpQR** (Dettmers et al., 2023, arXiv 2306.03078). Salient channels and outlier weights, found with calibration activations, are protected. This is the generic importance the withdrawn [E005](../experiments/E005-backbone/_index.md) used as its backbone.
 - **SqueezeLLM** (Kim et al., ICML 2024, arXiv 2306.07629). Fisher (gradient) sensitivity drives non-uniform quantization - the static counterpart of the gradient mask of FoQLens.
 - **HAWQ** (Dong et al., ICCV 2019, arXiv 1905.03696). Hessian-based bit widths per layer.
 - **Wanda** (Sun et al., ICLR 2024, arXiv 2306.11695), **SparseGPT** (Frantar et al., 2023, arXiv 2301.00774). Static pruning by activations or second-order information.
@@ -79,7 +79,7 @@ Added 2026-09-13 with [H4, H5 and H6](hypotheses.md); each arXiv id was checked 
 
 ## Where FoQLens stands
 
-1. **Per query, precision inside a layer.** Input-dependent decisions about a place in the model exist - channels (GRINQH), experts (HOBBIT), layers (DP-LLM), and which neurons to compute (contextual sparsity). What is not found: different bits for different blocks inside a dense layer, per query, by meaning, at a fixed mean-bits budget.
+1. **Per query, precision inside a layer.** Input-dependent decisions about a place in the model exist - channels (GRINQH), experts (HOBBIT), layers (DP-LLM), and which neurons to compute (contextual sparsity). What is not found: different bits for different blocks inside a dense layer, per query, by meaning.
 2. **Zones used for precision.** That dense models hold emergent co-activation modules is established (MoEfication, Emergent Modularity, EMoE). New is allocating precision by these zones, with a falloff around their centers instead of hard partitions.
 3. **No trained router for precision.** Training-free, self-signalled selection exists for sparsity (GRIFFIN, TEAL, CoreInfer). For precision the known selectors are trained (DP-LLM) or routed (MoBiQuant); FoQLens takes the address from the model's own activations and gradients.
 4. **Overlapping zones and isthmuses** as a measurable structure.

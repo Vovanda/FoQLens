@@ -31,7 +31,7 @@ again: [docs/corpus.md](corpus.md).
 | H3.2 | The shape: own expert zones beat random zones of the same count and size | ADDENDUM-07 S1, -09 M1, -11 L1 | part of H3 | **not tested** | E008, E009, E010 |
 | H3.3 | Static importance: generic block importance beats random blocks at the same memory | ADDENDUM-05 B1 | context for H3 | **not tested** | E005 |
 | H3.4 | The place: own zones beat the same figure carried elsewhere on the map, at the same cost | ADDENDUM-15, ADDENDUM-16 P3 | part of H3 | **not tested** | E014, E015 |
-| H4 | **Main.** A draft read mostly at base precision, then refined with sharper zones, ends better than the same model at native precision - where there are iterations: an agent or a model's reasoning. Full text below | author, 2026-09-12; restated by the author 2026-09-13; a single-pass part of the earlier text fixed in ADDENDUM-11 | main | **not tested** | E010 |
+| H4 | **Main.** A draft read mostly at base precision, then refined with sharper zones, ends better than the same model at native precision - where there are iterations: an agent or a model's reasoning. Full text below | author, 2026-09-12; restated by the author 2026-09-13; a single-pass part of the earlier text fixed in ADDENDUM-11 (E010) | main | **not tested** | - |
 | H5 | **Horizon.** A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment. Full text below | author, 2026-09-12; restated by the author 2026-09-13 | horizon | **not tested** | - |
 | H6 | **Additional.** How good asking for a shorter answer and coarsening the weights each are at representing knowledge in compressed form, and below which step coarsening slides into nonsense. Full text below | author, 2026-09-13, from the author's article | additional | **not tested** | - |
 
@@ -104,7 +104,7 @@ Which form keeps more of what matters at the same length is an open question ins
 - *A breakdown below step X.* That is the lower bound of the regulator: a base below X is ruled out whatever the zones.
 - *The loss at the junction is smaller than within an area.* The bridges exist, and for interdisciplinary questions the coarsened model is fit for use with all its memory saving.
 
-**A condition on the bench.** The model has to follow a request to compress its answer. Base E2B does not: in a one-off probe of 2026-09-13 it kept a word limit on 2 questions of 12 and built the ladder on none. H6 needs the `-it` checkpoint; the rest of the bench stays on the base one.
+**A condition on the bench.** The model has to follow a request to compress its answer. In a one-off probe of 2026-09-13 base E2B did not: it kept a word limit on 2 questions of 12 and built the ladder on none. H6 needs the `-it` checkpoint; the rest of the bench stays on the base one.
 
 **Aside, not a priority.** Summarizing a text given in the context - direct compression - can be checked alongside, with the same fact-by-fact comparison.
 

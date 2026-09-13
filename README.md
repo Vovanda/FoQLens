@@ -61,7 +61,7 @@ The steps are ordered so each one can kill the next:
 | 2 | Do related topics (biology-chemistry) share more of their zones than unrelated ones (biology-math)? | no overlap structure |
 | 2+ | Geometry: are masks additive, is there a junction zone, does ablating it break mixed questions only? | - (refining, not load-bearing) |
 | 3 | Over what interval of the regulator's settings does the model stay usable, and what memory does that interval save against uniform quantization at the same memory? The other topic's zones and generic importance test the address | the interval saves nothing against uniform quantization |
-| 7 | Is an agent on the lens model more accurate and cheaper than on the same model in full? (the main hypothesis, once the model exists) | - |
+| 7 | In an agent chain of a draft and refinements, does the zone model end better than the same model at native precision and than uniform quantization at the same memory? (the main hypothesis, once the model exists) | - |
 
 All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"), not numbers. The full reasoning is in [`docs/`](docs/).
 
@@ -81,8 +81,8 @@ once, each enough on its own to void a result:
 - **the comparisons** - built on those two, so whichever way they came out they were reading a coin toss.
 
 Every verdict the bench produced is therefore withdrawn - the favourable readings and the unfavourable ones
-alike - and every hypothesis is back to untested ([docs/hypotheses.md](docs/hypotheses.md)). The runs, their
-code, their raw numbers and their preregistrations stay: they are the baseline to beat, not evidence.
+alike - and every hypothesis is back to untested ([docs/hypotheses.md](docs/hypotheses.md)). Their code and
+preregistrations stay as a record; the runs and their result texts were deleted with the corpus.
 
 **What is being rebuilt, in order:** a corpus measured rather than chosen, where the model answers from
 knowledge ([docs/corpus.md](docs/corpus.md)); a metric with nothing to lean on - the model reads a passage and
@@ -94,8 +94,8 @@ how much memory that interval actually saves - if any.
 
 **Engineering that stands regardless**, because it does not depend on the questions: one stored copy of the
 weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), 1.63 GiB freed on E2B without the bf16
-copy, and each block storing only the depth it is read to
-([E006](experiments/E006-read-depths/_index.md)). The slices are unpacked before the multiplication, so speed
+copy ([E006](experiments/E006-read-depths/_index.md)), and each block able to store only the depth it is read to
+(depth caps, [E011](experiments/E011-depth-caps/_index.md)). The slices are unpacked before the multiplication, so speed
 and energy would need a kernel that reads only the bits it needs.
 
 ## Reproduce

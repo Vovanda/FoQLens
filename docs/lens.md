@@ -13,7 +13,7 @@ and the model that carries the regulator; the lens is the picture of it.
 
 The picture is a multi-lens objective: a glass over the whole network, and lenses inserted where the query needs to see. It is a picture, not the mechanism - what the mechanism does is allocate precision over blocks by the meaning of the query.
 
-**The metric is an input, and it is not settled.** A zone is a ball of radius `R` in a distance `d` on blocks; the rules below hold in any `d`. What the bench runs today is Euclidean distance on a two-dimensional PCA layout, and the zones themselves are found by image processing on that layout (`foqlens.zones.find_zones`) - so their shape is a property of the picture rather than of the model. That layout keeps 18.1% of the variance of the co-activation distance it approximates. Naming the metric is [issue #4](https://github.com/Vovanda/FoQLens/issues/4).
+**The metric is an input, and it is not settled.** A zone is a ball of radius `R` in a distance `d` on blocks; the rules below hold in any `d`. Which `d` the bench should use is [issue #4](https://github.com/Vovanda/FoQLens/issues/4).
 
 ## The mechanism in formulas
 

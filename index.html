@@ -161,7 +161,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     <div class="wrap">
       <h2>The mechanism</h2>
       <p>Three controls, each doing one thing: the <b>base precision</b> - what the whole network is read at before any zone is lifted, called <code>floor</code> in the runs and the scripts; <b>focus area</b> - how large the zones are; <b>focus strength</b> - how far their centers rise above it. The rules below are what the field above runs; the full text is in <a href="docs.html#lens">docs/lens.md</a>.</p>
-      <p>A fourth input is a choice rather than a control, and it is open: the <b>metric</b> <code>d</code> on blocks, the one that makes a zone a ball. The rules hold in any metric; which one the bench should use is <a href="https://github.com/Vovanda/FoQLens/issues/4" target="_blank" rel="noopener">issue #4</a>.</p>
+      <p>A fourth input is a choice rather than a control, and it is open: the <b>metric</b> <code>d</code> on blocks, which decides which blocks lie close to a zone's center. A zone is round only on the map drawn here; in another metric the same zone may be a strand through the layers. The rules hold in any metric; which one the bench should use is <a href="https://github.com/Vovanda/FoQLens/issues/4" target="_blank" rel="noopener">issue #4</a>.</p>
       <pre class="rules"><b>ladder</b>      ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          the levels this model can be read at; ℓ₀ = ZERO
 <b>base</b>        G = ℓ_γ                     any rung; floor in the scripts
 <b>metric</b>      d(a, b)                     a distance on blocks - an input, not a fixed choice

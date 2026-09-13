@@ -15,6 +15,8 @@ The picture is a multi-lens objective: a glass over the whole network, and lense
 
 **The metric is an input, and it is not settled.** A zone is a ball of radius `R` in a distance `d` on blocks; the rules below hold in any `d`. Which `d` the bench should use is [issue #4](https://github.com/Vovanda/FoQLens/issues/4).
 
+A ball here is a set of blocks, not a round island. It is round only in the metric used today, the 2D map, and that roundness is a property of the picture, not a finding about the model. In a metric taken on the full co-activation profile, or on a graph of blocks, the same ball is whatever the blocks near its center turn out to be - possibly a strand running through the layers. What shape the zones really have is one of the things the bench has to measure, not an assumption it starts from.
+
 ## The mechanism in formulas
 
 **Given**

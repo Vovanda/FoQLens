@@ -38,7 +38,7 @@ No work was found that gives different bits to different blocks inside a dense l
 ## Contextual sparsity - which weights to compute per input
 
 - **Deja Vu** (Liu et al., ICML 2023, arXiv 2310.17157). Per input, a trained lookahead predictor keeps some attention heads and MLP neurons and skips the rest.
-- **PowerInfer** (Song et al., SOSP 2024, arXiv 2312.12456). Neuron activity follows a power law: hot neurons stay on the GPU, cold input-dependent ones go to the CPU, chosen by trained predictors. Hot neurons are a static importance split - the same signal as the backbone of FoQLens ([results](../experiments/E005-backbone/results.md)).
+- **PowerInfer** (Song et al., SOSP 2024, arXiv 2312.12456). Neuron activity follows a power law: hot neurons stay on the GPU, cold input-dependent ones go to the CPU, chosen by trained predictors. Hot neurons are a static importance split - the same signal as the backbone of FoQLens ([E005-backbone](../experiments/E005-backbone/_index.md)).
 - **TEAL** (Liu et al., ICLR 2025, arXiv 2408.14690). Training-free sparsity of hidden states by magnitude, 40-50%.
 - **CoreInfer** (Wang et al., 2024, arXiv 2410.18311). Sentence-level core neurons whose activation patterns follow the semantics, chosen from the model's own activations - the closest in spirit, but keep or drop instead of bits.
 - **GRIFFIN** (Dong et al., 2024, arXiv 2404.01365). Training-free: feed-forward neurons chosen once per sequence from the prompt's own activations.
@@ -56,7 +56,7 @@ The difference from FoQLens: a weight is computed or skipped; there is no step b
 
 ## Static importance - which weights matter for every query
 
-- **AWQ** (Lin et al., MLSys 2024, arXiv 2306.00978), **OWQ** (Lee et al., AAAI 2024, arXiv 2306.02272), **SpQR** (Dettmers et al., 2023, arXiv 2306.03078). Salient channels and outlier weights, found with calibration activations, are protected. This is the generic importance that carries most of the budget in FoQLens ([results](../experiments/E005-backbone/results.md)).
+- **AWQ** (Lin et al., MLSys 2024, arXiv 2306.00978), **OWQ** (Lee et al., AAAI 2024, arXiv 2306.02272), **SpQR** (Dettmers et al., 2023, arXiv 2306.03078). Salient channels and outlier weights, found with calibration activations, are protected. This is the generic importance that carries most of the budget in FoQLens ([E005-backbone](../experiments/E005-backbone/_index.md)).
 - **SqueezeLLM** (Kim et al., ICML 2024, arXiv 2306.07629). Fisher (gradient) sensitivity drives non-uniform quantization - the static counterpart of the gradient mask of FoQLens.
 - **HAWQ** (Dong et al., ICCV 2019, arXiv 1905.03696). Hessian-based bit widths per layer.
 - **Wanda** (Sun et al., ICLR 2024, arXiv 2306.11695), **SparseGPT** (Frantar et al., 2023, arXiv 2301.00774). Static pruning by activations or second-order information.

@@ -4,9 +4,15 @@ title: Experiments
 
 # Experiments
 
-One folder per experiment, `E0NN-slug`: its preregistration (addenda, thresholds), its card (`_index.md`: dates, commits, hypotheses, status, verdict), and `results.md` once it has run. Raw summaries are in `runs/E0NN-slug/`. The main preregistration stays in [`prereg/`](../prereg/); the hypotheses are in [docs/hypotheses.md](../docs/hypotheses.md).
+One folder per experiment, `E0NN-slug`: its preregistration (addenda, thresholds), its card (`_index.md`: dates, commits, hypotheses, status, verdict), and `results.md` once it has run. The main preregistration stays in [`prereg/`](../prereg/); the hypotheses are in [docs/hypotheses.md](../docs/hypotheses.md).
 
-**Everything here is reset, 2026-09-13.** The bench has claimed nothing that survives: quality was scored by which of four letters the model ranks highest, on a set answered by guessing more than half the time, with a mask read off the prompt rather than off the answer. Rather than sort conclusions into surviving and not, all of them are dropped and every hypothesis goes back to untested. The runs, their code, their raw numbers and their preregistrations stay - they are what re-testing will be done against. What has to be true before anything is claimed again: [docs/corpus.md](../docs/corpus.md).
+**Reset 2026-09-13.** The corpus could not carry a verdict: the core - questions bf16 gets right in
+every order of the options - was 31%, and 3% on maths. The masks were read from the same questions,
+the weight map from those masks, the zones from that map, so the whole chain measured noise.
+
+Deleted: the result texts and the runs of E004, E005, E007-E011, E013, E014, and the never-run
+E002, E003, E012, E015. Kept: the preregistrations and the code. Next: a corpus the model knows and
+a metric that does not reward a lucky letter ([docs/corpus.md](../docs/corpus.md)).
 
 Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `done`; `exploratory` - run without a preregistration, so it can point a direction but not settle one; `legacy` - run, but on an approach since replaced; `not-run` - fixed and never run on its own; `withdrawn` - run, but its verdict does not stand.
 

@@ -24,7 +24,7 @@ The precision share `p` is the share of the precision range spent. With the leve
 
 ## What was wrong in the early runs
 
-The mask was a flat list of block scores, and the top blocks were opened one by one until the budget was spent. There were no centers and no radii: a topic could only show up as scattered single blocks, and dilation ([results](../experiments/E007-dilation/results.md)) only regrouped the same budget around those points. The picture the project is built on is different: antinodes at full precision, a stepped falloff around them, the background coarse. That needs centers, distances and radii.
+The mask was a flat list of block scores, and the top blocks were opened one by one until the budget was spent. There were no centers and no radii: a topic could only show up as scattered single blocks, and dilation ([E007-dilation](../experiments/E007-dilation/_index.md)) only regrouped the same budget around those points. The picture the project is built on is different: antinodes at full precision, a stepped falloff around them, the background coarse. That needs centers, distances and radii.
 
 ## Expert zones - in what shape
 
@@ -59,11 +59,11 @@ R_i(f) = r_i * f / (1 - f)        f in [0, 1]
 phi(b) = max_i exp(-d(b, c_i) / R_i)        in (0, 1]
 ```
 
-The sharpness is cut into rings - D8 at the centers, then D6, D4 for the background - read on `log phi = max_i(-d / R_i)`, which keeps the order of far blocks when `R` is small. The edge of the rings is searched so that the mean bits equal the budget of the precision share. D2 is not used as the background: uncalibrated 2 bits break the model ([results](../experiments/E006-read-depths/results.md)).
+The sharpness is cut into rings - D8 at the centers, then D6, D4 for the background - read on `log phi = max_i(-d / R_i)`, which keeps the order of far blocks when `R` is small. The edge of the rings is searched so that the mean bits equal the budget of the precision share. D2 is not used as the background: uncalibrated 2 bits break the model ([E006-read-depths](../experiments/E006-read-depths/_index.md)).
 
 ### 5. Memory follows the zones
 
-The level of a block is also the depth it stores (depth caps of the resident bench, [results](../experiments/E006-read-depths/results.md)): a block in the background keeps only its first slices, a center keeps all four.
+The level of a block is also the depth it stores (depth caps of the resident bench, [E006-read-depths](../experiments/E006-read-depths/_index.md)): a block in the background keeps only its first slices, a center keeps all four.
 
 ## What is compared
 

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FoQLens - precision follows the query</title>
-<meta name="description" content="A precision regulator for language models: the weights sit behind a glass, and lenses open where the query needs to see.">
+<meta name="description" content="A precision regulator for language models: FoQZones - focusable quantization zones, opened where the query needs them. An R&amp;D bench on Gemma 4 E2B.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=35">
-<link rel="stylesheet" href="site/front.css?v=35">
+<link rel="stylesheet" href="site/site.css?v=37">
+<link rel="stylesheet" href="site/front.css?v=37">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
@@ -149,8 +149,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <div class="cols">
         <p>Every quantization scheme decides precision per fixed unit - the model, a layer, a channel, a token, an expert. The boundaries come from the architecture; a controller only picks how many bits each unit gets.</p>
         <p>FoQLens asks the model itself which weights matter for <em>this</em> query, places those blocks on a map, and reads the rest coarsely. Mixture of Experts is the rigid special case of the same idea: experts with hard edges, fixed at training, opened by a router.</p>
-        <p>The mechanism is <b>FoQZones</b> - focusable quantization zones. Call it a Mixture of Zones if you like, though there is no router here and there will not be one. FoQLens is the project and the model that carries the regulator; the lens is the picture of it, and the field above is that picture made interactive.</p>
-        <p>The field above is decoration. Its points come from a run, but what is drawn is a fragment flattened onto a plane, spread and thinned until it reads - a picture, and nothing to measure with. Every number on this page comes from the runs.</p>
+        <p>The mechanism is <b>FoQZones</b> - focusable quantization zones. Call it a Mixture of Zones if you like, though there is no router here and there will not be one. FoQLens is the project and the model that carries the regulator; the lens is the picture of it.</p>
+        <p>The field above is a handsome decoration built on real weights: the map of Gemma 4 E2B, 14 708 blocks of 64 output rows, laid out so that blocks which light up together lie close. Place a zone on it and the regulator runs - the plate gives the cost in bits per weight.</p>
         <p>Coarse pixels are weights read at few bits; sharp ones are read at many. Memory is not a budget you set - it is what your zones cost.</p>
       </div>
     </div>
@@ -161,7 +161,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     <div class="wrap">
       <h2>The mechanism</h2>
       <p>Three controls, each doing one thing: the <b>base precision</b> - what the whole network is read at before any zone is lifted, called <code>floor</code> in the runs and the scripts; <b>focus area</b> - how large the zones are; <b>focus strength</b> - how far their centers rise above it. The rules below are what the field above runs; the full text is in <a href="docs.html#lens">docs/lens.md</a>.</p>
-      <p>A fourth input is not a control but a choice, and it is not settled: the <b>metric</b> <code>d</code> on blocks, in which a zone is a ball. The rules hold in any metric. What runs today is the Euclidean distance on a two-dimensional layout of the weight map - the same layout drawn above - which keeps 18% of the variance of the co-activation distance it stands for, and the zones are found on it by image processing. So their shape is a property of the picture, not of the model. Naming the metric is <a href="https://github.com/Vovanda/FoQLens/issues/4" target="_blank" rel="noopener">issue #4</a>.</p>
+      <p>A fourth input is a choice rather than a control, and it is open: the <b>metric</b> <code>d</code> on blocks, the one that makes a zone a ball. The rules hold in any metric; which one the bench should use is <a href="https://github.com/Vovanda/FoQLens/issues/4" target="_blank" rel="noopener">issue #4</a>.</p>
       <pre class="rules"><b>ladder</b>      ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          the levels this model can be read at; ℓ₀ = ZERO
 <b>base</b>        G = ℓ_γ                     any rung; floor in the scripts
 <b>metric</b>      d(a, b)                     a distance on blocks - an input, not a fixed choice
@@ -189,8 +189,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
             <tr><td class="num">H1</td><td>The mask of a query is separable by topic and concentrated - there is an address to read at all</td><td><span class="tag tag--open">untested</span></td></tr>
             <tr><td class="num">H2</td><td>Zones of related topics overlap more than zones of unrelated ones</td><td><span class="tag tag--open">untested</span></td></tr>
             <tr><td class="num">H3</td><td>Precision laid out by the query beats the same memory spread any other way</td><td><span class="tag tag--open">untested</span></td></tr>
-            <tr><td class="num">H4</td><td><b>The main one.</b> A model read through the query's lenses is <em>better</em> than the same model in full - the glass damps what the query does not need</td><td><span class="tag tag--open">untested</span></td></tr>
-            <tr><td class="num">H5</td><td>The lens model beats a Mixture of Experts built from the same weights - continuous zones against hard-edged experts</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H4</td><td><b>The main one.</b> A model read through the query's zones is <em>better</em> than the same model in full - what the query does not need is damped</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H5</td><td>The zone model beats a Mixture of Experts built from the same weights - continuous zones against hard-edged experts</td><td><span class="tag tag--open">untested</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -212,7 +212,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
             <tr><td class="num">3</td><td>Precision follows meaning: the interval of settings where the model stays usable, and what memory it saves</td><td><span class="tag tag--open">next</span></td></tr>
             <tr><td class="num">5</td><td>Memory follows the lenses - one stored copy read at 2 / 4 / 6 / 8 bits, 1.63 GiB freed on E2B</td><td><span class="tag tag--yes">built</span></td></tr>
             <tr><td class="num">6</td><td>The regulator answers to the machine: load, heat, memory</td><td><span class="tag tag--open">after 3</span></td></tr>
-            <tr><td class="num">7</td><td>An agent on the lens model against the same model in full</td><td><span class="tag tag--open">after 3</span></td></tr>
+            <tr><td class="num">7</td><td>An agent on the zone model against the same model in full</td><td><span class="tag tag--open">after 3</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -245,9 +245,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 </div>
 </div>
 
-<script src="site/panel.js?v=35"></script>
-<script src="site/sections.js?v=35"></script>
-<script src="site/field.js?v=35"></script>
+<script src="site/panel.js?v=37"></script>
+<script src="site/sections.js?v=37"></script>
+<script src="site/field.js?v=37"></script>
 <script>
 /* Transitions come back only once the panel and the sheet stand where storage says - two frames
    later, so the browser has laid the page out and painted it at rest. This lives in the page, next

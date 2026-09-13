@@ -107,7 +107,11 @@ def test_the_documentation_lists_its_documents_without_scripts():
     otherwise - which is how an agent came back saying it could not read the site."""
     page = read("docs.html")
     body = page[page.index('<main'):page.index("</main>")]
-    assert body.count("<li>") >= 20, "the table of contents is not in the HTML"
+    listed = len(re.findall(r'\["[\w-]+", "(?:docs|prereg|experiments)/', page))
+    assert body.count("<li>") == listed, (
+        f"the table of contents in the HTML has {body.count('<li>')} entries against {listed} in the "
+        "shelf - a crawler and a reader without JavaScript see the stale one"
+    )
     assert "blob/main/" in body, "the documents are not linked to their sources"
 
 

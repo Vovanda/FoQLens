@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=37">
-<link rel="stylesheet" href="site/docs.css?v=37">
+<link rel="stylesheet" href="site/site.css?v=38">
+<link rel="stylesheet" href="site/docs.css?v=38">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
@@ -122,16 +122,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <li><a href="#prereg-ru">Пререгистрация (original)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/prereg/PREREGISTRATION.ru.md">prereg/PREREGISTRATION.ru.md</a></span></li>
         <li><a href="#addendum-11">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/ADDENDUM-11.md">experiments/E010-lens-layout/ADDENDUM-11.md</a></span></li>
         <li><a href="#addendum-14">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/ADDENDUM-14.md">experiments/E013-regulator-map/ADDENDUM-14.md</a></span></li>
-        <li><a href="#addendum-16">E015 - three topic pairs</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E015-topic-pairs/ADDENDUM-16.md">experiments/E015-topic-pairs/ADDENDUM-16.md</a></span></li>
       </ul>
       <h3>Runs - verdicts withdrawn</h3>
       <ul>
         <li><a href="#e001">E001 - separation and masks</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E001-run1-exploration/results.md">experiments/E001-run1-exploration/results.md</a></span></li>
         <li><a href="#e006">E006 - read depths</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-read-depths/results.md">experiments/E006-read-depths/results.md</a></span></li>
-        <li><a href="#e011">E011 - depth caps</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E011-depth-caps/results.md">experiments/E011-depth-caps/results.md</a></span></li>
-        <li><a href="#e010">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/results.md">experiments/E010-lens-layout/results.md</a></span></li>
-        <li><a href="#e013">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/results.md">experiments/E013-regulator-map/results.md</a></span></li>
-        <li><a href="#e014">E014 - the zones carried elsewhere</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E014-moved-zones/results.md">experiments/E014-moved-zones/results.md</a></span></li>
       </ul>
     </main>
 
@@ -146,7 +141,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
-<script src="site/panel.js?v=37"></script>
+<script src="site/panel.js?v=38"></script>
 <script>
 /* ==== THE SHELF ==== */
 // Every document the site shows, by the path it has in the repository - the page renders the same
@@ -176,15 +171,10 @@ const SHELF = [
     ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
     ["addendum-11", "experiments/E010-lens-layout/ADDENDUM-11.md", "E010 - the lens layout"],
     ["addendum-14", "experiments/E013-regulator-map/ADDENDUM-14.md", "E013 - the map of the regulator"],
-    ["addendum-16", "experiments/E015-topic-pairs/ADDENDUM-16.md", "E015 - three topic pairs"],
   ]},
   { group: "Runs - verdicts withdrawn", docs: [
     ["e001", "experiments/E001-run1-exploration/results.md", "E001 - separation and masks"],
     ["e006", "experiments/E006-read-depths/results.md", "E006 - read depths"],
-    ["e011", "experiments/E011-depth-caps/results.md", "E011 - depth caps"],
-    ["e010", "experiments/E010-lens-layout/results.md", "E010 - the lens layout"],
-    ["e013", "experiments/E013-regulator-map/results.md", "E013 - the map of the regulator"],
-    ["e014", "experiments/E014-moved-zones/results.md", "E014 - the zones carried elsewhere"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));

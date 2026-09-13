@@ -13,10 +13,7 @@ and the model that carries the regulator; the lens is the picture of it.
 
 The picture is a multi-lens objective: a glass over the whole network, and lenses inserted where the query needs to see. It is a picture, not the mechanism - what the mechanism does is allocate precision over blocks by the meaning of the query.
 
-**The metric is an input, and it is not settled.** A zone is a ball of radius `R` in a distance `d` on blocks; the rules below hold in any `d`. Which `d` the bench should use is [issue #4](https://github.com/Vovanda/FoQLens/issues/4).
-
-A ball here is a set of blocks, not a round island. It is round only in the metric used today, the 2D map, and that roundness is a property of the picture, not a finding about the model. In a metric taken on the full co-activation profile, or on a graph of blocks, the same ball is whatever the blocks near its center turn out to be - possibly a strand running through the layers. What shape the zones really have is one of the things the bench has to measure, not an assumption it starts from.
-
+**The distance `d` is the one the bench uses today.** The rules below need a distance between blocks, and today it is the distance on the weight map. In what space the regions of a query are defined, and what makes two weights close, is the first open hole of the [problem statement](problem-statement.md); the shape of a zone is meant to grow from an oval to arbitrary shapes with bridges.
 ## The mechanism in formulas
 
 **Given**
@@ -25,7 +22,7 @@ A ball here is a set of blocks, not a round island. It is round only in the metr
 | --- | --- | --- |
 | `ℓ_0 < ℓ_1 < … < ℓ_m` | the ladder: the levels a block can be read at, set by the model and its storage; `ℓ_0` = ZERO, nothing read | 0, 2, 4, 6, 8, 16 bits (ZERO, D2, D4, D6, D8, bf16) |
 | `w_b` | block `b`: its number of weights | |
-| `d(a, b)` | **the metric on blocks** - an input of the mechanism, not a fixed choice. A zone is a ball in it | today: Euclidean distance on a 2D PCA layout of the co-activation distance `sqrt(2(1 - corr))` ([weight_map.py](../src/foqlens/weight_map.py)) |
+| `d(a, b)` | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), hole 1) | today: Euclidean distance on a 2D PCA layout of the co-activation distance `sqrt(2(1 - corr))` ([weight_map.py](../src/foqlens/weight_map.py)) |
 | `c_i`, `r_i` | the query's expert zones: centers and base radii ([zones.md](zones.md)) | |
 
 **Controls**
@@ -108,7 +105,7 @@ From the center outwards the precision falls off along **stops**, as gradient st
 
 - The default is even (rule 3). A level may be skipped: `D8:0.33 D6:1 D2:1.5` - the step from D6 to D2 is then a jump, a choice of the profile.
 - A stop above 1 puts a ring beyond the lens edge. Not recommended, except at ZERO base: there the lowest non-zero rung is pushed past the edge by default, as a ring that may soften the step from the lens into emptiness. On E2B that rung is D2, which alone often gives nonsense; the hope is only less nonsense at the junction than with a hard cut.
-- Stops are bounded by 1.5. The bound was argued on the 2D map, where a ring from 1 to 1.5 covers 1.25 of the area of the zone; in `k` dimensions the same ring covers `1.5^k − 1` - 2.38 at `k = 3`, 6.59 at `k = 5`, 56.7 at `k = 10`. **The number does not carry over to another metric** and has to be restated as a share of the weight mass covered, which is what makes it comparable at all ([issue #4](https://github.com/Vovanda/FoQLens/issues/4)). A ring larger than the bound would be a second zone, and the size belongs to focus_area.
+- Stops are bounded by 1.5, a parameter of the profile: a ring larger than that would be a second zone, and the size belongs to focus_area. The bound was set on the 2D map and is revisited together with the space of the zones.
 
 ## Where lenses overlap
 

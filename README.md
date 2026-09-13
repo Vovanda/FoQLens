@@ -17,7 +17,7 @@ Mixture of Experts is its rigid special case: experts with hard edges fixed at t
 
 **The main hypothesis:** on a hard question the first pass gives a draft, most of it read at base precision - an approximate guess, and more useful than a refusal, since a guess can be refined. The draft goes back into the input with the refinement; the zones of the next step land more precisely, and the weights outside them affect the answer less. So where there are iterations - an agent, or a model's reasoning - the model should end better than the same model at native precision. It is tested once the FoQLens model exists: an agent on a hard multi-step task, such as designing a software architecture ([H4](docs/hypotheses.md)). Further out, a horizon: a network trained with zoning, read the same way, should beat a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment ([H5](docs/hypotheses.md)).
 
-**FoQLens** (Focus + Quantization + Lens) is the model that uses this regulator: its weights sit behind a filter, and lenses open where the query needs to see. This repository is the R&D inside FoQLens - a bench that tests the core of the idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are ([goals](docs/goals.md)).
+**FoQLens** (Focus + Quantization + Lens) is the model that uses this regulator. Its mechanism is **FoQZones** - focusable quantization zones: the precision of the weights is allocated by the meaning of the query, and the lens is the picture of it. This repository is the R&D inside FoQLens - a bench that tests the core of the idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are ([goals](docs/goals.md)).
 
 ## The problem
 
@@ -29,24 +29,24 @@ A question about biology and a question about a proof do not need *more or less*
 
 1. Score every block of weights (64 output rows) by how much it matters for the query - from the model's own activations and gradients, no trained router.
 2. Place the blocks on a **weight map**, where blocks that light up together lie close. The query's mask has peaks on this map: its **expert zones**.
-3. Put the whole network behind a **glass** and insert a **lens** into each expert zone: sharp at its center, falling off toward its edge.
+3. Read the whole network at a **base precision** and read each expert zone more precisely: sharpest at its center, falling off toward its edge.
 
 Three controls, each doing one thing:
 
-- **glass** - the precision of everything outside the lenses, down to nothing at all;
-- **focus_area** - the size of the lenses;
-- **focus_strength** - how far the lens centers rise above the glass.
+- **base precision** (`floor` in the scripts) - the precision of everything outside the zones, down to nothing at all;
+- **focus_area** - the size of the zones;
+- **focus_strength** - how far the zone centers rise above the base.
 
-Memory is the result, not a preset budget: a query that needs little sees through small lenses and pays little. The mechanism in formulas, the single source of truth for it: [docs/lens.md](docs/lens.md).
+Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas, the single source of truth for it: [docs/lens.md](docs/lens.md).
 
 If the idea holds, **expert zones emerge** as the regions that stay sharp when everything around them is coarsened - and related topics share part of their zone instead of paying for it twice, as MoE experts do.
 
 ## Where it leads
 
-- **On-device models.** One weights file for a phone, glasses or a laptop: precision follows the battery, the heat and the free memory, and the lenses stay where the query is.
-- **Cost per query in data centers.** A simple question sees through small lenses and costs little; a hard one opens them wider. The price of a token follows the question, not the model size.
+- **On-device models.** One weights file for a phone, glasses or a laptop: precision follows the battery, the heat and the free memory, and the zones stay where the query is.
+- **Cost per query in data centers.** A simple question gets small zones and costs little; a hard one gets wider ones. The price of a token follows the question.
 - **Agents and reasoning.** Wherever a draft is refined step by step - the main hypothesis above.
-- **Graceful degradation.** Under load or heat the model gets coarser in what the query does not need, not everywhere at once.
+- **Graceful degradation.** Under load or heat the model gets coarser first in what the query does not need.
 
 These are the directions the regulator opens; each is tested by a step of the [plan](docs/goals.md) before it is claimed.
 

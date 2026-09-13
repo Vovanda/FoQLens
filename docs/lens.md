@@ -114,7 +114,7 @@ From the center outwards the precision falls off along **stops**, as gradient st
 
 Each lens lifts the blocks it covers, continuously, from 1 at its center to 0 at its last stop (rule 4). Overlapping lifts combine by a replaceable strategy (rule 5):
 
-- **sum**, the default: lenses stacked on each other add their power, as thin lenses in contact (`1/f = 1/f_1 + 1/f_2`). The core of a deep overlap reaches the ceiling: a query on the border of two topics gets a sharp junction.
+- **sum**, the default: the lifts of overlapping lenses add up, capped at 1. The core of a deep overlap reaches the ceiling: a query on the border of two topics gets a sharp junction.
 - **max**: the strongest lens only - no gain, and the junction does not fall back to the base.
 
 Both are continuous: at the border of an overlap the second lens adds 0, so the junction rises smoothly. A single lens reads its stepped profile exactly, an overlap lowers no block, and neighbouring blocks differ by at most one rung unless the profile skips one (1D simulation of five layouts of two lenses, both strategies).

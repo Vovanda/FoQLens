@@ -46,7 +46,7 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the lens layout ([lens.md](lens.md)); the fixed-budget layouts of E008 and E009 are legacy.*
 
-Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → a lens in each zone, the rest of the weights behind the filter (a glass at any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
+Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
 The weights are stored once, as residual slices read to a depth (step 5), so a lens costs only the depth it reads.
 

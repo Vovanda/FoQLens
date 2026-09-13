@@ -17,7 +17,7 @@ Pixel size and palette follow the rung of the ladder a block is read at:
 | 4 bits | 8px | 16 colors |
 | 6 bits | 6px | 64 colors |
 | 8 bits | 4px | 256 colors |
-| 16 bits (bf16) | 2px | full color - only for the original model, never inside a lens |
+| 16 bits (bf16) | 2px | full color - the weight as stored; a lens center reaches it at focus_strength 1 |
 
 Rules:
 

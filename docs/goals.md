@@ -6,13 +6,13 @@ FoQLens goals in order of execution. Each next goal opens only if the previous o
 
 **A universal mechanism that lets a model work more economically and react to its environment and context: a precision regulator.** It sets how finely the model works right now - not an optimizer on top of the system but its constant state, made up of three inputs: the difficulty of the task, the resources of the machine (load, heat, memory) and the value of the query. The idea and its background are in the author's article [«Квантование - всё, что вам нужно»](https://sawking.tech/blog/kvantovaniie-vsio-chto-vam-nuzhno).
 
-Mixture of Experts is a special case of it: experts are zones with hard edges fixed by the architecture, behind opaque glass, opened by a router. The regulator makes the same thing continuous - the zones emerge from the query, their edges fall off smoothly, the rest of the weights is coarse rather than absent, and how sharp the zones are follows the context and the machine. One set of weights then serves every device and every load, lean where little is needed and at full precision where the query needs it.
+Mixture of Experts is a special case of it: experts are zones with hard edges fixed at training, the rest not computed, a router choosing which. The regulator makes the same thing continuous - the zones emerge from the query, their edges fall off smoothly, and how sharp they are follows the context and the machine. The rest of the weights is read coarsely or, at a ZERO base, not loaded at all - the topology of MoE, with the zones chosen by the query. One set of weights then serves every device and every load, lean where little is needed and at full precision where the query needs it.
 
 **The main hypothesis:** on a hard question the first pass gives a draft read mostly at base precision; the draft goes back into the input with the refinement, the zones of the next step land more precisely, and the answer ends better than that of the same model at native precision. The gain is expected where the iterations are - an agent or a model's reasoning ([H4](hypotheses.md)). It is tested once the FoQLens model exists (step 7). Further out, a horizon: a network trained with zoning and read with FoQZones should beat a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment ([H5](hypotheses.md)). It needs training and zeros that are never loaded, and is reproduced on a small transformer.
 
 ## What this bench tests
 
-FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network sits behind a glass - at any precision, down to nothing at all - and a lens is inserted into each expert zone of the query ([lens.md](lens.md)).
+FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([lens.md](lens.md)).
 
 **The question to answer first, and the one that decides whether any of this is worth building** (fixed 2026-09-13): **over what interval of the regulator's settings does the model stay usable, and how much memory does that interval actually save - if it saves any.** Not "is the address better than a control", but "where can this be set, and what does it buy". An interval that saves nothing is an answer; so is an interval too narrow to hold a regulator.
 
@@ -48,9 +48,9 @@ Done when: the interval of settings over which the model stays usable is named, 
 
 **Step 4. Learned score** - beyond solo work; only if the untrained scores give an effect.
 
-**Step 5. Memory follows the lenses** - engineering. Done so far ([E006](../experiments/E006-read-depths/_index.md)): one residual-sliced copy read at 2 / 4 / 6 / 8 bits, the bf16 weights leave the GPU (-1.63 GiB on E2B, D8 as good as int8), and every block can store only the depth it is read to. Speed and energy savings need a kernel that reads only the bits it needs.
+**Step 5. Memory follows the zones** - engineering. Done so far ([E006](../experiments/E006-read-depths/_index.md)): one residual-sliced copy read at 2 / 4 / 6 / 8 bits, the bf16 weights leave the GPU (-1.63 GiB on E2B, D8 as good as int8), and every block can store only the depth it is read to. Speed and energy savings need a kernel that reads only the bits it needs.
 
-**Step 6. The regulator reacts to the machine** - after step 3: precision lowered under load or heat, the lenses of the query kept sharpest.
+**Step 6. The regulator reacts to the machine** - after step 3: precision lowered under load or heat, the zones of the query kept sharpest.
 
 **Step 7. Agents on the lens model - the main hypothesis** - once the FoQLens model exists (lenses with the address taken online from the first layers). An agent solves a hard multi-step task - designing a software architecture, for example - on the lens model and on the same model in bf16; compared are the quality of the result and what it cost (memory, compute, tokens).
 Done when: the agent on the lens model is at least as good as on the full model at a lower cost - and the hypothesis expects better.

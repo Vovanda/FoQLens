@@ -66,7 +66,7 @@ quiz. Code: `src/foqlens/extractive.py`.
 query because the knowledge a query needs sits in particular weights. That claim predicts different
 things in different regimes, and until now every corpus was of one kind:
 
-| Regime | Where the answer is | What lenses should do |
+| Regime | Where the answer is | What the zones should do |
 | --- | --- | --- |
 | the answer is in the passage | in the context | little - the knowledge came in with the prompt |
 | the answer is not in the passage | in the weights | decide - this is the regime the idea is about |

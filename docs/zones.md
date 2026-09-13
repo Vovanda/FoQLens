@@ -1,13 +1,13 @@
 # Precision share, focus area and expert zones
 
-> **Legacy layout.** This page describes the fixed-budget layout of ADDENDUM-07 to 10: the mean bits are set in advance and the zones are fitted to them. It is replaced by the lens layout ([lens.md](lens.md)): the whole network behind a glass, lenses in the expert zones, memory the result of the lenses.
+> **Legacy layout.** This page describes the fixed-budget layout of ADDENDUM-07 to 10: the mean bits are set in advance and the zones are fitted to them. It is replaced by the layout of [lens.md](lens.md): the whole network at a base precision, the expert zones read more precisely, memory the result of the settings.
 
 How precision is laid out over the weights. Two parameters, both in [0, 1] and checked where they enter:
 
 - **precision_share** - how much precision the model gets: the share of the precision range spent, the memory and compute it pays for;
 - **focus_area** - where that precision goes: the area read sharp, from the centers of the query's **expert zones** ([problem statement](problem-statement.md)) to the whole weight map.
 
-Fixed 2026-09-11, names from a tier list 2026-09-12 ([ADDENDUM-10](../experiments/E009-zones-matrix/ADDENDUM-10.md)). In the lens layout the lens is the mechanism itself ([lens.md](lens.md)); here the parameters of the legacy layout are named by what they do.
+Fixed 2026-09-11, names from a tier list 2026-09-12 ([ADDENDUM-10](../experiments/E009-zones-matrix/ADDENDUM-10.md)). The current layout is in [lens.md](lens.md); here the parameters of the legacy layout are named by what they do.
 
 ## Precision share - how much
 
@@ -24,7 +24,7 @@ The precision share `p` is the share of the precision range spent. With the leve
 
 ## What was wrong in the early runs
 
-The mask was a flat list of block scores, and the top blocks were opened one by one until the budget was spent. There were no centers and no radii: a topic could only show up as scattered single blocks, and dilation ([E007-dilation](../experiments/E007-dilation/_index.md)) only regrouped the same budget around those points. The picture the project is built on is different: antinodes at full precision, a stepped falloff around them, the background coarse. That needs centers, distances and radii.
+The mask was a flat list of block scores, and the top blocks were opened one by one until the budget was spent. There were no centers and no radii: a topic could only show up as scattered single blocks, and dilation ([E007-dilation](../experiments/E007-dilation/_index.md)) only regrouped the same budget around those points. The problem statement asks for something else: zones sharp at their centers, precision falling off around them, the background coarse ([problem statement](problem-statement.md)). That needs centers, distances and radii.
 
 ## Expert zones - in what shape
 

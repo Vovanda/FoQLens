@@ -6,8 +6,8 @@ Hi, I'm Vladimir Savkin. I hold master's degrees in mathematical software and in
 
 **[vovanda.github.io/FoQLens](https://vovanda.github.io/FoQLens/)** - the idea, with the controls of the
 regulator to move: base precision, the size and strength of the zones, how overlaps combine, and what
-the setting costs in bits per weight. The field they act on is drawn from the weight map of Gemma 4
-E2B - 14 708 blocks, blocks that light up together lying close.
+the setting costs in bits per weight. The metaphor they act on is drawn on real weights: the map of
+Gemma 4 E2B, 14 708 blocks, blocks that light up together lying close.
 [The documents](https://vovanda.github.io/FoQLens/docs.html) - the mechanism, the preregistration and
 every run - are on the same site.
 

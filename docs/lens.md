@@ -121,7 +121,7 @@ Both are continuous: at the border of an overlap the second lens adds 0, so the 
 
 ## Why a filter can make the model better
 
-A lens restores at most the precision of the original weights at its center - it cannot make a weight better. But a model is not its weights; it is the computation over them. Behind the glass the associations that do not belong to the query are damped, and where two topics meet the isthmus is sharpened: the model keeps to the task instead of sinking into detail. For a single answer this may be close to neutral; for an agent that reasons over many steps it should add up. That is the main hypothesis of the project ([H4](hypotheses.md)), tested once the model exists.
+A zone restores at most the precision of the stored weights at its center; it cannot make a weight better. The claim is about an answer reached over several steps. On a hard question the first pass gives a draft read mostly at base precision; the draft goes back into the input with the refinement, the zones of the next step land more precisely, and the weights outside them, read at base precision, affect the answer less. That is the main hypothesis of the project ([H4](hypotheses.md)), tested once the model exists. It asks one thing of the rules above that they do not yet have: a strength of its own for each zone, so that on a question the model knows poorly the zones stay weak and the draft stays a draft. Today the ceiling (rule 2) is one for all zones.
 
 ## What is compared
 

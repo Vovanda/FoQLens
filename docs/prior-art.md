@@ -64,6 +64,19 @@ The difference from FoQLens: a weight is computed or skipped; there is no step b
 - **D-Pruner** (Zhang et al., NAACL Findings 2024, arXiv 2405.06275). Pruning with a domain-specific calibration set, fixed offline.
 - **Instruction-Following Pruning** (Hou et al., ICML 2025, arXiv 2501.02086). A mask predictor trained with the model picks parameters per instruction - per query, but trained, and skip instead of bits.
 
+## What H4, H5 and H6 lean on
+
+Added 2026-09-13 with [H4, H5 and H6](hypotheses.md); each arXiv id was checked against its abstract page, LASER was read in its paper and code.
+
+- **LASER** (Sharma, Ash and Misra, ICLR 2024, arXiv 2312.13558). One weight matrix of a trained model - chosen by type, layer and kept share of rank on a validation split - is replaced by its low-rank approximation; late MLP layers give the gains, up to 20-30 points of accuracy on some tasks, while perplexity rises slightly. Removing selected parts of the weights can improve answers - the direction of H4.
+- **TopoLM** (Rathi et al., ICLR 2025, arXiv 2410.11516). Units of a transformer get places on a two-dimensional map, and a spatial smoothness loss added to next-token prediction makes semantically related units cluster. The rule by which H5 trains knowledge into neighbouring places; it was not used for precision.
+- **DEMix** (Gururangan et al., NAACL 2022, arXiv 2108.05036). One feed-forward expert per domain, chosen by the domain label of the text; attention shared. What training with a hard zero outside the zone reduces to.
+- **Sparsely-Gated Mixture-of-Experts** (Shazeer et al., 2017, arXiv 1701.06538), **Switch Transformer** (Fedus, Zoph and Shazeer, 2021, arXiv 2101.03961). The classical MoE H5 is compared with: a trained gate picks a few experts per example, each expert owns its parameters.
+- **On Faithfulness and Factuality in Abstractive Summarization** (Maynez et al., ACL 2020, arXiv 2005.00661). Human annotators found substantial hallucinated content in the summaries of every system they evaluated. The faithfulness axis of H6.
+- **Instruction-controllable summarization** (arXiv 2311.09184). Every LLM evaluated made factual errors in its summaries, and no LLM-based evaluator aligned strongly with human annotators - why H6 needs a judge checked against people.
+- **Length-controllable summarization** (NAACL Findings 2025, arXiv 2501.00233). LLMs keep structural limits but not word or token counts; compliance with a word limit falls as low as 14.5% in some settings. Why H6 compares answers by their actual length.
+- **Lost in the Middle** (Liu et al., TACL 2023, arXiv 2307.03172). Models use information at the start and the end of a long context better than in the middle: what a summary keeps may follow position rather than importance.
+
 ## Where FoQLens stands
 
 1. **Per query, precision inside a layer.** Input-dependent decisions about a place in the model exist - channels (GRINQH), experts (HOBBIT), layers (DP-LLM), and which neurons to compute (contextual sparsity). What is not found: different bits for different blocks inside a dense layer, per query, by meaning, at a fixed mean-bits budget.

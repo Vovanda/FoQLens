@@ -189,8 +189,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
             <tr><td class="num">H1</td><td>The mask of a query is separable by topic and concentrated - there is an address to read at all</td><td><span class="tag tag--open">untested</span></td></tr>
             <tr><td class="num">H2</td><td>Zones of related topics overlap more than zones of unrelated ones</td><td><span class="tag tag--open">untested</span></td></tr>
             <tr><td class="num">H3</td><td>Precision laid out by the query beats the same memory spread any other way</td><td><span class="tag tag--open">untested</span></td></tr>
-            <tr><td class="num">H4</td><td><b>The main one.</b> A model read through the query's zones is <em>better</em> than the same model in full - what the query does not need is damped</td><td><span class="tag tag--open">untested</span></td></tr>
-            <tr><td class="num">H5</td><td>The zone model beats a Mixture of Experts built from the same weights - continuous zones against hard-edged experts</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H4</td><td><b>The main one.</b> A draft read mostly at base precision, then refined with sharper zones, ends <em>better</em> than the same model at native precision - where there are iterations: an agent or a model's reasoning</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H5</td><td>A horizon. A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment</td><td><span class="tag tag--open">untested</span></td></tr>
+            <tr><td class="num">H6</td><td>An additional one. How good asking for a shorter answer and coarsening the weights each are at holding knowledge in compressed form - and below which step coarsening slides into nonsense</td><td><span class="tag tag--open">untested</span></td></tr>
           </tbody>
         </table>
       </div>

@@ -15,7 +15,7 @@ The larger goal is a universal **precision regulator** - one mechanism that sets
 
 Mixture of Experts is its rigid special case: experts with hard edges fixed at training, opened by a router. The regulator makes experts continuous - zones emerge from the query itself, related topics share them, and the junction between two topics is sharpened instead of falling between two experts.
 
-**The main hypothesis:** such a model is not only cheaper but better at the work that matters. A model that does not sink into irrelevant detail stays on the task; for an agent that reasons over many steps, a model behind a filter should be both more efficient and more accurate than the same model read in full. It looks like a paradox - the filter removes information - but what it removes is what the task does not need. It is tested once the FoQLens model exists: an agent on a hard multi-step task, such as designing a software architecture, on the lens model against the same model in bf16 ([H4](docs/hypotheses.md)). A stronger one: the lens model should be more accurate and more efficient than a Mixture of Experts built from the same model ([H5](docs/hypotheses.md)).
+**The main hypothesis:** on a hard question the first pass gives a draft, most of it read at base precision - an approximate guess, and more useful than a refusal, since a guess can be refined. The draft goes back into the input with the refinement; the zones of the next step land more precisely, and the weights outside them affect the answer less. So where there are iterations - an agent, or a model's reasoning - the model should end better than the same model at native precision. It is tested once the FoQLens model exists: an agent on a hard multi-step task, such as designing a software architecture ([H4](docs/hypotheses.md)). Further out, a horizon: a network trained with zoning, read the same way, should beat a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment ([H5](docs/hypotheses.md)).
 
 **FoQLens** (Focus + Quantization + Lens) is the model that uses this regulator: its weights sit behind a filter, and lenses open where the query needs to see. This repository is the R&D inside FoQLens - a bench that tests the core of the idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are ([goals](docs/goals.md)).
 
@@ -45,7 +45,7 @@ If the idea holds, **expert zones emerge** as the regions that stay sharp when e
 
 - **On-device models.** One weights file for a phone, glasses or a laptop: precision follows the battery, the heat and the free memory, and the lenses stay where the query is.
 - **Cost per query in data centers.** A simple question sees through small lenses and costs little; a hard one opens them wider. The price of a token follows the question, not the model size.
-- **Agents.** Long chains of reasoning on a model that keeps to the task - the main hypothesis above.
+- **Agents and reasoning.** Wherever a draft is refined step by step - the main hypothesis above.
 - **Graceful degradation.** Under load or heat the model gets coarser in what the query does not need, not everywhere at once.
 
 These are the directions the regulator opens; each is tested by a step of the [plan](docs/goals.md) before it is claimed.

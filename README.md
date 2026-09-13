@@ -60,7 +60,7 @@ The steps are ordered so each one can kill the next:
 | 1 | Are per-block masks similar within a topic and different between topics? Are they concentrated? | masks look the same for every query |
 | 2 | Do related topics (biology-chemistry) share more of their zones than unrelated ones (biology-math)? | no overlap structure |
 | 2+ | Geometry: are masks additive, is there a junction zone, does ablating it break mixed questions only? | - (refining, not load-bearing) |
-| 3 | At the same memory, do the query's own lenses beat the other topic's lenses, the lenses of generic importance and the same memory without a mask? Random lenses are the floor. | own lenses do no better than the other topic's or generic importance: then there is no address |
+| 3 | Over what interval of the regulator's settings does the model stay usable, and what memory does that interval save against uniform quantization at the same memory? The other topic's zones and generic importance test the address | the interval saves nothing against uniform quantization |
 | 7 | Is an agent on the lens model more accurate and cheaper than on the same model in full? (the main hypothesis, once the model exists) | - |
 
 All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"), not numbers. The full reasoning is in [`docs/`](docs/).

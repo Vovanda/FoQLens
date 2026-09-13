@@ -55,7 +55,7 @@ Wang, Kim, Han, Gudovskiy, Nakata, Okuno, Peong, Jeon, Ko, Chen, Yang. *MoBiQuan
 - **A structure, not a local switch.** A MoBiQuant decision is local to a token and a layer. FoQLens lays precision out as expert zones on a weight map of the whole network, with lenses, their profile and the isthmus where two lenses meet ([lens.md](lens.md)).
 - **What it is for.** MoBiQuant fixes the generalization of post-training quantization across precisions ("outlier migration", §3) under a budget. FoQLens aims at a regulator that follows the task, the machine and the value of the query, with MoE as its special case ([goals.md](goals.md)).
 - **Mixed layouts in one batch.** MoBiQuant leaves "heterogeneous batching strategies" open (Appendix F); the FoQLens bench already evaluates a batch in which every question has its own layout.
-- **Method.** MoBiQuant reports perplexity, zero-shot accuracy and throughput; FoQLens compares against random lenses of the same shape and the other topic at the same memory, with every prediction preregistered.
+- **Method.** MoBiQuant reports perplexity, zero-shot accuracy and throughput; FoQLens compares against uniform quantization at the same memory, and against the other topic's zones for the address, with every prediction preregistered.
 
 ### Does the FoQLens idea fit their scheme
 

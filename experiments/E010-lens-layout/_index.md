@@ -16,4 +16,4 @@ params:
 The whole network behind a glass, lenses in the query's expert zones, memory following the lenses - the test of the idea itself. The mechanism is [docs/lens.md](../../docs/lens.md) at commit `4fa3e7f`.
 
 - Preregistration: [ADDENDUM-11](ADDENDUM-11.md). Results: [results.md](results.md). Runs: `runs/E010-lens-layout/`.
-- Random zones, the floor of the comparison, were run separately on the same commit: `runs/E010-lens-layout-random/`.
+- Random zones were run separately on the same commit (`runs/E010-lens-layout-random/`). They are no longer a reference: they overlap less, so they cost more ([ADDENDUM-15](../E014-moved-zones/ADDENDUM-15.md)).

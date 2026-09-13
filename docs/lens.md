@@ -131,7 +131,7 @@ At the same base, focus_area and focus_strength:
 - the lenses of the paired topic - the address;
 - the lenses of the backbone, one set of zones for every query - the query against generic importance;
 - no mask at the same memory;
-- random lenses of the same number and sizes - the noise to beat: a meaningful mask is expected to do better.
+- uniform quantization at the same memory - the baseline, what a deployment would otherwise do. Random lenses of the same number and sizes are not a baseline: they overlap less, so they cost more (dropped 2026-09-13, [plan](plan.md)).
 
 ## Names used before
 

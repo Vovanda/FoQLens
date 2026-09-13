@@ -26,7 +26,7 @@ again: [docs/corpus.md](corpus.md).
 | H1.1 | The address is the meaning of the query, not the surface form of the prompt | found 2026-09-13 in the shuffle check | part of H1 | **not tested** | E013 |
 | H2 | Zones of related topics overlap more than of unrelated ones | preregistration, step 2; property 2 | refining | **not tested** | E001 |
 | H2+ | Mask geometry: not additive, a junction zone, isthmuses with a function, hierarchy, a non-linear representation → mask map | preregistration, step 2+; properties 1, 3, 5, 6, 7 | refining | **not tested** | E001 |
-| H3 | Precision laid out by the query's mask beats uniform quantization and a random mask of the same concentration at the same memory | preregistration, step 3 | main | **not tested** | E003-E013 |
+| H3 | Precision laid out by the query's mask beats uniform quantization and a random mask of the same concentration at the same memory; the random-mask arm is dropped, 2026-09-13 ([plan](plan.md)) | preregistration, step 3 | main | **not tested** | E003-E013 |
 | H3.1 | The address: the query's own topic beats the paired topic's at the same memory | ADDENDUM-04 I1, -05 B2, -06 W1, -07 S2, -09 M2, -11 L2 | part of H3 | **not tested** | E004, E005, E007, E008, E009, E010 |
 | H3.2 | The shape: own expert zones beat random zones of the same count and size | ADDENDUM-07 S1, -09 M1, -11 L1 | part of H3 | **not tested** | E008, E009, E010 |
 | H3.3 | Static importance: generic block importance beats random blocks at the same memory | ADDENDUM-05 B1 | context for H3 | **not tested** | E005 |

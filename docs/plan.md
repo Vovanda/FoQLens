@@ -50,7 +50,7 @@ Pass scheme: the first N layers at base precision → a per-block score from the
 
 The weights are stored once, as residual slices read to a depth (step 5), so a lens costs only the depth it reads.
 
-Measurement: quality against **memory**. Baselines - the same memory without a mask, the paired topic's lenses and generic importance; random lenses of the same number and size are the floor. Curve above all → the scheme works.
+Measurement: quality against **memory**. The baseline is uniform quantization at the same memory (see «The baseline» below); the paired topic's zones and generic importance test the address. A random mask is not a baseline. Curve above the baseline → the scheme works.
 
 ## Step 4. Learned score
 
@@ -259,7 +259,7 @@ Where a control for shape is genuinely needed, it is the query's own zones carri
 
 **The learned score (step 4) is taken outside what is done alone.** It is not "run the model and look" but training with a non-standard gradient through soft depth: parameterization, loss, stability, regime. A profession of its own; on one 3090 Ti and one person it takes not weeks but months.
 
-**The construction does not collapse because of this.** The whole testable part is done on untrained scores: separability, concentration, overlaps, support shape, isthmuses, ablations, quality against two baselines. The learned version improves the result, it does not create it.
+**The construction does not collapse because of this.** The whole testable part is done on untrained scores: separability, concentration, overlaps, support shape, isthmuses, ablations, quality against uniform quantization at the same memory. The learned version improves the result, it does not create it.
 
 If the naive score gives a signal, the learned one becomes exactly what co-authors, a supervisor or a group are needed for. This is a natural boundary: by hand up to step 3, beyond that someone else is needed.
 
@@ -267,7 +267,7 @@ If the naive score gives a signal, the learned one becomes exactly what co-autho
 
 One day is only step 0 plus the naive score on a couple of domains, i.e. the answer to "is there a signal at all".
 
-Realistically, a showable result takes **about two weeks**: a query set over several domains with a held-out part, run and logging infrastructure, scale calibration, two baselines, repeats for stability, then mask geometry and ablations. Plus what breaks along the way - on a mix of transformers, quantization and work with intermediate activations things break regularly.
+Realistically, a showable result takes **about two weeks**: a query set over several domains with a held-out part, run and logging infrastructure, scale calibration, the baseline, repeats for stability, then mask geometry and ablations. Plus what breaks along the way - on a mix of transformers, quantization and work with intermediate activations things break regularly.
 
 Steps 4 and 5 are not part of these two weeks at all.
 

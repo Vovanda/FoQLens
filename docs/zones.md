@@ -74,7 +74,7 @@ For every cell of precision share x focus area:
 - the zones of the paired topic;
 - the precision share spent evenly, without a mask (focus area 1), the reference of its row.
 
-The idea works where own-topic zones beat random zones and the other topic at the same precision share. The cells run from the most promising (mid precision share, zones as found) to the edges.
+The idea works where own-topic zones beat random zones and the other topic at the same precision share. The cells run from the most promising (mid precision share, zones as found) to the edges. Random zones are no longer a reference: they overlap less, so they cost more ([plan](plan.md)).
 
 ## Names used before
 

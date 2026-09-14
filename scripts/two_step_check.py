@@ -162,6 +162,7 @@ def main(argv: list[str] | None = None) -> Path:
         "seed": args.seed,
         "gpu_share": args.gpu_share,
         "gpu": gpu.summary(),
+        "pacer": bench.throttle.stats(),
         "mean_bits": bits,
         "accuracy_per_order": {name: [float(np.mean(per_order[o]["accuracy"][name])) for o in per_order]
                                for name in names},

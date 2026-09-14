@@ -245,6 +245,7 @@ def run(args: argparse.Namespace, pool) -> Path:
             write_json(out_dir / "summary.json", summary)
             print(progress.step(f"{cell[0]} fa{cell[1]:.2f} fs{cell[2]:.2f}"), flush=True)
     summary["gpu"]["eval"] = eval_gpu.summary()
+    summary["pacer"] = bench.throttle.stats()
     write_json(out_dir / "summary.json", summary)
     write_json(out_dir / "raw" / "per_question.json", {"questions": [q.__dict__ for q in questions], "results": results})
     np.save(out_dir / "raw" / "weight_map.npy", coords)

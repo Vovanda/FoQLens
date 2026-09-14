@@ -293,6 +293,7 @@ def main(argv: list[str] | None = None) -> Path:
         "revision": fm.REVISIONS[MODELS[args.model]],
         "seed": args.seed,
         "gpu": gpu.summary(),
+        "pacer": bench.throttle.stats(),
         "subjects": dict(sorted(subjects.items(), key=lambda kv: -kv[1]["core"])),
     }
     if any(s["kind"] == LetterChoice.name for s in subjects.values()):

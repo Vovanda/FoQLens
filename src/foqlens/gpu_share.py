@@ -49,6 +49,10 @@ class Pacer(Protocol):
 
     def batch(self) -> Iterator[None]: ...
 
+    def stats(self) -> dict:
+        """What the pacing did over the run, for its summary: this pacer's numbers and its inner one's."""
+        ...
+
 
 class Throttle:
     """Rests after every batch so that the GPU is busy `share` of the time."""
@@ -69,6 +73,9 @@ class Throttle:
         rest = (self._clock() - start) * (1.0 - self.share) / self.share
         if rest > 0:
             self._sleep(rest)
+
+    def stats(self) -> dict:
+        return {"share": self.share}
 
 
 class ThermalGuard:
@@ -128,6 +135,11 @@ class ThermalGuard:
                 break
         self.paused_s += self._clock() - start
 
+    def stats(self) -> dict:
+        peak = None if self.peak == float("-inf") else self.peak
+        return self.inner.stats() | {"temperature_ceiling_c": self.ceiling, "temperature_peak_c": peak,
+                                     "thermal_pause_s": self.paused_s}
+
 
 class Cooldown:
     """Another pacer, plus a break of `pause` seconds after every `every` seconds of running.
@@ -161,6 +173,9 @@ class Cooldown:
             self._since = self._clock()
         with self.inner.batch():
             yield
+
+    def stats(self) -> dict:
+        return self.inner.stats() | {"cooling_breaks": self.breaks, "cooling_break_s": self.paused_s}
 
 
 FULL = Throttle(1.0)

@@ -49,6 +49,7 @@ def test_step3_injection_smoke(tmp_path):
     c = summary["comparisons"]["biology-math|pooled|0.950"]["own_minus_other"]
     assert c["lo"] <= c["mean"] <= c["hi"] and c["n"] == 6
     assert {"own_topic_gradient_0.950", "other_topic_pooled_0.950", "random_0.950", "uniform_zero"} <= set(summary["configs"])
+    assert {"share", "cooling_breaks", "cooling_break_s", "temperature_peak_c", "thermal_pause_s"} <= set(summary["pacer"])
 
 
 def test_step3_filter_smoke(tmp_path, capsys):
@@ -63,6 +64,7 @@ def test_step3_filter_smoke(tmp_path, capsys):
             "zones_nomask_d4_fa0.50_fs1.00", "floor_d4", "floor_zero", "uniform_bf16"} <= set(s["configs"])
     assert {"own_minus_other", "own_minus_nomask", "own_minus_backbone", "own_minus_floor", "own_minus_bf16"}         <= set(s["comparisons"]["biology-math|d4|fa0.50|fs1.00"])
     assert s["cells_done"] == [["d4", 0.5, 1.0], ["zero", 0.5, 1.0]]  # the D4 floor first
+    assert s["pacer"]["cooling_breaks"] == 0 and s["pacer"]["temperature_peak_c"] < 80  # a smoke is short and cool
     cfg = s["configs"]
     # no budget: the layout costs what its zones ask for, and the shuffled control costs exactly the same
     assert cfg["zones_own_d4_fa0.50_fs1.00"]["mean_bits"] == pytest.approx(cfg["zones_nomask_d4_fa0.50_fs1.00"]["mean_bits"])

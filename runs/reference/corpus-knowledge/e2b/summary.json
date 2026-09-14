@@ -1,0 +1,87 @@
+{
+  "model": "google/gemma-4-E2B",
+  "revision": "d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f",
+  "seed": 0,
+  "subjects": {
+    "arc_challenge": {
+      "source": "allenai/ai2_arc@210d026f",
+      "kind": "letter_choice",
+      "questions": 102,
+      "accuracy": 0.6470588235294118,
+      "core": 0.4411764705882353,
+      "never_right": 0.14705882352941177,
+      "calculation": 0.058823529411764705,
+      "core_among_knowledge": 0.4583333333333333,
+      "two_step": {
+        "accuracy": 0.5294117647058824,
+        "core": 0.30392156862745096,
+        "never_right": 0.11764705882352941,
+        "core_in_both": 0.24509803921568626,
+        "answer_tokens": 32,
+        "answers_sample": [
+          "The planet will have a longer day.",
+          "A comparison of the different building designs",
+          "The absorption of light energy by chlorophyll.",
+          "The effect of changing the speed on the distance the car jumps.",
+          "The 1.0 kg object has a greater speed than the 5.0 kg object."
+        ]
+      }
+    },
+    "triviaqa": {
+      "source": "mandarjoshi/trivia_qa@0f7faf33",
+      "kind": "closed_book",
+      "questions": 100,
+      "exact_match": 0.41,
+      "f1": 0.4353333333333334,
+      "core": 0.41,
+      "unanswerable": 0.0
+    },
+    "nq_open": {
+      "source": "google-research-datasets/nq_open@5dd9790a",
+      "kind": "closed_book",
+      "questions": 100,
+      "exact_match": 0.24,
+      "f1": 0.2973593073593074,
+      "core": 0.24,
+      "unanswerable": 0.0
+    }
+  },
+  "orders": [
+    [
+      0,
+      1,
+      2,
+      3
+    ],
+    [
+      2,
+      0,
+      1,
+      3
+    ],
+    [
+      3,
+      2,
+      1,
+      0
+    ],
+    [
+      1,
+      3,
+      0,
+      2
+    ],
+    [
+      0,
+      2,
+      3,
+      1
+    ],
+    [
+      0,
+      2,
+      1,
+      3
+    ]
+  ]
+}

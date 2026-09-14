@@ -6,14 +6,22 @@ import torch
 from torch import nn
 from transformers import AutoTokenizer, BatchEncoding, Gemma4ForConditionalGeneration, PreTrainedTokenizerBase
 
+from foqlens.prompting import PLAIN, ChatFormat, PromptFormat
+
 E2B = "google/gemma-4-E2B"
 E4B = "google/gemma-4-E4B"
+# Instruction-tuned: they answer a question asked as it is and follow a request (write the solution,
+# justify the answer), which a base checkpoint does only when shown worked examples.
+E2B_IT = "google/gemma-4-E2B-it"
+E4B_IT = "google/gemma-4-E4B-it"
 
 # Pinned Hugging Face commits: every run of the bench reads exactly these weights.
 # Bump only with a separate commit - results before and after a bump are not comparable.
 REVISIONS = {
     E2B: "d29ff6b45f081a49ee2733a859c9c9c2d95d1a6f",
     E4B: "411aa17b749aa952df1359d2dcea73917a544d9a",
+    E2B_IT: "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+    E4B_IT: "ee0ef6023621cff504d758262d4e04895a5af4a2",
 }
 
 
@@ -63,8 +71,9 @@ def load(
     forbid_spill(device, gpu_share)
     revision = REVISIONS[model_id]
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
-    # Gemma 4 derives position ids from arange(seq), not from the attention mask, so left padding
-    # would shift the positions of real tokens. Batches are padded on the right.
+    # A plain forward takes position ids from arange(seq), not from the attention mask, so left padding
+    # would shift the positions of real tokens: forward batches are padded on the right. generate()
+    # builds the positions from the mask itself, so generation pads on the left (encode_left).
     tokenizer.padding_side = "right"
     model = Gemma4ForConditionalGeneration.from_pretrained(
         model_id, revision=revision, dtype=dtype, device_map=device, attn_implementation=attn_implementation
@@ -73,6 +82,14 @@ def load(
     if text_only:
         drop_towers(model)
     return model, tokenizer
+
+
+CHAT_MODELS = frozenset({E2B_IT, E4B_IT})
+
+
+def prompt_format(model_id: str, tokenizer: PreTrainedTokenizerBase) -> PromptFormat:
+    """How this checkpoint reads a prompt: its chat template if it is instruction-tuned, a plain document otherwise."""
+    return ChatFormat(tokenizer) if model_id in CHAT_MODELS else PLAIN
 
 
 def text_layers(model: Gemma4ForConditionalGeneration) -> nn.ModuleList:
@@ -86,10 +103,19 @@ def text_embeddings(model: Gemma4ForConditionalGeneration) -> nn.Module:
 
 
 def encode(tokenizer: PreTrainedTokenizerBase, texts: list[str], device: torch.device | str) -> BatchEncoding:
-    """A right-padded batch on the device (see load: left padding would shift positions)."""
+    """A right-padded batch on the device, for a plain forward (see load: left padding would shift positions)."""
     if tokenizer.padding_side != "right":
         raise ValueError("batches must be padded on the right: load the tokenizer with foqlens.model.load")
     return tokenizer(texts, return_tensors="pt", padding=True).to(device)
+
+
+def encode_left(tokenizer: PreTrainedTokenizerBase, texts: list[str], device: torch.device | str) -> BatchEncoding:
+    """A left-padded batch for generate(): every prompt ends where its answer starts.
+
+    generate() builds position ids from the attention mask (cumsum - 1) and advances them per row
+    (transformers 5.17, generation/utils.py), so left padding does not shift them.
+    """
+    return tokenizer(texts, return_tensors="pt", padding=True, padding_side="left").to(device)
 
 
 @torch.no_grad()

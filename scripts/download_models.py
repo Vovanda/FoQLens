@@ -6,6 +6,7 @@ so every researcher runs the bench on the same bytes.
 
     uv run python scripts/download_models.py            # E2B, ~10 GB - enough for the tests
     uv run python scripts/download_models.py e4b        # E4B, ~16 GB - the confirmation model
+    uv run python scripts/download_models.py e2b-it     # E2B-it, ~10 GB - the model the corpus is selected on
     uv run python scripts/download_models.py e2b e4b
 """
 
@@ -15,9 +16,9 @@ import argparse
 
 from huggingface_hub import snapshot_download
 
-from foqlens.model import E2B, E4B, REVISIONS
+from foqlens.model import E2B, E2B_IT, E4B, E4B_IT, REVISIONS
 
-MODELS = {"e2b": E2B, "e4b": E4B}
+MODELS = {"e2b": E2B, "e4b": E4B, "e2b-it": E2B_IT, "e4b-it": E4B_IT}
 
 
 def main() -> None:

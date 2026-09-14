@@ -47,7 +47,7 @@ from foqlens.quant import Level
 
 REDUX = "edinburgh-dawg/mmlu-redux-2.0"
 REDUX_REVISION = "372ea425445d51e1ba1188c56e5e893f8138621f"
-MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
+MODELS = {"e2b": fm.E2B, "e4b": fm.E4B, "e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 # Everyday knowledge and reasoning rather than school calculation - what a 2B model is asked to hold.
 # The four the bench already uses are included so the new numbers can be read against the known ones.
 CANDIDATES = (
@@ -71,8 +71,10 @@ EXTERNAL = {
 
 # The free-answer corpora (foqlens.corpora): the same prompt shape and the same score with a passage and
 # without one, so the regimes differ only in where the answer lies.
-QA_SHOTS = 2  # examples shown to a base checkpoint so it answers in the expected shape
-QA_PACE = 8   # answers written between two rests of the pacer: one prompt at a time, a few seconds of GPU
+QA_SHOTS = 2  # examples, so the model answers in the expected shape: a document to a base checkpoint, earlier turns to an -it one
+# Prompts answered as one batch, between two rests of the pacer. A decoding step costs the same at any
+# batch here: E2B-it answered 3.7 / 7.3 / 14.8 questions a second at 32 / 64 / 128, peak memory 9.6 GiB.
+QA_BATCH = 128
 
 
 def _revision(repo: str) -> str:
@@ -80,7 +82,7 @@ def _revision(repo: str) -> str:
     return HfApi().dataset_info(repo).sha
 
 
-def answer_questions(bench, rows: list[corpora.Row], shots: tuple) -> list[dict]:
+def answer_questions(bench, rows: list[corpora.Row], shots: tuple, fmt) -> list[dict]:
     """What the model writes for each passage, scored as SQuAD scores it."""
     from foqlens.evaluate import Question
     from foqlens.extractive import ContextQA, qa_prompt
@@ -88,14 +90,14 @@ def answer_questions(bench, rows: list[corpora.Row], shots: tuple) -> list[dict]
     passages = {}
     questions = []
     for r in rows:
-        prompt = qa_prompt(r.context, r.question, shots)
+        prompt = qa_prompt(r.context, r.question, shots, fmt)
         passages[prompt] = r.answers
         questions.append(Question("x", prompt, 0))
     metric = ContextQA(passages=passages, shots=shots)
     rows = []
-    for start in range(0, len(questions), QA_PACE):
+    for start in range(0, len(questions), QA_BATCH):
         with bench.throttle.batch():
-            rows += metric.score(bench.model, bench.tokenizer, questions[start:start + QA_PACE])
+            rows += metric.score(bench.model, bench.tokenizer, questions[start:start + QA_BATCH])
     return rows
 
 
@@ -186,7 +188,7 @@ def main(argv: list[str] | None = None) -> Path:
                 rows, source = corpora.read(subject, args.limit)
                 kind = "context_qa" if corpora.CORPORA[subject].passage else "closed_book"
                 shots = tuple((r.context, r.question, (r.answers or (NO_ANSWER,))[0]) for r in rows[:QA_SHOTS])
-                scored = answer_questions(bench, rows[QA_SHOTS:], shots)
+                scored = answer_questions(bench, rows[QA_SHOTS:], shots, fm.prompt_format(MODELS[args.model], bench.tokenizer))
                 em = np.array([s["exact_match"] for s in scored])
                 f1 = np.array([s["f1"] for s in scored])
                 subjects[subject] = {

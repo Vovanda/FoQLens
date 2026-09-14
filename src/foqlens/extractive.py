@@ -17,8 +17,8 @@ Without a passage the same format and the same score ask for recall instead of r
 can then only come from the weights (closed-book QA - TriviaQA, NQ-open), which is the regime a
 precision regulator is meant to decide.
 
-Invariant: greedy decoding - the same layout and the same prompt give the same text, hence the same
-score. Scores never depend on the order of anything.
+Invariant: greedy decoding - the same layout and the same prompt in the same batch give the same text,
+hence the same score (foqlens.generation). Scores never depend on the order of anything.
 """
 
 from __future__ import annotations
@@ -28,9 +28,8 @@ import string
 from collections import Counter
 from dataclasses import dataclass, field
 
-import torch
-
-from foqlens import model as fm
+from foqlens.generation import generate_answers
+from foqlens.prompting import ASSISTANT, PLAIN, USER, Message, PromptFormat
 
 NO_ANSWER = "unanswerable"
 ANSWER_TOKENS = 16  # a SQuAD answer is a span of a few words
@@ -64,16 +63,23 @@ def token_f1(prediction: str, references: list[str]) -> float:
     return best
 
 
-def qa_block(context: str | None, question: str, answer: str | None = None) -> str:
-    """One example; no `Context:` line when there is no passage, so a closed-book question is bare."""
+def qa_question(context: str | None, question: str) -> str:
+    """One question as the user asks it; no `Context:` line when there is no passage, so a closed-book question is bare."""
     head = f"Context: {context}\n" if context is not None else ""
-    tail = f" {answer}" if answer is not None else ""
-    return f"{head}Question: {question}\nAnswer:{tail}"
+    return f"{head}Question: {question}"
 
 
-def qa_prompt(context: str | None, question: str, shots: tuple = ()) -> str:
-    """A base checkpoint has no chat template, so the format is shown to it in a couple of examples."""
-    return "\n\n".join([qa_block(c, q, a) for c, q, a in shots] + [qa_block(context, question)])
+def qa_messages(context: str | None, question: str, shots: tuple = ()) -> list[Message]:
+    """The examples as earlier turns, answered, then the question."""
+    turns = []
+    for c, q, a in shots:
+        turns += [{"role": USER, "content": qa_question(c, q)}, {"role": ASSISTANT, "content": a}]
+    return turns + [{"role": USER, "content": qa_question(context, question)}]
+
+
+def qa_prompt(context: str | None, question: str, shots: tuple = (), fmt: PromptFormat = PLAIN) -> str:
+    """The question with its examples, in the form the model reads (foqlens.prompting)."""
+    return fmt.render(qa_messages(context, question, shots))
 
 
 def first_line(text: str) -> str:
@@ -95,14 +101,12 @@ class ContextQA:
     name: str = "context_qa"
     primary: str = "f1"
 
-    @torch.no_grad()
     def score(self, model, tokenizer, questions: list) -> list[dict[str, float]]:
+        """The questions are answered as one batch (foqlens.generation), so the caller sizes the batch."""
+        written = generate_answers(model, tokenizer, [q.prompt for q in questions], self.max_new_tokens)
         rows = []
-        for question in questions:
-            inputs = fm.encode(tokenizer, [question.prompt], model.device)
-            out = model.generate(**inputs, max_new_tokens=self.max_new_tokens, do_sample=False)
-            written = tokenizer.decode(out[0, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-            answer = first_line(written)
+        for question, text in zip(questions, written, strict=True):
+            answer = first_line(text)
             references = self.passages[question.prompt]
             rows.append({"exact_match": exact_match(answer, references), "f1": token_f1(answer, references)})
         return rows

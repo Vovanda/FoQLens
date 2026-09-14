@@ -17,12 +17,12 @@ from dataclasses import dataclass
 from typing import Protocol
 
 import numpy as np
-import torch
 
 from foqlens.evaluate import LETTERS, letter_logprobs_batch
 from foqlens.quant import Level
 
 ANSWER_TOKENS = 32  # a free answer to a quiz question is a short phrase; beyond this the model explains itself
+ANSWER_BATCH = 32   # a decoding step costs the same for 1 row and for 32 (14.09 profile); short prompts, small cache
 
 
 class AnswerMatcher(Protocol):
@@ -74,19 +74,15 @@ def first_answer(text: str) -> str:
     return text.split("\n", 1)[0].strip()
 
 
-@torch.no_grad()
 def free_answers(model, tokenizer, prompts: list[str], max_new_tokens: int,
-                 log: object = None) -> list[str]:
-    """What the model writes for each prompt, under whatever layout is currently set.
-
-    One prompt at a time: Gemma 4 derives positions from arange(seq), so a left-padded batch would
-    shift them (foqlens.generation).
-    """
-    from foqlens.generation import generate_answer
+                 log: object = None, batch_size: int = ANSWER_BATCH) -> list[str]:
+    """What the model writes for each prompt, under whatever layout is currently set, batch_size at a time."""
+    from foqlens.generation import generate_answers
 
     out = []
-    for i, prompt in enumerate(prompts):
-        out.append(first_answer(generate_answer(model, tokenizer, prompt, max_new_tokens)))
-        if log is not None and (i + 1) % 50 == 0:
-            log(f"  generated {i + 1}/{len(prompts)}")
+    for start in range(0, len(prompts), batch_size):
+        written = generate_answers(model, tokenizer, prompts[start:start + batch_size], max_new_tokens)
+        out += [first_answer(text) for text in written]
+        if log is not None:
+            log(f"  generated {len(out)}/{len(prompts)}")
     return out

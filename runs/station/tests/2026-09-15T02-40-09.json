@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests",
+  "gpu": {
+    "samples": 12,
+    "started": "2026-09-15T02:39",
+    "wall_s": 12.2661452293396,
+    "utilization_mean": 0.08333333333333333,
+    "utilization_median": 0.0,
+    "memory_reserved_peak_mib": 1135.0,
+    "temperature_mean_c": 48.25,
+    "temperature_peak_c": 49.0,
+    "power_mean_w": 105.22249999999998,
+    "power_peak_w": 105.9,
+    "memory_allocated_peak_mib": 11.17724609375
+  },
+  "note": "20 passed"
+}

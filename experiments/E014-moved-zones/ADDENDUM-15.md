@@ -1,12 +1,12 @@
 # Addendum 15 - E014: the query's own zones, carried elsewhere on the map
 
-Written 2026-09-13, **after the run**. This is stated first because it matters: E014 is exploratory, not preregistered. The bench's rule is preregistration before the run, and it was not followed here - the control was built and run in one sitting while [E013](../E013-regulator-map/results.md) was still open. Nothing below was edited to fit the numbers, but the reader has only my word for that, which is exactly what a preregistration exists to replace. A confirming run under a fixed prediction is owed, and it is named in section 6.
+Written 2026-09-13, **after the run**. This is stated first because it matters: E014 is exploratory, not preregistered. The bench's rule is preregistration before the run, and it was not followed here - the control was built and run in one sitting while [E013](../E013-regulator-map/_index.md) was still open. Nothing below was edited to fit the numbers, but the reader has only my word for that, which is exactly what a preregistration exists to replace. A confirming run under a fixed prediction is owed, and it is named in section 6.
 
 ## 1. Why
 
 Every result so far compares a layout against uniform quantization. That answers "does addressing pay", not "does the address pay": a layout with zones of the right shape might do as well anywhere on the map, and then what works is the shape, not where it points.
 
-The control E010 used - zones of the same count and radii around random blocks - is not honest about cost. Random zones overlap less, so they store and read more: 5.72 bits against 4.28 at focus area 0.5 ([E011](../E011-depth-caps/results.md)). A control that spends a third more and answers worse says nothing.
+The control E010 used - zones of the same count and radii around random blocks - is not honest about cost. Random zones overlap less, so they store and read more: 5.72 bits against 4.28 at focus area 0.5 ([E011](../E011-depth-caps/_index.md)). A control that spends a third more and answers worse says nothing.
 
 Volodya set the condition for taking the comparison up again: do it **when we can choose zones at random honestly**. This is that attempt.
 
@@ -37,4 +37,4 @@ The address pays if, pooled over the grid, the query's own zones beat the moved 
 
 ## 6. What is owed
 
-E014 was run before this text existed, so it can support a claim only as an exploratory result. A confirming run is preregistered separately: the same control, on topic pairs the bench has not used ([E015](../E015-topic-pairs/), chemistry-physics, biology-chemistry, math-physics), with the prediction fixed before the run.
+E014 was run before this text existed, so it can support a claim only as an exploratory result. A confirming run is preregistered separately: the same control, on topic pairs the bench has not used (E015, chemistry-physics, biology-chemistry, math-physics), with the prediction fixed before the run.

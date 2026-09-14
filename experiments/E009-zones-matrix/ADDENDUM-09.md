@@ -13,7 +13,7 @@ The parameters are named by what they do ([docs/zones.md](../../docs/zones.md));
 
 ## 2. Why
 
-At one precision (5 bits) the expert zones of the gradient mask beat random zones, the paired topic and no mask for biology-math, not for history-geography ([results](../E008-zones-fixed-budget/results.md)). One cell of precision does not say where the address lives or whether it grows with the budget. This run spans both parameters.
+At one precision (5 bits) the expert zones of the gradient mask beat random zones, the paired topic and no mask for biology-math, not for history-geography ([E008](../E008-zones-fixed-budget/_index.md)). One cell of precision does not say where the address lives or whether it grows with the budget. This run spans both parameters.
 
 ## 3. Design
 

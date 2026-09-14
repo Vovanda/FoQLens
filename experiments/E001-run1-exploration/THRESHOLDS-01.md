@@ -11,7 +11,7 @@ Fixed 2026-09-11, after the run 1 exploration ([results](results.md)) and **befo
 
 ## 2. Why a permutation test and not a number
 
-Calibration ([runs/E001-run1-exploration/calibration/e2b/summary.json](../../runs/E001-run1-exploration/calibration/e2b/summary.json)) showed that the cosine scale depends on the vector kind: raw masks sit at 0.97-0.99 for any two texts, background-subtracted ones spread over ±0.5. A fixed cosine margin would be arbitrary. The threshold is therefore taken from the data itself:
+Calibration ([E001](_index.md)) showed that the cosine scale depends on the vector kind: raw masks sit at 0.97-0.99 for any two texts, background-subtracted ones spread over ±0.5. A fixed cosine margin would be arbitrary. The threshold is therefore taken from the data itself:
 
 - **margin** of a domain pair = min over the two domains of cos_in − cos_between;
 - **permutation test**: the domain labels inside the pair are shuffled 1000 times (seed 0); p = (1 + #{permuted margin ≥ observed}) / 1001;

@@ -6,7 +6,7 @@ Fixed 2026-09-12, **before the run**. Not edited after its commit.
 
 Everything so far asked whether the address beats a control. That is the scientist's question; the engineer's is the one a regulator actually has to answer: **set to what, does the model make the fewest mistakes, and what does that cost in memory?**
 
-Random zones are dropped from the question. They are not an honest control here: zones of the same count and radii around random blocks overlap less, so they store and read more ([E011](../E011-depth-caps/results.md)) - a control that spends more and answers worse says nothing about the address. The honest reference for a setting is uniform quantization at the same memory, which is what the regulator would otherwise fall back to.
+Random zones are dropped from the question. They are not an honest control here: zones of the same count and radii around random blocks overlap less, so they store and read more ([E011](../E011-depth-caps/_index.md)) - a control that spends more and answers worse says nothing about the address. The honest reference for a setting is uniform quantization at the same memory, which is what the regulator would otherwise fall back to.
 
 ## 2. Given
 

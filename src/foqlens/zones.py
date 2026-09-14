@@ -186,7 +186,7 @@ def precision_lift(
 
     One zone lifts a block by 1 - d / (R reach), clipped at 0, so the lift is 1 at its center and
     fades to 0 at `reach` radii - the outermost stop of the profile. Zones that cover the same block
-    combine by `combine`: "sum" adds their lifts, capped at 1, as thin lenses in contact do; "max"
+    combine by `combine`: "sum" adds their lifts, capped at 1; "max"
     takes the strongest alone.
     """
     check_focus_area(focus_area)
@@ -244,7 +244,7 @@ def even_stops(floor: Level, ceiling: Level, ladder: Sequence[Level] = READ_LEVE
     """The default profile: the rungs from the ceiling down to the floor, evenly spaced over the radius.
 
     Behind an empty floor the lowest rung goes past the edge instead, to HALO_STOP - the ring that
-    softens the step from a lens into nothing (docs/quantization-filter.md).
+    softens the step from a zone into nothing (docs/quantization-filter.md).
     """
     rungs = [lv for lv in reversed(ladder) if floor < lv <= ceiling]
     if not rungs:

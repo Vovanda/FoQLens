@@ -44,11 +44,11 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 ## Step 3. Precision follows the meaning
 
-Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the lens layout ([quantization-filter.md](quantization-filter.md)); the fixed-budget layouts of E008 and E009 are legacy.*
+Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([quantization-filter.md](quantization-filter.md)); the fixed-budget layouts of E008 and E009 are legacy.*
 
 Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
-The weights are stored once, as residual slices read to a depth (step 5), so a lens costs only the depth it reads.
+The weights are stored once, as residual slices read to a depth (step 5), so a zone costs only the depth it reads.
 
 Measurement: quality against **memory**. The baseline is uniform quantization at the same memory (see «The baseline» below); the paired topic's zones and generic importance test the address. A random mask is not a baseline. Curve above the baseline → the scheme works.
 
@@ -77,7 +77,7 @@ A side benefit: no need to re-cut blocks by meaning - the layout stays aligned, 
 *Updated 2026-09-12.* Memory savings are real on the bench now: one sliced copy replaces the bf16 weights (-1.63 GiB on E2B) and every block can store only the depth it is read to. What is not shown at home is speed and energy: the slices are unpacked before the multiplication, and reading only the needed bits takes a kernel of its own.
 
 What can honestly be shown at home:
-- **memory** - the lenses of a query cost only what they read;
+- **memory** - the zones of a query cost only what they read;
 - **quality against memory** - if precision is laid out by meaning, the same memory describes the model better;
 - **compactness in parameter count** - through overlapping zones, not through bits per weight;
 - **the shape of the degradation curve** - see experiment 2 on hardware inputs, value and degradation priority (author's private notes).
@@ -253,7 +253,7 @@ Background subtraction is worth keeping in the plan as a prepared next step: it 
 - **It does not cost the same.** Zones of the same count and radii around random blocks overlap less, so they store and read more - 5.72 bits against 4.28 at focus area 0.5. A control that spends a third more and answers worse says nothing about the address.
 - **Beating it proves nothing anyone needs.** Nobody ships a model quantized by random mask. Being better than deliberate damage is not a result; being better than uniform quantization at the same cost is.
 
-Where a control for shape is genuinely needed, it is the query's own zones carried elsewhere on the map as a rigid figure, landed where they cover the same weight - same count, same radii, same distances, same cost (`foqlens.zones.moved_zones`). That isolates *where the lenses point* without changing what they cost.
+Where a control for shape is genuinely needed, it is the query's own zones carried elsewhere on the map as a rigid figure, landed where they cover the same weight - same count, same radii, same distances, same cost (`foqlens.zones.moved_zones`). That isolates *where the zones point* without changing what they cost.
 
 ## The boundary of solo work
 

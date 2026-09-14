@@ -28,13 +28,13 @@ mathematics; it is a metric that cannot see mathematics. The same tell appears i
 physics.
 
 **So the comparisons were measuring the guessing.** Split the 395 questions by the core and compare a
-lens layout against uniform quantization of the same cost: inside the core the lenses are behind by
+zone layout against uniform quantization of the same cost: inside the core the zones are behind by
 5.1 points of accuracy, outside it they are ahead by 1.0, and over the whole set the two cancel into
-a difference that looks positive and clears no interval. The headline result of E013 - lenses ahead
+a difference that looks positive and clears no interval. The headline result of E013 - zones ahead
 of uniform D6 at the same memory - came from the outside, and did not survive reordering the options.
 
 **And the letters themselves carry a lean.** Over six orders, the full model picks C 29% of the time
-and a lens layout 35%. On a set where half the answers are guesses, a layout that shifts the lean
+and a zone layout 35%. On a set where half the answers are guesses, a layout that shifts the lean
 looks like a layout that answers better.
 
 ## What a corpus has to satisfy

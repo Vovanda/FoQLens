@@ -5,7 +5,7 @@ moving with them. The model's own bias toward a letter is then spread over all f
 only exploits that bias loses its advantage, while a layout that reads the answer keeps it.
 
 The masks are recomputed for every order, because the regulator sees the prompt that is actually
-sent: taking the address off a differently ordered prompt would give the lenses a head start no
+sent: taking the address off a differently ordered prompt would give the zones a head start no
 deployment could give them.
 
 Three configurations per order: bf16, uniform D6 - the reference E013 was read against at the same
@@ -47,9 +47,9 @@ BEST_CELL = {"floor": Level.D4, "focus_area": 0.75, "focus_strength": 1.0}
 REFERENCES = {"uniform_bf16": Level.BF16, "uniform_d6": Level.D6}
 
 
-def lens_name(area: float) -> str:
+def zone_layout_name(area: float) -> str:
     """The layout is named by the cell it is, so two runs at different sizes never share a key."""
-    return f"lens_own_{BEST_CELL['floor'].name.lower()}_fa{area:.2f}_fs{BEST_CELL['focus_strength']:.2f}"
+    return f"zones_own_{BEST_CELL['floor'].name.lower()}_fa{area:.2f}_fs{BEST_CELL['focus_strength']:.2f}"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -59,7 +59,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--orders", type=int, default=6, help="orders of the options per question, the first being the original")
     parser.add_argument("--masks-from-original", action="store_true",
                         help="take the address off the original order and reuse it for every shuffle - it separates "
-                             "'the lenses lose the address on a reordered prompt' from 'the advantage was in the letter'")
+                             "'the zones lose the address on a reordered prompt' from 'the advantage was in the letter'")
     parser.add_argument("--focus-area", type=float, default=BEST_CELL["focus_area"],
                         help="the size of the zones; the default is the best cell of E013. A different mask gives "
                              "zones of a different size, so matching the memory of another run means moving this")
@@ -125,9 +125,9 @@ def picked_letters(rows: list[dict]) -> list[float]:
     return (np.bincount(top, minlength=len(LETTERS)) / len(top)).tolist()
 
 
-def compare(values: dict[str, np.ndarray], keep: np.ndarray, seed: int, lens: str) -> dict:
-    """The lens against each reference on the questions kept, paired over the questions."""
-    return {f"lens_minus_{name}": paired_bootstrap(values[lens][keep], values[name][keep], seed=seed)
+def compare(values: dict[str, np.ndarray], keep: np.ndarray, seed: int, own: str) -> dict:
+    """The zones against each reference on the questions kept, paired over the questions."""
+    return {f"zones_minus_{name}": paired_bootstrap(values[own][keep], values[name][keep], seed=seed)
             for name in REFERENCES}
 
 
@@ -138,28 +138,28 @@ def main(argv: list[str] | None = None) -> Path:
     orders = orders_of(args.orders, args.seed)
     bench = Bench.load(MODELS[args.model], gpu_share=args.gpu_share)
     metric = LetterChoice.for_tokenizer(bench.tokenizer)
-    lens = lens_name(args.focus_area)
+    own = zone_layout_name(args.focus_area)
     out_dir = args.out / args.model
 
     per_order: dict[str, dict] = {}
     progress = Progress(len(orders), "order")
-    lens_policy = None
+    own_policy = None
     with layout_pool() as pool, GpuMonitor() as gpu:
         for k, order in enumerate(orders):
             questions = in_order(rows, domains.tolist(), order)
-            if lens_policy is None or not args.masks_from_original:
+            if own_policy is None or not args.masks_from_original:
                 addressed = addressed_text(rows, questions, args.address)
                 raw = bench.masks(addressed, bench.sources(args.pooled_batch, args.gradient_batch))
                 coords = coactivation_map(raw[MASK_SOURCE])
                 topics = TopicZones(TopicMeans(subtract_background(raw)[MASK_SOURCE], tuple(domains)), PAIRS, coords)
-                lens_policy = graded_zone_layout(lens, OwnZones(topics), args.focus_area,
+                own_policy = graded_zone_layout(own, OwnZones(topics), args.focus_area,
                                                  BEST_CELL["focus_strength"], coords, floor=BEST_CELL["floor"])
             # the address came from this order; the answering can stay on the original one, and then the
             # only thing that differs between the orders is the text the address was read from
             if args.answer_in_original_order:
                 questions = in_order(rows, domains.tolist(), orders[0])
             policies = [Uniform(level, bench.ctl.n_blocks) for level in REFERENCES.values()]
-            policies.append(lens_policy)
+            policies.append(own_policy)
             results = evaluate_all(bench.model, bench.tokenizer, bench.ctl, questions, policies, metric,
                                    args.eval_batch, throttle=bench.throttle, pool=pool)
             per_order[f"order_{k}"] = {
@@ -175,17 +175,17 @@ def main(argv: list[str] | None = None) -> Path:
     # pooled over the orders: a question's value is its mean over the orders, so the letter bias averages out
     def pooled(field: str) -> dict[str, np.ndarray]:
         return {name: np.mean([per_order[o][field][name] for o in per_order], axis=0) for name in
-                (lens, *REFERENCES)}
+                (own, *REFERENCES)}
 
     everything = np.ones(len(rows), bool)
     comparisons = {
-        "original_order": {field: compare({n: np.array(per_order["order_0"][field][n]) for n in (lens, *REFERENCES)},
-                                          everything, args.seed, lens) for field in ("accuracy", "logprob")},
-        "pooled_over_orders": {field: compare(pooled(field), everything, args.seed, lens) for field in ("accuracy", "logprob")},
+        "original_order": {field: compare({n: np.array(per_order["order_0"][field][n]) for n in (own, *REFERENCES)},
+                                          everything, args.seed, own) for field in ("accuracy", "logprob")},
+        "pooled_over_orders": {field: compare(pooled(field), everything, args.seed, own) for field in ("accuracy", "logprob")},
     }
     for pair in PAIR_NAMES:
         keep = np.isin(domains, pair)
-        comparisons[f"pooled|{'-'.join(pair)}"] = {field: compare(pooled(field), keep, args.seed, lens)
+        comparisons[f"pooled|{'-'.join(pair)}"] = {field: compare(pooled(field), keep, args.seed, own)
                                                    for field in ("accuracy", "logprob")}
 
     summary = {
@@ -202,10 +202,10 @@ def main(argv: list[str] | None = None) -> Path:
         "gpu_share": args.gpu_share,
         "gpu": gpu.summary(),
         "accuracy_per_order": {name: [per_order[o]["summary"][name]["accuracy"] for o in per_order]
-                               for name in (lens, *REFERENCES)},
+                               for name in (own, *REFERENCES)},
         "letters_picked_per_order": {name: [per_order[o]["picked"][name] for o in per_order]
-                                     for name in (lens, *REFERENCES)},
-        "mean_bits": {name: per_order["order_0"]["summary"][name]["mean_bits"] for name in (lens, *REFERENCES)},
+                                     for name in (own, *REFERENCES)},
+        "mean_bits": {name: per_order["order_0"]["summary"][name]["mean_bits"] for name in (own, *REFERENCES)},
         "comparisons": comparisons,
     }
     write_json(out_dir / "summary.json", summary)

@@ -14,8 +14,8 @@ stopped run still leaves what it has done.
 
 Writes runs/E010-lens-layout/<model>/summary.json and raw per-question results.
 
-    uv run python scripts/step3_lenses.py
-    uv run python scripts/step3_lenses.py --limit 4 --focus-area 0.5 --out /tmp/lenses   # smoke check
+    uv run python scripts/step3_filter.py
+    uv run python scripts/step3_filter.py --limit 4 --focus-area 0.5 --out /tmp/filter   # smoke check
 """
 
 from __future__ import annotations
@@ -85,7 +85,7 @@ def cells_by_promise(floors: list[str], areas: list[float], strengths: list[floa
 
 
 def cell_name(kind: str, floor: str, area: float, strength: float) -> str:
-    return f"lens_{kind}_{floor}_fa{area:.2f}_fs{strength:.2f}"
+    return f"zones_{kind}_{floor}_fa{area:.2f}_fs{strength:.2f}"
 
 
 def lifted_share(policy, index: np.ndarray, floor: Level, weights: np.ndarray) -> dict:
@@ -101,17 +101,17 @@ def cell_policies(cell, coords, topics, backbone_zones, weights, seed, random_zo
     floor_name, area, strength = cell
     floor = FLOORS[floor_name]
     halo = floor is Level.ZERO  # the lowest rung goes past the edge, softening the step into nothing
-    def lens(kind: str, source):
+    def layout(kind: str, source):
         return graded_zone_layout(cell_name(kind, floor_name, area, strength), source, area, strength, coords,
                                   floor=floor, halo=halo)
 
-    own = lens("own", OwnZones(topics))
+    own = layout("own", OwnZones(topics))
     if moved_zones:
         reach = area / (1 - area) if area < 1 else 1.0
-        return [own, lens("moved", MovedZones(topics, weights, reach, seed))]
+        return [own, layout("moved", MovedZones(topics, weights, reach, seed))]
     if random_zones:
-        return [own, lens("random", RandomZones(topics, seed))]
-    return [own, lens("other", OtherZones(topics)), lens("backbone", FixedZones(backbone_zones)),
+        return [own, layout("random", RandomZones(topics, seed))]
+    return [own, layout("other", OtherZones(topics)), layout("backbone", FixedZones(backbone_zones)),
             ShuffledLevels(cell_name("nomask", floor_name, area, strength), own, weights, seed)]
 
 

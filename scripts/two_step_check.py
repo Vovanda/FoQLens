@@ -66,8 +66,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def lens_name(area: float) -> str:
-    return f"lens_own_{BEST_CELL['floor'].name.lower()}_fa{area:.2f}_fs{BEST_CELL['focus_strength']:.2f}"
+def zone_layout_name(area: float) -> str:
+    return f"zones_own_{BEST_CELL['floor'].name.lower()}_fa{area:.2f}_fs{BEST_CELL['focus_strength']:.2f}"
 
 
 def read_rows(prompts_dir: Path, limit: int | None) -> tuple[list[dict], list[str]]:
@@ -107,7 +107,7 @@ def main(argv: list[str] | None = None) -> Path:
     prompts = [question_prompt(q) for q in questions]
     orders = orders_of(args.orders, args.seed)
     bench = Bench.load(MODELS[args.model], gpu_share=args.gpu_share)
-    lens = lens_name(args.focus_area)
+    own = zone_layout_name(args.focus_area)
     out_dir = args.out / args.model
     log = lambda s: print(s, flush=True)
 
@@ -118,7 +118,7 @@ def main(argv: list[str] | None = None) -> Path:
         coords = coactivation_map(raw[MASK_SOURCE])
         topics = TopicZones(TopicMeans(subtract_background(raw)[MASK_SOURCE], tuple(domains)), PAIRS, coords)
         policies = {name: Uniform(level, bench.ctl.n_blocks) for name, level in REFERENCES.items()}
-        policies[lens] = graded_zone_layout(lens, OwnZones(topics), args.focus_area,
+        policies[own] = graded_zone_layout(own, OwnZones(topics), args.focus_area,
                                             BEST_CELL["focus_strength"], coords, floor=BEST_CELL["floor"])
 
         answers, bits = {}, {}
@@ -148,7 +148,7 @@ def main(argv: list[str] | None = None) -> Path:
 
     names = list(policies)
     pooled = {name: np.mean([per_order[o]["accuracy"][name] for o in per_order], axis=0) for name in names}
-    compare = lambda keep: {f"lens_minus_{n}": paired_bootstrap(pooled[lens][keep], pooled[n][keep], seed=args.seed)
+    compare = lambda keep: {f"zones_minus_{n}": paired_bootstrap(pooled[own][keep], pooled[n][keep], seed=args.seed)
                             for n in REFERENCES}
     everything = np.ones(len(rows), bool)
     summary = {

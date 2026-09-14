@@ -20,7 +20,9 @@ from pathlib import Path
 from foqlens import corpora
 from foqlens import model as fm
 from foqlens.answering import JUDGE_BATCH, Asking, level_label
+from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
+from foqlens.graph_decode import STATIC
 from foqlens.gpu_share import default_share
 from foqlens.io import answers_path, append_answers, write_json, written_ids
 from foqlens.judging import ModelJudge
@@ -41,6 +43,8 @@ TRAIN_POOL = 2000
 # justify-terse leaves out its answer line.
 FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passage-0",
                  "arc_challenge_closed": "solve-0", "hotpotqa": "justify"}
+# static: the static cache with every step a CUDA graph (foqlens.graph_decode); dynamic: the reference loop.
+DECODERS = {"static": STATIC, "dynamic": DYNAMIC}
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -54,6 +58,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--rounds", type=int, default=None, help="stop after this many rounds, for a smoke check")
     parser.add_argument("--out", type=Path, default=Path("runs/reference/stage1"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
+    parser.add_argument("--decoder", choices=list(DECODERS), default="static")
     return parser.parse_args(argv)
 
 
@@ -90,12 +95,12 @@ def main(argv: list[str] | None = None) -> Path:
                 asking = askings[corpus]
                 for chunk in asking.batches(fmt, tokenizer, [rows[corpus][i] for i in ids]):
                     append_answers(paths[corpus], asking.answer(bench.model, tokenizer, bench.ctl, fmt, judge,
-                                                                chunk, bench.throttle))
+                                                                chunk, bench.throttle, DECODERS[args.decoder]))
             rounds_done += 1
             print(progress.step(f"round {k}"), flush=True)
 
     summary = {
-        "model": name, "level": args.level, "seed": args.seed, "setups": args.setups,
+        "model": name, "level": args.level, "seed": args.seed, "setups": args.setups, "decoder": args.decoder,
         "tuning": str(args.tuning) if args.tuning else None, "rounds_this_run": rounds_done,
         "answered": {c: len(written_ids(p)) for c, p in paths.items()},
         "questions": {c: len(r) for c, r in rows.items()},

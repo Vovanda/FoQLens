@@ -34,7 +34,7 @@ class Judge:
 def run(monkeypatch):
     log = []
 
-    def replies(model, tokenizer, prompts, max_new_tokens, stop):
+    def replies(model, tokenizer, prompts, max_new_tokens, stop, decoder):
         log.append(("generate", len(prompts), max_new_tokens))
         return [Reply("It is the capital.\nAnswer: Paris", 8, True),
                 Reply("It was Marlowe.\n**Answer:** Marlowe", 9, False)][: len(prompts)]

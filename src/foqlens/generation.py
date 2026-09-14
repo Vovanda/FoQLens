@@ -8,8 +8,9 @@ The batch is padded on the left, so every prompt ends where its answer starts, a
 positions from its own attention mask - the way generate() builds them (transformers 5.17,
 generation/utils.py: cumsum of the mask minus one, padding at 0, then one more per step). A plain
 forward would take them from arange(seq) and shift every real token of a padded row (model.load).
-The loop is our own rather than generate(): the static cache and the CUDA graph of the next steps
-need it, and generate() with a static cache compiles the step with triton.
+The loop is our own rather than generate(): the static cache and its CUDA graph (graph_decode) need
+it, and generate() with a static cache compiles the step with triton. Which loop runs is a Decoder:
+DYNAMIC here is the reference, graph_decode.STATIC the fast one.
 
 Where an answer ends is a StopRule. A short answer is its first line (FIRST_LINE): after it a base
 checkpoint goes on to invent the next question, and in Gemma 4 a newline is always a token of its
@@ -64,6 +65,14 @@ def mask_positions(attention_mask: torch.Tensor) -> torch.Tensor:
     return positions.masked_fill(attention_mask == 0, 0)
 
 
+def ends_after(step: int, max_new_tokens: int, done: torch.Tensor, check_every: int) -> bool:
+    """Whether decoding stops once `step` is written: at the limit, or at a look that finds every row done.
+
+    The look waits for the device, so it is taken only every `check_every` steps.
+    """
+    return step + 1 == max_new_tokens or ((step + 1) % check_every == 0 and bool(done.all()))
+
+
 @torch.no_grad()
 def greedy_tokens(
     model, input_ids: torch.Tensor, attention_mask: torch.Tensor, max_new_tokens: int, stop: torch.Tensor,
@@ -87,13 +96,33 @@ def greedy_tokens(
     for step in range(max_new_tokens):
         tokens[:, step] = out.logits[:, -1].argmax(-1)
         done |= (tokens[:, step, None] == stop).any(-1)  # torch.isin waits for the device three times a step
-        if step + 1 == max_new_tokens or ((step + 1) % check_every == 0 and bool(done.all())):
+        if ends_after(step, max_new_tokens, done, check_every):
             return tokens[:, : step + 1]
         attention_mask = torch.cat([attention_mask, step_mask], dim=-1)
         position = position + 1
         out = model(input_ids=tokens[:, step : step + 1], attention_mask=attention_mask, position_ids=position,
                     past_key_values=cache, use_cache=True, logits_to_keep=1)
     return tokens
+
+
+class Decoder(Protocol):
+    def tokens(self, model, input_ids: torch.Tensor, attention_mask: torch.Tensor, max_new_tokens: int,
+               stop: torch.Tensor) -> torch.Tensor:
+        """The greedy continuation of a left-padded batch, [batch, steps run], as greedy_tokens defines it."""
+        ...
+
+
+@dataclass(frozen=True)
+class DynamicDecoder:
+    """The reference loop: a cache that grows by a token a step, every step launched from Python (greedy_tokens)."""
+
+    check_every: int = STOP_CHECK_EVERY
+
+    def tokens(self, model, input_ids, attention_mask, max_new_tokens, stop):
+        return greedy_tokens(model, input_ids, attention_mask, max_new_tokens, stop, self.check_every)
+
+
+DYNAMIC = DynamicDecoder()
 
 
 def end_ids(model) -> tuple[int, ...]:
@@ -155,14 +184,16 @@ class EndOfTurn:
 FIRST_LINE, END_OF_TURN = FirstLine(), EndOfTurn()
 
 
-def generate_replies(model, tokenizer, prompts: list[str], max_new_tokens: int, stop: StopRule = FIRST_LINE) -> list[Reply]:
+def generate_replies(model, tokenizer, prompts: list[str], max_new_tokens: int, stop: StopRule = FIRST_LINE,
+                     decoder: Decoder = DYNAMIC) -> list[Reply]:
     """What the model writes for each prompt, under the layout currently set, as one batch, cut by `stop`."""
     stop = stop.ids(model, tokenizer)
     enc = fm.encode_left(tokenizer, prompts, model.device)
-    tokens = greedy_tokens(model, enc["input_ids"], enc["attention_mask"], max_new_tokens,
-                           torch.tensor(stop, device=model.device))
+    tokens = decoder.tokens(model, enc["input_ids"], enc["attention_mask"], max_new_tokens,
+                            torch.tensor(stop, device=model.device))
     return replies(tokenizer, tokens, stop)
 
 
-def generate_answers(model, tokenizer, prompts: list[str], max_new_tokens: int, stop: StopRule = FIRST_LINE) -> list[str]:
-    return [r.text for r in generate_replies(model, tokenizer, prompts, max_new_tokens, stop)]
+def generate_answers(model, tokenizer, prompts: list[str], max_new_tokens: int, stop: StopRule = FIRST_LINE,
+                     decoder: Decoder = DYNAMIC) -> list[str]:
+    return [r.text for r in generate_replies(model, tokenizer, prompts, max_new_tokens, stop, decoder)]

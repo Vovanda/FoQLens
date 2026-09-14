@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 from foqlens.corpora import Row
 from foqlens.extractive import exact_match, token_f1
-from foqlens.generation import generate_replies
+from foqlens.generation import DYNAMIC, Decoder, generate_replies
 from foqlens.gpu_share import FULL, Pacer
 from foqlens.prompt_variants import Variant
 from foqlens.prompting import PromptFormat
@@ -55,10 +55,12 @@ class Asking:
         lengths = [len(ids) for ids in tokenizer(self.prompts(fmt, rows))["input_ids"]]
         return [[rows[i] for i in idx.tolist()] for idx in token_batches(lengths, BATCH_TOKENS, BATCH)]
 
-    def answer(self, model, tokenizer, ctl, fmt: PromptFormat, judge, rows: list[Row], pacer: Pacer = FULL) -> list[Answer]:
+    def answer(self, model, tokenizer, ctl, fmt: PromptFormat, judge, rows: list[Row], pacer: Pacer = FULL,
+               decoder: Decoder = DYNAMIC) -> list[Answer]:
         ctl.set_all(self.level)
         with pacer.batch():
-            written = generate_replies(model, tokenizer, self.prompts(fmt, rows), self.setup.max_new_tokens, self.setup.stop)
+            written = generate_replies(model, tokenizer, self.prompts(fmt, rows), self.setup.max_new_tokens, self.setup.stop,
+                                       decoder)
         parts = [self.setup.extract(w.text) for w in written]
         answers = [a for _, a in parts]
         questions = [r.question for r in rows]

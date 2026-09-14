@@ -10,7 +10,7 @@ Random zones are dropped from the question. They are not an honest control here:
 
 ## 2. Given
 
-- **The mechanism**: [docs/lens.md](../../docs/lens.md) at commit `c91af59`; sum of lifts, the default profile, attention level D4 behind an empty floor.
+- **The mechanism**: [docs/quantization-filter.md](../../docs/quantization-filter.md) at commit `c91af59`; sum of lifts, the default profile, attention level D4 behind an empty floor.
 - **Model and data**: Gemma 4 E2B at the pinned revision; the 395 questions of E010 (biology 95, math 100, history 100, geography 100). Held-out topics are not opened.
 - **The map**: floor D4, D2 and ZERO x focus area 0.3, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9 x focus strength 0.5 and 1 - denser where E010 found the effect lives, and out to where the lenses cover nearly everything.
 - **Reported with every cell**: the error rate, the right-letter log-probability, the mean bits, and the share of the net lifted over the floor.

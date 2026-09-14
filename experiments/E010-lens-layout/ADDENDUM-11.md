@@ -10,7 +10,7 @@ From the legacy runs: the gradient zones find what matters for a question (E009 
 
 ## 2. Given
 
-- **The mechanism**: [docs/lens.md](../../docs/lens.md) at commit `4fa3e7f` - the controls and rules 1-7 as written there. This addendum does not restate them; a later change of lens.md does not change E010.
+- **The mechanism**: [docs/quantization-filter.md](../../docs/quantization-filter.md) at commit `4fa3e7f` - the controls and rules 1-7 as written there. This addendum does not restate them; a later change of lens.md does not change E010.
 - **The configuration of this run** - values, not rules: the E2B ladder ZERO, D2, D4, D6, D8 from the sliced copy of E006; the attention level D4 (uncalibrated D2 diverges on E2B, [E006](../E006-read-depths/results.md), so D2 is only a glass and the ring pushed past a lens edge); the sum strategy; the default profile.
 - **Model and data**: Gemma 4 E2B at the revision pinned in `foqlens.model.REVISIONS`; the 395 questions of E009 (biology 95, math 100, history 100, geography 100); pairs biology-math and history-geography. Held-out topics are not opened.
 - **Zones**: the weight map (co-activation of the raw gradient masks of all questions, no labels) and the zones of each question as in ADDENDUM-07; the gradient source only (pooled zones failed in ADDENDUM-07 and E009), on the deterministic gradient pass of `7a06b67`.

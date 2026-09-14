@@ -20,7 +20,7 @@ Rejected: fitting the radii to the memory budget (breaks the figure), and drawin
 
 ## 3. Given
 
-- **The mechanism**: [docs/lens.md](../../docs/lens.md); sum of lifts, the default profile, floor D4.
+- **The mechanism**: [docs/quantization-filter.md](../../docs/quantization-filter.md); sum of lifts, the default profile, floor D4.
 - **Model and data**: Gemma 4 E2B at the pinned revision, the 395 questions of E010 (biology 95, math 100, history 100, geography 100).
 - **The grid**: the working range E013 found - floor D4, focus area 0.70, 0.75, 0.80, focus strength 0.5 and 1. Six cells, own and moved in each.
 - **Reported per cell**: error rate, right-letter log-probability, mean bits, and the ratio of the memory the moved figure spends to the memory its own spends.

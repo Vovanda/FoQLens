@@ -10,7 +10,7 @@ The probe that prompted this experiment, on the 395 questions of [E010](../E010-
 
 ## 2. Given
 
-- **The mechanism**: [docs/lens.md](../../docs/lens.md) at commit `c91af59` - the rules as written there. The floor stays D4 (calibrating a D2 floor was measured and dropped, see the reading notes at the same commit).
+- **The mechanism**: [docs/quantization-filter.md](../../docs/quantization-filter.md) at commit `c91af59` - the rules as written there. The floor stays D4 (calibrating a D2 floor was measured and dropped, see the reading notes at the same commit).
 - **The layouts**: the graded zone layout of [ADDENDUM-11](../E010-lens-layout/ADDENDUM-11.md) on the masks of the E010 run, floor D4 and ZERO, focus area 0.2 ... 0.8, focus strength 1.
 - **The cap of a block**: the deepest level any question of the set asks of it. Reading is unchanged by construction - a cap is never below what a question reads - so quality is not measured again here.
 - **Model and data**: Gemma 4 E2B at the pinned revision; the 395 questions of E010 (biology 95, math 100, history 100, geography 100). Held-out topics are not opened.

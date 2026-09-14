@@ -6,7 +6,7 @@ Fixed 2026-09-12, **before the code of the lens layout and before the run**. Not
 
 ADDENDUM-07 to 10 fixed the mean bits in advance and stretched the zones to hit them, so even at focus area 0 precision was pushed into the zones ([zones.md](../../docs/zones.md), legacy). That is not the picture of the project. Here the whole network sits behind a glass, lenses are inserted into the query's expert zones, and memory is the result of the lenses, not a budget.
 
-From the legacy runs: the gradient zones find what matters for a question (E009 M1 on both pairs) and carry a topic address for far topics (M2 biology-math); the address is worth most where bits are scarce; a falloff around the centers beats a plateau ([E009 results](../E009-zones-matrix/results.md)).
+From the legacy runs: the gradient zones find what matters for a question (E009 M1 on both pairs) and carry a topic address for far topics (M2 biology-math); the address is worth most where bits are scarce; a falloff around the centers beats a plateau ([E009](../E009-zones-matrix/_index.md)).
 
 ## 2. Given
 

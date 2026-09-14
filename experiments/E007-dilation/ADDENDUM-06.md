@@ -4,7 +4,7 @@ Fixed 2026-09-11, **before the run**. Not edited after its commit.
 
 ## 1. Why
 
-Over a generic importance backbone the topic fill added nothing where the model still answers ([results](../E005-backbone/results.md)). One explanation, raised by the author: a mask points at blocks one by one, while what a topic uses may be wider - a sharp block whose partners are removed does not help. Dilation keeps the aperture and spends it on fewer seeds, each widened to its neighbours.
+Over a generic importance backbone the topic fill added nothing where the model still answers ([E005](../E005-backbone/_index.md)). One explanation, raised by the author: a mask points at blocks one by one, while what a topic uses may be wider - a sharp block whose partners are removed does not help. Dilation keeps the aperture and spends it on fewer seeds, each widened to its neighbours.
 
 ## 2. Design
 

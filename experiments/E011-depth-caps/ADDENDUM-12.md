@@ -6,7 +6,7 @@ Fixed 2026-09-12, **before the code of the experiment and before the run**. Not 
 
 A layout is read per query, but storage is one copy. A block has to keep the deepest slice any query asks of it, so its cap is the maximum over the queries the model serves. [E006](../E006-read-depths/results.md) built that storage (`CappedSlicedWeight`, `set_caps`) and showed a block can keep only the depth it is read to; what was never measured is how much that saves once many different queries share one copy.
 
-The probe that prompted this experiment, on the 395 questions of [E010](../E010-lens-layout/results.md): behind a D4 floor at focus area 0.5 a question reads 4.28 bits per weight while the caps have to store 6.47; at focus area 0.8 the caps store 8.00 - every block is read at D8 by someone, and nothing is saved. Behind an empty floor a question reads 0.82 and storage still costs 6.07. Addressing precision by the query saves reading, not storage, unless the queries are few or alike - and that is what this experiment measures.
+The probe that prompted this experiment, on the 395 questions of [E010](../E010-lens-layout/_index.md): behind a D4 floor at focus area 0.5 a question reads 4.28 bits per weight while the caps have to store 6.47; at focus area 0.8 the caps store 8.00 - every block is read at D8 by someone, and nothing is saved. Behind an empty floor a question reads 0.82 and storage still costs 6.07. Addressing precision by the query saves reading, not storage, unless the queries are few or alike - and that is what this experiment measures.
 
 ## 2. Given
 

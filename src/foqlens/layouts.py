@@ -140,21 +140,6 @@ class OtherTopic:
 
 
 @dataclass(frozen=True)
-class RandomFill:
-    """Random numbers per block, reproducible per question and precision share."""
-
-    precision_share: float
-    seed: int = 0
-    kind: ClassVar[str] = "random"
-
-    def label(self, source: str) -> str:
-        return "random"
-
-    def vector(self, index: int, n_blocks: int) -> np.ndarray:
-        return _rng(self.seed, index, self.precision_share, salt=1).random(n_blocks)
-
-
-@dataclass(frozen=True)
 class TopicMask:
     """A topic's mask - the question's own topic or its paired topic - at the precision share."""
 
@@ -190,60 +175,6 @@ class Random:
         return np.stack(
             [
                 bg.to_levels(bg.random_layout(self.weights, self.precision_share, _rng(self.seed, int(i), self.precision_share)), lo=self.coarse)
-                for i in indices
-            ]
-        )
-
-
-@dataclass(frozen=True)
-class Backbone:
-    """Generic block importance, the same for every question, for the whole precision share."""
-
-    precision_share: float
-    backbone: np.ndarray
-    weights: np.ndarray
-    coarse: Level = Level.NF4
-
-    @property
-    def name(self) -> str:
-        return f"backbone_{self.precision_share:.3f}"
-
-    def levels(self, indices: np.ndarray) -> np.ndarray:
-        row = bg.to_levels(bg.directed(self.backbone, self.weights, self.precision_share), lo=self.coarse)
-        return np.repeat(row[None], len(indices), axis=0)
-
-
-@dataclass(frozen=True)
-class BackboneFill:
-    """The backbone for `share` of the precision share; the rest filled by the own topic, the other topic or random blocks."""
-
-    fill: FillSource
-    source: str  # topic mask source, in the name of topic fills
-    precision_share: float
-    share: float
-    backbone: np.ndarray
-    weights: np.ndarray
-    coarse: Level = Level.NF4
-    dilation: str = "none"  # name of the neighbour table the fill is widened by (see neighbours.py)
-    neighbours: np.ndarray | None = None
-
-    def __post_init__(self) -> None:
-        if (self.dilation == "none") != (self.neighbours is None):
-            raise ValueError(f"dilation {self.dilation!r} needs a neighbour table exactly when it is not 'none'")
-
-    @property
-    def name(self) -> str:
-        wide = "" if self.dilation == "none" else f"_{self.dilation}"
-        return f"bb{self.share:.2f}_{self.fill.label(self.source)}{wide}_{self.precision_share:.3f}"
-
-    def levels(self, indices: np.ndarray) -> np.ndarray:
-        n = len(self.weights)
-        return np.stack(
-            [
-                bg.to_levels(
-                    bg.layered(self.backbone, self.fill.vector(int(i), n), self.weights, self.precision_share, self.share, self.neighbours),
-                    lo=self.coarse,
-                )
                 for i in indices
             ]
         )

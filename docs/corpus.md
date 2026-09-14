@@ -55,22 +55,38 @@ looks like a layout that answers better.
 
 ## What is being built
 
-**The metric becomes context QA.** The model is given a passage and a question, writes the answer
-itself, and is scored the way SQuAD scores it: exact match after normalization, and token F1 against
-the reference. No options to lean on, nothing to reorder, a continuous scale, and the answer is in
-the passage - so the question is whether the model can read, not whether it happens to know. Code: `src/foqlens/extractive.py`.
+**The model writes its own answer, in every regime.** It is given the question - with a passage or
+without one - and writes the answer itself; it never sees options. What it writes is compared with the
+reference answer of the dataset, and three judges read it: exact match and token F1 as SQuAD scores
+them; the full model, asked whether the answer agrees with the reference; and Claude, who reads every
+answer the first two do not settle. Where they disagree, Claude's verdict decides. No options to lean
+on, nothing to reorder, a continuous scale. Code: `src/foqlens/extractive.py`.
+
+**The corpus is selected, then frozen.** The full model first answers every question of the full
+datasets, and a question stays if the answer is right. The corpus is then a file of question numbers -
+kept and excluded, each with its reason - with the dataset revisions pinned. Every later run reads that
+file; how it was assembled is recorded, not re-derived.
+
+**Questions the model did not know go back in, marked.** The set the coarsened models answer is 90%
+questions the full model knew and 10% questions it got wrong, drawn at random. The 90% is where the
+bench is confident of the model's knowledge; the 10% is there to check for emergent properties - in
+case a model answers some of them after all. That is unlikely, and they are counted apart.
 
 **Three regimes, so that the claim can fail.** The bench's claim is that precision should follow the
 query because the knowledge a query needs sits in particular weights. That claim predicts different
 things in different regimes, and until now every corpus was of one kind:
 
-| Regime | Where the answer is | What the zones should do |
-| --- | --- | --- |
-| the answer is in the passage | in the context | little - the knowledge came in with the prompt |
-| the answer is not in the passage | in the weights | decide - this is the regime the idea is about |
-| two passages and a step between them | partly in each | matter, and matter less than in the second |
+| Regime | Corpus | Why this one | What the zones should do |
+| --- | --- | --- | --- |
+| the answer is in the passage | SQuAD v2 | the standard reading set; half its questions have no answer in the passage, and saying so is part of reading | little - the knowledge came in with the prompt |
+| the answer is only in the weights | TriviaQA, NQ-open, ARC-Challenge without its options | facts and school science; for ARC the reference is the text of the right option, and the questions that point at their options ("which of the following") are left out - 206 of 1165 | decide - this is the regime the idea is about |
+| two passages and a step between them | HotpotQA | the answer is assembled from two paragraphs among eight that do not hold it | matter, and matter less than in the second |
 
-If lenses help as much when the answer is sitting in the context as when it is only in the weights,
+ARC-Challenge and ReClor with a letter to pick stay only in the calibration table below, as
+measurements: ARC's core is 41.5% and ReClor's 14.8%, and ReClor looks for its answer in an attached
+passage - reasoning over a text, not knowledge held in the weights.
+
+If the zones help as much when the answer is sitting in the context as when it is only in the weights,
 the mechanism is not doing what it is claimed to do. That is the test the old corpus could not run.
 
 ## Candidates, measured

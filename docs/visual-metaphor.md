@@ -1,6 +1,6 @@
 # Visual metaphor
 
-How FoQLens is drawn. Fixed 2026-09-11, updated 2026-09-12 to the lens mechanism ([lens.md](lens.md)).
+How FoQLens is drawn. Fixed 2026-09-11, updated 2026-09-12 to the lens mechanism ([quantization-filter.md](quantization-filter.md)).
 
 ## Why Lens
 

@@ -396,7 +396,7 @@ class FixedBudget:
 
 @dataclass(frozen=True)
 class ZoneLayout:
-    """Levels from expert zones (docs/lens.md, docs/zones.md): zones of a question -> a field -> levels.
+    """Levels from expert zones (docs/quantization-filter.md, docs/zones.md): zones of a question -> a field -> levels.
 
     Each part is replaced by a new class with the same interface; the layout does not know which.
     """
@@ -442,7 +442,7 @@ def graded_zone_layout(
     floor: Level = Level.D4, combine: str = "sum", halo: bool = False,
     stops: tuple[tuple[Level, float], ...] | None = None,
 ) -> ZoneLayout:
-    """The layout of E010 (ADDENDUM-11, docs/lens.md): a floor everywhere, zones graded up to a ceiling.
+    """The layout of E010 (ADDENDUM-11, docs/quantization-filter.md): a floor everywhere, zones graded up to a ceiling.
 
     The ceiling is focus_strength of the way from the floor to the top of the ladder; the profile is
     even by default, with the lowest rung pushed past the edge when `halo` is on. There is no budget:

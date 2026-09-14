@@ -1,4 +1,4 @@
-"""The graded zone layout of E010: the invariants of zones.py and the layout it gives (docs/lens.md)."""
+"""The graded zone layout of E010: the invariants of zones.py and the layout it gives (docs/quantization-filter.md)."""
 
 import numpy as np
 import pytest

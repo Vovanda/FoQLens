@@ -12,7 +12,7 @@ Mixture of Experts is a special case of it: experts are zones with hard edges fi
 
 ## What this bench tests
 
-FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([lens.md](lens.md)).
+FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([quantization-filter.md](quantization-filter.md)).
 
 **The question to answer first, and the one that decides whether any of this is worth building** (fixed 2026-09-13): **over what interval of the regulator's settings does the model stay usable, and how much memory does that interval actually save - if it saves any.** Not "is the address better than a control", but "where can this be set, and what does it buy". An interval that saves nothing is an answer; so is an interval too narrow to hold a regulator.
 

@@ -7,7 +7,7 @@ title: Invariants
 What holds no matter how the question is asked. This page is the output of the exploration step
 ([goals.md](goals.md)) and the input to the hypotheses that follow it: a hypothesis worth
 preregistering is a claim about something that already looks invariant, and a model of the mechanism
-([lens.md](lens.md)) is worth keeping only as far as the invariants agree with it.
+([quantization-filter.md](quantization-filter.md)) is worth keeping only as far as the invariants agree with it.
 
 Started 2026-09-13, after every earlier verdict of the bench was withdrawn - all of them rested on
 one corpus, one metric and one way of reading the mask, so none of them could tell a property of the

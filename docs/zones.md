@@ -1,13 +1,13 @@
 # Precision share, focus area and expert zones
 
-> **Legacy layout.** This page describes the fixed-budget layout of ADDENDUM-07 to 10: the mean bits are set in advance and the zones are fitted to them. It is replaced by the layout of [lens.md](lens.md): the whole network at a base precision, the expert zones read more precisely, memory the result of the settings.
+> **Legacy layout.** This page describes the fixed-budget layout of ADDENDUM-07 to 10: the mean bits are set in advance and the zones are fitted to them. It is replaced by the layout of [quantization-filter.md](quantization-filter.md): the whole network at a base precision, the expert zones read more precisely, memory the result of the settings.
 
 How precision is laid out over the weights. Two parameters, both in [0, 1] and checked where they enter:
 
 - **precision_share** - how much precision the model gets: the share of the precision range spent, the memory and compute it pays for;
 - **focus_area** - where that precision goes: the area read sharp, from the centers of the query's **expert zones** ([problem statement](problem-statement.md)) to the whole weight map.
 
-Fixed 2026-09-11, names from a tier list 2026-09-12 ([ADDENDUM-10](../experiments/E009-zones-matrix/ADDENDUM-10.md)). The current layout is in [lens.md](lens.md); here the parameters of the legacy layout are named by what they do.
+Fixed 2026-09-11, names from a tier list 2026-09-12 ([ADDENDUM-10](../experiments/E009-zones-matrix/ADDENDUM-10.md)). The current layout is in [quantization-filter.md](quantization-filter.md); here the parameters of the legacy layout are named by what they do.
 
 ## Precision share - how much
 

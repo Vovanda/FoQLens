@@ -60,7 +60,7 @@ The steps are ordered so each one can kill the next:
 | 1 | Are per-block masks similar within a topic and different between topics? Are they concentrated? | masks look the same for every query |
 | 2 | Do related topics (biology-chemistry) share more of their zones than unrelated ones (biology-math)? | no overlap structure |
 | 2+ | Geometry: are masks additive, is there a junction zone, does ablating it break mixed questions only? | - (refining, not load-bearing) |
-| 3 | Over what interval of the regulator's settings does the model stay usable, and what memory does that interval save against uniform quantization at the same memory? The other topic's zones and generic importance test the address | the interval saves nothing against uniform quantization |
+| 3 | How much of what the model knows do the query's zones keep, against uniform quantization at the same memory? The other topic's zones and generic importance test the address | the zones keep no more than uniform quantization at the same memory |
 | 7 | In an agent chain of a draft and refinements, does the zone model end better than the same model at native precision and than uniform quantization at the same memory? (the main hypothesis, once the model exists) | - |
 
 All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"), not numbers. The full reasoning is in [`docs/`](docs/).
@@ -75,8 +75,9 @@ of five datasets in its own words, with no options anywhere, and a question stay
 across two passages - so that the claim can fail; then a mask that is asked about the answer instead of the
 text. Then the hypotheses, from the first.
 
-**The question all of it serves:** over what interval of the regulator's settings the model stays usable, and
-how much memory that interval actually saves - if any.
+**The question all of it serves:** does the regulator work - the structure where a coarse reading is enough, the
+details where sharpness is needed, a gain over iterations. Saving memory is a secondary goal, plan B: even without
+a gain in quality the mechanism saves memory at the same usability.
 
 **Engineering that stands regardless**, because it does not depend on the questions: one stored copy of the
 weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), 1.63 GiB freed on E2B without the bf16

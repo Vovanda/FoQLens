@@ -4,7 +4,7 @@ Fixed 2026-09-11, **before the run**. Not edited after its commit.
 
 ## 1. Why
 
-The runs so far read a mask as a flat ranking of blocks and opened the top blocks one by one; a topic could only show up as scattered points. The project's picture needs bubbles: centers, radii and a stepped falloff ([docs/zones.md](../../docs/zones.md)). This run tests the address in that shape.
+The runs so far read a mask as a flat ranking of blocks and opened the top blocks one by one; a topic could only show up as scattered points. The project's picture needs bubbles: centers, radii and a stepped falloff ([docs/zones.md](https://github.com/Vovanda/FoQLens/blob/76a077c/docs/zones.md)). This run tests the address in that shape.
 
 ## 2. Design
 

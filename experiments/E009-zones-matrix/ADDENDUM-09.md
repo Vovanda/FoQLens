@@ -4,7 +4,7 @@ Fixed 2026-09-11, **before the run**. Not edited after its commit.
 
 ## 1. Names
 
-The parameters are named by what they do ([docs/zones.md](../../docs/zones.md)); the earlier documents read with this table:
+The parameters are named by what they do ([docs/zones.md](https://github.com/Vovanda/FoQLens/blob/76a077c/docs/zones.md)); the earlier documents read with this table:
 
 | Earlier | Now |
 | --- | --- |

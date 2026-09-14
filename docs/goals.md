@@ -14,7 +14,7 @@ Mixture of Experts is a special case of it: experts are zones with hard edges fi
 
 FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([quantization-filter.md](quantization-filter.md)).
 
-**The question to answer first, and the one that decides whether any of this is worth building** (fixed 2026-09-13): **over what interval of the regulator's settings does the model stay usable, and how much memory does that interval actually save - if it saves any.** Not "is the address better than a control", but "where can this be set, and what does it buy". An interval that saves nothing is an answer; so is an interval too narrow to hold a regulator.
+**The question to answer first** (2026-09-14): **does the regulator work** - does it give the model the right scale, the structure where a coarse reading is enough and the details where sharpness is needed, and does the model gain over iterations. Saving memory is a secondary goal, plan B: even without a gain in quality the mechanism saves memory at the same usability.
 
 That makes the comparison uniform quantization at the same memory - what a deployment would otherwise do. A random mask is not a baseline: it costs more than the query's own zones and nobody ships one, so beating it settles nothing ([plan.md](plan.md)). Where the *place* of the zones has to be isolated, the control is the query's own zones carried elsewhere at the same cost.
 
@@ -42,7 +42,7 @@ Its first piece is the corpus: the full model answers five datasets in its own w
 What the model is actually competent at and on which corpora; what a gradient mask tracks and whether anything about it is stable; what the regulator's settings do to an answer a person would accept. This step states no predictions and settles nothing. **Its output is a list of invariants** - properties that survive a change of corpus, of metric or of settings ([invariants.md](invariants.md)) - and the hypotheses worth preregistering are then written about those. A property seen once under one setup does not qualify; that is the mistake this whole reset came from. The hypotheses that follow it are expected to differ from the ones listed today ([hypotheses.md](hypotheses.md)).
 
 **Step 3. Precision follows the meaning** - **not started.** Eight runs were made ([E004](../experiments/E004-injection/_index.md), [E005](../experiments/E005-backbone/_index.md), [E007](../experiments/E007-dilation/_index.md) through [E014](../experiments/E014-moved-zones/_index.md)) and none of them measured what it set out to; their code and preregistrations remain as a record. Before this step is attempted again: a corpus and a metric that can carry a verdict ([corpus.md](corpus.md)), and a mask that is asked about the answer rather than about the prompt.
-Done when: the interval of settings over which the model stays usable is named, and the memory that interval saves against uniform quantization is named with it - including the honest outcome that it saves nothing.
+Done when: how much of what the model knows the zones keep, against uniform quantization at the same memory, is named - including the outcome that they keep no more.
 
 **Step 4. Learned score** - beyond solo work; only if the untrained scores give an effect.
 

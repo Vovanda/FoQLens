@@ -13,7 +13,7 @@ Everything in the repository is written in English: docs, code comments, test me
 - **Blind analysis.** All runs at once; during the runs only check that the script did not crash. The exception is step 0.
 - **Held-out topics** (`prompts/heldout/`) are not opened and not run while the score is being debugged.
 - **The baseline** at step 3 is uniform quantization at the same memory - what a deployment would otherwise do. A random mask is not a baseline: random zones overlap less, so they cost more, and beating deliberate damage proves nothing (dropped 2026-09-13, see `docs/plan.md`). Where a shape control is needed, it is the query's own zones carried elsewhere at the same cost.
-- **The question to answer** is the engineer's one: over what interval of the regulator's settings is the model still usable, and what memory does that interval actually save - if any.
+- **The question to answer**: does the regulator work - does it give the model the right scale, the structure where a coarse reading is enough and the details where sharpness is needed, and does the model gain over iterations. Saving memory is a secondary goal, plan B: even without a gain in quality the mechanism saves memory at the same usability.
 - **One project, one language.** Every file, link and text agrees - code, docs, the site, the README, GitHub. One entity is one word everywhere, and a change is a pass over the whole project, not over one file.
 
 ## Engineering standards

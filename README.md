@@ -112,6 +112,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`experiments/`](experiments/_index.md) - one folder per experiment (`E0NN-slug`): its preregistration, card and results; raw summaries in `runs/E0NN-slug/`.
 - [`docs/prior-art.md`](docs/prior-art.md) - what dynamic quantization already has and where FoQLens differs.
 - [`docs/reading-notes.md`](docs/reading-notes.md) - notes from the papers read, with the passages cited and what FoQLens takes from them.
+- [`docs/station.md`](docs/station.md) - the machine the runs are made on, its limits, and a log of what the runs cost it.
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
 - [`docs/data-sources.md`](docs/data-sources.md) - where the questions of run 1 came from (MMLU-Redux-2.0) and why.
 - [`docs/corpus.md`](docs/corpus.md) - the corpus: how it is selected and its three regimes.

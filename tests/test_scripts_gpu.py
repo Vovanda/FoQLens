@@ -75,21 +75,6 @@ def test_step3_dilation_smoke(tmp_path):
     assert max(bits.values()) - min(bits.values()) < 0.05  # dilation spends the same budget
 
 
-def test_step3_zones_smoke(tmp_path, capsys):
-    sz = load_script("step3_zones")
-    out = sz.main(["--limit", "3", "--precision-share", "0.25", "--focus-area", "0.5", "0.0", "--pooled-batch", "4",
-                   "--gradient-batch", "2", "--eval-batch", "6", "--prompts-dir", str(ROOT / "prompts"), "--out", str(tmp_path)])
-    log = capsys.readouterr().out
-    assert "cell [1/2] ps0.250 fa0.50 (50%), ETA " in log and "cell [2/2] ps0.250 fa0.00 (100%), ETA " in log
-    s = json.loads(Path(out).read_text())
-    assert {"zone_uniform_ps0.250", "zone_own_gradient_fa0.50_ps0.250", "zone_random_pooled_fa0.00_ps0.250",
-            "zone_other_pooled_fa0.50_ps0.250", "zone_fixed_backbone_fa0.50_ps0.250", "uniform_d4"} <= set(s["configs"])
-    assert {"own_minus_random", "own_minus_other", "own_minus_uniform"} <= set(s["comparisons"]["biology-math|gradient|ps0.250|fa0.50"])
-    assert s["cells_done"] == [[0.25, 0.5], [0.25, 0.0]]  # the promising cell first
-    bits = [c["mean_bits"] for name, c in s["configs"].items() if name.startswith("zone_")]
-    assert max(abs(b - 5.0) for b in bits) < 0.05  # precision share 0.25 spends 4 + 4 x 0.25 bits
-
-
 def test_step3_filter_smoke(tmp_path, capsys):
     sl = load_script("step3_filter")
     out = sl.main(["--limit", "3", "--floor", "d4", "zero", "--focus-area", "0.5", "--focus-strength", "1.0",

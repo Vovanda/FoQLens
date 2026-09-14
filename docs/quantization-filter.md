@@ -23,7 +23,7 @@ The metaphor of the mechanism - a multi-lens chosen for the query - is in [visua
 | `ℓ_0 < ℓ_1 < … < ℓ_m` | the ladder: the levels a block can be read at, set by the model and its storage; `ℓ_0` = ZERO, nothing read | 0, 2, 4, 6, 8, 16 bits (ZERO, D2, D4, D6, D8, bf16) |
 | `w_b` | block `b`: its number of weights | |
 | `d(a, b)` | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), hole 1) | today: Euclidean distance on a 2D PCA layout of the co-activation distance `sqrt(2(1 - corr))` ([weight_map.py](../src/foqlens/weight_map.py)) |
-| `c_i`, `r_i` | the query's expert zones: centers and base radii ([zones.md](zones.md)) | |
+| `c_i`, `r_i` | the query's expert zones: centers and base radii ([where they come from](#where-the-zones-come-from)) | |
 
 **Controls**
 
@@ -74,6 +74,16 @@ weight already occupies, while costing an unpacking the stored weight does not n
 the ladder and could be - D10 and D12, the fifth and sixth slice - has not been measured.
 
 No rung is fixed in the rules: every level follows from the ladder and the controls. What E2B needs is configuration of a run, not a rule: uniform D2 by round-to-nearest, without calibration, breaks E2B ([E006](../experiments/E006-read-depths/_index.md)), and calibrating the first slice within this storage was tried and dropped ([reading notes](reading-notes.md)), so D2 serves only as a base to test against and as the ring pushed past a zone edge.
+
+## Where the zones come from
+
+Today the blocks are placed on a weight map by co-activation: every block gets its vector of raw mask values
+over the questions of a calibration set, blocks that light up together lie close, and the vectors are embedded
+in two dimensions ([weight_map.py](../src/foqlens/weight_map.py)). A query's mask is a field over that map; its
+peaks after smoothing are the query's expert zones, each with a center `c_i` at the top of its hill and a base
+radius `r_i` - the radius of a disc with the area of the hill above half height ([zones.py](../src/foqlens/zones.py)).
+Their number is not fixed: the query decides it. In what space the zones should live is open - hole 1 of the
+[problem statement](problem-statement.md).
 
 ## The base precision
 

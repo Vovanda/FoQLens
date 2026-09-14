@@ -52,98 +52,49 @@ def test_find_zones_finds_both_peaks_and_a_wider_peak_has_a_wider_radius():
     assert found.radii[near[0]] > found.radii[near[1]]
 
 
-def test_a_focus_area_or_a_precision_share_outside_zero_to_one_is_refused_where_it_enters():
-    from foqlens.layouts import FixedZones, legacy_zone_layout
+def test_a_focus_area_outside_zero_to_one_is_refused_where_it_enters():
+    from foqlens.layouts import FixedZones, graded_zone_layout
 
     xy = grid_map(4)
     one = zn.Zones(centers=np.array([[1.0, 1.0]]), radii=np.array([1.0]))
-    weights = np.ones(len(xy))
     for bad in OUTSIDE:
         with pytest.raises(ValueError):
             zn.check_focus_area(bad)
         with pytest.raises(ValueError):
-            zn.log_sharpness(xy, one, bad)
-        with pytest.raises(ValueError):
-            zn.budget_bits(bad)
-        with pytest.raises(ValueError):
-            legacy_zone_layout("z", FixedZones(one), bad, 0.25, xy, weights)
-        with pytest.raises(ValueError):
-            legacy_zone_layout("z", FixedZones(one), 0.5, bad, xy, weights)
+            graded_zone_layout("z", FixedZones(one), bad, 1.0, xy)
     assert zn.check_focus_area(0.0) == 0.0 and zn.check_focus_area(1.0) == 1.0
 
 
-def test_precision_share_spends_from_the_background_to_the_centers():
-    assert (zn.budget_bits(0.0), zn.budget_bits(0.25), zn.budget_bits(1.0)) == (4.0, 5.0, 8.0)
-
-
-def test_the_focus_area_sets_the_radius_from_zero_to_infinity():
-    xy = grid_map(10)
-    one = zn.Zones(centers=np.array([[2.0, 2.0]]), radii=np.array([1.0]))
-    d = np.linalg.norm(xy - [2, 2], axis=1)
-    assert np.all(zn.log_sharpness(xy, one, 1.0) == 0)  # focus_area 1: infinite radius, no mask
-    assert np.allclose(zn.log_sharpness(xy, one, 0.5), -d)  # focus_area 0.5: the base radius
-    assert np.allclose(zn.log_sharpness(xy, one, 0.25), -3 * d)  # R = r f / (1 - f) = r / 3
-    assert np.allclose(zn.log_sharpness(xy, one, 0.0), -d)  # focus_area 0: only the order is left
-    empty = zn.Zones(centers=np.zeros((0, 2)), radii=np.zeros(0))
-    assert np.all(zn.log_sharpness(xy, empty, 0.5) == 0)  # no zone: no mask
-
-
-def test_layout_holds_the_precision_share_and_puts_the_top_level_at_the_center():
-    xy = grid_map(20)
-    weights = np.full(len(xy), 64 * 256)
-    one = zn.Zones(centers=np.array([[5.0, 5.0]]), radii=np.array([3.0]))
-    tiebreak = np.random.default_rng(0).permutation(len(xy))
-    bits = zn.budget_bits(0.25)
-    for focus_area in (1.0, 0.7, 0.5, 0.2, 0.0):
-        codes = zn.layout_at_budget(zn.log_sharpness(xy, one, focus_area), weights, bits, tiebreak, hard_edge=focus_area == 0.0)
-        mean = np.mean([Level(int(c)).bits for c in codes])
-        block_step = (4 if focus_area == 0.0 else 2) / len(xy)  # a hard edge moves a block D4 -> D8 in one step
-        assert bits - block_step <= mean <= bits + block_step, focus_area
-        if focus_area < 1.0:
-            assert codes[np.linalg.norm(xy - [5, 5], axis=1).argmin()] == Level.D8
-    hard = zn.layout_at_budget(zn.log_sharpness(xy, one, 0.0), weights, bits, tiebreak, hard_edge=True)
-    assert set(np.unique(hard).tolist()) == {int(Level.D4), int(Level.D8)}
-
-
-def test_zone_layouts_share_the_precision_share_and_own_puts_d8_on_its_topic():
-    from foqlens.layouts import NoZones, OtherZones, OwnZones, RandomZones, TopicMeans, TopicZones, legacy_zone_layout
+def test_own_zones_lift_their_topic_and_the_paired_topics_zones_do_not():
+    from foqlens.layouts import OtherZones, OwnZones, TopicMeans, TopicZones, graded_zone_layout
 
     xy = grid_map(12)
-    weights = np.full(len(xy), 64)
     field_a = np.exp(-np.sum((xy - [3, 3]) ** 2, axis=1) / 4.0)
     field_b = np.exp(-np.sum((xy - [9, 9]) ** 2, axis=1) / 4.0)
     means = TopicMeans(np.stack([field_a, field_a, field_b, field_b]), ("a", "a", "b", "b"))
     topics = TopicZones(means, {"a": "b", "b": "a"}, xy)
     idx = np.array([0, 2])
-    sources = {"own": OwnZones(topics), "other": OtherZones(topics), "random": RandomZones(topics)}
-    layouts = {k: legacy_zone_layout(k, src, 0.5, 0.25, xy, weights).levels(idx) for k, src in sources.items()}
-    layouts["uniform"] = legacy_zone_layout("uniform", NoZones(2), 1.0, 0.25, xy, weights).levels(idx)
-    for name, codes in layouts.items():
-        mean = np.array([[Level(int(c)).bits for c in row] for row in codes]).mean(axis=1)
-        assert np.all(np.abs(mean - 5.0) <= 2 / len(xy) + 1e-9), name  # one block's step, up to rounding
+    top = int(zn.ceiling_of(1.0, Level.D4))
+    own = graded_zone_layout("own", OwnZones(topics), 0.5, 1.0, xy).levels(idx)
+    other = graded_zone_layout("other", OtherZones(topics), 0.5, 1.0, xy).levels(idx)
     center_a = np.linalg.norm(xy - [3, 3], axis=1).argmin()
-    assert layouts["own"][0, center_a] == Level.D8 and layouts["other"][0, center_a] != Level.D8
+    assert own[0, center_a] == top and other[0, center_a] != top
 
 
 def test_a_zone_layout_is_its_parts_and_a_new_part_is_a_new_class():
-    from foqlens.layouts import FixedBudget, FixedZones, LogSharpness, ZoneLayout, legacy_zone_layout
+    from foqlens.layouts import GradedLevels, LiftField, ZoneLayout
 
     xy = grid_map(10)
-    weights = np.full(len(xy), 64)
-    one = zn.Zones(centers=np.array([[4.0, 4.0]]), radii=np.array([2.0]))
-    legacy = legacy_zone_layout("z", FixedZones(one), 0.5, 0.25, xy, weights, seed=3).levels(np.array([0, 1]))
-    # the legacy layout is exactly log-sharpness at the focus area, rings at the precision share
-    direct = [zn.layout_at_budget(zn.log_sharpness(xy, one, 0.5), weights, zn.budget_bits(0.25),
-                                  np.random.default_rng([3, i, 0, 2]).permutation(len(xy))) for i in (0, 1)]
-    assert np.array_equal(legacy, np.stack(direct))
 
     class Everywhere:  # a new zone source: one zone at every question's own place, no change to ZoneLayout
         def zones(self, index: int) -> zn.Zones:
             return zn.Zones(centers=np.array([[float(index), float(index)]]), radii=np.array([1.0]))
 
-    codes = ZoneLayout("new", Everywhere(), LogSharpness(0.5), FixedBudget(0.25, weights), xy).levels(np.array([0, 9]))
+    top = zn.ceiling_of(1.0, Level.D4)
+    rule = GradedLevels(Level.D4, zn.even_stops(Level.D4, top))
+    codes = ZoneLayout("new", Everywhere(), LiftField(0.5), rule, xy).levels(np.array([0, 9]))
     corner = {i: np.linalg.norm(xy - [i, i], axis=1).argmin() for i in (0, 9)}
-    assert codes[0, corner[0]] == Level.D8 and codes[1, corner[9]] == Level.D8
+    assert codes[0, corner[0]] == top and codes[1, corner[9]] == top
 
 
 def test_random_zones_keep_count_and_radii():

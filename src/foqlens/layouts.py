@@ -11,7 +11,6 @@ A zone layout is made of three parts behind their own interfaces - the zones of 
 
 Invariants:
 - Invariant: every policy at the same precision share spends the same share of weights.
-- Invariant: legacy_zone_layout reproduces the fixed-budget layouts of E008 and E009 bit for bit.
 - Invariant: Random is reproducible per question from its seed and differs between questions.
 - Invariant: a question never sees its own mask through its topic's mean (leave-one-out).
 """
@@ -355,48 +354,8 @@ class FixedZones:
 
 
 @dataclass(frozen=True)
-class NoZones:
-    """No zones: the field is flat, so the rule spends evenly, without a mask."""
-
-    dims: int
-
-    def zones(self, index: int) -> zones.Zones:
-        return zones.Zones(centers=np.zeros((0, self.dims)), radii=np.zeros(0))
-
-
-@dataclass(frozen=True)
-class LogSharpness:
-    """The legacy field: psi = max over zones of -d / R at a focus area (zones.log_sharpness)."""
-
-    focus_area: float
-
-    def __post_init__(self) -> None:
-        zones.check_focus_area(self.focus_area)
-
-    def field(self, coords: np.ndarray, zones_: zones.Zones) -> np.ndarray:
-        return zones.log_sharpness(coords, zones_, self.focus_area)
-
-
-@dataclass(frozen=True)
-class FixedBudget:
-    """The legacy rule: rings of the field fitted to the mean bits of a precision share (zones.layout_at_budget)."""
-
-    precision_share: float
-    weights: np.ndarray
-    seed: int = 0
-    hard_edge: bool = False
-
-    def __post_init__(self) -> None:
-        bg.check_precision_share(self.precision_share)
-
-    def levels(self, field: np.ndarray, index: int) -> np.ndarray:
-        tie = _rng(self.seed, index, 0.0, salt=2).permutation(len(self.weights))
-        return zones.layout_at_budget(field, self.weights, zones.budget_bits(self.precision_share), tie, hard_edge=self.hard_edge)
-
-
-@dataclass(frozen=True)
 class ZoneLayout:
-    """Levels from expert zones (docs/quantization-filter.md, docs/zones.md): zones of a question -> a field -> levels.
+    """Levels from expert zones (docs/quantization-filter.md): zones of a question -> a field -> levels.
 
     Each part is replaced by a new class with the same interface; the layout does not know which.
     """
@@ -478,14 +437,3 @@ class ShuffledLevels:
             for group in groups:
                 out[row, group] = levels[row, rng.permutation(group)]
         return out
-
-
-def legacy_zone_layout(
-    name: str, source: ZoneSource, focus_area: float, precision_share: float, coords: np.ndarray, weights: np.ndarray,
-    seed: int = 0,
-) -> ZoneLayout:
-    """The fixed-budget zone layout of E008 and E009: log-sharpness at a focus area, rings at a precision share.
-
-    Focus area 0 is the hard edge (D8 inside, D4 outside); NoZones with focus area 1 is the budget spent evenly.
-    """
-    return ZoneLayout(name, source, LogSharpness(focus_area), FixedBudget(precision_share, weights, seed, focus_area == 0.0), coords)

@@ -1,4 +1,4 @@
-"""The weight map: blocks that light up together over many queries lie close (docs/zones.md).
+"""The weight map: blocks that light up together over many queries lie close (docs/quantization-filter.md).
 
 Every block is described by its raw mask values over a set of questions, standardized per block;
 the map is the first `dims` principal axes of those descriptions, so the distance on the map

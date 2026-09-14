@@ -120,6 +120,23 @@ def test_a_run_shorter_than_the_period_never_breaks():
     assert clock.slept == [] and cooldown.breaks == 0
 
 
+def test_the_pacers_report_what_they_did_for_the_run_summary():
+    """The composition of the bench, guard over break over share, reports every layer's numbers at once."""
+    clock = FakeClock()
+    cooldown = Cooldown(Throttle(0.8, clock=clock, sleep=clock.sleep), every=3600, pause=300, clock=clock, sleep=clock.sleep)
+    g = ThermalGuard(cooldown, FakeSensor(81, 72, 60), ceiling=80, resume=72, soft=75, poll=1.0, clock=clock, sleep=clock.sleep)
+    for _ in range(8):                                  # 8 batches of 10 min: one hourly break, one pause at the ceiling
+        with g.batch():
+            clock.now += 600
+    s = g.stats()
+    assert s["share"] == 0.8 and s["cooling_breaks"] == 1 and s["cooling_break_s"] == 300
+    assert s["temperature_peak_c"] == 81 and s["thermal_pause_s"] == pytest.approx(1.0) and s["temperature_ceiling_c"] == 80
+
+
+def test_a_guard_that_never_read_the_card_reports_no_peak():
+    assert ThermalGuard(FULL, FakeSensor(60)).stats()["temperature_peak_c"] is None
+
+
 def test_the_default_share_comes_from_the_environment(monkeypatch):
     monkeypatch.delenv(ENV, raising=False)
     assert default_share() == DEFAULT_SHARE == 0.8

@@ -104,6 +104,7 @@ def main(argv: list[str] | None = None) -> Path:
         "coarse": "zero",
         "gpu_share": args.gpu_share,
         "gpu": {"masks": mask_gpu.summary(), "eval": eval_gpu.summary()},
+        "pacer": bench.throttle.stats(),
         "comparisons": comparisons(results, domains, args.precision_share, args.seed),
         "configs": summarize(results, questions),
     }

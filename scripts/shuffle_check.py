@@ -201,6 +201,7 @@ def main(argv: list[str] | None = None) -> Path:
         "answer_in_original_order": args.answer_in_original_order,
         "gpu_share": args.gpu_share,
         "gpu": gpu.summary(),
+        "pacer": bench.throttle.stats(),
         "accuracy_per_order": {name: [per_order[o]["summary"][name]["accuracy"] for o in per_order]
                                for name in (own, *REFERENCES)},
         "letters_picked_per_order": {name: [per_order[o]["picked"][name] for o in per_order]

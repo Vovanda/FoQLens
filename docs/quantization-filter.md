@@ -11,7 +11,7 @@ the regulator reads at a higher precision than the rest; it is focusable in two 
 how far it rises, and the zones of a query come from the query itself. **FoQLens** names the project
 and the model that carries the regulator; the lens is its metaphor.
 
-The metaphor is a multi-lens objective: a glass over the whole network, and lenses inserted where the query needs to see. It is a metaphor, not the mechanism - what the mechanism does is allocate precision over blocks by the meaning of the query.
+The metaphor of the mechanism - a multi-lens chosen for the query - is in [visual-metaphor.md](visual-metaphor.md).
 
 **The distance `d` is the one the bench uses today.** The rules below need a distance between blocks, and today it is the distance on the weight map. In what space the regions of a query are defined, and what makes two weights close, is the first open hole of the [problem statement](problem-statement.md); the shape of a zone is meant to grow from an oval to arbitrary shapes with bridges.
 ## The mechanism in formulas

@@ -84,10 +84,11 @@ Every verdict the bench produced is therefore withdrawn - the favourable reading
 alike - and every hypothesis is back to untested ([docs/hypotheses.md](docs/hypotheses.md)). Their code and
 preregistrations stay as a record; the runs and their result texts were deleted with the corpus.
 
-**What is being rebuilt, in order:** a corpus measured rather than chosen, where the model answers from
-knowledge ([docs/corpus.md](docs/corpus.md)); a metric with nothing to lean on - the model reads a passage and
-writes the answer, scored as SQuAD scores it; a mask that is asked about the answer instead of the text. Then
-the hypotheses, from the first.
+**What is being rebuilt, in order:** a corpus of what the model knows - the full model answers every question
+of five datasets in its own words, with no options anywhere, and a question stays if the answer is right
+([docs/corpus.md](docs/corpus.md)); three regimes in it - the answer in a passage, only in the weights, split
+across two passages - so that the claim can fail; then a mask that is asked about the answer instead of the
+text. Then the hypotheses, from the first.
 
 **The question all of it serves:** over what interval of the regulator's settings the model stays usable, and
 how much memory that interval actually saves - if any.
@@ -126,7 +127,8 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/prior-art.md`](docs/prior-art.md) - what dynamic quantization already has and where FoQLens differs.
 - [`docs/reading-notes.md`](docs/reading-notes.md) - notes from the papers read, with the passages cited and what FoQLens takes from them.
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
-- [`docs/data-sources.md`](docs/data-sources.md) - where the questions come from (MMLU-Redux-2.0) and why.
+- [`docs/data-sources.md`](docs/data-sources.md) - where the questions of run 1 came from (MMLU-Redux-2.0) and why.
+- [`docs/corpus.md`](docs/corpus.md) - the corpus being built now: how it is selected, its three regimes, and why the first one failed.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:
   - `model`, `quant`, `precision` - loading, quantizers and residual slices, the per-block precision controller;

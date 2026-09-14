@@ -209,7 +209,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
           <tbody>
             <tr><td class="num">0-2</td><td>Topics separate in the model; the mask is separable and concentrated; zones of related topics overlap</td><td><span class="tag tag--open">to re-test</span></td></tr>
-            <tr><td class="num">2.5</td><td><b>A corpus and a metric that can carry a verdict</b>, and whatever holds across them</td><td><span class="tag tag--yes">now</span></td></tr>
+            <tr><td class="num">2.5</td><td><b>A corpus of what the model knows</b> - selected by its own answers in three regimes, one metric throughout - and whatever holds across them</td><td><span class="tag tag--yes">now</span></td></tr>
             <tr><td class="num">3</td><td>Precision follows meaning: the interval of settings where the model stays usable, and what memory it saves</td><td><span class="tag tag--open">next</span></td></tr>
             <tr><td class="num">5</td><td>Memory follows the zones - one stored copy read at 2 / 4 / 6 / 8 bits, 1.63 GiB freed on E2B</td><td><span class="tag tag--yes">built</span></td></tr>
             <tr><td class="num">6</td><td>The regulator answers to the machine: load, heat, memory</td><td><span class="tag tag--open">after 3</span></td></tr>
@@ -219,13 +219,13 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       </div>
 
       <h3>The corpus being built now</h3>
-      <p>A layout can only be measured where the model answers from knowledge rather than from the arrangement of the options. So the questions are picked by measurement - the share the model gets right under <em>every</em> ordering of its options - and the metric drops the options: the model reads a passage and writes the answer, scored the way SQuAD scores it.</p>
+      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself, and Claude.</p>
       <div class="scroller">
         <table>
           <thead><tr><th>Regime</th><th>Where the answer is</th><th>What the zones should do</th></tr></thead>
           <tbody>
             <tr><td>Reading</td><td>in the passage - SQuAD v2</td><td>little: the knowledge came in with the prompt</td></tr>
-            <tr><td>Knowledge</td><td>only in the weights - ARC-Challenge, ReClor</td><td>decide - the regime the idea is about</td></tr>
+            <tr><td>Knowledge</td><td>only in the weights - TriviaQA, NQ-open, ARC-Challenge without its options</td><td>decide - the regime the idea is about</td></tr>
             <tr><td>Two steps</td><td>split across two passages - HotpotQA</td><td>matter, and less than in the second</td></tr>
           </tbody>
         </table>

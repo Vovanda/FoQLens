@@ -149,7 +149,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <div class="cols">
         <p>Every quantization scheme decides precision per fixed unit - the model, a layer, a channel, a token, an expert. The boundaries come from the architecture; a controller only picks how many bits each unit gets.</p>
         <p>FoQLens asks the model itself which weights matter for <em>this</em> query, places those blocks on a map, and reads the rest coarsely. Mixture of Experts is the rigid special case of the same idea: experts with hard edges, fixed at training, opened by a router.</p>
-        <p>The mechanism is <b>FoQZones</b> - focusable quantization zones. Call it a Mixture of Zones if you like, though there is no router here and there will not be one. FoQLens is the project and the model that carries the regulator; the lens is the picture of it.</p>
+        <p>The mechanism is <b>FoQZones</b> - focusable quantization zones. Call it a Mixture of Zones if you like, though there is no router here and there will not be one. FoQLens is the project and the model that carries the regulator; the lens is its metaphor.</p>
         <p>The metaphor above is drawn on real weights: the map of Gemma 4 E2B, 14 708 blocks of 64 output rows, blocks that light up together lying close. Place a zone on it and the regulator runs - the plate gives the cost in bits per weight.</p>
         <p>Coarse pixels are weights read at few bits; sharp ones are read at many. Memory is not a budget you set - it is what your zones cost.</p>
       </div>
@@ -167,11 +167,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 <b>distance</b>    d(a, b)                     between blocks; the weight map today, the space is open
 
 1 <b>radius</b>    R_i = r_i · f / (1 − f)
-2 <b>ceiling</b>   κ = γ + ⌊g · (m − γ)⌋       g = 0: the lens is the base;   g = 1: the top rung
+2 <b>ceiling</b>   κ = γ + ⌊g · (m − γ)⌋       g = 0: the zone is the base;   g = 1: the top rung
 3 <b>profile</b>   stops s_κ &lt; … &lt; s_(γ+1)     where each ring ends, in radii
 4 <b>lift</b>      ρ_i(b) = d(b, c_i) / R_i,   L_i(b) = max(0, 1 − ρ_i(b) / s_last)
 5 <b>combine</b>   L(b) = min(1, Σ L_i)  or  max L_i
-6 <b>level</b>     ρ* = s_last · (1 − L(b))    the ring that ρ* falls into; outside every lens: G
+6 <b>level</b>     ρ* = s_last · (1 − L(b))    the ring that ρ* falls into; outside every zone: G
 7 <b>memory</b>    bits = Σ w_b · bits(b) / Σ w_b</pre>
       <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy of residual slices is read at 2, 4, 6 or 8 bits, and the stored weight itself is the rung above them - so the ladder is ZERO, D2, D4, D6, D8, bf16, and the regulator runs over all six.</p>
     </div>
@@ -230,7 +230,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           </tbody>
         </table>
       </div>
-      <p>If the lenses help as much where the answer sits in the context as where it is only in the weights, the mechanism is not doing what it claims - and that is the test the old corpus could not run. How a corpus is chosen: <a href="docs.html#corpus">docs/corpus.md</a>.</p>
+      <p>If the zones help as much where the answer sits in the context as where it is only in the weights, the mechanism is not doing what it claims - and that is the test the old corpus could not run. How a corpus is chosen: <a href="docs.html#corpus">docs/corpus.md</a>.</p>
     </div>
   </section>
 

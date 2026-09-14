@@ -50,8 +50,8 @@ force on the sibling project ([Work-Life-Schedule](https://github.com/Vovanda/Wo
   like a table of contents; sections carry `/* ==== NAME ==== */` headers, and a new rule goes into
   its section, not onto the end of the file.
 - **Do not duplicate knowledge.** The ladder lives in `LADDER`, a colour in a token, the controls in
-  `DEFAULTS`. One entity, one word, everywhere: the level outside the lenses is `floor` in the panel,
-  in the scripts and in `docs/lens.md`; the glass is the picture of it, not a second name for it.
+  `DEFAULTS`. One entity, one word, everywhere: the level outside the zones is `floor` in the panel,
+  in the scripts and in `docs/lens.md`; the glass is its metaphor, not a second name for it.
 - **A comment says why.** What a line does is visible in the line.
 - **Static files are versioned** (`site/field.js?v=N`) and the version is bumped with every change to
   `site/*`: without it a browser serves a stale copy and the page you are shown is not the page you

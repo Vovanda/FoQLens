@@ -17,7 +17,7 @@ Mixture of Experts is its rigid special case: experts with hard edges fixed at t
 
 **The main hypothesis:** on a hard question the first pass gives a draft, most of it read at base precision - an approximate guess, and more useful than a refusal, since a guess can be refined. The draft goes back into the input with the refinement; the zones of the next step land more precisely, and the weights outside them affect the answer less. So where there are iterations - an agent, or a model's reasoning - the model should end better than the same model at native precision. It is tested once the FoQLens model exists: an agent on a hard multi-step task, such as designing a software architecture ([H4](docs/hypotheses.md)). Further out, a horizon: a network trained with zoning, read the same way, should beat a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment ([H5](docs/hypotheses.md)).
 
-**FoQLens** (Focus + Quantization + Lens) is the model that uses this regulator. Its mechanism is **FoQZones** - focusable quantization zones: the precision of the weights is allocated by the meaning of the query, and the lens is the picture of it. This repository is the R&D inside FoQLens - a bench that tests the core of the idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are ([goals](docs/goals.md)).
+**FoQLens** (Focus + Quantization + Lens) is the model that uses this regulator. Its mechanism is **FoQZones** - focusable quantization zones: the precision of the weights is allocated by the meaning of the query, and the lens is its metaphor. This repository is the R&D inside FoQLens - a bench that tests the core of the idea: keep the weights that matter for *this particular query* at high precision and read the rest coarsely - and let the model itself say which weights those are ([goals](docs/goals.md)).
 
 ## The problem
 
@@ -119,7 +119,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
 - [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones as an outcome, not an input.
-- [`docs/lens.md`](docs/lens.md) - the filter and its lenses: how precision is laid out over the weights.
+- [`docs/lens.md`](docs/lens.md) - the quantization filter and its zones: how precision is laid out over the weights.
 - [`docs/zones.md`](docs/zones.md) - expert zones on the weight map; the legacy fixed-budget layout.
 - [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.

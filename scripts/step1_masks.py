@@ -1,7 +1,7 @@
 """Step 1: are per-block masks separable by topic and concentrated.
 
 Reads prompts/<domain>.jsonl (one {"text": ...} per line), computes the naive mask vectors of
-every query in all three center modes of experiments/E001-run1-exploration/ADDENDUM-01.md (norm, pooled, attention) in one
+every query in all three center modes of experiments/E001-run1-exploration/PREREG.md (norm, pooled, attention) in one
 eager-attention pass, and writes:
 
 - runs/E001-run1-exploration/step1/<model>/raw/vectors_<mode>.npy and raw/queries.json - mask vectors, labels, the
@@ -64,7 +64,7 @@ def main() -> None:
     parser.add_argument("--permutations", type=int, default=0, help="label permutations per domain pair (0 = none)")
     parser.add_argument(
         "--instrument", choices=["centers", "gradient"], default="centers",
-        help="centers: the naive score of ADDENDUM-01 (--modes apply); gradient: gradient x activation of ADDENDUM-02",
+        help="centers: the naive score of E001 PREREG (--modes apply); gradient: gradient x activation of E002",
     )
     args = parser.parse_args()
     modes = ("gradient",) if args.instrument == "gradient" else tuple(args.modes)

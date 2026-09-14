@@ -144,8 +144,8 @@ At the same base, focus_area and focus_strength:
 
 | Earlier | Now |
 | --- | --- |
-| precision_share (ADDENDUM-10) - the share of a preset budget | focus_strength - how far the zone centers rise above the base; there is no preset budget |
-| focus_area (ADDENDUM-10) | focus_area - the same word, now the size of the zones |
+| precision_share (E009 PREREG-2) - the share of a preset budget | focus_strength - how far the zone centers rise above the base; there is no preset budget |
+| focus_area (E009 PREREG-2) | focus_area - the same word, now the size of the zones |
 | coarse level / uniform background; frosted (D4) or opaque (ZERO) glass | the floor: any rung of the ladder |
-| glass (ADDENDUM-11, E010 - the control) | floor - the same control, the word the runs and the scripts already use; glass stays its metaphor |
+| glass (E010 PREREG - the control) | floor - the same control, the word the runs and the scripts already use; glass stays its metaphor |
 | - | the site shows it as **base precision**: what the network is read at before any zone. Not *baseline*, which in this bench means the control to beat - uniform quantization at the same memory |

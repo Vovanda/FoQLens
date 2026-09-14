@@ -4,7 +4,7 @@ Reads prompts/calibration/paraphrase.jsonl and unrelated.jsonl (pairs {"a": ...,
 for every pair, computes the cosine between the two texts for:
 
 - the representation: hidden states of the middle decoder layer, mean-pooled over tokens;
-- the mask vectors of all three center modes of experiments/E001-run1-exploration/ADDENDUM-01.md, raw and with the
+- the mask vectors of all three center modes of experiments/E001-run1-exploration/PREREG.md, raw and with the
   background subtracted (the mean mask over every calibration text).
 
 Paraphrases give the top of the scale, unrelated pairs its floor. The summary holds the

@@ -255,25 +255,6 @@ def test_flat_policies_are_exactly_their_budget_rules():
     assert np.array_equal(random_fill.levels(idx), direct_random)
 
 
-def test_zone_comparisons_cell_by_cell_equal_all_cells_at_once():
-    import importlib.util
-    from pathlib import Path
-
-    path = Path(__file__).resolve().parents[1] / "scripts" / "step3_zones.py"
-    spec = importlib.util.spec_from_file_location("step3_zones", path)
-    sz = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(sz)
-    rng = np.random.default_rng(0)
-    domains = ("biology",) * 4 + ("math",) * 4 + ("history",) * 4 + ("geography",) * 4
-    cells = [(0.25, 0.5), (0.5, 0.0)]
-    names = [f"zone_uniform_ps{p:.3f}" for p, _ in cells]
-    names += [sz.zone_name(k, src, s, p) for p, s in cells for src in sz.MASK_SOURCES for k in ("own", "other", "random")]
-    results = {n: [{sz.METRIC.primary: float(v)} for v in rng.normal(size=len(domains))] for n in names}
-    together = sz.comparisons(results, domains, cells, seed=0)
-    one_by_one = sz.comparisons(results, domains, cells[:1], seed=0) | sz.comparisons(results, domains, cells[1:], seed=0)
-    assert together and together == one_by_one
-
-
 def test_summarize_averages_whatever_the_metric_names_overall_and_per_domain():
     questions = [Question("x", "p", 0), Question("x", "p", 0), Question("y", "p", 0)]
     rows = [{"accuracy": 1.0, "logprob": -0.1, "mean_bits": 8.0}, {"accuracy": 0.0, "logprob": -2.0, "mean_bits": 8.0},

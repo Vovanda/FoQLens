@@ -103,7 +103,7 @@ const SHOWN = 4;   // every SHOWN-th block is drawn: the field reads as points, 
 const GLYPHS = ["♥︎", "♡︎", "❤︎", "❥︎", "❦︎", "❧︎", "✿︎", "❀︎", "✾︎", "❁︎", "♠︎", "♣︎", "♦︎", "☺︎", "☻︎", "☼︎", "☀︎", "☁︎", "☂︎", "☃︎", "❄︎", "✹︎", "✺︎", "✻︎", "★︎", "☆︎", "✦︎", "✧︎", "✩︎", "✪︎", "✫︎", "✬︎", "✭︎", "✮︎", "✯︎", "✰︎", "✶︎", "✷︎", "✸︎", "⁂︎", "✳︎", "✴︎", "♪︎", "♫︎", "♬︎", "♩︎", "☕︎", "✈︎", "⚓︎", "⌛︎", "⚡︎", "☘︎", "✂︎", "✎︎", "✉︎", "✆︎", "☯︎", "☮︎", "✔︎", "✚︎", "✜︎", "✠︎", "⚙︎", "⌘︎", "⍟︎", "⧗︎", "❖︎", "❋︎", "❈︎", "▲︎", "▼︎", "◀︎", "▶︎", "◆︎", "◇︎", "○︎", "●︎", "□︎", "■︎", "◈︎", "◉︎", "△︎", "▽︎"];
 const GLYPH_SCALE = 2.6;   // a character is drawn larger than the square it replaces
 const BASE_RADIUS = 0.09;   // a new lens covers this share of the map before focus_area scales it
-// Zones of a query come out with different radii (docs/zones.md); a placed lens takes the next of these.
+// Zones of a query come out with different radii (docs/quantization-filter.md); a placed lens takes the next of these.
 const LENS_RADII = [1, 0.62, 1.35, 0.8, 1.1, 0.5];
 const HALO_STOP = 1.5;      // at a ZERO floor the lowest rung is pushed past the edge (docs/quantization-filter.md)
 const PICK_SLACK = 1.25;    // clicking this much past a lens edge still grabs it

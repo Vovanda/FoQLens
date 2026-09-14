@@ -1,4 +1,4 @@
-"""Expert zones: the peaks of a query's mask on the weight map, and the layout they give (docs/zones.md).
+"""Expert zones: the peaks of a query's mask on the weight map, and the layout they give (docs/quantization-filter.md).
 
 A mask is a field over the weight map. It is rasterized on a GRID x GRID grid and smoothed (sum and
 count smoothed apart, so empty cells take their neighbours' value); every hill of the smoothed field
@@ -8,19 +8,14 @@ the disc with the area of the hill above half height.
 The focus area f in [0, 1] sets every radius, R = r f / (1 - f): at 0 the zones shrink to their
 centers (a hard edge), at 0.5 they are as found, at 1 they cover the whole map (no mask).
 
-Two layouts read those zones. The legacy one (E008, E009) spends a given precision share p over the
-rings of the log-sharpness psi = max_i (-d_i / R_i): a mean of bits between the D4 background and
-the D8 centers, 4 + 4p. The graded one (E010, docs/quantization-filter.md) has no budget: precision_lift gives every
+The layout (docs/quantization-filter.md) has no budget: precision_lift gives every
 block how far it is lifted over the floor, 1 at a zone's center and 0 at its reach, and
 levels_from_lift turns that into levels between a floor and a ceiling along the profile's stops.
 Memory is what the layout costs, not what it was given.
 
 Invariants:
-- Invariant: a focus area outside [0, 1] (NaN included) is refused where it enters; so is a precision share (budget.py).
+- Invariant: a focus area outside [0, 1] (NaN included) is refused where it enters.
 - Invariant: one zone per hill - a weaker top inside a stronger zone's half-height area is not a zone.
-- Invariant: focus area 0 gives a hard edge (D8 plateaus, D4 around); focus area 1, or no zone at all,
-  the precision share spent evenly, without a mask.
-- Invariant: every layout at precision share p holds the weighted mean bits at 4 + 4p, up to one block's step.
 - Invariant: random zones keep the number and the radii of the zones they control; only the centers move.
 - Invariant: precision_lift is 0 outside every zone's reach and 1 at a center; combining lifts never
   lowers a block below the strongest single lift.
@@ -36,16 +31,12 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import ndimage
 
-from foqlens import budget as bg
 from foqlens.quant import Level
 
 GRID = 64
 SMOOTH_CELLS = 1.5  # gaussian sigma of the smoothing, in grid cells
 PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field
 MAX_ZONES = 16
-# Background ... centers of the legacy layout. D2 is not used there: uncalibrated 2 bits break the
-# model (experiments/E006-read-depths/results.md).
-LEVELS = (Level.D4, Level.D6, Level.D8)
 # The ladder of the graded layout: every level a block can be read at, coarse first. What a model can
 # actually carry is a choice of the run, not of the layout - a floor of D4 leaves D2 out of the rings.
 READ_LEVELS = (Level.D2, Level.D4, Level.D6, Level.D8)
@@ -54,9 +45,6 @@ READ_LEVELS = (Level.D2, Level.D4, Level.D6, Level.D8)
 MAX_STOP = 1.5
 HALO_STOP = 1.5
 PLACES_TRIED = 40  # landings a moved figure tries before taking the one that costs what the original did
-# A block climbs one level per ring of psi it is inside; the rings are RING_GAP apart in psi.
-RING_GAP = np.log(2.0)
-SEARCH_STEPS = 60
 EPS = 1e-12
 
 
@@ -71,12 +59,6 @@ def check_focus_area(focus_area: float) -> float:
     if not 0.0 <= focus_area <= 1.0:
         raise ValueError(f"focus area {focus_area} outside [0, 1]")
     return focus_area
-
-
-def budget_bits(precision_share: float) -> float:
-    """The mean of bits a precision share spends: from all background (0) to all centers (1)."""
-    low, high = LEVELS[0].bits, LEVELS[-1].bits
-    return low + bg.check_precision_share(precision_share) * (high - low)
 
 
 def _smoothed(coords: np.ndarray, field: np.ndarray, grid: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -164,21 +146,6 @@ def _covered(zones: Zones, coords: np.ndarray, weights: np.ndarray, reach: float
     return float(weights[inside].sum() / weights.sum())
 
 
-def log_sharpness(coords: np.ndarray, zones: Zones, focus_area: float) -> np.ndarray:
-    """psi [n_blocks] = max_i (-d_i / R_i), R_i = r_i f / (1 - f).
-
-    At focus area 1 the radius is infinite and psi = 0 everywhere; without zones as well - there is no
-    mask. At focus area 0 the radius is 0 and only the order survives, psi = max_i (-d_i / r_i), which the
-    layout reads as a hard edge.
-    """
-    check_focus_area(focus_area)
-    if focus_area == 1.0 or len(zones.radii) == 0:
-        return np.zeros(len(coords))
-    d = np.linalg.norm(coords[:, None, :] - zones.centers[None], axis=-1)
-    scale = 1.0 if focus_area == 0.0 else focus_area / (1.0 - focus_area)
-    return (-d / (zones.radii * scale)).max(axis=1)
-
-
 def precision_lift(
     coords: np.ndarray, zones: Zones, focus_area: float, reach: float = 1.0, combine: str = "sum",
 ) -> np.ndarray:
@@ -264,42 +231,3 @@ def ceiling_of(focus_strength: float, floor: Level, ladder: Sequence[Level] = RE
     # rule 2: the ceiling is floor(g k) rungs above the floor, so half the way up a D4 floor is D6
     rungs = min(int(focus_strength * len(above)), len(above))
     return above[rungs - 1] if rungs else floor
-
-
-def _levels_of(psi: np.ndarray, edge: float, rings: int) -> np.ndarray:
-    """Level index per block: 0 (background) ... rings, one per ring of psi above `edge`."""
-    return np.clip(np.floor((psi - edge) / RING_GAP) + 1, 0, rings).astype(int)
-
-
-def layout_at_budget(
-    psi: np.ndarray, weights: np.ndarray, bits: float, tiebreak: np.ndarray, hard_edge: bool = False,
-) -> np.ndarray:
-    """Level codes [n_blocks] from log-sharpness at a weighted mean of `bits`.
-
-    The outer edge of the rings is searched so that the mean stays at or below the budget; the rest
-    of the budget goes one step at a time to the next blocks by psi, ties broken by `tiebreak`
-    (a permutation rank). A hard edge has one ring: D8 inside, D4 outside.
-    """
-    level_bits = np.array([lv.bits for lv in LEVELS], dtype=float)
-    top = len(LEVELS) - 1
-    rings = 1 if hard_edge else top
-    step = (level_bits[-1] - level_bits[0]) / rings
-
-    def mean_bits(level_idx: np.ndarray) -> float:
-        return float((level_bits[0] + step * level_idx) @ weights / weights.sum())
-
-    # Invariant of the search: at `lo` the mean is above the budget (every block on top), at `hi` not (all background).
-    lo, hi = psi.min() - (rings + 1) * RING_GAP - 1.0, psi.max() + 1.0
-    for _ in range(SEARCH_STEPS):
-        mid = (lo + hi) / 2
-        lo, hi = (mid, hi) if mean_bits(_levels_of(psi, mid, rings)) > bits else (lo, mid)
-    idx = _levels_of(psi, hi, rings)
-    remaining = (bits - mean_bits(idx)) * weights.sum()
-    if remaining > 0:
-        order = np.lexsort((tiebreak, -psi))
-        candidates = order[idx[order] < rings]
-        cum = np.cumsum(step * weights[candidates])
-        take = min(int(np.searchsorted(cum, remaining)) + 1, len(candidates))  # at most one block past the budget
-        idx[candidates[:take]] += 1
-    codes = np.array([int(lv) for lv in LEVELS], dtype=np.uint8)
-    return codes[idx * (top if hard_edge else 1)]

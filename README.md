@@ -37,7 +37,7 @@ Three controls, each doing one thing:
 - **focus_area** - the size of the zones;
 - **focus_strength** - how far the zone centers rise above the base.
 
-Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas, the single source of truth for it: [docs/lens.md](docs/lens.md).
+Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas, the single source of truth for it: [docs/quantization-filter.md](docs/quantization-filter.md).
 
 If the idea holds, **expert zones emerge** as the regions that stay sharp when everything around them is coarsened - and related topics share part of their zone instead of paying for it twice, as MoE experts do.
 
@@ -119,7 +119,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
 - [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones as an outcome, not an input.
-- [`docs/lens.md`](docs/lens.md) - the quantization filter and its zones: how precision is laid out over the weights.
+- [`docs/quantization-filter.md`](docs/quantization-filter.md) - the quantization filter and its zones: how precision is laid out over the weights.
 - [`docs/zones.md`](docs/zones.md) - expert zones on the weight map; the legacy fixed-budget layout.
 - [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.

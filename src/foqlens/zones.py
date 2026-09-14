@@ -10,7 +10,7 @@ centers (a hard edge), at 0.5 they are as found, at 1 they cover the whole map (
 
 Two layouts read those zones. The legacy one (E008, E009) spends a given precision share p over the
 rings of the log-sharpness psi = max_i (-d_i / R_i): a mean of bits between the D4 background and
-the D8 centers, 4 + 4p. The graded one (E010, docs/lens.md) has no budget: precision_lift gives every
+the D8 centers, 4 + 4p. The graded one (E010, docs/quantization-filter.md) has no budget: precision_lift gives every
 block how far it is lifted over the floor, 1 at a zone's center and 0 at its reach, and
 levels_from_lift turns that into levels between a floor and a ceiling along the profile's stops.
 Memory is what the layout costs, not what it was given.
@@ -182,7 +182,7 @@ def log_sharpness(coords: np.ndarray, zones: Zones, focus_area: float) -> np.nda
 def precision_lift(
     coords: np.ndarray, zones: Zones, focus_area: float, reach: float = 1.0, combine: str = "sum",
 ) -> np.ndarray:
-    """How far every block is lifted over the floor, 0 ... 1 (docs/lens.md, rules 1, 4 and 5).
+    """How far every block is lifted over the floor, 0 ... 1 (docs/quantization-filter.md, rules 1, 4 and 5).
 
     One zone lifts a block by 1 - d / (R reach), clipped at 0, so the lift is 1 at its center and
     fades to 0 at `reach` radii - the outermost stop of the profile. Zones that cover the same block
@@ -205,7 +205,7 @@ def precision_lift(
 
 
 def levels_from_lift(lift: np.ndarray, floor: Level, ceiling: Level, stops: Sequence[tuple[Level, float]]) -> np.ndarray:
-    """Level codes [n_blocks] from the lift over the floor (docs/lens.md, rules 3 and 6).
+    """Level codes [n_blocks] from the lift over the floor (docs/quantization-filter.md, rules 3 and 6).
 
     `stops` are the profile from the ceiling down, each the outer edge of that level's ring as a
     share of the reach. A block at lift l sits at rho* = reach (1 - l) and takes the level of the
@@ -244,7 +244,7 @@ def even_stops(floor: Level, ceiling: Level, ladder: Sequence[Level] = READ_LEVE
     """The default profile: the rungs from the ceiling down to the floor, evenly spaced over the radius.
 
     Behind an empty floor the lowest rung goes past the edge instead, to HALO_STOP - the ring that
-    softens the step from a lens into nothing (docs/lens.md).
+    softens the step from a lens into nothing (docs/quantization-filter.md).
     """
     rungs = [lv for lv in reversed(ladder) if floor < lv <= ceiling]
     if not rungs:

@@ -1,5 +1,5 @@
 /* ==== LADDER ==== */
-// One rung per level the bench can read a block at, coarse first (docs/lens.md).
+// One rung per level the bench can read a block at, coarse first (docs/quantization-filter.md).
 // Sizes are shares of the room one block has on screen, not pixels: a phone gives a block a tenth of
 // the area a monitor does, and fixed pixels turned the field into one solid blot there.
 const LADDER = [
@@ -105,7 +105,7 @@ const GLYPH_SCALE = 2.6;   // a character is drawn larger than the square it rep
 const BASE_RADIUS = 0.09;   // a new lens covers this share of the map before focus_area scales it
 // Zones of a query come out with different radii (docs/zones.md); a placed lens takes the next of these.
 const LENS_RADII = [1, 0.62, 1.35, 0.8, 1.1, 0.5];
-const HALO_STOP = 1.5;      // at a ZERO floor the lowest rung is pushed past the edge (docs/lens.md)
+const HALO_STOP = 1.5;      // at a ZERO floor the lowest rung is pushed past the edge (docs/quantization-filter.md)
 const PICK_SLACK = 1.25;    // clicking this much past a lens edge still grabs it
 const DPR_CAP = 1.5;        // how fine the canvas is drawn, against how much a frame costs
 
@@ -177,7 +177,7 @@ function pointerMap(e) {
   return toMap(e.clientX - rect.left, e.clientY - rect.top);
 }
 
-/* ==== THE RULES OF docs/lens.md ==== */
+/* ==== THE RULES OF docs/quantization-filter.md ==== */
 function layout() {
   const floorIndex = Number(controls.floor.value);          // 0 = ZERO … 5 = bf16, the whole ladder
   const area = Number(controls.area.value);

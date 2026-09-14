@@ -1,4 +1,4 @@
-"""E010, the graded zone layout (experiments/E010-lens-layout/ADDENDUM-11.md; mechanism: docs/lens.md).
+"""E010, the graded zone layout (experiments/E010-lens-layout/ADDENDUM-11.md; mechanism: docs/quantization-filter.md).
 
 The whole network sits at a floor level; the expert zones of a query are lifted over it up to a
 ceiling, along an even profile. There is no budget: what a layout costs is what its zones ask for.

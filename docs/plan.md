@@ -44,7 +44,7 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 ## Step 3. Precision follows the meaning
 
-Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the lens layout ([lens.md](lens.md)); the fixed-budget layouts of E008 and E009 are legacy.*
+Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the lens layout ([quantization-filter.md](quantization-filter.md)); the fixed-budget layouts of E008 and E009 are legacy.*
 
 Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 

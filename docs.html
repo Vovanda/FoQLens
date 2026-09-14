@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=41">
-<link rel="stylesheet" href="site/docs.css?v=41">
+<link rel="stylesheet" href="site/site.css?v=42">
+<link rel="stylesheet" href="site/docs.css?v=42">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
@@ -33,7 +33,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
            Keep in step with SHELF below. -->
         <h2>The idea</h2>
         <ul>
-          <li><a href="#lens" data-id="lens">The quantization filter and its zones</a></li>
+          <li><a href="#filter" data-id="filter">The quantization filter and its zones</a></li>
           <li><a href="#problem" data-id="problem">Problem statement</a></li>
           <li><a href="#goals" data-id="goals">Goals</a></li>
           <li><a href="#plan" data-id="plan">Plan</a></li>
@@ -92,7 +92,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <p>Pick a document on the left. Each is a markdown file in the repository, and every link below goes to its source.</p>
       <h3>The idea</h3>
       <ul>
-        <li><a href="#lens">The quantization filter and its zones</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/lens.md">docs/lens.md</a></span></li>
+        <li><a href="#filter">The quantization filter and its zones</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/quantization-filter.md">docs/quantization-filter.md</a></span></li>
         <li><a href="#problem">Problem statement</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/problem-statement.md">docs/problem-statement.md</a></span></li>
         <li><a href="#goals">Goals</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/goals.md">docs/goals.md</a></span></li>
         <li><a href="#plan">Plan</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/plan.md">docs/plan.md</a></span></li>
@@ -136,7 +136,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
-<script src="site/panel.js?v=41"></script>
+<script src="site/panel.js?v=42"></script>
 <script>
 /* ==== THE SHELF ==== */
 // Every document the site shows, by the path it has in the repository - the page renders the same
@@ -144,7 +144,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 const REPO = "https://github.com/Vovanda/FoQLens/blob/main/";
 const SHELF = [
   { group: "The idea", docs: [
-    ["lens", "docs/lens.md", "The quantization filter and its zones"],
+    ["filter", "docs/quantization-filter.md", "The quantization filter and its zones"],
     ["problem", "docs/problem-statement.md", "Problem statement"],
     ["goals", "docs/goals.md", "Goals"],
     ["plan", "docs/plan.md", "Plan"],
@@ -173,7 +173,7 @@ const SHELF = [
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
-const DEFAULT_DOC = "lens";
+const DEFAULT_DOC = "filter";
 
 /* ==== MENU ==== */
 const menu = document.getElementById("menu");

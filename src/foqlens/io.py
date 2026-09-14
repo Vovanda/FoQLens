@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from foqlens.evaluate import Question, mc_prompt
+from foqlens.selection import Answer
 
 
 def read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
@@ -23,3 +24,24 @@ def read_questions(prompts_dir: Path, spec: str, limit: int | None = None) -> li
 def write_json(path: Path, obj) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2), encoding="utf-8")
+
+
+def answers_path(root: Path, level: str, corpus: str) -> Path:
+    """answers/<level>/<corpus>.jsonl: one file per corpus and per quantization level of the model that answered."""
+    return root / level / f"{corpus}.jsonl"
+
+
+def append_answers(path: Path, answers: list[Answer]) -> None:
+    """A batch goes to the file as soon as it is written, so a stopped run loses at most the batch in flight."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.writelines(json.dumps(a.to_json(), ensure_ascii=False) + "\n" for a in answers)
+
+
+def read_answers(path: Path) -> list[Answer]:
+    return [Answer.from_json(row) for row in read_jsonl(path)] if path.exists() else []
+
+
+def written_ids(path: Path) -> set[str]:
+    """The questions already answered in this file: a restart skips them."""
+    return {a.id for a in read_answers(path)}

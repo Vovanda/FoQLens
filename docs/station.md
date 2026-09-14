@@ -32,19 +32,49 @@ runs cost it.
 
 The ceiling of 80 °C is the owner's for this machine, below the card's own target.
 
+## How the log is kept
+
+Every run summary records the GPU through `GpuMonitor` - when the run started, how long it took, mean
+utilization, mean and peak temperature, peak power - and the pacing through `"pacer"`, with the cooling
+breaks taken. A session of the GPU tests leaves the same record in `runs/station/tests/`. A run stopped
+before it wrote its summary is entered by hand in `runs/station/`, and its note says so.
+
+`scripts/station_log.py` rebuilds the log and the peaks below from all of them, and from the summaries
+of the runs deleted with the first corpus, which it reads from the git history. A time marked ~ is an
+estimate: a summary written before the monitor kept a clock is counted by its samples, one a second.
+The runs of E001 predate the monitor and are not in the log.
+
+<!-- station-log:begin -->
 ## Log
 
-Every run summary records the GPU through `GpuMonitor`: mean utilization, mean and peak temperature, mean
-and peak power. The log is filled from those summaries.
-
-| Date | Run | Time | Utilization, mean | Temperature, mean / peak | Power, peak | Note |
-| --- | --- | --- | --- | --- | --- | --- |
-| 2026-09-14 | calibration of the letter-choice corpora, share 0.8, before the thermal guard | ~25 min | 100% | - / 83 °C | 403 W | stopped: a smell of burnt dust; the dust was blown out, the limits above were set |
-| 2026-09-14 | GPU tests under the thermal guard | 8 min 17 s | 16% | 47 / 57 °C | 277 W | 61 passed |
+| Date | Run | Time | Utilization, mean | Temperature, mean / peak | Power, peak | Cooling breaks | Note |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-09-12 | E004-injection/e2b | ~8 min | 54% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-12 | E005-backbone/e2b | ~14 min | 61% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-12 | E007-dilation/e2b | ~7 min | 48% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-12 | E008-zones-fixed-budget/e2b | ~20 min | 50% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-12 | E009-zones-matrix/e2b | ~1 h 34 min | 40% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-12 | E010-lens-layout-random/e2b | ~16 min | 72% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-12 | E010-lens-layout/e2b | ~25 min | 69% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-13 | E013-regulator-map/e2b | ~44 min | 71% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-13 | E014-moved-zones/e2b | ~4 min | 66% | - / - | - | - | deleted with the first corpus in 1e89a81 |
+| 2026-09-13 | reference/address-stability/e2b | ~6 min | 58% | - / - | - | - |  |
+| 2026-09-13 | reference/shuffle-answers-canonical/e2b | ~6 min | 56% | - / - | - | - |  |
+| 2026-09-13 | reference/shuffle-answers-fixed-address/e2b | ~4 min | 68% | - / - | - | - |  |
+| 2026-09-13 | reference/shuffle-answers-question-only-matched/e2b | ~5 min | 60% | - / - | - | - |  |
+| 2026-09-13 | reference/shuffle-answers-question-only/e2b | ~5 min | 56% | - / - | - | - |  |
+| 2026-09-13 | reference/shuffle-answers/e2b | ~6 min | 60% | - / - | - | - |  |
+| 2026-09-14 | GPU tests | 2 min | 14% | 47 / 54 °C | 265 W | - | 2 passed; the injection and filter smokes, entered by hand from their report |
+| 2026-09-14 | GPU tests | 8 min | 16% | 47 / 57 °C | 277 W | - | 61 passed; the first session under the thermal guard, entered by hand from its report |
+| 2026-09-14 | GPU tests | 1 min | 5% | 45 / 47 °C | 173 W | - | 1 passed |
+| 2026-09-14 | calibration of the letter-choice corpora, share 0.8, before the thermal guard | ~25 min | 100% | - / 83 °C | 403 W | - | entered by hand from nvidia-smi, the run was stopped before its summary: a smell of burnt dust; the dust was blown out, the limits were set |
 
 ## Peaks
 
 | | Value | When |
 | --- | --- | --- |
-| Temperature | 83 °C | 2026-09-14, before the thermal guard |
-| Power | 403 W | 2026-09-14, before the power limit |
+| Temperature | 83 °C | 2026-09-14, calibration of the letter-choice corpora, share 0.8, before the thermal guard |
+| Power | 403 W | 2026-09-14, calibration of the letter-choice corpora, share 0.8, before the thermal guard |
+| Longest run | ~1 h 34 min | 2026-09-12, E009-zones-matrix/e2b |
+| GPU time in total | ~4 h 59 min | 19 entries |
+<!-- station-log:end -->

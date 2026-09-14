@@ -1,0 +1,13 @@
+{
+  "run": "GPU tests",
+  "date": "2026-09-14",
+  "gpu": {
+    "samples": 84,
+    "wall_s": 102.6,
+    "utilization_mean": 14,
+    "temperature_mean_c": 47,
+    "temperature_peak_c": 54,
+    "power_peak_w": 265
+  },
+  "note": "2 passed; the injection and filter smokes, entered by hand from their report"
+}

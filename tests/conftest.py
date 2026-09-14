@@ -1,9 +1,18 @@
+from datetime import datetime
+from pathlib import Path
+
 import pytest
 import torch
 
 # The card is watched through the whole test session: a run of the GPU tests that heats it is reported
-# at the end, not left to be noticed by ear (2026-09-14, 83 °C).
+# at the end, not left to be noticed by ear (2026-09-14, 83 °C), and goes into the station's log.
 GPU_WATCH = pytest.StashKey()
+STATION_TESTS = Path(__file__).resolve().parents[1] / "runs" / "station" / "tests"
+OUTCOMES = ("passed", "failed", "error")
+
+
+def ran_gpu_tests(terminalreporter) -> bool:
+    return any("gpu" in r.keywords for k in OUTCOMES for r in terminalreporter.stats.get(k, []))
 
 
 def pytest_sessionstart(session):
@@ -23,6 +32,12 @@ def pytest_terminal_summary(terminalreporter, config):
         terminalreporter.write_line(
             f"GPU during the tests: peak {s['temperature_peak_c']:.0f} C (mean {s['temperature_mean_c']:.0f}), "
             f"peak {s['power_peak_w']:.0f} W, utilization {s['utilization_mean']:.0f}% mean, {s['samples']} samples")
+    if s["samples"] and ran_gpu_tests(terminalreporter):
+        from foqlens.io import write_json
+        from foqlens.station import session_record
+
+        outcomes = {k: len(terminalreporter.stats.get(k, [])) for k in OUTCOMES}
+        write_json(STATION_TESTS / f"{datetime.now():%Y-%m-%dT%H-%M-%S}.json", session_record(s, outcomes))
 
 
 def pytest_collection_modifyitems(config, items):

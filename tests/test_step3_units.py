@@ -294,6 +294,14 @@ def test_gpu_monitor_summary():
     assert s["power_peak_w"] == 330.0 and s["power_mean_w"] == pytest.approx(280.0)
 
 
+def test_gpu_monitor_records_when_the_phase_started_and_how_long_it_took():
+    ticks = iter([1_757_860_000.0, 1_757_860_095.5])
+    with GpuMonitor(interval=0.001, sampler=lambda: (1.0, 1.0, 50.0, 100.0), clock=lambda: next(ticks)) as mon:
+        pass
+    s = mon.summary()
+    assert s["wall_s"] == pytest.approx(95.5) and len(s["started"]) == len("2025-09-14T21:06")
+
+
 def test_gpu_monitor_samples_in_the_background_until_exit():
     with GpuMonitor(interval=0.001, sampler=lambda: (42.0, 7.0, 55.0, 120.0)) as mon:
         while len(mon.samples) < 3:

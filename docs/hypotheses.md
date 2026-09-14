@@ -6,18 +6,9 @@ title: Hypotheses
 
 The claims FoQLens tests, each with the experiments that test it. The text of every hypothesis and its predictions lives in the preregistration ([PREREGISTRATION.ru.md](../prereg/PREREGISTRATION.ru.md), English: [PREREGISTRATION.md](../prereg/PREREGISTRATION.md)) and in the addenda of the experiments; this page only gives them ids (assigned 2026-09-12) and tracks their status.
 
-**As of 2026-09-13 every hypothesis is reset to untested, without exception.**
+**Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](corpus.md).
 
-The bench measured quality by which of four letters the model ranks highest, on a set it answers by
-guessing more than half the time, with a mask taken from the gradient of the language-model loss on
-the prompt - that is, from what the text activates, not from what the answer needs. No verdict of any
-sign can rest on that, so none is kept: the favourable readings, the damning ones and the instrument
-checks all go back to untested together.
-
-**And the list itself is not fixed.** It was written before the bench could measure anything, and the exploration that comes now - what the model is competent at, what a mask actually tracks, what the regulator's settings do to a usable answer - is expected to produce different questions than these. New ones are expected to sharpen the model of the mechanism rather than repeat these: the exploration is looking for invariants ([invariants.md](invariants.md)), and a hypothesis is worth fixing when it is a claim about something that already looks invariant. The hypotheses below are kept as history and as a starting point; the ones that get tested will be stated after the exploration, together with the experiments that test them, and preregistered in the usual way before any of them is run.
-
-Re-testing starts from data and a bench that can be trusted. What has to be true of the corpus and the metric before anything is claimed
-again: [docs/corpus.md](corpus.md).
+The list is a starting point: the hypotheses tested next are stated after the exploration ([invariants.md](invariants.md)) and preregistered before their runs.
 
 | Id | Hypothesis | Where fixed | Type | Status | Experiments |
 | --- | --- | --- | --- | --- | --- |

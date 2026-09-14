@@ -22,10 +22,7 @@ The input from the machine (a governor that lowers precision under load or heat)
 
 ## Goals by step
 
-> **Every step below is reset to untested, 2026-09-13.** Quality was scored by which of four letters the model
-> ranks highest, on a set it answers by guessing more than half the time, with a mask taken from the gradient of
-> the language-model loss on the prompt - what the text activates, not what the answer needs. The statuses that
-> follow are what the runs reported at the time; none of them is claimed now. See [corpus.md](corpus.md).
+> **Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](corpus.md). The statuses below are what the runs reported at the time.
 
 
 **Step −1. Preregistration in git** - done.

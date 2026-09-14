@@ -6,13 +6,9 @@ title: Experiments
 
 One folder per experiment, `E0NN-slug`: its preregistration (addenda, thresholds), its card (`_index.md`: dates, commits, hypotheses, status, verdict), and `results.md` once it has run. The main preregistration stays in [`prereg/`](../prereg/); the hypotheses are in [docs/hypotheses.md](../docs/hypotheses.md).
 
-**Reset 2026-09-13.** The corpus could not carry a verdict: the core - questions bf16 gets right in
-every order of the options - was 31%, and 3% on maths. The masks were read from the same questions,
-the weight map from those masks, the zones from that map, so no link of the chain could carry a verdict.
+**Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](../docs/corpus.md).
 
-Deleted: the result texts and the runs of E004, E005, E007-E011, E013, E014, and the never-run
-E002, E003, E012, E015. Kept: the preregistrations and the code. Next: a corpus the model knows and
-a metric that does not reward a lucky letter ([docs/corpus.md](../docs/corpus.md)).
+Deleted with the corpus: the result texts and runs of E004, E005, E007-E011, E013 and E014, and the never-run E002, E003, E012 and E015. The preregistrations and the code are kept.
 
 Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `done`; `exploratory` - run without a preregistration, so it can point a direction but not settle one; `legacy` - run, but on an approach since replaced; `not-run` - fixed and never run on its own; `withdrawn` - run, but its verdict does not stand; `reset` - run on the question set of the reset, nothing is claimed from it; `deleted` - prepared on that set and deleted with it, kept in git history.
 

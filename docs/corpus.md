@@ -2,40 +2,22 @@
 title: The corpus
 ---
 
-# The corpus: what the bench measures on, and why the first one did not work
+# The corpus
 
-This page is the source of truth for how questions get into the bench. It exists because the first
-corpus was chosen by eye and could not measure a layout, which invalidated every quality verdict the
-bench had produced. Written 2026-09-13, after that was found and before the new corpus is fixed.
+How questions get into the bench; the source of truth for it.
 
-## What went wrong
+## The first corpus, measured
 
-The bench asked multiple-choice questions - four options, scored by which of " A" … " D" the model
-ranks highest - drawn from four MMLU subjects: high-school biology, mathematics, prehistory and
-high-school geography. Three checks, run for unrelated reasons, all landed on the corpus rather than
-on the layouts.
+Four MMLU subjects (high-school biology, mathematics, prehistory, high-school geography), four options,
+scored by which of " A" … " D" the model ranks highest.
 
-**The model does not know most of the set.** Ask every question in six different orders of its
-options and count the questions answered correctly in *every* order - the ones where the answer comes
-from knowledge rather than from the arrangement. That is **121 of 395, or 31%**. On 69 questions the
-model is never right. On the mathematics subject the core is **3 of 100**.
-
-**Where the core is small, the reason is calculation.** 91 of those 100 mathematics questions ask for
-a computed value - factor a quadratic, integrate, count committees of five - and the format allows
-exactly one token to answer in, with no room to work. That is not a model failing to know
-mathematics; it is a metric that cannot see mathematics. The same tell appears in `global_facts`
-(69% of its questions have all-numeric options, core 3.4%), and in half of high-school chemistry and
-physics.
-
-**So the comparisons were measuring the guessing.** Split the 395 questions by the core and compare a
-zone layout against uniform quantization of the same cost: inside the core the zones are behind by
-5.1 points of accuracy, outside it they are ahead by 1.0, and over the whole set the two cancel into
-a difference that looks positive and clears no interval. The headline result of E013 - zones ahead
-of uniform D6 at the same memory - came from the outside, and did not survive reordering the options.
-
-**And the letters themselves carry a lean.** Over six orders, the full model picks C 29% of the time
-and a zone layout 35%. On a set where half the answers are guesses, a layout that shifts the lean
-looks like a layout that answers better.
+| Measured | Value |
+| --- | --- |
+| questions right under every order of the options - the core | 121 of 395, 31% |
+| mathematics: core | 3 of 100; 91 of them ask for a computed value, and the format gave one token to answer in |
+| global_facts: core | 3.4%; 69% of its questions have all-numeric options |
+| zone layout against uniform quantization at the same cost | −5.1 points of accuracy inside the core, +1.0 outside; no interval clears |
+| letter C picked, over six orders | the full model 29%, a zone layout 35% |
 
 ## What a corpus has to satisfy
 
@@ -113,16 +95,9 @@ full subjects. Raw numbers in `runs/reference/corpus/`.
 
 The old set occupied the bottom half of this table, and one of its four subjects was unmeasurable.
 
-## What this does not fix
+## Open
 
-A better corpus makes a verdict possible; it does not make one favourable. Two things are known to be
-wrong independently of it, both measured on the current mask with the letter-choice metric the reset withdrew, which leaves them as directions:
-
-- **The address moves with the shape of the prompt.** Reordering the options - same question, same
-  meaning - changes accuracy by 6.3 points and memory by a whole bit, while bf16 and uniform
-  quantization repeat exactly. Reading the mask from other texts was tried three ways and all were
-  worse. Until the address is stable, no corpus can give a clean answer.
-- **The floor costs quality on its own.** On the core, uniform D4 - the floor every layout so far has
-  used - reads 0.843 where uniform D6 reads 0.975. The floor stays D4, since raising it removes the
-  saving the mechanism exists for; what has to change is D4 itself, or a thin static skeleton of
-  blocks held above it.
+Whether the mask follows the form of the text. On the first corpus reordering the options - same
+question, same meaning - moved a zone layout's accuracy by 6.3 points and its memory by a whole bit,
+while bf16 and uniform quantization repeated exactly. The new corpus has no options to reorder; the
+question is measured again on it.

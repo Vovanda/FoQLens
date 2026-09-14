@@ -13,7 +13,7 @@ params:
 
 # E004 - Mask injection
 
-The mask of topic A on the questions of topic B, at the same aperture, outside it every block removed.
+The mask of topic A on the questions of topic B, at the same share of blocks kept, the rest removed.
 
 - Preregistration: [ADDENDUM-04](ADDENDUM-04.md). Results and runs deleted with the corpus (`1e89a81`).
 - Verdict at the time, withdrawn 2026-09-13: own - other overlaps zero everywhere; background-subtracted masks cut the shared foundation first.

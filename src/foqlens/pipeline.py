@@ -60,7 +60,7 @@ class PooledMask:
 
 @dataclass(frozen=True)
 class GradientMask:
-    """Gradient x activation of the query's own language-model loss (ADDENDUM-02)."""
+    """Gradient x activation of the query's own language-model loss (E002)."""
 
     scorer: GradientScorer
     batch_size: int

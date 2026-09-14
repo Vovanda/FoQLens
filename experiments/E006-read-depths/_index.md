@@ -3,7 +3,7 @@ title: "E006 - Read depths from one sliced copy"
 date: 2026-09-11
 weight: 6
 hypotheses: []
-statuses: [reset]
+statuses: [done]
 params:
   fixed: "- (engineering, docs/plan.md step 5; no prediction)"
   run: "2026-09-11 - c35709b"
@@ -15,5 +15,5 @@ params:
 
 One residual-sliced copy of the weights (after MoBiQuant) read at 2 / 4 / 6 / 8 bits; perplexity per depth and the memory of the resident bench.
 
-- Results: [results.md](results.md). Runs: `runs/E006-read-depths/`.
+- Results: [results.md](results.md). Runs: deleted in `1e89a81`, in git history.
 - Engineering: it tests no hypothesis.

@@ -227,8 +227,9 @@ function levelOf(x, y, L) {
 const LINK_NEIGHBOURS = 2;    // lines kept per block
 const LINK_REACH = 2.2;       // how far a neighbour may be, in cells
 /* The canvas is drawn at the device pixel ratio, so a line of 2 came out as one hairline on a
-   retina screen and the web of co-activation read as noise rather than as structure. */
-const LINK_WIDTH = 3.5;
+   retina screen and the web of co-activation read as noise rather than as structure; 3.5 went the
+   other way and the lines outweighed the blocks they join. */
+const LINK_WIDTH = 2.5;
 
 let links = null;             // [a0, b0, a1, b1, …] indices into points
 

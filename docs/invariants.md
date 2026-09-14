@@ -52,4 +52,4 @@ Things shown *not* to hold, which are as useful and easier to establish.
 | Statement | Why it fails |
 | --- | --- |
 | Accuracy on a four-option question measures what the model knows | it is right under every ordering of the options on 31% of the old set, and on 3% of its mathematics subject; the rest moves with the arrangement |
-| A comparison on one order of the options is a comparison | the original order was the best of six for the lens layout and only for it |
+| A comparison on one order of the options is a comparison | the original order was the best of six for the zone layout and only for it |

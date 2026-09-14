@@ -2,7 +2,7 @@
 
 # FoQLens
 
-FoQLens is a model whose precision regulator reads the weights through a filter with lenses in the query's expert zones; MoE is a special case of it. This repository is the R&D bench inside FoQLens that tests the idea: weight precision is allocated by the meaning of the query, expert zones emerge instead of being set by a router. The problem statement and the plan are in `docs/`, the main preregistration in `prereg/`, and every experiment in `experiments/E0NN-slug/` - its addenda, a card (`_index.md`, YAML front matter for Hugo: dates, commits, hypotheses, status, verdict) and `results.md` - with its raw summaries in `runs/E0NN-slug/`. A new experiment takes the next id; hypotheses are tracked in `docs/hypotheses.md`.
+FoQLens is a model whose precision regulator reads the weights through a quantization filter that sharpens the query's expert zones; MoE is a special case of it. This repository is the R&D bench inside FoQLens that tests the idea: weight precision is allocated by the meaning of the query, expert zones emerge instead of being set by a router. The problem statement and the plan are in `docs/`, the main preregistration in `prereg/`, and every experiment in `experiments/E0NN-slug/` - its addenda, a card (`_index.md`, YAML front matter for Hugo: dates, commits, hypotheses, status, verdict) and `results.md` - with its raw summaries in `runs/E0NN-slug/`. A new experiment takes the next id; hypotheses are tracked in `docs/hypotheses.md`.
 
 Everything in the repository is written in English: docs, code comments, test messages, commit messages.
 

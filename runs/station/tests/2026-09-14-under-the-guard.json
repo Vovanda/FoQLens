@@ -1,0 +1,12 @@
+{
+  "run": "GPU tests",
+  "date": "2026-09-14",
+  "gpu": {
+    "wall_s": 497,
+    "utilization_mean": 16,
+    "temperature_mean_c": 47,
+    "temperature_peak_c": 57,
+    "power_peak_w": 277
+  },
+  "note": "61 passed; the first session under the thermal guard, entered by hand from its report"
+}

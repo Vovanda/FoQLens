@@ -1,0 +1,12 @@
+{
+  "run": "calibration of the letter-choice corpora, share 0.8, before the thermal guard",
+  "date": "2026-09-14",
+  "estimated": true,
+  "gpu": {
+    "wall_s": 1500,
+    "utilization_mean": 100,
+    "temperature_peak_c": 83,
+    "power_peak_w": 403
+  },
+  "note": "entered by hand from nvidia-smi, the run was stopped before its summary: a smell of burnt dust; the dust was blown out, the limits were set"
+}

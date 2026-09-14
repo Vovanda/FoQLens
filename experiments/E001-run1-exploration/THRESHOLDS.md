@@ -1,6 +1,6 @@
 # Thresholds 01 - the instrument and the pass criteria for the confirmatory pass
 
-Fixed 2026-09-11, after the run 1 exploration ([results](results.md)) and **before any run on the held-out domains or on E4B**. Required by the [preregistration](../../prereg/PREREGISTRATION.ru.md) (section 5, item 4) and [addendum 01](ADDENDUM-01.md) (section 2). Not edited after its commit.
+Fixed 2026-09-11, after the run 1 exploration ([results](results.md)) and **before any run on the held-out domains or on E4B**. Required by the [preregistration](../../prereg/PREREGISTRATION.ru.md) (section 5, item 4) and [E001 PREREG](PREREG.md) (section 2). Not edited after its commit.
 
 ## 1. The instrument
 

@@ -4,9 +4,9 @@ How FoQLens is drawn. Fixed 2026-09-11, updated 2026-09-12 to the lens mechanism
 
 ## Why Lens
 
-Mechanically the model does not look through anything - it distributes precision over the weights. The lens in the name is justified by the picture: a field coarsened everywhere except where sharpness is needed.
+Mechanically the model does not look through anything - it distributes precision over the weights. The lens in the name comes from the metaphor: a field coarsened everywhere except where sharpness is needed.
 
-## The picture - a pixel-art field of weights
+## How it is drawn - a pixel-art field of weights
 
 Pixel size and palette follow the rung of the ladder a block is read at:
 

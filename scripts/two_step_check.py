@@ -35,7 +35,7 @@ from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import read_jsonl, write_json
 from foqlens.layouts import OwnZones, TopicMeans, TopicZones, Uniform, graded_zone_layout
-from foqlens.matching import LetterMatcher, free_answers
+from foqlens.matching import ANSWER_TOKENS, LetterMatcher, free_answers
 from foqlens.pipeline import GRADIENT_BATCH, POOLED_BATCH, Bench, subtract_background
 from foqlens.progress import Progress
 from foqlens.quant import Level
@@ -47,7 +47,6 @@ MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
 MASK_SOURCE = "gradient"
 BEST_CELL = {"floor": Level.D4, "focus_area": 0.75, "focus_strength": 1.0}
 REFERENCES = {"uniform_bf16": Level.BF16, "uniform_d6": Level.D6}
-ANSWER_TOKENS = 32  # MMLU answers are short phrases; beyond this the model starts explaining itself
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

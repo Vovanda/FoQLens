@@ -1,4 +1,4 @@
-"""E010, the graded zone layout (experiments/E010-lens-layout/ADDENDUM-11.md; mechanism: docs/quantization-filter.md).
+"""E010, the graded zone layout (experiments/E010-lens-layout/PREREG.md; mechanism: docs/quantization-filter.md).
 
 The whole network sits at a floor level; the expert zones of a query are lifted over it up to a
 ceiling, along an even profile. There is no budget: what a layout costs is what its zones ask for.
@@ -43,8 +43,8 @@ from foqlens.zones import find_zones
 
 MODELS = {"e2b": fm.E2B, "e4b": fm.E4B}
 METRIC = LetterChoice  # the quality metric; layouts are compared on METRIC.primary
-MASK_SOURCE = "gradient"  # the only source here: pooled zones failed in ADDENDUM-07 and E009
-# The grid of ADDENDUM-11: three floors x focus areas that halve or double the radius x two strengths.
+MASK_SOURCE = "gradient"  # the only source here: pooled zones failed in E008 PREREG and E009
+# The grid of E010 PREREG: three floors x focus areas that halve or double the radius x two strengths.
 FLOORS = {"d4": Level.D4, "d2": Level.D2, "zero": Level.ZERO}
 FOCUS_AREAS = [0.2, 0.333, 0.5, 0.667, 0.8]
 FOCUS_STRENGTHS = [0.5, 1.0]
@@ -117,7 +117,7 @@ def cell_policies(cell, coords, topics, backbone_zones, weights, seed, random_zo
 
 def comparisons(results: dict, domains: tuple[str, ...], cells, seed: int, random_zones: bool = False,
                 moved_zones: bool = False, pair_names: tuple = PAIR_NAMES) -> dict:
-    """The predictions of ADDENDUM-11 per pair and cell: L2 the address, L3 no mask, L6 the backbone, H4 against bf16.
+    """The predictions of E010 PREREG per pair and cell: L2 the address, L3 no mask, L6 the backbone, H4 against bf16.
 
     With random zones the run holds only the floor of the comparison, L1 and L4: own against random.
     """

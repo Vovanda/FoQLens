@@ -1,4 +1,4 @@
-"""E011, what a depth cap costs (experiments/E011-depth-caps/ADDENDUM-12.md).
+"""E011, what a depth cap costs (experiments/E011-depth-caps/PREREG.md).
 
 A layout is read per query, but storage is one copy: a block keeps the deepest slice any query of the
 set asks of it. This measures that storage against the number of questions and against their variety,

@@ -48,7 +48,7 @@ class MaskSource(Protocol):
 
 @dataclass(frozen=True)
 class PooledMask:
-    """The naive score (ADDENDUM-01, mode B): block output norms averaged over the query's tokens."""
+    """The naive score (E001 PREREG, mode B): block output norms averaged over the query's tokens."""
 
     scorer: BlockScorer
     batch_size: int

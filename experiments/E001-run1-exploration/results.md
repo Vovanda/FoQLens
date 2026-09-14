@@ -2,7 +2,7 @@
 
 > **Withdrawn 2026-09-13.** This run was read on the question set the reset found unable to carry a verdict ([docs/corpus.md](../../docs/corpus.md)). The verdicts below are a record of what was read at the time; none of them is claimed.
 
-Run 1 exploration on the debugging domains, read against the [preregistration](../../prereg/PREREGISTRATION.ru.md) and [addendum 01](ADDENDUM-01.md). Opened 2026-09-11, all at once, after the step 1 summary (`c407c45`) and the step 2+ summary (`9e008e3`) had been committed unopened. Data: [docs/data-sources.md](../../docs/data-sources.md) - biology 95, math 100, chemistry 99, physics 97, biophysics 30 questions.
+Run 1 exploration on the debugging domains, read against the [preregistration](../../prereg/PREREGISTRATION.ru.md) and [PREREG](PREREG.md). Opened 2026-09-11, all at once, after the step 1 summary (`c407c45`) and the step 2+ summary (`9e008e3`) had been committed unopened. Data: [docs/data-sources.md](../../docs/data-sources.md) - biology 95, math 100, chemistry 99, physics 97, biophysics 30 questions.
 
 **This is exploration, not a result.** Three center modes were tried; by addendum 01 one of them is now chosen and only that one is tested on the held-out domains and E4B.
 
@@ -57,14 +57,14 @@ Raw masks are left out here: they are nearly identical, and every geometry test 
 
 ## Confirmation - E2B, held-out domains: **not confirmed**
 
-Run under [THRESHOLDS-01](THRESHOLDS-01.md) (committed in `aed8a29` before the run): mode B, background subtracted, history (MMLU `prehistory`) 100, geography 100, math 100 questions, 1000 label permutations.
+Run under [THRESHOLDS](THRESHOLDS.md) (committed in `aed8a29` before the run): mode B, background subtracted, history (MMLU `prehistory`) 100, geography 100, math 100 questions, 1000 label permutations.
 
 | Claim | Criterion | E2B | Verdict |
 | --- | --- | --- | --- |
 | Step 1 | history–geography: cosine direction and permutation p < 0.05 | cos_in history +0.157, geography +0.282, cos_between +0.199; margin −0.042, p 0.85, ARI 0.00 | **fail** |
 | Step 2 | cos(history, geography) between cos(history, math) and cos_in(history) | −0.298 < **+0.199** > +0.157 | **fail** |
 
-By THRESHOLDS-01 a claim is confirmed only if it holds on both E2B and E4B, so neither can be confirmed any more. **The E4B pass is not run with this instrument**: it cannot change the verdict, and running it anyway would be a second try at the same claim.
+By THRESHOLDS a claim is confirmed only if it holds on both E2B and E4B, so neither can be confirmed any more. **The E4B pass is not run with this instrument**: it cannot change the verdict, and running it anyway would be a second try at the same claim.
 
 A caveat, recorded but not used to rescue the result: prehistory partly overlaps with geography (migrations, sites, regions) and is loosely coherent inside itself (cos_in +0.157). The preregistration does not allow "it failed, so the domains were wrong" for a load-bearing claim.
 

@@ -1,4 +1,4 @@
-"""Mask injection (experiments/E004-injection/ADDENDUM-04.md): the mask of topic A on the questions of topic B.
+"""Mask injection (experiments/E004-injection/PREREG.md): the mask of topic A on the questions of topic B.
 
 For every question of the paired topics, at every precision share (outside it: ZERO), the question is
 answered under its own mask ("self"), its topic's mask ("own", leave-one-out), the paired topic's

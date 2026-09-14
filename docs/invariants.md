@@ -9,9 +9,7 @@ What holds no matter how the question is asked. This page is the output of the e
 preregistering is a claim about something that already looks invariant, and a model of the mechanism
 ([quantization-filter.md](quantization-filter.md)) is worth keeping only as far as the invariants agree with it.
 
-Started 2026-09-13, after every earlier verdict of the bench was withdrawn - all of them rested on
-one corpus, one metric and one way of reading the mask, so none of them could tell a property of the
-phenomenon from a property of the setup.
+Started 2026-09-13.
 
 ## What counts as an invariant here
 
@@ -42,7 +40,6 @@ a metric that can carry a verdict before it moves up; several may simply be arti
 | --- | --- | --- | --- |
 | The mask follows the surface form of the prompt, not only its meaning | reordering the four answer options moved accuracy by 6.3 points and memory by a whole bit, while bf16 and uniform quantization repeated exactly | `runs/reference/address-stability`, 395 questions, 6 orders | the same reordering on a corpus with no options to reorder - if the address is stable there, the effect was the options and not the mask |
 | The cost of a layout depends on the text the mask is read from | the same settings spent 5.24 to 6.24 bits depending only on which ordering the mask was read off | same run | a corpus where memory holds while the text varies |
-| A coarse floor costs more quality than the zones recover | on the questions the model answered under every ordering, uniform D4 read 0.843 against uniform D6's 0.975 | `runs/reference/shuffle-answers`, core of 121 questions | the same gap measured with an answer-based metric, on a different corpus |
 | What a model is competent at varies by more than a factor of twenty between corpora | core from 66.9% (ARC-Easy) to 3.0% (school mathematics) | `runs/reference/corpus` | another model with the same ordering of corpora would strengthen it; a different ordering would break the generality |
 
 ## Anti-invariants

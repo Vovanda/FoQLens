@@ -67,22 +67,7 @@ All predictions were [preregistered](prereg/) in git before each run, as directi
 
 ## Status
 
-**Reset, 2026-09-13. Nothing is claimed.**
-
-The bench spent its first weeks measuring, and then found that it could not measure. Three things were wrong at
-once, each enough on its own to void a result:
-
-- **the questions** - four options scored by which of A-D the model ranks highest; it is right under *every*
-  ordering of the options on only 31% of them, and on the mathematics subject on 3%, because those questions are
-  answered by calculating and the format allows one token to do it in;
-- **the mask** - the gradient of the model's language-model loss on the prompt, which shows which blocks the
-  *text* lights up, never which blocks the *answer* needs; reordering the options changes the text, so the
-  address moves with it;
-- **the comparisons** - built on those two, so whichever way they came out they were reading a coin toss.
-
-Every verdict the bench produced is therefore withdrawn - the favourable readings and the unfavourable ones
-alike - and every hypothesis is back to untested ([docs/hypotheses.md](docs/hypotheses.md)). Their code and
-preregistrations stay as a record; the runs and their result texts were deleted with the corpus.
+**Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](docs/corpus.md).
 
 **What is being rebuilt, in order:** a corpus of what the model knows - the full model answers every question
 of five datasets in its own words, with no options anywhere, and a question stays if the answer is right
@@ -128,7 +113,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/reading-notes.md`](docs/reading-notes.md) - notes from the papers read, with the passages cited and what FoQLens takes from them.
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
 - [`docs/data-sources.md`](docs/data-sources.md) - where the questions of run 1 came from (MMLU-Redux-2.0) and why.
-- [`docs/corpus.md`](docs/corpus.md) - the corpus being built now: how it is selected, its three regimes, and why the first one failed.
+- [`docs/corpus.md`](docs/corpus.md) - the corpus: how it is selected and its three regimes.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:
   - `model`, `quant`, `precision` - loading, quantizers and residual slices, the per-block precision controller;

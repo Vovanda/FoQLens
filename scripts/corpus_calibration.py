@@ -13,16 +13,23 @@ layout's damage is visible; a subject with a small one measures nothing.
 Also reported per subject: the share of questions whose options are all numbers or formulas, which is
 the tell of a question answered by calculation rather than recall.
 
-Writes runs/reference/corpus/<model>/summary.json.
+Corpora without options are answered in the model's own words and scored as SQuAD scores them: with a
+passage (CONTEXT_QA) or without one (CLOSED_BOOK); there the core is the exact-match share. A
+multiple-choice corpus can be asked the same way without its options (FROM_CHOICES), the right option's
+text being the reference.
+
+Writes <out>/<model>/summary.json; every invocation replaces it, so a run of other subjects takes its own --out.
 
     uv run python scripts/corpus_calibration.py
     uv run python scripts/corpus_calibration.py --subjects nutrition marketing --limit 20
+    uv run python scripts/corpus_calibration.py --subjects triviaqa nq_open --limit 102 --out runs/reference/corpus-closed-book
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -70,6 +77,48 @@ CONTEXT_QA = {
     "hotpotqa": ("hotpotqa/hotpot_qa", "distractor/validation-00000-of-00001.parquet"),
 }
 QA_SHOTS = 2  # examples shown to a base checkpoint so it answers in the expected shape
+
+# The same answering with no passage at all: the answer can only come from the weights. Same prompt
+# shape and the same score as CONTEXT_QA, so the regimes differ only in where the answer lies.
+CLOSED_BOOK = {
+    "triviaqa": ("mandarjoshi/trivia_qa", "rc.nocontext/validation-00000-of-00001.parquet"),
+    "nq_open": ("google-research-datasets/nq_open", "nq_open/validation-00000-of-00001.parquet"),
+}
+
+
+def closed_book_answers(name: str, record: dict) -> list[str]:
+    """Every accepted form of the answer: TriviaQA names one entity under its aliases, NQ-open lists answers."""
+    if name == "triviaqa":
+        return list(dict.fromkeys([record["answer"]["value"], *record["answer"]["aliases"]]))
+    return list(record["answer"])
+
+
+# A multiple-choice corpus asked without its options: the model writes its answer, and the text of the
+# right option is the reference. Nothing matches the answer to the options - that matching read letters
+# and moved its pick with their order on a fifth of ARC-Challenge (runs/reference/corpus-knowledge).
+FROM_CHOICES = {"arc_challenge_closed": "arc_challenge"}
+# A question that points at its options has no answer without them.
+POINTS_AT_OPTIONS = re.compile(r"\b(which of (the following|these)|the following|listed below)\b", re.IGNORECASE)
+
+
+def closed_from_choices(rows: list[dict]) -> list[dict]:
+    """Multiple-choice rows as closed-book rows: the right option's text is the one reference answer."""
+    return [{"context": None, "question": r["question"], "answers": [r["choices"][r["answer"]]]}
+            for r in rows if not POINTS_AT_OPTIONS.search(r["question"])]
+
+
+def closed_book_rows(name: str, limit: int | None) -> tuple[list[dict], str]:
+    """One closed-book corpus in the rows of context_qa_rows, with no passage."""
+    if name in FROM_CHOICES:
+        rows, source = external_rows(FROM_CHOICES[name], None)
+        rows = closed_from_choices(rows)
+        return (rows[:limit] if limit else rows), source
+    repo, path = CLOSED_BOOK[name]
+    revision = _revision(repo)
+    local = hf_hub_download(repo, path, repo_type="dataset", revision=revision)
+    table = pq.read_table(local, columns=["question", "answer"]).to_pylist()
+    rows = [{"context": None, "question": r["question"], "answers": closed_book_answers(name, r)} for r in table]
+    return (rows[:limit] if limit else rows), f"{repo}@{revision[:8]}"
 
 
 def _revision(repo: str) -> str:
@@ -140,8 +189,11 @@ def external_rows(name: str, limit: int | None) -> tuple[list[dict], str]:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b")
-    parser.add_argument("--subjects", nargs="+", default=list(CANDIDATES) + list(EXTERNAL) + list(CONTEXT_QA),
-                        help="MMLU-Redux subjects, the multiple-choice corpora of EXTERNAL, and the passage corpora of CONTEXT_QA")
+    parser.add_argument("--subjects", nargs="+",
+                        default=list(CANDIDATES) + list(EXTERNAL) + list(CONTEXT_QA) + list(CLOSED_BOOK)
+                        + list(FROM_CHOICES),
+                        help="MMLU-Redux subjects, the multiple-choice corpora of EXTERNAL, the passage corpora of "
+                             "CONTEXT_QA and the closed-book corpora of CLOSED_BOOK and FROM_CHOICES")
     parser.add_argument("--orders", type=int, default=6, help="orders of the options a question is asked in")
     parser.add_argument("--limit", type=int, default=None, help="questions per subject, for a smoke check")
     parser.add_argument("--seed", type=int, default=0)
@@ -191,15 +243,17 @@ def main(argv: list[str] | None = None) -> Path:
     subjects = {}
     progress = Progress(len(args.subjects), "subject")
     for subject in args.subjects:
-        if subject in CONTEXT_QA:
-            rows, source = context_qa_rows(subject, args.limit)
+        if subject in CONTEXT_QA or subject in CLOSED_BOOK or subject in FROM_CHOICES:
+            reader, kind = ((context_qa_rows, "context_qa") if subject in CONTEXT_QA
+                            else (closed_book_rows, "closed_book"))
+            rows, source = reader(subject, args.limit)
             shots = tuple((r["context"], r["question"], (r["answers"] or [NO_ANSWER])[0])
                           for r in rows[:QA_SHOTS])
             scored = answer_questions(bench, rows[QA_SHOTS:], shots)
             em = np.array([s["exact_match"] for s in scored])
             f1 = np.array([s["f1"] for s in scored])
             subjects[subject] = {
-                "source": source, "kind": "context_qa", "questions": len(scored),
+                "source": source, "kind": kind, "questions": len(scored),
                 "exact_match": float(em.mean()), "f1": float(f1.mean()), "core": float(em.mean()),
                 "unanswerable": float(np.mean([not r["answers"] for r in rows[QA_SHOTS:]])),
             }
@@ -213,7 +267,7 @@ def main(argv: list[str] | None = None) -> Path:
         calc = np.array([answered_by_calculating(r) for r in rows])
         subjects[subject] = {
             "source": source,
-            "kind": "letter_choice",
+            "kind": LetterChoice.name,
             "questions": len(rows),
             "accuracy": float(right.mean()),
             "core": float(core.mean()),
@@ -225,15 +279,15 @@ def main(argv: list[str] | None = None) -> Path:
               f"calculation {calc.mean():5.1%}  n={len(rows)}", flush=True)
         print(progress.step(subject), flush=True)
 
+    # Each subject names its own source and kind; the orders exist only where options were reordered.
     summary = {
         "model": MODELS[args.model],
         "revision": fm.REVISIONS[MODELS[args.model]],
-        "dataset": f"{REDUX}@{REDUX_REVISION[:8]}",
-        "orders": [o.tolist() for o in orders],
         "seed": args.seed,
-        "metric": LetterChoice.name,
         "subjects": dict(sorted(subjects.items(), key=lambda kv: -kv[1]["core"])),
     }
+    if any(s["kind"] == LetterChoice.name for s in subjects.values()):
+        summary["orders"] = [o.tolist() for o in orders]
     out = args.out / args.model / "summary.json"
     write_json(out, summary)
     print(f"written {out}", flush=True)

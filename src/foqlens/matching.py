@@ -22,6 +22,8 @@ import torch
 from foqlens.evaluate import LETTERS, letter_logprobs_batch
 from foqlens.quant import Level
 
+ANSWER_TOKENS = 32  # a free answer to a quiz question is a short phrase; beyond this the model explains itself
+
 
 class AnswerMatcher(Protocol):
     name: str

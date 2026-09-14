@@ -13,6 +13,10 @@ reference answers. F1 is a continuous scale, so it sees damage that four letters
 An unanswerable question (SQuAD v2) has no reference answers; the right response is to say so, and
 `NO_ANSWER` is what counts as saying it.
 
+Without a passage the same format and the same score ask for recall instead of reading: the answer
+can then only come from the weights (closed-book QA - TriviaQA, NQ-open), which is the regime a
+precision regulator is meant to decide.
+
 Invariant: greedy decoding - the same layout and the same prompt give the same text, hence the same
 score. Scores never depend on the order of anything.
 """
@@ -60,11 +64,16 @@ def token_f1(prediction: str, references: list[str]) -> float:
     return best
 
 
-def qa_prompt(context: str, question: str, shots: tuple = ()) -> str:
+def qa_block(context: str | None, question: str, answer: str | None = None) -> str:
+    """One example; no `Context:` line when there is no passage, so a closed-book question is bare."""
+    head = f"Context: {context}\n" if context is not None else ""
+    tail = f" {answer}" if answer is not None else ""
+    return f"{head}Question: {question}\nAnswer:{tail}"
+
+
+def qa_prompt(context: str | None, question: str, shots: tuple = ()) -> str:
     """A base checkpoint has no chat template, so the format is shown to it in a couple of examples."""
-    blocks = [f"Context: {c}\nQuestion: {q}\nAnswer: {a}" for c, q, a in shots]
-    blocks.append(f"Context: {context}\nQuestion: {question}\nAnswer:")
-    return "\n\n".join(blocks)
+    return "\n\n".join([qa_block(c, q, a) for c, q, a in shots] + [qa_block(context, question)])
 
 
 def first_line(text: str) -> str:

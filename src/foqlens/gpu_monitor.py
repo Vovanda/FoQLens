@@ -1,8 +1,10 @@
-"""Infrastructure: GPU utilization and memory of one phase of a run, sampled in the background.
+"""Infrastructure: GPU utilization, memory, temperature and power of one phase of a run, sampled in the background.
 
 The standard says a long run below ~80% utilization is a bug; this is how a run proves it is not.
 nvidia-smi reports memory reserved by every process, torch the peak actually allocated by this
-one - both are recorded. The sampler is injectable, so the monitor is tested without a GPU.
+one - both are recorded. Temperature and power are recorded because a run that is fast but cooks the
+card is not acceptable either (83 °C and 403 W on 2026-09-14; the ceiling is in gpu_share). The
+sampler is injectable, so the monitor is tested without a GPU.
 """
 
 from __future__ import annotations
@@ -14,17 +16,27 @@ from collections.abc import Callable
 import numpy as np
 import torch
 
-Sample = tuple[float, float]  # (utilization %, memory used MiB)
+Sample = tuple[float, float, float, float]  # (utilization %, memory used MiB, temperature °C, power W)
 MIB = 2**20
 
 
 def nvidia_smi(device: int = 0) -> Sample:
     out = subprocess.run(
-        ["nvidia-smi", f"--id={device}", "--query-gpu=utilization.gpu,memory.used", "--format=csv,noheader,nounits"],
+        ["nvidia-smi", f"--id={device}", "--query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw",
+         "--format=csv,noheader,nounits"],
         capture_output=True, text=True, check=True,
     ).stdout
-    util, mem = out.strip().split(",")
-    return float(util), float(mem)
+    util, mem, temp, power = out.strip().split(",")
+    return float(util), float(mem), float(temp), float(power)
+
+
+def gpu_temperature(device: int = 0) -> float:
+    """The core temperature of the card in °C - the sensor of gpu_share.ThermalGuard."""
+    out = subprocess.run(
+        ["nvidia-smi", f"--id={device}", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    return float(out.strip())
 
 
 class GpuMonitor:
@@ -58,11 +70,15 @@ class GpuMonitor:
     def summary(self) -> dict:
         out: dict = {"samples": len(self.samples)}
         if self.samples:
-            util = np.array([s[0] for s in self.samples])
+            util, mem, temp, power = (np.array(column) for column in zip(*self.samples))
             out |= {
                 "utilization_mean": float(util.mean()),
                 "utilization_median": float(np.median(util)),
-                "memory_reserved_peak_mib": float(max(s[1] for s in self.samples)),
+                "memory_reserved_peak_mib": float(mem.max()),
+                "temperature_mean_c": float(temp.mean()),
+                "temperature_peak_c": float(temp.max()),
+                "power_mean_w": float(power.mean()),
+                "power_peak_w": float(power.max()),
             }
         if self.torch_peak_mib is not None:
             out["memory_allocated_peak_mib"] = self.torch_peak_mib

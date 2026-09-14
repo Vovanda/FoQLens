@@ -40,6 +40,7 @@ from huggingface_hub import HfApi, hf_hub_download
 from foqlens import model as fm
 from foqlens.evaluate import LETTERS, LetterChoice, Question, letter_ids, letter_logprobs_batch, mc_prompt
 from foqlens.extractive import NO_ANSWER
+from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import write_json
 from foqlens.pipeline import Bench
@@ -77,6 +78,7 @@ CONTEXT_QA = {
     "hotpotqa": ("hotpotqa/hotpot_qa", "distractor/validation-00000-of-00001.parquet"),
 }
 QA_SHOTS = 2  # examples shown to a base checkpoint so it answers in the expected shape
+QA_PACE = 8   # answers written between two rests of the pacer: one prompt at a time, a few seconds of GPU
 
 # The same answering with no passage at all: the answer can only come from the weights. Same prompt
 # shape and the same score as CONTEXT_QA, so the regimes differ only in where the answer lies.
@@ -157,7 +159,11 @@ def answer_questions(bench, rows: list[dict], shots: tuple, batch_note: str = ""
         passages[prompt] = r["answers"]
         questions.append(Question("x", prompt, 0))
     metric = ContextQA(passages=passages, shots=shots)
-    return metric.score(bench.model, bench.tokenizer, questions)
+    rows = []
+    for start in range(0, len(questions), QA_PACE):
+        with bench.throttle.batch():
+            rows += metric.score(bench.model, bench.tokenizer, questions[start:start + QA_PACE])
+    return rows
 
 
 def external_rows(name: str, limit: int | None) -> tuple[list[dict], str]:
@@ -227,7 +233,8 @@ def ask(bench, ids, rows: list[dict], order: np.ndarray, batch: int) -> np.ndarr
     right = np.empty(len(questions), dtype=bool)
     for start in range(0, len(questions), batch):
         chunk = questions[start:start + batch]
-        logprobs = letter_logprobs_batch(bench.model, bench.tokenizer, [q.prompt for q in chunk], ids)
+        with bench.throttle.batch():
+            logprobs = letter_logprobs_batch(bench.model, bench.tokenizer, [q.prompt for q in chunk], ids)
         right[start:start + batch] = logprobs.argmax(axis=1) == [q.answer for q in chunk]
     return right
 
@@ -240,50 +247,52 @@ def main(argv: list[str] | None = None) -> Path:
     bench.ctl.set_all(Level.BF16)
     ids = letter_ids(bench.tokenizer)
 
-    subjects = {}
-    progress = Progress(len(args.subjects), "subject")
-    for subject in args.subjects:
-        if subject in CONTEXT_QA or subject in CLOSED_BOOK or subject in FROM_CHOICES:
-            reader, kind = ((context_qa_rows, "context_qa") if subject in CONTEXT_QA
-                            else (closed_book_rows, "closed_book"))
-            rows, source = reader(subject, args.limit)
-            shots = tuple((r["context"], r["question"], (r["answers"] or [NO_ANSWER])[0])
-                          for r in rows[:QA_SHOTS])
-            scored = answer_questions(bench, rows[QA_SHOTS:], shots)
-            em = np.array([s["exact_match"] for s in scored])
-            f1 = np.array([s["f1"] for s in scored])
+    with GpuMonitor() as gpu:
+        subjects = {}
+        progress = Progress(len(args.subjects), "subject")
+        for subject in args.subjects:
+            if subject in CONTEXT_QA or subject in CLOSED_BOOK or subject in FROM_CHOICES:
+                reader, kind = ((context_qa_rows, "context_qa") if subject in CONTEXT_QA
+                                else (closed_book_rows, "closed_book"))
+                rows, source = reader(subject, args.limit)
+                shots = tuple((r["context"], r["question"], (r["answers"] or [NO_ANSWER])[0])
+                              for r in rows[:QA_SHOTS])
+                scored = answer_questions(bench, rows[QA_SHOTS:], shots)
+                em = np.array([s["exact_match"] for s in scored])
+                f1 = np.array([s["f1"] for s in scored])
+                subjects[subject] = {
+                    "source": source, "kind": kind, "questions": len(scored),
+                    "exact_match": float(em.mean()), "f1": float(f1.mean()), "core": float(em.mean()),
+                    "unanswerable": float(np.mean([not r["answers"] for r in rows[QA_SHOTS:]])),
+                }
+                print(f"  {subject:30} exact {em.mean():5.1%}  F1 {f1.mean():5.1%}  n={len(scored)}", flush=True)
+                print(progress.step(subject), flush=True)
+                continue
+            rows, source = ((external_rows(subject, args.limit)) if subject in EXTERNAL
+                            else (subject_rows(subject, args.limit), f"{REDUX}@{REDUX_REVISION[:8]}"))
+            right = np.array([ask(bench, ids, rows, order, args.batch) for order in orders])  # [orders, questions]
+            core = right.all(axis=0)
+            calc = np.array([answered_by_calculating(r) for r in rows])
             subjects[subject] = {
-                "source": source, "kind": kind, "questions": len(scored),
-                "exact_match": float(em.mean()), "f1": float(f1.mean()), "core": float(em.mean()),
-                "unanswerable": float(np.mean([not r["answers"] for r in rows[QA_SHOTS:]])),
+                "source": source,
+                "kind": LetterChoice.name,
+                "questions": len(rows),
+                "accuracy": float(right.mean()),
+                "core": float(core.mean()),
+                "never_right": float((~right.any(axis=0)).mean()),
+                "calculation": float(calc.mean()),
+                "core_among_knowledge": float(core[~calc].mean()) if (~calc).any() else None,
             }
-            print(f"  {subject:30} exact {em.mean():5.1%}  F1 {f1.mean():5.1%}  n={len(scored)}", flush=True)
+            print(f"  {subject:30} core {core.mean():5.1%}  accuracy {right.mean():5.1%}  "
+                  f"calculation {calc.mean():5.1%}  n={len(rows)}", flush=True)
             print(progress.step(subject), flush=True)
-            continue
-        rows, source = ((external_rows(subject, args.limit)) if subject in EXTERNAL
-                        else (subject_rows(subject, args.limit), f"{REDUX}@{REDUX_REVISION[:8]}"))
-        right = np.array([ask(bench, ids, rows, order, args.batch) for order in orders])  # [orders, questions]
-        core = right.all(axis=0)
-        calc = np.array([answered_by_calculating(r) for r in rows])
-        subjects[subject] = {
-            "source": source,
-            "kind": LetterChoice.name,
-            "questions": len(rows),
-            "accuracy": float(right.mean()),
-            "core": float(core.mean()),
-            "never_right": float((~right.any(axis=0)).mean()),
-            "calculation": float(calc.mean()),
-            "core_among_knowledge": float(core[~calc].mean()) if (~calc).any() else None,
-        }
-        print(f"  {subject:30} core {core.mean():5.1%}  accuracy {right.mean():5.1%}  "
-              f"calculation {calc.mean():5.1%}  n={len(rows)}", flush=True)
-        print(progress.step(subject), flush=True)
 
     # Each subject names its own source and kind; the orders exist only where options were reordered.
     summary = {
         "model": MODELS[args.model],
         "revision": fm.REVISIONS[MODELS[args.model]],
         "seed": args.seed,
+        "gpu": gpu.summary(),
         "subjects": dict(sorted(subjects.items(), key=lambda kv: -kv[1]["core"])),
     }
     if any(s["kind"] == LetterChoice.name for s in subjects.values()):

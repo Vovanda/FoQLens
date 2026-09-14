@@ -11,14 +11,15 @@ Invariant: masks are always computed with every block at bf16.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, partial
 from typing import Protocol
 
 import numpy as np
 import torch
 
 from foqlens import model as fm
-from foqlens.gpu_share import FULL, Throttle
+from foqlens.gpu_monitor import gpu_temperature
+from foqlens.gpu_share import FULL, Cooldown, Pacer, ThermalGuard, Throttle
 from foqlens.precision import Controller, install
 from foqlens.quality import compute_masks, token_batches
 from foqlens.quant import Level
@@ -74,12 +75,16 @@ class Bench:
     model: object
     tokenizer: object
     ctl: Controller
-    throttle: Throttle = FULL
+    throttle: Pacer = FULL
 
     @classmethod
     def load(cls, model_id: str, attn_implementation: str = "sdpa", gpu_share: float = 1.0) -> Bench:
         model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
-        return cls(model, tokenizer, install(model), Throttle(gpu_share))
+        # the share paces the batches, the hourly break rests the card, the guard keeps it under its
+        # ceiling whatever the share
+        log = partial(print, flush=True)
+        pacer = ThermalGuard(Cooldown(Throttle(gpu_share), log=log), gpu_temperature, log=log)
+        return cls(model, tokenizer, install(model), pacer)
 
     @cached_property
     def pooled(self) -> BlockScorer:

@@ -338,21 +338,23 @@ def test_write_json_creates_directories(tmp_path):
 
 
 def test_gpu_monitor_summary():
-    mon = GpuMonitor(sampler=lambda: (0.0, 0.0))
+    mon = GpuMonitor(sampler=lambda: (0.0, 0.0, 0.0, 0.0))
     assert mon.summary() == {"samples": 0}
-    mon.samples = [(50.0, 1000.0), (90.0, 3000.0), (100.0, 2000.0)]
+    mon.samples = [(50.0, 1000.0, 60.0, 200.0), (90.0, 3000.0, 78.0, 330.0), (100.0, 2000.0, 72.0, 310.0)]
     mon.torch_peak_mib = 1500.0
     s = mon.summary()
     assert s["utilization_mean"] == pytest.approx(80.0) and s["utilization_median"] == 90.0
     assert s["memory_reserved_peak_mib"] == 3000.0 and s["memory_allocated_peak_mib"] == 1500.0 and s["samples"] == 3
+    assert s["temperature_peak_c"] == 78.0 and s["temperature_mean_c"] == pytest.approx(70.0)
+    assert s["power_peak_w"] == 330.0 and s["power_mean_w"] == pytest.approx(280.0)
 
 
 def test_gpu_monitor_samples_in_the_background_until_exit():
-    with GpuMonitor(interval=0.001, sampler=lambda: (42.0, 7.0)) as mon:
+    with GpuMonitor(interval=0.001, sampler=lambda: (42.0, 7.0, 55.0, 120.0)) as mon:
         while len(mon.samples) < 3:
             pass
     taken = len(mon.samples)
-    assert taken >= 3 and mon.samples[0] == (42.0, 7.0)
+    assert taken >= 3 and mon.samples[0] == (42.0, 7.0, 55.0, 120.0)
     assert len(mon.samples) == taken  # the thread has stopped
 
 

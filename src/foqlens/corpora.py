@@ -108,25 +108,31 @@ class Corpus:
     columns: tuple[str, ...]
     build: Callable[[list[dict]], list[Row]]
     passage: bool = False  # the answer is read from a given passage rather than recalled from the weights
+    train: str | None = None  # the train split in the same repository and revision: examples for a prompt come from here
+
+    def train_source(self) -> Source:
+        if self.train is None:
+            raise ValueError(f"{self.source.repo} has no train split registered: its prompts take no examples")
+        return Source(self.source.repo, self.train, self.source.revision)
 
 
 CORPORA = {
     "triviaqa": Corpus(
         Source("mandarjoshi/trivia_qa", "rc.nocontext/validation-00000-of-00001.parquet",
                "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f"),
-        ("question_id", "question", "answer"), trivia_rows),
+        ("question_id", "question", "answer"), trivia_rows, train="rc.nocontext/train-00000-of-00001.parquet"),
     "nq_open": Corpus(
         Source("google-research-datasets/nq_open", "nq_open/validation-00000-of-00001.parquet",
                "5dd9790a83002ad084ddeb7c420dc716852c6f28"),
-        ("question", "answer"), nq_rows),
+        ("question", "answer"), nq_rows, train="nq_open/train-00000-of-00001.parquet"),
     "arc_challenge_closed": Corpus(
         Source("allenai/ai2_arc", "ARC-Challenge/test-00000-of-00001.parquet",
                "210d026faf9955653af8916fad021475a3f00453"),
-        ("id", "question", "choices", "answerKey"), arc_closed_rows),
+        ("id", "question", "choices", "answerKey"), arc_closed_rows, train="ARC-Challenge/train-00000-of-00001.parquet"),
     "squad_v2": Corpus(
         Source("rajpurkar/squad_v2", "squad_v2/validation-00000-of-00001.parquet",
                "3ffb306f725f7d2ce8394bc1873b24868140c412"),
-        ("id", "question", "context", "answers"), squad_rows, passage=True),
+        ("id", "question", "context", "answers"), squad_rows, passage=True, train="squad_v2/train-00000-of-00001.parquet"),
     "hotpotqa": Corpus(
         Source("hotpotqa/hotpot_qa", "distractor/validation-00000-of-00001.parquet",
                "1908d6afbbead072334abe2965f91bd2709910ab"),
@@ -134,8 +140,24 @@ CORPORA = {
 }
 
 
+def _rows(corpus: Corpus, source: Source, limit: int | None) -> list[Row]:
+    rows = corpus.build(pq.read_table(source.local(), columns=list(corpus.columns)).to_pylist())
+    return rows[:limit] if limit else rows
+
+
 def read(name: str, limit: int | None = None) -> tuple[list[Row], Source]:
     """One corpus at its pinned revision, in its own order; `limit` keeps the first rows, for a smoke check."""
     corpus = CORPORA[name]
-    rows = corpus.build(pq.read_table(corpus.source.local(), columns=list(corpus.columns)).to_pylist())
-    return (rows[:limit] if limit else rows), corpus.source
+    return _rows(corpus, corpus.source, limit), corpus.source
+
+
+def read_train(name: str, limit: int) -> list[Row]:
+    """The first `limit` records of a corpus's train split: never measured on, a pool of examples for its prompts.
+
+    Only those records are read. TriviaQA's train split is 138k records of nested answers, and turning
+    all of it into Python objects next to a loading model ran the machine out of memory (2026-09-14).
+    Records, not rows: TriviaQA lists most questions twice, so its pool comes out smaller than `limit`.
+    """
+    corpus = CORPORA[name]
+    batches = pq.ParquetFile(corpus.train_source().local()).iter_batches(batch_size=limit, columns=list(corpus.columns))
+    return corpus.build(next(batches).to_pylist())

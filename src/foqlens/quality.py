@@ -15,7 +15,7 @@ from functools import partial
 import numpy as np
 
 from foqlens.evaluate import QualityMetric, Question
-from foqlens.gpu_share import FULL, Throttle
+from foqlens.gpu_share import FULL, Pacer
 from foqlens.layouts import LayoutPolicy
 from foqlens.precision import Controller
 from foqlens.progress import Progress
@@ -51,7 +51,7 @@ def token_batches(lengths: Sequence[int], max_tokens: int, max_batch: int) -> li
 
 
 def compute_masks(
-    score: BatchScorer, prompts: list[str], batch_size: int, throttle: Throttle = FULL, groups: list[np.ndarray] | None = None,
+    score: BatchScorer, prompts: list[str], batch_size: int, throttle: Pacer = FULL, groups: list[np.ndarray] | None = None,
 ) -> np.ndarray:
     """Mask vectors of all prompts: [len(prompts), n_blocks], in the prompts' order.
 
@@ -90,7 +90,7 @@ def layout_pool() -> Executor:
 
 def evaluate_policy(
     model, tokenizer, ctl: Controller, questions: list[Question], policy: LayoutPolicy, metric: QualityMetric,
-    batch_size: int, throttle: Throttle = FULL, layouts: list[np.ndarray] | None = None,
+    batch_size: int, throttle: Pacer = FULL, layouts: list[np.ndarray] | None = None,
 ) -> list[dict]:
     """Per question: the metric's values and the mean bits spent.
 
@@ -118,7 +118,7 @@ def _evaluate_batch(
 
 def evaluate_all(
     model, tokenizer, ctl: Controller, questions: list[Question], policies: list[LayoutPolicy], metric: QualityMetric,
-    batch_size: int, log: Callable[[str], None] = partial(print, flush=True), throttle: Throttle = FULL,
+    batch_size: int, log: Callable[[str], None] = partial(print, flush=True), throttle: Pacer = FULL,
     pool: Executor | None = None, layouts: list[Future] | None = None,
 ) -> dict[str, list[dict]]:
     """evaluate_policy for every policy, by name, logging each finished one with the percent and the expected end.

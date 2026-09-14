@@ -15,5 +15,5 @@ params:
 
 A layout is read per query, storage is one copy: a block keeps the deepest slice any query asks of it. How much that saves, against how many queries and how varied they are.
 
-- Preregistration: [ADDENDUM-12](ADDENDUM-12.md). Results deleted with the corpus (`1e89a81`). Runs: `runs/E011-depth-caps/`.
+- Preregistration: [ADDENDUM-12](ADDENDUM-12.md). Results deleted with the corpus (`1e89a81`). Runs: deleted with the corpus.
 - An engineering measurement, no hypothesis at stake: reading is unchanged by a cap, so quality is not measured again.

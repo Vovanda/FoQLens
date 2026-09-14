@@ -82,7 +82,9 @@ What it means:
 - The instrument is still not off the hook: in representations the cosine direction holds (weakly), in masks it does not - the masks lost even that faint signal.
 - For the next instrument, the held-out pair must pass a step 0 check on representations before it is fixed; and history and geography are no longer untouched, since this pair is now known to be hard.
 
-## What is next
+## What was next at the time
+
+Superseded by step 2.5 of [docs/goals.md](../../docs/goals.md).
 
 1. **Instrument change**, as the preregistration fixes: the output gradient per block, then block ablation - each through the same path of addendum, exploration, thresholds and confirmation.
 2. **A new held-out set** for that confirmation, checked for separability in representations before it is fixed.

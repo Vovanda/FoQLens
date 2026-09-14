@@ -8,7 +8,7 @@ One folder per experiment, `E0NN-slug`: its preregistration (addenda, thresholds
 
 **Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](../docs/corpus.md).
 
-Deleted with the corpus: the result texts and runs of E004, E005, E007-E011, E013 and E014, and the never-run E002, E003, E012 and E015. The preregistrations and the code are kept.
+Deleted with the corpus: every run outside `runs/reference/`, the result texts of E004, E005, E007-E011, E013 and E014, and the never-run E002, E003, E012 and E015. The preregistrations and the code are kept.
 
 Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `done`; `exploratory` - run without a preregistration, so it can point a direction but not settle one; `legacy` - run, but on an approach since replaced; `not-run` - fixed and never run on its own; `withdrawn` - run, but its verdict does not stand; `reset` - run on the question set of the reset, nothing is claimed from it; `deleted` - prepared on that set and deleted with it, kept in git history.
 
@@ -21,9 +21,9 @@ Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `do
 | [E005](E005-backbone/_index.md) | Backbone + topic fill | 2026-09-11 | H3.1, H3.3 | reset |
 | [E006](E006-read-depths/_index.md) | Read depths from one sliced copy, resident bench | - | - | done |
 | [E007](E007-dilation/_index.md) | Dilation of the topic fill | 2026-09-11 | H3.1 | reset |
-| [E008](E008-zones-fixed-budget/_index.md) | Expert zones at a fixed 5-bit budget | 2026-09-11 | H3.1, H3.2 | reset |
-| [E009](E009-zones-matrix/_index.md) | Expert zones over precision share x focus area | 2026-09-11 | H3.1, H3.2 | reset |
-| [E010](E010-lens-layout/_index.md) | Lens layout: a floor over the network, zones lifted over it ([docs/quantization-filter.md](../docs/quantization-filter.md)) | 2026-09-12 | H3, H3.1, H3.2, H4 | reset |
+| [E008](E008-zones-fixed-budget/_index.md) | Expert zones at a fixed 5-bit budget | 2026-09-11 | H3.1, H3.2 | legacy, reset |
+| [E009](E009-zones-matrix/_index.md) | Expert zones over precision share x focus area | 2026-09-11 | H3.1, H3.2 | legacy, reset |
+| [E010](E010-lens-layout/_index.md) | Lens layout: a floor over the network, zones lifted over it ([docs/quantization-filter.md](../docs/quantization-filter.md)) | 2026-09-12 | H3, H3.1, H3.2 | reset |
 | [E011](E011-depth-caps/_index.md) | Depth caps: what storage costs when many queries share one copy | 2026-09-12 | - | reset |
 | E012 | The edges of the address: a scan behind an empty floor | 2026-09-12 | H3.1, H3.2 | deleted |
 | [E013](E013-regulator-map/_index.md) | The map of the regulator: which settings cost the fewest errors | 2026-09-12 | H3 | reset |

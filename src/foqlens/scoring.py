@@ -4,7 +4,7 @@ Two instruments, both producing one score per block over all controlled modules,
 
 - BlockScorer - the naive score of experiments/E001-run1-exploration/ADDENDUM-01.md: the L2 norm of a block's output,
   averaged over the tokens a center mode selects ("norm", "pooled", "attention");
-- GradientScorer - gradient x activation of experiments/E002-gradient-score/ADDENDUM-02.md: the first-order estimate of
+- GradientScorer - gradient x activation (E002; its preregistration was deleted with the corpus): the first-order estimate of
   the change in the query's own language-model loss if the block's output were zeroed.
 
 Both work on right-padded batches. Background subtraction is done by the caller.

@@ -1,19 +1,7 @@
 """Answering in the model's own words, scored as SQuAD scores it - with a passage and without one."""
 
-import importlib.util
-from pathlib import Path
-
 from foqlens.extractive import NO_ANSWER, exact_match, first_line, qa_prompt, token_f1
 from foqlens.generation import question_prompt
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def calibration():
-    spec = importlib.util.spec_from_file_location("corpus_calibration", ROOT / "scripts" / "corpus_calibration.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def test_a_closed_book_prompt_carries_no_passage():
@@ -55,30 +43,3 @@ def test_an_unanswerable_question_is_right_only_when_the_model_says_so():
 
 def test_the_answer_ends_at_the_first_line():
     assert first_line(" David Seville\n\nQuestion: next") == "David Seville"
-
-
-def test_trivia_answers_keep_every_alias_once_with_the_value_first():
-    record = {"answer": {"value": "Sunset Boulevard",
-                         "aliases": ["Sunset Blvd", "Sunset Boulevard", "West Sunset Boulevard"]}}
-    assert calibration().closed_book_answers("triviaqa", record) == [
-        "Sunset Boulevard", "Sunset Blvd", "West Sunset Boulevard"]
-
-
-def test_a_question_asked_without_its_options_is_scored_against_the_right_options_text():
-    rows = [{"question": "What gas do plants take in?", "choices": ["oxygen", "carbon dioxide", "helium", "neon"],
-             "answer": 1}]
-    assert calibration().closed_from_choices(rows) == [
-        {"context": None, "question": "What gas do plants take in?", "answers": ["carbon dioxide"]}]
-
-
-def test_a_question_that_points_at_its_options_is_left_out():
-    """Without the options it has no answer, whatever the model knows."""
-    pointing = ["Which of the following best describes the objects?", "Which of these steps should come first?",
-                "The following are true EXCEPT", "Pick one of the items listed below."]
-    rows = [{"question": q, "choices": ["a", "b", "c", "d"], "answer": 0} for q in pointing]
-    assert calibration().closed_from_choices(rows) == []
-
-
-def test_nq_open_answers_are_taken_as_listed():
-    record = {"answer": ["14 December 1972 UTC", "December 1972"]}
-    assert calibration().closed_book_answers("nq_open", record) == ["14 December 1972 UTC", "December 1972"]

@@ -40,4 +40,4 @@ explicit = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["gpu: needs CUDA and the model weights"]
+markers = ["gpu: needs CUDA and the model weights", "data: reads the pinned corpora from the hub or its local cache"]

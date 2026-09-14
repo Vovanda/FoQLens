@@ -92,33 +92,6 @@ def test_own_and_other_topic_policies_point_at_different_blocks():
     assert own.name == "own_topic_pooled_0.500"
 
 
-def test_layered_keeps_the_backbone_and_fills_the_rest_by_the_fill_order():
-    weights = np.full(10, 10)
-    backbone = np.arange(10, 0, -1, dtype=float)  # blocks 0, 1, 2 ... most important
-    fill = np.arange(10, dtype=float)  # blocks 9, 8, 7 ... first by the topic
-    sharp = bg.layered(backbone, fill, weights, precision_share=0.4, share=0.5)
-    assert sharp.tolist() == [True, True] + [False] * 5 + [False, True, True]  # 2 backbone + 2 topic blocks
-    assert bg.layered(backbone, fill, weights, 0.4, 1.0).tolist() == bg.directed(backbone, weights, 0.4).tolist()
-    assert bg.layered(backbone, fill, weights, 0.4, 0.0).tolist() == bg.directed(fill, weights, 0.4).tolist()
-
-
-def test_backbone_fill_policies_share_the_backbone_and_differ_in_the_fill():
-    from foqlens.layouts import Backbone, BackboneFill, OtherTopic, OwnTopic, RandomFill, TopicMeans
-
-    weights = np.full(6, 10)
-    backbone = np.array([9.0, 8.0, 0.0, 0.0, 0.0, 0.0])
-    scores = np.array([[0, 0, 5.0, 4.0, 0, 0]] * 2 + [[0, 0, 0, 0, 5.0, 4.0]] * 2)
-    means = TopicMeans(scores, ("a", "a", "b", "b"))
-    pairs = {"a": "b", "b": "a"}
-    own = BackboneFill(OwnTopic(means), "pooled", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO).levels(np.array([0]))[0]
-    other = BackboneFill(OtherTopic(means, pairs), "pooled", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO).levels(np.array([0]))[0]
-    sharp = lambda row: [i for i, v in enumerate(row) if v == Level.BF16]  # noqa: E731
-    assert sharp(own) == [0, 1, 2, 3] and sharp(other) == [0, 1, 4, 5]
-    rnd = BackboneFill(RandomFill(4 / 6, seed=0), "-", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO)
-    assert set(sharp(rnd.levels(np.array([0]))[0])) >= {0, 1} and rnd.name == "bb0.50_random_0.667"
-    assert sharp(Backbone(4 / 6, backbone, weights, Level.ZERO).levels(np.array([0, 3]))[1])[:2] == [0, 1]
-
-
 def test_paired_bootstrap_interval_and_reproducibility():
     from foqlens.stats import paired_bootstrap
 
@@ -212,7 +185,7 @@ def test_evaluate_all_takes_queued_layouts_in_order_and_refuses_a_short_queue(mo
 def test_a_new_fill_is_a_new_class_and_needs_no_change_to_the_policies():
     from typing import ClassVar
 
-    from foqlens.layouts import BackboneFill, TopicMask
+    from foqlens.layouts import TopicMask
 
     class Last:  # ranks the last blocks first
         kind: ClassVar[str] = "last"
@@ -224,24 +197,19 @@ def test_a_new_fill_is_a_new_class_and_needs_no_change_to_the_policies():
             return np.arange(n_blocks, dtype=float)
 
     weights = np.full(6, 10)
-    backbone = np.array([9.0, 8.0, 0.0, 0.0, 0.0, 0.0])
-    fill = BackboneFill(Last(), "pooled", 4 / 6, 0.5, backbone, weights, coarse=Level.ZERO)
-    sharp = np.flatnonzero(fill.levels(np.array([0]))[0] == Level.BF16).tolist()
-    assert sharp == [0, 1, 4, 5] and fill.name == "bb0.50_last_pooled_0.667"
     mask = TopicMask(Last(), "pooled", 2 / 6, weights, Level.ZERO)
     assert np.flatnonzero(mask.levels(np.array([0]))[0] == Level.BF16).tolist() == [4, 5]
     assert mask.name == "last_topic_pooled_0.333"
 
 
 def test_flat_policies_are_exactly_their_budget_rules():
-    from foqlens.layouts import BackboneFill, OtherTopic, OwnTopic, RandomFill, TopicMask, TopicMeans, _rng
+    from foqlens.layouts import OtherTopic, OwnTopic, TopicMask, TopicMeans
 
     rng = np.random.default_rng(3)
     domains = ("a",) * 3 + ("b",) * 3
     partner = {"a": "b", "b": "a"}
-    n, share, cut = 40, 0.4, 0.5
+    n, share = 40, 0.4
     weights = rng.integers(64, 640, size=n)
-    backbone = rng.normal(size=n)
     means = TopicMeans(rng.normal(size=(len(domains), n)), domains)
     idx = np.arange(len(domains))
     direct_topic = lambda topic_of: np.stack(  # noqa: E731
@@ -249,10 +217,6 @@ def test_flat_policies_are_exactly_their_budget_rules():
     assert np.array_equal(TopicMask(OwnTopic(means), "s", share, weights, Level.ZERO).levels(idx), direct_topic(lambda i: domains[i]))
     assert np.array_equal(TopicMask(OtherTopic(means, partner), "s", share, weights, Level.ZERO).levels(idx),
                           direct_topic(lambda i: partner[domains[i]]))
-    random_fill = BackboneFill(RandomFill(share, seed=7), "-", share, cut, backbone, weights, coarse=Level.ZERO)
-    direct_random = np.stack([bg.to_levels(bg.layered(backbone, _rng(7, int(i), share, salt=1).random(n), weights, share, cut),
-                                           lo=Level.ZERO) for i in idx])
-    assert np.array_equal(random_fill.levels(idx), direct_random)
 
 
 def test_summarize_averages_whatever_the_metric_names_overall_and_per_domain():

@@ -1,4 +1,6 @@
-# Data sources - run 1
+# Data sources - the first corpus
+
+The first corpus chosen was rejected ([corpus.md](corpus.md)); this page stays as the record of how its source was chosen. Steps are numbered as in the preregistration.
 
 Which questions the bench is fed, why this source was chosen, and what was rejected. Decided 2026-09-11, before any run. This is the source of **run 1**; later runs may use another benchmark - each run records its own sources in a file like this one.
 

@@ -9,6 +9,7 @@ Predictions are **directions, not numbers**. This is an exploratory experiment: 
 ## 1. Conditions
 
 - **Models.** Exploration - `google/gemma-4-E2B`, confirmation - `google/gemma-4-E4B`. Base checkpoints, not `-it`: what is measured is how pretraining organized knowledge, not the instruction-tuning layer. Queries are given as text without a chat template.
+  **UPD 2026-09-15.** Free answers - the selection of the corpus, its judge, H6 - run on the `-it` version of the same model (`google/gemma-4-E2B-it`, `google/gemma-4-E4B-it`) with its chat template: without `-it` it is unclear what data to prepare for it and how. The model is a detail of the bench; the hypotheses do not depend on it.
 - **The step 1 instrument** is a naive score without training: the heaviest tokens of the query (by activation norm) as centers, a block's score is its response on these tokens. What a "block" is and how exactly the response is computed is fixed in the run code, committed before the launch.
 - **Exploration phase - debugging domains:** biology, math, chemistry, physics, biophysics (mixed: biology + physics).
 - **Domains are school subjects**, simple questions the model is known to tell apart.

@@ -1,6 +1,6 @@
 # Goals
 
-FoQLens goals in order of execution. Each next goal opens only if the previous one passed. Details, measurements and reasoning are in the [plan](plan.md); every experiment is in [experiments/](../experiments/_index.md), every hypothesis in [hypotheses.md](hypotheses.md). Updated 2026-09-13.
+The goals of FoQLens and the roadmap of the bench. Details, measurements and reasoning are in the [plan](plan.md); every experiment is in [experiments/](../experiments/_index.md), every hypothesis in [hypotheses.md](hypotheses.md). Updated 2026-09-15.
 
 ## Main goal
 
@@ -8,7 +8,7 @@ FoQLens goals in order of execution. Each next goal opens only if the previous o
 
 Mixture of Experts is a special case of it: experts are zones with hard edges fixed at training, the rest not computed, a router choosing which. The regulator makes the same thing continuous - the zones emerge from the query, their edges fall off smoothly, and how sharp they are follows the context and the machine. The rest of the weights is read coarsely or, at a ZERO base, not loaded at all - the topology of MoE, with the zones chosen by the query. One set of weights then serves every device and every load, lean where little is needed and at full precision where the query needs it.
 
-**The main hypothesis:** on a hard question the first pass gives a draft read mostly at base precision; the draft goes back into the input with the refinement, the zones of the next step land more precisely, and the answer ends better than that of the same model at native precision. The gain is expected where the iterations are - an agent or a model's reasoning ([H4](hypotheses.md)). It is tested once the FoQLens model exists (step 7). Further out, a horizon: a network trained with zoning and read with FoQZones should beat a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment ([H5](hypotheses.md)). It needs training and zeros that are never loaded, and is reproduced on a small transformer.
+**The main hypothesis:** on a hard question the first pass gives a draft read mostly at base precision; the draft goes back into the input with the refinement, the zones of the next step land more precisely, and the answer ends better than that of the same model at native precision. The gain is expected where the iterations are - an agent or a model's reasoning ([H4](hypotheses.md)). It is tested once the FoQLens model exists (item 8 of the roadmap). Further out, a horizon: a network trained with zoning and read with FoQZones should beat a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment ([H5](hypotheses.md)). It needs training and zeros that are never loaded, and is reproduced on a small transformer.
 
 ## What this bench tests
 
@@ -20,42 +20,57 @@ That makes the comparison uniform quantization at the same memory - what a deplo
 
 The input from the machine (a governor that lowers precision under load or heat) and from the value of the query come after this core works.
 
-## Goals by step
+## Roadmap
 
-> **Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](corpus.md). The statuses below are what the runs reported at the time.
+In order of work; items 3 and 4 run in parallel. Every hypothesis is untested.
 
+1. **The bench: its design and optimization** - done, and optimized as it goes. One stored copy of the
+   weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), each block able to store only
+   the depth it is read to; a decoding step is one CUDA graph over a static cache. A kernel that reads
+   only the bits it needs is written and tested, not yet wired into decoding.
+2. **A corpus of what the model knows** - done. Selected by the model's own answers in three regimes
+   and frozen: 17,214 questions E2B-it knows and 1,913 it does not, marked ([corpus.md](corpus.md)).
+3. **Uniform quantization on the corpus** - now. The answers at D8, D6, D4 and D2, judged by the model at
+   source quality ([invariants.md](invariants.md)): the share of the full model's knowledge each level
+   keeps. It is the baseline the filter is compared with.
+4. **The filter: how the zones are built** - now, in parallel with 3. Grounded variants of the mask and
+   of the zones built from it, read from the papers before any is coded.
+5. **The address** - waits for the filter. Topics separate in the model, the mask is concentrated, zones
+   of related topics overlap.
+6. **Precision follows the meaning** - waits for the filter. How much of what the model knows the zones
+   keep, against uniform quantization at the same memory - including the outcome that they keep no more.
+7. **The regulator answers to the machine** - waits. Precision lowered under load or heat, the zones of
+   the query kept sharpest.
+8. **Agents on the FoQLens model - the main hypothesis** - waits for the model (zones with the address
+   taken online from the first layers). An agent solves a hard multi-step task - designing a software
+   architecture, for example - as a chain of a draft and refinements, on the zone model, on the same
+   model at native precision and on uniform quantization at the same memory; compared are the result of
+   the chain and what it cost (memory, compute, tokens). [H4](hypotheses.md) expects the zone model to
+   end better than native precision at a lower cost.
 
-**Step −1. Preregistration in git** - done.
-Before every run the repo holds its hypotheses and predictions, fixed as directions; the main preregistration is in [prereg/](../prereg/), each experiment's addenda in its folder.
+Beyond solo work: a learned score, only if the untrained ones give an effect.
 
-**Step 0. Topics separate in representations** - reported yes on E2B at the time, withdrawn with the corpus ([E001](../experiments/E001-run1-exploration/_index.md)).
-At the middle layer k-means ARI 0.98 for biology-math (the run's summary was deleted with the corpus; the number is in [E001 results](../experiments/E001-run1-exploration/results.md)). The held-out pair (history-geography) barely separates even here (ARI 0.04).
+**The steps as numbered before 2026-09-15** keep their numbers where they are written - the
+preregistration is never edited, and [plan.md](plan.md), [hypotheses.md](hypotheses.md) and
+[data-sources.md](data-sources.md) refer to it:
 
-**Step 1. Masks are separable and concentrated** - **not confirmed with the naive score** ([E001](../experiments/E001-run1-exploration/_index.md)): exploration passed weakly, the held-out confirmation failed. The gradient score (E002, deleted with the corpus) replaced it as the mask source but was never checked on its own. Load-bearing.
-
-**Step 2. Zones overlap** - exploration passed, confirmation failed ([E001](../experiments/E001-run1-exploration/_index.md)). Read again when an instrument passes step 1.
-
-**Step 2+. Mask geometry** - mixed in exploration; the hand-written mixed domain came out biology-like, so a better mixed domain is needed first.
-
-**Step 2.5. Exploration, before any hypothesis is stated again** - in progress, 2026-09-13.
-Its first piece is the corpus: the full model answers five datasets in three regimes - a passage, the weights only, two passages - in its own words, and the questions it gets right, as judged by the SQuAD score, the full model and Claude, become the set every later run reads ([corpus.md](corpus.md)).
-What the model is actually competent at and on which corpora; what a gradient mask tracks and whether anything about it is stable; what the regulator's settings do to an answer a person would accept. This step states no predictions and settles nothing. **Its output is a list of invariants** - properties that survive a change of corpus, of metric or of settings ([invariants.md](invariants.md)) - and the hypotheses worth preregistering are then written about those. A property seen once under one setup does not qualify; that is the mistake this whole reset came from. The hypotheses that follow it are expected to differ from the ones listed today ([hypotheses.md](hypotheses.md)).
-
-**Step 3. Precision follows the meaning** - **not started.** Eight runs were made ([E004](../experiments/E004-injection/_index.md), [E005](../experiments/E005-backbone/_index.md), [E007](../experiments/E007-dilation/_index.md) to [E010](../experiments/E010-lens-layout/_index.md), [E013](../experiments/E013-regulator-map/_index.md), [E014](../experiments/E014-moved-zones/_index.md)) and none of them measured what it set out to; their code and preregistrations remain as a record. Before this step is attempted again: a corpus and a metric that can carry a verdict ([corpus.md](corpus.md)), and a mask that is asked about the answer rather than about the prompt.
-Done when: how much of what the model knows the zones keep, against uniform quantization at the same memory, is named - including the outcome that they keep no more.
-
-**Step 4. Learned score** - beyond solo work; only if the untrained scores give an effect.
-
-**Step 5. Memory follows the zones** - engineering. Done so far ([E006](../experiments/E006-read-depths/_index.md)): one residual-sliced copy read at 2 / 4 / 6 / 8 bits, the bf16 weights leave the GPU (-1.63 GiB on E2B, D8 as good as int8), and every block can store only the depth it is read to. Speed and energy savings need a kernel that reads only the bits it needs.
-
-**Step 6. The regulator reacts to the machine** - after step 3: precision lowered under load or heat, the zones of the query kept sharpest.
-
-**Step 7. Agents on the FoQLens model - the main hypothesis** - once the model exists (zones with the address taken online from the first layers). An agent solves a hard multi-step task - designing a software architecture, for example - as a chain of a draft and refinements, on the zone model, on the same model at native precision and on uniform quantization at the same memory; compared are the result of the chain and what it cost (memory, compute, tokens).
-Done when: the chains are compared; [H4](hypotheses.md) expects the zone model to end better than native precision at a lower cost.
+| Step | Roadmap item |
+| --- | --- |
+| −1 - preregistration in git | a rule of the work, below |
+| 0, 1, 2, 2+ - separation, masks, overlap, geometry | 5 |
+| 2.5 - the corpus | 2 |
+| 3 - precision follows the meaning | 6 |
+| 4 - learned score | beyond solo work |
+| 5 - residuals instead of copies | 1 |
+| 6 - the regulator and the machine | 7 |
+| 7 - agents | 8 |
 
 ## Order and boundaries
 
-- Blind analysis: all runs of an experiment first, then everything is opened at once. The exception is step 0.
+- Preregistration in git: before every run the repo holds its hypotheses and predictions, fixed as
+  directions; the main preregistration is in [prereg/](../prereg/), each experiment's addenda in its folder.
+- Blind analysis: all runs of an experiment first, then everything is opened at once. The exception is the
+  check that the model is fit for the bench at all - do topics separate.
 - A second model (E4B) only after a stable positive result on E2B with more than one score.
 - Publication only if there is a result to publish; external review comes after it.
 - Literature is read when the stage that needs it comes, with notes that cite the passage.

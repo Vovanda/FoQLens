@@ -1,6 +1,6 @@
 # Step-by-step plan and preregistration
 
-Assembled 2026-09-10, moved into FoQLens 2026-09-11. What exactly to do for the [problem statement](problem-statement.md), in order of execution. Each step gates the next: if it fails, do not go further. The status summary is in the [goals](goals.md).
+Assembled 2026-09-10, moved into FoQLens 2026-09-11. What exactly to do for the [problem statement](problem-statement.md), in order of execution. Each step gates the next: if it fails, do not go further. The steps are numbered as in the preregistration; the roadmap in the [goals](goals.md) has its own numbering and says where each step stands.
 
 ## Stack and model
 

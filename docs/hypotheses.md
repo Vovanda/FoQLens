@@ -6,7 +6,7 @@ title: Hypotheses
 
 The claims FoQLens tests, each with the experiments that test it. The text of every hypothesis and its predictions lives in the preregistration ([PREREGISTRATION.ru.md](../prereg/PREREGISTRATION.ru.md), English: [PREREGISTRATION.md](../prereg/PREREGISTRATION.md)) and in the addenda of the experiments; this page only gives them ids (assigned 2026-09-12) and tracks their status.
 
-**Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](corpus.md).
+**Every hypothesis is untested.** The first corpus chosen was rejected: the letter did not tell whether the model knew the answer or guessed it ([corpus.md](corpus.md)). A step in the table below is numbered as in the preregistration; the roadmap is in [goals.md](goals.md).
 
 The list is a starting point: the hypotheses tested next are stated after the exploration ([invariants.md](invariants.md)) and preregistered before their runs.
 
@@ -95,7 +95,7 @@ Which form keeps more of what matters at the same length is an open question ins
 - *A breakdown below step X.* That is the lower bound of the regulator: a base below X is ruled out whatever the zones.
 - *The loss at the junction is smaller than within an area.* The bridges exist, and for interdisciplinary questions the coarsened model is fit for use with all its memory saving.
 
-**A condition on the bench.** The model has to follow a request to compress its answer. In a one-off probe of 2026-09-13 base E2B did not: it kept a word limit on 2 questions of 12 and built the ladder on none. H6 needs the `-it` checkpoint; the rest of the bench stays on the base one.
+**A condition on the bench.** The model has to follow a request to compress its answer. In a one-off probe of 2026-09-13 base E2B did not: it kept a word limit on 2 questions of 12 and built the ladder on none. H6 needs the `-it` checkpoint; the corpus is selected on it too (UPD 2026-09-15 in the [preregistration](../prereg/PREREGISTRATION.md)), and what needs no instructions stays on the base one.
 
 **Aside, not a priority.** Summarizing a text given in the context - direct compression - can be checked alongside, with the same fact-by-fact comparison.
 

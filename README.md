@@ -52,7 +52,7 @@ These are the directions the regulator opens; each is tested by a step of the [p
 
 ## What the bench checks
 
-The steps are ordered so each one can kill the next:
+The steps, numbered as in the [preregistration](prereg/), are ordered so each one can kill the next; where each stands is in the [roadmap](docs/goals.md):
 
 | Step | Question | Kills the idea if |
 | --- | --- | --- |

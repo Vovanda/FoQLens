@@ -191,6 +191,45 @@ def levels_from_lift(lift: np.ndarray, floor: Level, ceiling: Level, stops: Sequ
     return codes
 
 
+def zone_ceilings(strengths: np.ndarray, focus_strength: float, floor: Level, ladder: Sequence[Level] = READ_LEVELS) -> list[Level]:
+    """The ceiling of every zone from its own strength s in [0, 1]: kappa_i = gamma + floor(g s_i (m - gamma)) (#19).
+
+    With every strength 1 this is rule 2 as it is: one ceiling for all zones.
+    """
+    strengths = np.asarray(strengths, dtype=float)
+    if ((strengths < 0) | (strengths > 1) | np.isnan(strengths)).any():
+        raise ValueError("a zone strength outside [0, 1]")
+    return [ceiling_of(focus_strength * float(s), floor, ladder) for s in strengths]
+
+
+def levels_from_rungs(lifts: np.ndarray, ceilings: Sequence[Level], floor: Level, combine: str = "sum") -> np.ndarray:
+    """Level codes [n_blocks] from every zone's lift [n_zones, n_blocks] and its own ceiling, on the even profile (#19).
+
+    The even profile is linear in rungs: a zone with lift l > 0 reads a block at min(kappa, gamma + 1 +
+    floor(l (kappa - gamma))) - what levels_from_lift gives on even_stops without a halo. Zones with
+    different ceilings add in rungs, r = sum_i l_i (kappa_i - gamma), the level being min(max kappa,
+    gamma + 1 + floor(r)) where r > 0; with one ceiling for all this is rule 5 "sum" exactly. "max" takes
+    the highest level any zone gives alone.
+    """
+    lifts = np.clip(np.asarray(lifts, dtype=float), 0.0, 1.0)
+    gamma = floor.rung
+    kappa = np.array([c.rung for c in ceilings], dtype=np.int64)
+    if len(kappa) != len(lifts):
+        raise ValueError(f"{len(kappa)} ceilings for {len(lifts)} zones")
+    if len(kappa) == 0:
+        return np.full(lifts.shape[1], int(floor), dtype=np.uint8)
+    span = (kappa - gamma)[:, None]
+    if combine == "sum":
+        r = (lifts * span).sum(axis=0)
+        rung = np.where(r > 0, np.minimum(kappa.max(), gamma + 1 + np.floor(r).astype(np.int64)), gamma)
+    elif combine == "max":
+        alone = np.where((lifts > 0) & (span > 0), np.minimum(kappa[:, None], gamma + 1 + np.floor(lifts * span).astype(np.int64)), gamma)
+        rung = alone.max(axis=0)
+    else:
+        raise ValueError(f"unknown combine {combine!r}, expected 'sum' or 'max'")
+    return np.asarray([int(LADDER[i]) for i in range(len(LADDER))], dtype=np.uint8)[rung]
+
+
 def check_stops(stops: Sequence[tuple[Level, float]], floor: Level, ceiling: Level) -> None:
     """Refuse a profile that is not a falloff from the ceiling down to the floor."""
     if not stops:

@@ -22,7 +22,7 @@ from typing import ClassVar, Protocol
 
 import numpy as np
 
-from foqlens import zones
+from foqlens import graph_zones, zones
 from foqlens import budget as bg
 from foqlens.quant import Level
 
@@ -368,3 +368,113 @@ class ShuffledLevels:
             for group in groups:
                 out[row, group] = levels[row, rng.permutation(group)]
         return out
+
+
+# --- Zones on the block graph (#4, #19): the same three parts, with no map - zones, their reach, their strength.
+
+
+class GraphZoneSource(Protocol):
+    def zones(self, index: int) -> graph_zones.GraphZones:
+        """The expert zones of question `index` on the block graph."""
+        ...
+
+
+class ZoneStrength(Protocol):
+    def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
+        """Every zone's own strength in [0, 1]: how far its ceiling rises of the way g allows."""
+        ...
+
+
+@dataclass(frozen=True)
+class QueryGraphZones:
+    """The zones of the question's own mask - the address read from the query itself."""
+
+    scores: np.ndarray  # [questions, n_blocks], background subtracted
+    metric: object  # metric.BlockMetric
+    table: np.ndarray  # its neighbour table
+    weights: np.ndarray  # block sizes in weights
+
+    def zones(self, index: int) -> graph_zones.GraphZones:
+        return graph_zones.find_graph_zones(self.scores[index], self.metric, self.table, self.weights)
+
+
+class TopicGraphZones:
+    """The zones of the question's own topic mean (leave-one-out), found once per question."""
+
+    def __init__(self, means: TopicMeans, metric, table: np.ndarray, weights: np.ndarray):
+        self.means, self.metric, self.table, self.weights = means, metric, table, weights
+        self._cache: dict[int, graph_zones.GraphZones] = {}
+
+    def zones(self, index: int) -> graph_zones.GraphZones:
+        if index not in self._cache:
+            mean = self.means.mean(index, self.means.domains[index])
+            self._cache[index] = graph_zones.find_graph_zones(mean, self.metric, self.table, self.weights)
+        return self._cache[index]
+
+
+@dataclass(frozen=True)
+class EqualStrength:
+    """Every zone at full strength: rule 2 as it is, one ceiling for all zones."""
+
+    def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
+        return np.ones(len(zones_.centers))
+
+
+@dataclass(frozen=True)
+class GraphZoneLayout:
+    """Levels from zones on the block graph: zones -> how far each reaches -> lifts -> levels in rungs (#19).
+
+    Every part is a class behind its own interface - the zones (GraphZoneSource), the reach
+    (graph_zones.Reach: FoundReach or FrontReach), the strength of a zone (ZoneStrength) - and the knobs
+    mean the same whichever source the zones come from: f is the reach, g the ceiling. The level map is
+    the even profile without a halo (zones.levels_from_rungs).
+    """
+
+    name: str
+    source: GraphZoneSource
+    reach: graph_zones.Reach
+    metric: object  # metric.BlockMetric
+    floor: Level
+    focus_strength: float
+    strength: ZoneStrength = EqualStrength()
+    combine: str = "sum"
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        rows = []
+        for i in indices:
+            found = self.source.zones(int(i))
+            lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.metric)
+            ceilings = zones.zone_ceilings(self.strength.strengths(int(i), found), self.focus_strength, self.floor)
+            rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine))
+        return np.stack(rows)
+
+
+@dataclass(frozen=True)
+class QuantileLevels:
+    """The per-block regulator (#19) - the control the zones must beat, not a mechanism.
+
+    The top share f of blocks by the question's own score rise over the floor, graded by score up to the
+    ceiling of g; the level map is the zones' own even profile, so what differs is only that there are no
+    zones. It spends the same share of blocks whatever the question - a preset budget - and knows no
+    connectedness.
+    """
+
+    name: str
+    scores: np.ndarray  # [questions, n_blocks]
+    focus_area: float
+    focus_strength: float
+    floor: Level
+
+    def __post_init__(self) -> None:
+        zones.check_focus_area(self.focus_area)
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        ceiling = zones.ceiling_of(self.focus_strength, self.floor)
+        rows = []
+        for i in indices:
+            s = np.asarray(self.scores[int(i)], dtype=float)
+            lift = np.maximum(0.0, s - np.quantile(s, 1.0 - self.focus_area))
+            top = lift.max()
+            lift = lift / top if top > 0 else lift
+            rows.append(zones.levels_from_rungs(lift[None], [ceiling], self.floor))
+        return np.stack(rows)

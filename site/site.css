@@ -298,6 +298,8 @@ th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
 .tag--done { color: var(--done); }
 .tag--now { color: var(--now); }
 .tag--wait { color: var(--wait); }
+/* when a roadmap item started and ended, under its status: a line of its own, so the table keeps three columns on a phone */
+.when { display: block; margin-top: 0.25rem; font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 
 /* The rule above the footer runs at the width of the content, not of the window: a line across
    the whole page would cut the sheet off from the panel standing beside it. */

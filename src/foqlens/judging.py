@@ -27,7 +27,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from torch.nn.attention import SDPBackend, sdpa_kernel
 
+from foqlens.attention import MATH
 from foqlens.evaluate import letter_logprobs_batch
 from foqlens.extractive import NO_ANSWER
 from foqlens.prompting import PLAIN, USER, PromptFormat
@@ -109,6 +111,7 @@ class ModelJudge:
     batch_size: int = 16
     name: str = "model_judge"
     grade_tokens: tuple[int, ...] = ()
+    kernels: tuple[SDPBackend, ...] = MATH  # the sdpa kernels its forward may use (foqlens.attention)
 
     @classmethod
     def build(cls, model, tokenizer, ctl, fmt: PromptFormat, **kwargs) -> ModelJudge:
@@ -132,9 +135,10 @@ class ModelJudge:
         """The next word's probabilities among `ids`, renormalized, at bf16 in batches: log, [prompts, ids]."""
         self.ctl.set_all(Level.BF16)
         out = np.empty((len(prompts), len(ids)))
-        for start in range(0, len(prompts), self.batch_size):
-            chunk = slice(start, start + self.batch_size)
-            out[chunk] = letter_logprobs_batch(self.model, self.tokenizer, prompts[chunk], ids)
+        with sdpa_kernel(list(self.kernels)):
+            for start in range(0, len(prompts), self.batch_size):
+                chunk = slice(start, start + self.batch_size)
+                out[chunk] = letter_logprobs_batch(self.model, self.tokenizer, prompts[chunk], ids)
         return out
 
 

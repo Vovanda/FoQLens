@@ -35,6 +35,8 @@ the dynamic loop's top two logits were 0.06-0.25 apart, below the 5th percentile
 Invariant: the host reads the device once every check_every steps and once at the end, never more.
 Invariant: memory does not grow from batch to batch - every capture runs on one side stream per device
 (capture_stream); measured 2026-09-15: 40 batches in a row, 0.00 MiB a batch (tests/test_graph_decode_gpu.py).
+Invariant: the prefill runs on the prefill kernels of the decoder's attention plan and every step, eager or
+captured, on its decode kernels (foqlens.attention; tests/test_padded_batch_gpu.py).
 """
 
 from __future__ import annotations
@@ -43,8 +45,10 @@ import functools
 from dataclasses import dataclass
 
 import torch
+from torch.nn.attention import sdpa_kernel
 from transformers import Cache, StaticLayer
 
+from foqlens.attention import MATH_ONLY, AttentionPlan
 from foqlens.generation import STOP_CHECK_EVERY, ends_after, mask_positions
 
 FULL, SLIDING = "full_attention", "sliding_attention"
@@ -175,15 +179,19 @@ class StaticDecoder:
 
     graph: bool = True
     check_every: int = STOP_CHECK_EVERY
+    # The kernels of the prefill and of the steps (foqlens.attention); a graph keeps those it was captured with.
+    attention: AttentionPlan = MATH_ONLY
 
     def tokens(self, model, input_ids, attention_mask, max_new_tokens, stop):
-        run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
+        with sdpa_kernel(list(self.attention.prefill)):
+            run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
         step = GraphedStep(run) if self.graph else run.advance
         try:
-            for written in range(max_new_tokens):
-                if ends_after(written, max_new_tokens, run.done, self.check_every):
-                    return run.tokens[:, : written + 1]
-                step()
+            with sdpa_kernel(list(self.attention.decode)):
+                for written in range(max_new_tokens):
+                    if ends_after(written, max_new_tokens, run.done, self.check_every):
+                        return run.tokens[:, : written + 1]
+                    step()
             return run.tokens
         finally:
             if self.graph:

@@ -9,10 +9,15 @@ import torch
 GPU_WATCH = pytest.StashKey()
 STATION_TESTS = Path(__file__).resolve().parents[1] / "runs" / "station" / "tests"
 OUTCOMES = ("passed", "failed", "error")
+# A session goes into the station's log when it ran a GPU test file. Not by the gpu mark: a unit file that
+# needs CUDA carries it too (test_precision_unit), and every run of the unit suite became a "GPU session"
+# of one minute at 0% (2026-09-15).
+GPU_TEST_FILE = "_gpu.py"
 
 
 def ran_gpu_tests(terminalreporter) -> bool:
-    return any("gpu" in r.keywords for k in OUTCOMES for r in terminalreporter.stats.get(k, []))
+    return any(r.nodeid.split("::")[0].endswith(GPU_TEST_FILE)
+               for k in OUTCOMES for r in terminalreporter.stats.get(k, []))
 
 
 def pytest_sessionstart(session):

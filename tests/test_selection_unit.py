@@ -4,9 +4,10 @@ from dataclasses import replace
 
 import pytest
 
+from foqlens.extractive import NO_ANSWER
 from foqlens.io import answers_path, append_answers, append_verdicts, read_answers, read_verdicts, written_ids
-from foqlens.selection import (Answer, ClaudeVerdict, FrozenCorpus, Reading, Reason, Turn, Verdict, split_reasoning,
-                               strip_markup, turn, two_way_choice, verdict)
+from foqlens.selection import (Answer, ClaudeVerdict, FrozenCorpus, Reading, Reason, Turn, Verdict, freeze,
+                               split_reasoning, strip_markup, turn, two_way_choice, verdict)
 
 ANSWER = Answer(corpus="triviaqa", id="tc_1", revision="0f7faf33", model="google/gemma-4-E2B-it@3e22461f",
                 level="bf16", prompt="short-0shot", reply="Paris", answer="Paris", reasoning=None,
@@ -147,5 +148,54 @@ def test_a_guess_between_two_named_options_or_yes_no_is_marked(question, referen
 
 def test_the_frozen_corpus_survives_its_round_trip():
     frozen = FrozenCorpus("triviaqa", "0f7faf33", "google/gemma-4-E2B-it@3e22461f", "short-0shot",
-                          kept=("1", "2"), excluded={"3": "unknown:judges_agree"}, tuning=("4",), unknown_share=("3",))
+                          kept=("1", "2"), excluded={"3": "unknown:judges_agree"}, tuning=("4",), unknown_share=("3",),
+                          two_way=("2",))
     assert FrozenCorpus.from_json(frozen.to_json()) == frozen
+
+
+def answered(i, em, judge=None, answer="x"):
+    """An answer to question `i` the two automatic judges agree on unless `judge` says otherwise."""
+    return replace(ANSWER, id=i, answer=answer, exact_match=em, judge_with_reference=em if judge is None else judge)
+
+
+QUESTIONS = {str(i): (f"q{i}", ("a",)) for i in range(40)}
+
+
+def test_a_frozen_corpus_keeps_what_the_rule_calls_known_in_the_corpus_order():
+    answers = [answered(str(i), 1.0 if i % 2 else 0.0) for i in reversed(range(40))]
+    frozen = freeze(answers, {"2": Verdict.KNOWN, "3": Verdict.UNKNOWN}, QUESTIONS, (), seed=0)
+    kept = [str(i) for i in range(40) if i % 2 and i != 3] + ["2"]
+    assert set(frozen.kept) == set(kept) and list(frozen.kept) == sorted(frozen.kept, key=int)
+    assert frozen.excluded["3"] == "unknown:claude" and frozen.excluded["4"] == "unknown:judges_agree"
+    assert set(frozen.kept) | set(frozen.excluded) == set(QUESTIONS)
+
+
+def test_a_question_without_an_answer_is_kept_where_the_model_says_so():
+    questions = {**QUESTIONS, "40": ("q40", ())}
+    abstains = replace(ANSWER, id="40", answer=NO_ANSWER, exact_match=1.0, judge_with_reference=0.99)
+    frozen = freeze([answered(i, 1.0) for i in QUESTIONS] + [abstains], {}, questions, (), seed=0)
+    assert "40" in frozen.kept
+
+
+def test_an_open_answer_stops_the_freeze():
+    with pytest.raises(ValueError):
+        freeze([answered("1", 0.0, judge=0.99)], {}, QUESTIONS, (), seed=0)
+
+
+def test_the_unknown_share_is_a_tenth_of_the_stage2_set_drawn_from_the_excluded_by_seed():
+    answers = [answered(str(i), 1.0 if i < 27 else 0.0) for i in range(40)]
+    one, again = (freeze(answers, {}, QUESTIONS, ("99",), seed=7) for _ in range(2))
+    assert one.unknown_share == again.unknown_share and len(one.unknown_share) == 3  # 27 known = 90%
+    assert set(one.unknown_share) <= set(one.excluded) and one.tuning == ("99",)
+    assert one.unknown_share != freeze(answers, {}, QUESTIONS, (), seed=8).unknown_share
+
+
+def test_a_kept_guess_between_two_is_marked():
+    questions = {**QUESTIONS, "40": ("Is Paris in France?", ("yes",))}
+    frozen = freeze([answered(i, 1.0) for i in questions], {}, questions, (), seed=0)
+    assert frozen.two_way == ("40",)
+
+
+def test_answers_from_two_prompts_are_not_one_corpus():
+    with pytest.raises(ValueError):
+        freeze([answered("1", 1.0), replace(answered("2", 1.0), prompt="other")], {}, QUESTIONS, (), seed=0)

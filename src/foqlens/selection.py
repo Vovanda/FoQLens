@@ -253,12 +253,49 @@ class FrozenCorpus:
     excluded: dict[str, str] = field(default_factory=dict)  # id -> the reason it is out
     tuning: tuple[str, ...] = ()                # spent on choosing the prompt, never measured on
     unknown_share: tuple[str, ...] = ()          # the 10% of excluded questions stage 2 asks anyway, marked
+    two_way: tuple[str, ...] = ()                # kept questions a guess between two answers right half the time
 
     def to_json(self) -> dict:
-        return {**asdict(self), "kept": list(self.kept), "tuning": list(self.tuning),
-                "unknown_share": list(self.unknown_share)}
+        return {**asdict(self), **{name: list(getattr(self, name)) for name in LISTS}}
 
     @classmethod
     def from_json(cls, row: dict) -> FrozenCorpus:
-        return cls(**{**row, "kept": tuple(row["kept"]), "tuning": tuple(row["tuning"]),
-                      "unknown_share": tuple(row["unknown_share"])})
+        return cls(**{**row, **{name: tuple(row.get(name, ())) for name in LISTS}})
+
+
+LISTS = ("kept", "tuning", "unknown_share", "two_way")  # the FrozenCorpus fields written as JSON lists
+# Stage 2 asks 90% questions the full model knew and 10% it did not, drawn at random (Volodya 14.09).
+UNKNOWN_SHARE = 0.1
+
+
+def freeze(answers: list[Answer], claude: dict[str, Verdict], questions: dict[str, tuple[str, tuple[str, ...]]],
+           tuning: tuple[str, ...], seed: int) -> FrozenCorpus:
+    """The corpus as a file of numbers, by the same rule as every verdict (`verdict`).
+
+    `questions` maps every question's number, in the corpus's own order, to its text and references; the
+    questions spent on the prompt have no answer. An answer the rule leaves open is an error: the corpus
+    is frozen only once every answer is decided.
+    """
+    by_id = {a.id: a for a in answers}
+    fields = {(a.corpus, a.revision, a.model, a.prompt) for a in answers}
+    if len(fields) != 1:
+        raise ValueError(f"a corpus is frozen from one corpus, revision, model and prompt: {sorted(fields)}")
+    corpus, revision, model, prompt = fields.pop()
+    kept, excluded, two_way = [], {}, []
+    for i, (question, references) in questions.items():
+        if i not in by_id:
+            continue
+        v, reason = verdict(by_id[i], claude.get(i), bool(references))
+        if v == Verdict.OPEN:
+            raise ValueError(f"{corpus} {i}: the judges disagree and Claude has not read it")
+        if v == Verdict.KNOWN:
+            kept.append(i)
+            if references and two_way_choice(question, references):
+                two_way.append(i)
+        else:
+            excluded[i] = f"{v}:{reason}"
+    pool = list(excluded)
+    count = min(len(pool), round(len(kept) * UNKNOWN_SHARE / (1 - UNKNOWN_SHARE)))
+    picked = np.random.default_rng(seed).choice(len(pool), size=count, replace=False)
+    unknown = tuple(pool[k] for k in sorted(picked.tolist()))
+    return FrozenCorpus(corpus, revision, model, prompt, tuple(kept), excluded, tuple(tuning), unknown, tuple(two_way))

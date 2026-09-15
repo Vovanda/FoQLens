@@ -59,11 +59,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <li><a href="#e010-prereg" data-id="e010-prereg">E010 - the lens layout</a></li>
           <li><a href="#e013-prereg" data-id="e013-prereg">E013 - the map of the regulator</a></li>
         </ul>
-        <h2>Runs</h2>
-        <ul>
-          <li><a href="#e001" data-id="e001">E001 - separation and masks</a></li>
-          <li><a href="#e006" data-id="e006">E006 - read depths</a></li>
-        </ul>
       </div></div>
   </aside>
 
@@ -88,7 +83,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 
     <main class="doc wrap" id="doc">
       <h1>The documents of the bench</h1>
-      <p>FoQLens is a language model whose weights are read at a precision set by the meaning of the query; its mechanism is FoQZones, focusable quantization zones. This is the documentation of the bench that tests it - the mechanism, the goals, the plan, every preregistration and every run.</p>
+      <p>FoQLens is a language model whose weights are read at a precision set by the meaning of the query; its mechanism is FoQZones, focusable quantization zones. This is the documentation of the bench that tests it - the mechanism, the goals, the plan and every preregistration.</p>
       <p>Pick a document on the left. Each is a markdown file in the repository, and every link below goes to its source.</p>
       <h3>The idea</h3>
       <ul>
@@ -117,11 +112,6 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <li><a href="#prereg-ru">Пререгистрация (original)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/prereg/PREREGISTRATION.ru.md">prereg/PREREGISTRATION.ru.md</a></span></li>
         <li><a href="#e010-prereg">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/PREREG.md">experiments/E010-lens-layout/PREREG.md</a></span></li>
         <li><a href="#e013-prereg">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/PREREG.md">experiments/E013-regulator-map/PREREG.md</a></span></li>
-      </ul>
-      <h3>Runs</h3>
-      <ul>
-        <li><a href="#e001">E001 - separation and masks</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E001-run1-exploration/results.md">experiments/E001-run1-exploration/results.md</a></span></li>
-        <li><a href="#e006">E006 - read depths</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-read-depths/results.md">experiments/E006-read-depths/results.md</a></span></li>
       </ul>
     </main>
 
@@ -166,10 +156,6 @@ const SHELF = [
     ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
     ["e010-prereg", "experiments/E010-lens-layout/PREREG.md", "E010 - the lens layout"],
     ["e013-prereg", "experiments/E013-regulator-map/PREREG.md", "E013 - the map of the regulator"],
-  ]},
-  { group: "Runs", docs: [
-    ["e001", "experiments/E001-run1-exploration/results.md", "E001 - separation and masks"],
-    ["e006", "experiments/E006-read-depths/results.md", "E006 - read depths"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
@@ -226,7 +212,9 @@ async function show(id) {
   doc.innerHTML = '<p class="state">Loading…</p>';
   let text;
   try {
-    const response = await fetch(entry.path);
+    // Revalidated every time: a document changes without the page changing, and a cached copy would
+    // show the reader a page that is no longer in the repository.
+    const response = await fetch(entry.path, { cache: "no-cache" });
     if (!response.ok) throw new Error(String(response.status));
     text = await response.text();
   } catch {

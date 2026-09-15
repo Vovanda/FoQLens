@@ -203,14 +203,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
   <section id="roadmap">
     <div class="wrap">
       <h2>Where the work is</h2>
-      <p class="lede">Building the data the idea will be tested on.</p>
+      <p class="lede">The data is built; now the measure and the mask.</p>
       <div class="scroller">
         <table>
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
           <tbody>
             <tr><td class="num">0-2</td><td>Topics separate in the model; the mask is separable and concentrated; zones of related topics overlap</td><td><span class="tag tag--open">to re-test</span></td></tr>
-            <tr><td class="num">2.5</td><td><b>A corpus of what the model knows</b> - selected by its own answers in three regimes, one metric throughout - and whatever holds across them</td><td><span class="tag tag--yes">now</span></td></tr>
-            <tr><td class="num">3</td><td>Precision follows meaning: how much of what the model knows the zones keep, against uniform quantization at the same memory</td><td><span class="tag tag--open">next</span></td></tr>
+            <tr><td class="num">2.5</td><td><b>A corpus of what the model knows</b> - selected by its own answers in three regimes and frozen: 17,214 questions E2B-it knows</td><td><span class="tag tag--yes">built</span></td></tr>
+            <tr><td class="num">3</td><td>Precision follows meaning: how much of what the model knows the zones keep, against uniform quantization at the same memory. On the corpus: uniform D8-D2 and the score of the mask</td><td><span class="tag tag--yes">now</span></td></tr>
             <tr><td class="num">5</td><td>Memory follows the zones - one stored copy read at 2 / 4 / 6 / 8 bits, 1.63 GiB freed on E2B</td><td><span class="tag tag--yes">built</span></td></tr>
             <tr><td class="num">6</td><td>The regulator answers to the machine: load, heat, memory</td><td><span class="tag tag--open">after 3</span></td></tr>
             <tr><td class="num">7</td><td>An agent chain of a draft and refinements: the zone model against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--open">after 3</span></td></tr>
@@ -218,8 +218,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         </table>
       </div>
 
-      <h3>The corpus being built now</h3>
-      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself, and Claude.</p>
+      <h3>The corpus</h3>
+      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself grading it as an exam, and Claude. The corpus is frozen: 17,214 questions E2B-it knows, and 1,913 it does not, marked.</p>
       <div class="scroller">
         <table>
           <thead><tr><th>Regime</th><th>Where the answer is</th><th>What the zones should do</th></tr></thead>

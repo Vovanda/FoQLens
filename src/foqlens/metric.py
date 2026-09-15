@@ -1,15 +1,18 @@
 """Distances between weight blocks: the space the zones live in (issue #4).
 
-A zone is a ball in a metric on blocks. The rules of the zones (zones.py, issue #19) never look at
-coordinates - only at how far every block is from a zone's center - so a metric is anything that
-answers that, and a new space is a new class behind BlockMetric.
+The surface the zones live on is a graph of blocks, and a zone is every block within a radius of its
+center along it (issue #4). The rules of the zones (zones.py, issue #19) never look at coordinates - only
+at how far every block is from a zone's center - so a metric is anything that answers that, and a new
+space is a new class behind BlockMetric.
 
 - CoactivationMetric (M1): d(a, b) = sqrt(2 (1 - corr(a, b))) between the blocks' mask profiles over
   calibration questions - the distance weight_map.coactivation_map cuts down to two principal axes,
   here in full. Profiles are standardized per block and scaled to unit length, so the distance is the
   Euclidean distance between them.
-- neighbour_table: the k nearest blocks of every block in a metric, made symmetric - the graph the
-  peaks and hills of a mask are found on (zones.find_ball_zones) and the paths of M4 run along.
+- neighbour_table: the k nearest blocks of every block in a metric, made symmetric by union - the graph
+  the peaks and hills of a mask are found on (graph_zones.find_graph_zones) and the paths run along.
+  The union grows hubs; mutual_nicdm_table is the construction with fewer of them (hubness, #4), and
+  graph_report measures a graph for it.
 - ResistiveMetric: shortest paths along a neighbour table, every edge as long as its base distance
   divided by its conductance. The conductance is replaceable (Conductance): HarmonicConductance (M4) is
   the harmonic mean of the query's activity at the two ends - two half-edges in series (Kirchhoff), so
@@ -24,7 +27,8 @@ Invariants:
 - Invariant: CoactivationMetric distances are Euclidean: symmetric, zero on the diagonal, the triangle
   inequality holds (tests), and sqrt(2 (1 - corr)) for blocks whose profile varies.
 - Invariant: scaling or shifting one block's profile does not move it, as on the weight map.
-- Invariant: a neighbour table is symmetric and a block is never its own neighbour.
+- Invariant: a neighbour table is symmetric and a block is never its own neighbour, for either construction.
+- Invariant: mutual_nicdm_table leaves as many components as the union graph on the same distance has.
 - Invariant: with activity 1 everywhere a ResistiveMetric is the shortest path of its base table, for either conductance.
 - Invariant: a harmonic edge conducts between the smaller activity of its ends and twice that.
 - Invariant: a jump edge conducts 1 where its ends are equally active and less the larger the jump.
@@ -37,6 +41,9 @@ from typing import Protocol
 
 import numpy as np
 import torch
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components, minimum_spanning_tree
+from scipy.stats import skew
 
 EPS = 1e-12
 PAD = -1  # a missing neighbour in a padded table
@@ -87,24 +94,102 @@ class CoactivationMetric:
         return max(float(self.distances(rows).max()) for rows in every.split(ROW_CHUNK))
 
 
+def nearest(metric: BlockMetric, k: int, scale: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+    """Every block's k nearest blocks and their distances, [n_blocks, k] each, never the block itself.
+
+    With `scale` [n_blocks] the distance is rescaled first, d(a, b) / sqrt(scale_a scale_b) (NICDM).
+    """
+    n = metric.n_blocks
+    device = metric.distances(torch.tensor([0])).device
+    indices, distances = [], []
+    for rows in torch.arange(n, device=device).split(ROW_CHUNK):
+        d = metric.distances(rows)
+        if scale is not None:
+            d = d / torch.sqrt(scale[rows, None] * scale[None]).clamp_min(EPS)
+        d[torch.arange(len(rows), device=device), rows] = torch.inf  # never one's own neighbour
+        near = d.topk(min(k, n - 1), dim=1, largest=False)
+        indices.append(near.indices)
+        distances.append(near.values)
+    return torch.cat(indices), torch.cat(distances)
+
+
+def _directed(indices: torch.Tensor, distances: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """k-nearest lists as directed edges (head, tail, length)."""
+    heads = torch.arange(len(indices), device=indices.device).repeat_interleave(indices.shape[1])
+    return heads, indices.flatten(), distances.flatten()
+
+
 def neighbour_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch.Tensor]:
     """The k nearest blocks of every block, made symmetric: indices [n_blocks, width] padded with PAD, and their distances.
 
     A block's own entry is never among them. The union of "a is among b's k nearest" and the reverse
     keeps the graph undirected, so a path found along it runs both ways.
     """
+    a, b, w = _directed(*nearest(metric, k))
+    return _padded(torch.cat([a, b]), torch.cat([b, a]), torch.cat([w, w]), metric.n_blocks)
+
+
+def mutual_nicdm_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch.Tensor]:
+    """A graph with fewer hubs (#4): mutual nearest neighbours on the NICDM distance, its components joined along a spanning tree.
+
+    NICDM (Schnitzer et al. 2012) rescales d by the mean distance of either end to its k nearest,
+    d' = d / sqrt(mu_a mu_b): a hub sits near the mean profile, has a small mu, and every distance to it
+    grows. On d' only mutual pairs are linked - a hub can no longer collect the lists of hundreds. The
+    components that leaves are joined along the minimum spanning tree of the union graph on d', one edge
+    per join, shortest first (Dalmia & Sia 2021) - repairing on the raw d would hang them on the hubs
+    again (Flexer & Stevens 2018). Edge lengths are d'.
+    """
     n = metric.n_blocks
-    device = metric.distances(torch.tensor([0])).device
-    heads, tails, lengths = [], [], []
-    for rows in torch.arange(n, device=device).split(ROW_CHUNK):
-        d = metric.distances(rows)
-        d[torch.arange(len(rows), device=device), rows] = torch.inf  # never one's own neighbour
-        near = d.topk(min(k, n - 1), dim=1, largest=False)
-        heads.append(rows.repeat_interleave(near.indices.shape[1]))
-        tails.append(near.indices.flatten())
-        lengths.append(near.values.flatten())
-    a, b, w = torch.cat(heads), torch.cat(tails), torch.cat(lengths)
-    return _padded(torch.cat([a, b]), torch.cat([b, a]), torch.cat([w, w]), n)
+    mu = nearest(metric, k)[1].mean(dim=1)
+    heads, tails, lengths = _directed(*nearest(metric, k, scale=mu))
+    h, t, w = heads.cpu().numpy(), tails.cpu().numpy(), lengths.cpu().numpy()
+    mutual = np.isin(h * n + t, t * n + h)
+    _, parts = connected_components(coo_matrix((np.ones(mutual.sum()), (h[mutual], t[mutual])), shape=(n, n)), directed=False)
+    # explicit zeros are no edge to scipy: identical profiles lie at d' = 0, so every weight is lifted by EPS
+    tree = minimum_spanning_tree(coo_matrix((w + EPS, (h, t)), shape=(n, n)).tocsr().maximum(coo_matrix((w + EPS, (t, h)), shape=(n, n)).tocsr())).tocoo()
+    order = np.argsort(tree.data, kind="stable")
+    root = np.arange(parts.max() + 1)
+
+    def find(x: int) -> int:
+        while root[x] != x:
+            root[x] = root[root[x]]
+            x = root[x]
+        return x
+
+    joins = []
+    for e in order:
+        a, b = find(parts[tree.row[e]]), find(parts[tree.col[e]])
+        if a != b:
+            root[a] = b
+            joins.append(e)
+    ja, jb = tree.row[joins], tree.col[joins]
+    jw = tree.data[joins] - EPS
+    ea = np.concatenate([h[mutual], ja, jb])
+    eb = np.concatenate([t[mutual], jb, ja])
+    ew = np.concatenate([w[mutual], jw, jw])
+    device = lengths.device
+    as_tensor = lambda x, dtype: torch.as_tensor(x, dtype=dtype, device=device)  # noqa: E731
+    return _padded(as_tensor(ea, torch.long), as_tensor(eb, torch.long), as_tensor(ew, torch.float32), n)
+
+
+def graph_report(table: torch.Tensor | np.ndarray, indices: torch.Tensor | np.ndarray | None = None) -> dict:
+    """How a block graph measures up for hubness (#4): degrees, components, and - given the k-nearest lists - the k-occurrence."""
+    t = np.asarray(table.cpu() if isinstance(table, torch.Tensor) else table)
+    real = t != PAD
+    degree = real.sum(axis=1)
+    heads = np.repeat(np.arange(len(t)), t.shape[1])[real.ravel()]
+    n_parts, parts = connected_components(coo_matrix((np.ones(len(heads)), (heads, t.ravel()[real.ravel()])), shape=(len(t),) * 2), directed=False)
+    report = {"degree_median": float(np.median(degree)), "degree_p99": float(np.percentile(degree, 99)),
+              "degree_max": int(degree.max()), "components": int(n_parts),
+              "largest_share": float(np.bincount(parts).max() / len(t)), "isolated_share": float((degree == 0).mean())}
+    if indices is not None:
+        lists = np.asarray(indices.cpu() if isinstance(indices, torch.Tensor) else indices)
+        occurrence = np.bincount(lists.ravel(), minlength=len(lists))
+        rows = np.repeat(np.arange(len(lists)), lists.shape[1])
+        pairs = set(zip(rows.tolist(), lists.ravel().tolist()))
+        report |= {"k_occurrence_skewness": float(skew(occurrence)), "never_neighbour_share": float((occurrence == 0).mean()),
+                   "symmetric_share": float(np.mean([(b, a) in pairs for a, b in pairs]))}
+    return report
 
 
 def _padded(heads: torch.Tensor, tails: torch.Tensor, lengths: torch.Tensor, n: int) -> tuple[torch.Tensor, torch.Tensor]:

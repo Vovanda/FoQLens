@@ -28,6 +28,7 @@ Invariants:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol
 
 import numpy as np
@@ -125,6 +126,45 @@ def harmonic_conductance(activity: torch.Tensor, table: torch.Tensor) -> torch.T
     a_j = activity[table.clamp_min(0)]
     c = 2 * a_i * a_j / (a_i + a_j).clamp_min(EPS)
     return torch.where(table == PAD, torch.zeros_like(c), c)
+
+
+class Surface(Protocol):
+    """The graph the zones live on and the distances a question's zones reach by along it."""
+
+    table: np.ndarray  # [n_blocks, width] neighbours, padded with PAD: where peaks and hills are found
+
+    def metric(self, index: int) -> BlockMetric:
+        """The distances the zones of question `index` reach by."""
+        ...
+
+
+@dataclass(frozen=True)
+class StillSurface:
+    """One set of distances for every question: the graph at rest (geodesic) or any fixed metric."""
+
+    table: np.ndarray
+    fixed: BlockMetric
+
+    def metric(self, index: int) -> BlockMetric:
+        return self.fixed
+
+
+class MediumSurface:
+    """M4 per question: the graph's paths through a medium of the question's own activity.
+
+    activity [questions, n_blocks] is how loud every block is on a question (an output energy),
+    background [n_blocks] the same on average; the medium is their ratio, so a block that is loud on
+    every question - a massive activation - conducts no better than a quiet one that is loud here.
+    """
+
+    def __init__(self, table: torch.Tensor, lengths: torch.Tensor, activity: np.ndarray, background: np.ndarray):
+        self.table = table.cpu().numpy()
+        self._table, self._lengths = table, lengths
+        ratio = np.asarray(activity, dtype=np.float64) / np.maximum(np.asarray(background, dtype=np.float64), EPS)
+        self._ratio = torch.as_tensor(ratio, dtype=torch.float32, device=lengths.device)
+
+    def metric(self, index: int) -> ResistiveMetric:
+        return ResistiveMetric(self._table, self._lengths, self._ratio[index])
 
 
 def geodesic(table: torch.Tensor, lengths: torch.Tensor) -> ResistiveMetric:

@@ -9,6 +9,7 @@ from scipy.sparse.csgraph import dijkstra
 from foqlens.metric import (
     PAD,
     CoactivationMetric,
+    MediumSurface,
     ResistiveMetric,
     geodesic,
     harmonic_conductance,
@@ -121,17 +122,29 @@ def test_an_edge_conducts_between_the_smaller_activity_of_its_ends_and_twice_tha
 
 
 def test_a_quiet_block_holds_the_wave_back():
-    # a line of blocks 0 - 1 - ... - 9, one unit apart; block 5 goes quiet
-    n = 10
-    table = torch.full((n, 2), PAD)
-    lengths = torch.full((n, 2), torch.inf)
-    for i in range(n):
-        for slot, j in enumerate((i - 1, i + 1)):
-            if 0 <= j < n:
-                table[i, slot], lengths[i, slot] = j, 1.0
+    n = 10  # a line of blocks; block 5 goes quiet
+    table, lengths = line(n)
     loud = ResistiveMetric(table, lengths, torch.ones(n)).distances(torch.tensor([0]))[0]
     activity = torch.ones(n)
     activity[5] = 0.01
     quiet = ResistiveMetric(table, lengths, activity).distances(torch.tensor([0]))[0]
     assert torch.allclose(loud, torch.arange(n, dtype=torch.float32))
     assert torch.allclose(quiet[:5], loud[:5]) and torch.all(quiet[5:] > loud[5:] + 40)
+
+
+def test_the_medium_is_each_questions_own_and_at_rest_it_is_the_geodesic():
+    table, lengths = line(10)
+    activity = np.ones((2, 10))
+    activity[1, 5] = 0.01  # question 1 is quiet at block 5, question 0 is not
+    surface = MediumSurface(table, lengths, activity, background=np.ones(10))
+    rest = geodesic(table, lengths).distances(torch.tensor([0]))
+    torch.testing.assert_close(surface.metric(0).distances(torch.tensor([0])), rest)
+    assert torch.all(surface.metric(1).distances(torch.tensor([0]))[0, 5:] > rest[0, 5:] + 40)
+    assert np.array_equal(surface.table, table.numpy())
+
+
+def test_a_block_loud_on_every_question_conducts_no_better_than_its_background():
+    table, lengths = line(6)
+    activity = np.full((1, 6), 50.0)  # every block as loud as always
+    surface = MediumSurface(table, lengths, activity, background=np.full(6, 50.0))
+    torch.testing.assert_close(surface.metric(0).distances(torch.tensor([0])), geodesic(table, lengths).distances(torch.tensor([0])))

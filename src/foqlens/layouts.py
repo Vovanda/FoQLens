@@ -24,6 +24,7 @@ import numpy as np
 
 from foqlens import graph_zones, zones
 from foqlens import budget as bg
+from foqlens.metric import Surface
 from foqlens.quant import Level
 
 
@@ -390,25 +391,24 @@ class QueryGraphZones:
     """The zones of the question's own mask - the address read from the query itself."""
 
     scores: np.ndarray  # [questions, n_blocks], background subtracted
-    metric: object  # metric.BlockMetric
-    table: np.ndarray  # its neighbour table
+    surface: Surface
     weights: np.ndarray  # block sizes in weights
 
     def zones(self, index: int) -> graph_zones.GraphZones:
-        return graph_zones.find_graph_zones(self.scores[index], self.metric, self.table, self.weights)
+        return graph_zones.find_graph_zones(self.scores[index], self.surface.metric(index), self.surface.table, self.weights)
 
 
 class TopicGraphZones:
     """The zones of the question's own topic mean (leave-one-out), found once per question."""
 
-    def __init__(self, means: TopicMeans, metric, table: np.ndarray, weights: np.ndarray):
-        self.means, self.metric, self.table, self.weights = means, metric, table, weights
+    def __init__(self, means: TopicMeans, surface: Surface, weights: np.ndarray):
+        self.means, self.surface, self.weights = means, surface, weights
         self._cache: dict[int, graph_zones.GraphZones] = {}
 
     def zones(self, index: int) -> graph_zones.GraphZones:
         if index not in self._cache:
             mean = self.means.mean(index, self.means.domains[index])
-            self._cache[index] = graph_zones.find_graph_zones(mean, self.metric, self.table, self.weights)
+            self._cache[index] = graph_zones.find_graph_zones(mean, self.surface.metric(index), self.surface.table, self.weights)
         return self._cache[index]
 
 
@@ -442,7 +442,8 @@ class ProjectedStrength:
 class GraphZoneLayout:
     """Levels from zones on the block graph: zones -> how far each reaches -> lifts -> levels in rungs (#19).
 
-    Every part is a class behind its own interface - the zones (GraphZoneSource), the reach
+    Every part is a class behind its own interface - the zones (GraphZoneSource), the surface they
+    reach along (metric.Surface: the graph at rest, or its medium per question), the reach
     (graph_zones.Reach: FoundReach or FrontReach), the strength of a zone (ZoneStrength) - and the knobs
     mean the same whichever source the zones come from: f is the reach, g the ceiling. The level map is
     the even profile without a halo (zones.levels_from_rungs).
@@ -451,7 +452,7 @@ class GraphZoneLayout:
     name: str
     source: GraphZoneSource
     reach: graph_zones.Reach
-    metric: object  # metric.BlockMetric
+    surface: Surface
     floor: Level
     focus_strength: float
     strength: ZoneStrength = EqualStrength()
@@ -461,7 +462,7 @@ class GraphZoneLayout:
         rows = []
         for i in indices:
             found = self.source.zones(int(i))
-            lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.metric)
+            lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(int(i)))
             ceilings = zones.zone_ceilings(self.strength.strengths(int(i), found), self.focus_strength, self.floor)
             rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine))
         return np.stack(rows)

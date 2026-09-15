@@ -7,7 +7,7 @@ import torch
 from foqlens import graph_zones as bz
 from foqlens import zones
 from foqlens.layouts import GraphZoneLayout, EqualStrength, QuantileLevels, QueryGraphZones
-from foqlens.metric import geodesic, neighbour_table
+from foqlens.metric import StillSurface, geodesic, neighbour_table
 from foqlens.quant import LADDER, Level
 
 
@@ -150,9 +150,9 @@ def bits(codes: np.ndarray) -> float:
 
 
 def layout(focus_area: float, focus_strength: float, reach=bz.FoundReach) -> GraphZoneLayout:
-    source = QueryGraphZones(TWO_BUMPS[None], PLANE, TABLE, WEIGHTS)
+    source = QueryGraphZones(TWO_BUMPS[None], StillSurface(TABLE, PLANE), WEIGHTS)
     made = reach(focus_area) if reach is bz.FoundReach else reach(focus_area, PLANE.diameter())
-    return GraphZoneLayout("graph", source, made, PLANE, Level.D4, focus_strength)
+    return GraphZoneLayout("graph", source, made, StillSurface(TABLE, PLANE), Level.D4, focus_strength)
 
 
 def test_a_graph_layout_lifts_its_centers_to_the_ceiling_and_grows_with_f_and_g():

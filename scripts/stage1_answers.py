@@ -26,7 +26,7 @@ from foqlens.gpu_monitor import GpuMonitor
 from foqlens.graph_decode import STATIC
 from foqlens.gpu_share import default_share
 from foqlens.io import answers_path, append_answers, read_frozen, write_json, written_ids
-from foqlens.judging import ModelJudge
+from foqlens.judging import ModelJudge, NotJudged
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS, examples_for, needs_train, setup_named
@@ -48,6 +48,7 @@ FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passa
                  "arc_challenge_closed": "solve-0", "arc_easy_closed": "solve-brief", "hotpotqa": "justify"}
 # static: the static cache with every step a CUDA graph (foqlens.graph_decode); dynamic: the reference loop.
 DECODERS = {"static": STATIC, "dynamic": DYNAMIC}
+UNJUDGED = "unjudged"  # where a baked level's answers wait for the bf16 judge
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -73,7 +74,13 @@ def main(argv: list[str] | None = None) -> Path:
     bench = Bench.load(model_id, gpu_share=args.gpu_share)
     tokenizer = bench.tokenizer
     fmt = fm.prompt_format(model_id, tokenizer)
-    judge = ModelJudge.build(bench.model, tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH)
+    # A quantized level is baked into the weights - one unpacking, the step and the memory of bf16 - and
+    # so cannot judge: its answers wait in unjudged/ for the bf16 judge of scripts/rejudge_answers.py.
+    if level is Level.BF16:
+        judge, root = ModelJudge.build(bench.model, tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH), "answers"
+    else:
+        bench.ctl.bake(level)
+        judge, root = NotJudged(), UNJUDGED
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
     spent = json.loads(args.tuning.read_text(encoding="utf-8"))["corpora"] if args.tuning else {}
@@ -94,7 +101,7 @@ def main(argv: list[str] | None = None) -> Path:
         setup = setup_named(corpus, args.setups[corpus])
         train = corpora.read_train(corpus, TRAIN_POOL) if needs_train(setup) else []
         askings[corpus] = Asking(corpus, source.revision, name, level, setup, examples_for(corpus, setup, train, args.seed))
-        paths[corpus] = answers_path(out / "answers", args.level, corpus)
+        paths[corpus] = answers_path(out / root, args.level, corpus)
 
     schedule = Schedule.build({c: list(r) for c, r in rows.items()}, args.seed)
     written = {c: written_ids(p) for c, p in paths.items()}
@@ -119,7 +126,7 @@ def main(argv: list[str] | None = None) -> Path:
         "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
-        "rounds_this_run": rounds_done,
+        "rounds_this_run": rounds_done, "written_to": root,
         "answered": {**earlier.get("answered", {}), **{c: len(written_ids(p)) for c, p in paths.items()}},
         "questions": {**earlier.get("questions", {}), **{c: len(r) for c, r in rows.items()}},
         "gpu": gpu.summary(), "pacer": bench.throttle.stats(),

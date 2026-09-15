@@ -136,3 +136,18 @@ class ModelJudge:
             chunk = slice(start, start + self.batch_size)
             out[chunk] = letter_logprobs_batch(self.model, self.tokenizer, prompts[chunk], ids)
         return out
+
+
+class NotJudged:
+    """The judge of a model that cannot judge: a level baked into the weights holds no bf16 weight.
+
+    Its answers are written with NaN verdicts and no kinds of answer, and the bf16 judge of another
+    process reads them (foqlens.answering.rejudge).
+    """
+
+    def p_yes(self, questions: list[str], answers: list[str], references: list[list[str]] | None) -> np.ndarray:
+        return np.full(len(answers), np.nan)
+
+    def grades(self, questions: list[str], answers: list[str], references: list[list[str]],
+               p_yes: np.ndarray) -> list[tuple[float, ...]]:
+        return [()] * len(answers)

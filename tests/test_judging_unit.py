@@ -7,8 +7,8 @@ import pytest
 
 from foqlens import judging
 from foqlens.extractive import NO_ANSWER
-from foqlens.judging import (EXAM, GRADES, MAX_REFERENCES, ModelJudge, grade_ids, judge_prompt, judge_question,
-                             verdict_ids)
+from foqlens.judging import (EXAM, GRADES, MAX_REFERENCES, ModelJudge, NotJudged, grade_ids, judge_prompt,
+                             judge_question, verdict_ids)
 from foqlens.prompting import ChatFormat
 
 CORRECT = "Correct answers (any one is enough): "
@@ -115,6 +115,12 @@ def test_the_judge_reads_at_bf16_in_batches_and_keeps_the_order(monkeypatch):
     assert ctl.levels is not None and ctl.levels.name == "BF16"
     judge.p_yes(["q1"], ["a1"], None)
     assert CORRECT not in seen[-1][0]
+
+
+def test_a_model_that_cannot_judge_leaves_its_answers_unjudged():
+    got = NotJudged().p_yes(["q1", "q2"], ["a1", "a2"], [["r"], ["r"]])
+    assert got.shape == (2,) and np.isnan(got).all()
+    assert NotJudged().grades(["q1", "q2"], ["a1", "a2"], [["r"], ["r"]], got) == [(), ()]
 
 
 def test_the_kinds_of_answer_are_single_tokens_or_refused():

@@ -21,6 +21,8 @@ Invariants (each one has a test):
   copy alone, and a level it cannot read is refused when set, not when computed.
 - Invariant: with depth caps a block stores only its first cap slices, reads within its cap
   exactly as before, and a read deeper than its cap is refused when set.
+- Invariant: a baked level is bit-exact with reading the same depth from the sliced copy; afterwards
+  the module holds that weight alone and reads that level alone - bf16 is refused when set.
 """
 
 from __future__ import annotations
@@ -71,6 +73,7 @@ class MixedPrecisionLinear(nn.Module):
         self.weight.requires_grad_(False)
         self.bias = linear.bias
         self._device = linear.weight.device
+        self._native = Level.BF16  # the level the weight itself holds: bf16, or the read depth baked into it
         self._packed: dict[type, Int8Weight | Nf4Weight | SlicedWeight] = {}
         self.readable: frozenset[Level] = frozenset(Level)
         self._caps = np.full(self.n_blocks, N_SLICES, dtype=np.uint8)  # slices every block stores
@@ -87,9 +90,9 @@ class MixedPrecisionLinear(nn.Module):
         return tuple(self._packed)
 
     def _materialize(self, level: Level) -> None:
-        """Quantize the weight into the level's storage on its first use; bf16 and ZERO need no copy."""
+        """Quantize the weight into the level's storage on its first use; bf16, ZERO and a baked level need no copy."""
         kind = STORAGE.get(level)
-        if kind is not None and kind not in self._packed:
+        if kind is not None and kind not in self._packed and level is not self._native:
             self._packed[kind] = kind.quantize(self.weight.data)
 
     def set_levels(self, levels: Level | int | np.ndarray, codes: torch.Tensor | None = None) -> None:
@@ -144,6 +147,24 @@ class MixedPrecisionLinear(nn.Module):
         self.weight = None
         self.readable = self.RESIDENT
 
+    def bake(self, level: Level) -> None:
+        """Read one depth at the cost of bf16: the weight read to it replaces the bf16 weight and every copy.
+
+        A uniform level then unpacks once instead of on every call. Afterwards the module reads that
+        level alone; the bf16 weight is gone, so asking for bf16 is refused rather than answered wrongly.
+        """
+        if not level.slices:
+            raise ValueError(f"only a read depth is baked, not {level.name}")
+        if self._native is not Level.BF16 or self.weight is None:
+            raise ValueError("a level is baked once, from the bf16 weight")
+        self._materialize(level)
+        baked = self._packed[SlicedWeight].dequantize(self.weight.dtype, level.slices)
+        self.weight = nn.Parameter(baked, requires_grad=False)
+        self._packed = {}
+        self._native = level
+        self.readable = frozenset({level})
+        self.set_levels(level)
+
     def set_caps(self, caps: np.ndarray) -> None:
         """Store every block only to its depth cap (slices, 0 ... N_SLICES); the deeper slices leave the GPU.
 
@@ -176,7 +197,9 @@ class MixedPrecisionLinear(nn.Module):
 
     def output_at(self, level: Level, x: torch.Tensor) -> torch.Tensor:
         """The whole output as if every block were read at this level."""
-        if level is Level.BF16:
+        if level not in self.readable:
+            raise ValueError(f"{level.name} is not held by this module")
+        if level is self._native:
             return F.linear(x, self.weight, self.bias)
         if level in STORAGE:
             self._materialize(level)
@@ -260,6 +283,12 @@ class Controller:
         """Every module keeps only its sliced copy (MixedPrecisionLinear.drop_bf16); the cache returns the freed memory."""
         for module in self.modules.values():
             module.drop_bf16()
+        torch.cuda.empty_cache()
+
+    def bake(self, level: Level) -> None:
+        """Every module reads `level` from a weight unpacked once (MixedPrecisionLinear.bake); the cache returns the freed memory."""
+        for module in self.modules.values():
+            module.bake(level)
         torch.cuda.empty_cache()
 
     def set_caps(self, caps: np.ndarray) -> None:

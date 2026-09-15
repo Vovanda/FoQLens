@@ -125,6 +125,28 @@ def test_drop_bf16_keeps_the_depth_outputs_and_refuses_the_dropped_levels():
     assert mixed(x).shape == before.shape
 
 
+@pytest.mark.parametrize("level", [Level.D2, Level.D4, Level.D6, Level.D8])
+def test_a_baked_level_reads_as_the_sliced_depth_and_refuses_bf16(level):
+    mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
+    x = make_input()
+    mixed.set_levels(level)
+    unpacked = mixed(x)
+    mixed.bake(level)
+    assert torch.equal(mixed(x), unpacked) and mixed.storages == ()
+    mixed.set_levels(level)  # the judge of a run sets the level before every batch
+    assert torch.equal(mixed(x), unpacked) and mixed.storages == ()
+    for other in (Level.BF16, Level.D2 if level is not Level.D2 else Level.D4):
+        with pytest.raises(ValueError):
+            mixed.set_levels(other)
+    with pytest.raises(ValueError):
+        mixed.bake(level)
+
+
+def test_only_a_read_depth_is_baked():
+    with pytest.raises(ValueError):
+        MixedPrecisionLinear(make_linear(), block_rows=64).bake(Level.NF4)
+
+
 def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_slices():
     mixed = MixedPrecisionLinear(make_linear(out_features=200, in_features=256), block_rows=64)
     x = make_input()

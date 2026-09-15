@@ -63,9 +63,17 @@ when its interval excludes zero and Claude's reading of a sample of the discorda
 
 ## 5. Run
 
+UPD 2026-09-15: a level is baked into the weights - read once to its depth, the same weight the
+unpacking reads on every call - and so cannot judge itself; its answers are judged at bf16 by a second
+process. The smoke round at D4 unpacking on every call took ~20 minutes against ~4.5 at bf16 and ran
+out of memory on HotpotQA.
+
 ```
-uv run python scripts/rejudge_answers.py --frozen corpus/e2b-it --out runs/E016-uniform-quantization
+uv run python scripts/rejudge_answers.py --answers runs/reference/stage1/e2b-it/answers --level bf16 \
+    --frozen corpus/e2b-it --out runs/E016-uniform-quantization
 uv run python scripts/stage1_answers.py --frozen corpus/e2b-it --level d8 --out runs/E016-uniform-quantization
+uv run python scripts/rejudge_answers.py --answers runs/E016-uniform-quantization/e2b-it/unjudged --level d8 \
+    --frozen corpus/e2b-it --out runs/E016-uniform-quantization
 (the same for d6, d4, d2)
 ```
 

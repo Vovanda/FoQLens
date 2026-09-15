@@ -116,6 +116,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
 - [`docs/data-sources.md`](docs/data-sources.md) - where the questions of the first corpus came from (MMLU-Redux-2.0).
 - [`docs/corpus.md`](docs/corpus.md) - the corpus: how it is selected and its three regimes.
+- [`docs/data.md`](docs/data.md) - how the runs are stored and read: JSON Lines files, and DuckDB over them.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:
   - `model`, `quant`, `precision` - loading, quantizers and residual slices, the per-block precision controller;

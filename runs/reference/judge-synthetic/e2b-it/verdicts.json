@@ -1,0 +1,8002 @@
+[
+{
+"corpus": "triviaqa",
+"id": "tc_665",
+"answer": "Marshall Plan",
+"claude": "Correct",
+"p_yes": 0.9999990463256836,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_665",
+"answer": "Marshall",
+"claude": "Nearly",
+"p_yes": 0.9997458457946777,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_665",
+"answer": "Truman Doctrine",
+"claude": "Related",
+"p_yes": 4.012565213429298e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_665",
+"answer": "Magna Carta",
+"claude": "Wrong",
+"p_yes": 2.646573404874175e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1114",
+"answer": "Leonard Nimoy",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1114",
+"answer": "Nimoy",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1114",
+"answer": "William Shatner",
+"claude": "Related",
+"p_yes": 6.214782644065053e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1114",
+"answer": "Elvis Presley",
+"claude": "Wrong",
+"p_yes": 1.7805650287527897e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1686",
+"answer": "Woodrow Wilson",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1686",
+"answer": "Wilson",
+"claude": "Nearly",
+"p_yes": 0.9999443292617798,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1686",
+"answer": "Theodore Roosevelt",
+"claude": "Related",
+"p_yes": 7.496458920286386e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_1686",
+"answer": "Babe Ruth",
+"claude": "Wrong",
+"p_yes": 3.972977502542108e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2701",
+"answer": "Martin Luther King Jr.",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2701",
+"answer": "King",
+"claude": "Nearly",
+"p_yes": 0.9958010911941528,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2701",
+"answer": "Malcolm X",
+"claude": "Related",
+"p_yes": 7.979939198321517e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2701",
+"answer": "Albert Einstein",
+"claude": "Wrong",
+"p_yes": 5.602796449011294e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2930",
+"answer": "Corpus luteum",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2930",
+"answer": "Corpus",
+"claude": "Nearly",
+"p_yes": 0.027585282921791077,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2930",
+"answer": "Corpus callosum",
+"claude": "Related",
+"p_yes": 3.889111610533291e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "tc_2930",
+"answer": "Gallstone",
+"claude": "Wrong",
+"p_yes": 1.0145353890322895e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_374",
+"answer": "Dynamite",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_374",
+"answer": "an explosive",
+"claude": "Partial",
+"p_yes": 0.29421496391296387,
+"judge": "Partial"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_374",
+"answer": "Gunpowder",
+"claude": "Related",
+"p_yes": 8.059445235630847e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_374",
+"answer": "The telephone",
+"claude": "Wrong",
+"p_yes": 2.0176445403308207e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_1141",
+"answer": "James I",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_1141",
+"answer": "King James",
+"claude": "Nearly",
+"p_yes": 0.999939501285553,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_1141",
+"answer": "Charles I",
+"claude": "Related",
+"p_yes": 7.112435014278162e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_1141",
+"answer": "Napoleon",
+"claude": "Wrong",
+"p_yes": 7.734421814120651e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_2397",
+"answer": "Elysian fields",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_2397",
+"answer": "Elysian",
+"claude": "Nearly",
+"p_yes": 0.9997040629386902,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_2397",
+"answer": "Hades",
+"claude": "Related",
+"p_yes": 2.6165210442741227e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qz_2397",
+"answer": "Atlantis",
+"claude": "Wrong",
+"p_yes": 4.8400774943502256e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_916",
+"answer": "John le Carré",
+"claude": "Correct",
+"p_yes": 0.999998152256012,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_916",
+"answer": "le Carré",
+"claude": "Nearly",
+"p_yes": 0.9999039173126221,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_916",
+"answer": "Ian Fleming",
+"claude": "Related",
+"p_yes": 3.028843309493823e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_916",
+"answer": "Jane Austen",
+"claude": "Wrong",
+"p_yes": 8.152020392060422e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_1541",
+"answer": "Dr. Claw",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_1541",
+"answer": "Claw",
+"claude": "Nearly",
+"p_yes": 0.9999934434890747,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_1541",
+"answer": "Dr. Evil",
+"claude": "Related",
+"p_yes": 1.2098660135961836e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_1541",
+"answer": "Mickey Mouse",
+"claude": "Wrong",
+"p_yes": 1.1496191554272173e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_2497",
+"answer": "Toy Story",
+"claude": "Correct",
+"p_yes": 0.999998152256012,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_2497",
+"answer": "a Pixar film",
+"claude": "Partial",
+"p_yes": 0.7662935853004456,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_2497",
+"answer": "Shrek",
+"claude": "Related",
+"p_yes": 3.541076409874222e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_2497",
+"answer": "The Godfather",
+"claude": "Wrong",
+"p_yes": 1.0145353890322895e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_5408",
+"answer": "Australia",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_5408",
+"answer": "Oceania",
+"claude": "Partial",
+"p_yes": 0.0024726230185478926,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_5408",
+"answer": "New Zealand",
+"claude": "Related",
+"p_yes": 1.6373770961308765e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qb_5408",
+"answer": "Brazil",
+"claude": "Wrong",
+"p_yes": 4.691163724146463e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_151",
+"answer": "Denali",
+"claude": "Correct",
+"p_yes": 0.9999969005584717,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_151",
+"answer": "a peak in Alaska",
+"claude": "Partial",
+"p_yes": 0.00028240811661817133,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_151",
+"answer": "Mount Logan",
+"claude": "Related",
+"p_yes": 1.248271246367949e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_151",
+"answer": "Mont Blanc",
+"claude": "Wrong",
+"p_yes": 1.6726859897175927e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_381",
+"answer": "IBM",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_381",
+"answer": "International Business",
+"claude": "Nearly",
+"p_yes": 0.8872045874595642,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_381",
+"answer": "Microsoft",
+"claude": "Related",
+"p_yes": 1.4144765145829297e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "dpql_381",
+"answer": "Coca-Cola",
+"claude": "Wrong",
+"p_yes": 6.153467957403791e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "wh_3999",
+"answer": "Isambard Kingdom Brunel",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "wh_3999",
+"answer": "Isambard Brunel",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "wh_3999",
+"answer": "George Stephenson",
+"claude": "Related",
+"p_yes": 8.494600223230009e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "wh_3999",
+"answer": "William Shakespeare",
+"claude": "Wrong",
+"p_yes": 1.1142490485838152e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_338",
+"answer": "Red",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_338",
+"answer": "a warm colour",
+"claude": "Partial",
+"p_yes": 0.02595735527575016,
+"judge": "Related"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_338",
+"answer": "Orange",
+"claude": "Related",
+"p_yes": 1.5534972135355929e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_338",
+"answer": "Blue",
+"claude": "Wrong",
+"p_yes": 2.1024337115704839e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_1523",
+"answer": "Bullfighting",
+"claude": "Correct",
+"p_yes": 0.9999952912330627,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_1523",
+"answer": "a blood sport",
+"claude": "Partial",
+"p_yes": 0.0008559005800634623,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_1523",
+"answer": "Rodeo",
+"claude": "Related",
+"p_yes": 3.966986696468666e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_1523",
+"answer": "Ballet",
+"claude": "Wrong",
+"p_yes": 2.3090719025731232e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4306",
+"answer": "Fluid",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4306",
+"answer": "a liquid or gas",
+"claude": "Nearly",
+"p_yes": 0.9626731276512146,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4306",
+"answer": "Solid",
+"claude": "Related",
+"p_yes": 1.067703010448895e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4306",
+"answer": "Magnetism",
+"claude": "Wrong",
+"p_yes": 1.9750537205709406e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4865",
+"answer": "Fondue",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4865",
+"answer": "a cheese dish",
+"claude": "Partial",
+"p_yes": 0.02228618785738945,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4865",
+"answer": "Raclette",
+"claude": "Related",
+"p_yes": 0.003824483836069703,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bb_4865",
+"answer": "Sushi",
+"claude": "Wrong",
+"p_yes": 1.6373770961308765e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_4450",
+"answer": "Wat Tyler",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_4450",
+"answer": "Tyler",
+"claude": "Nearly",
+"p_yes": 0.9999973177909851,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_4450",
+"answer": "John Ball",
+"claude": "Related",
+"p_yes": 5.203573891776614e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_4450",
+"answer": "Isaac Newton",
+"claude": "Wrong",
+"p_yes": 6.348800152267131e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_5947",
+"answer": "New York Yankees",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_5947",
+"answer": "a New York team",
+"claude": "Partial",
+"p_yes": 0.9968273043632507,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_5947",
+"answer": "New York Mets",
+"claude": "Related",
+"p_yes": 4.5921376568003325e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_5947",
+"answer": "Chicago Bulls",
+"claude": "Wrong",
+"p_yes": 7.194132845000922e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_8517",
+"answer": "Australia",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_8517",
+"answer": "Oceania",
+"claude": "Partial",
+"p_yes": 2.0785166270798072e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_8517",
+"answer": "New Zealand",
+"claude": "Related",
+"p_yes": 1.3574332058396976e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qw_8517",
+"answer": "Canada",
+"claude": "Wrong",
+"p_yes": 6.023573462243803e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_288",
+"answer": "Rainbow Road",
+"claude": "Correct",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_288",
+"answer": "Rainbow",
+"claude": "Nearly",
+"p_yes": 0.9991958141326904,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_288",
+"answer": "Bowser Castle",
+"claude": "Related",
+"p_yes": 1.1253516873921399e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_288",
+"answer": "Silverstone",
+"claude": "Wrong",
+"p_yes": 5.896416155337647e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1502",
+"answer": "Belgium",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1502",
+"answer": "the Low Countries",
+"claude": "Partial",
+"p_yes": 0.16451647877693176,
+"judge": "Related"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1502",
+"answer": "Netherlands",
+"claude": "Related",
+"p_yes": 9.931194000500909e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1502",
+"answer": "Egypt",
+"claude": "Wrong",
+"p_yes": 2.9356552744275177e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1832",
+"answer": "Mars",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1832",
+"answer": "a son of Jupiter",
+"claude": "Partial",
+"p_yes": 3.0894950668880483e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1832",
+"answer": "Ares",
+"claude": "Related",
+"p_yes": 0.9991704225540161,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_1832",
+"answer": "Buddha",
+"claude": "Wrong",
+"p_yes": 2.6729447100137804e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3011",
+"answer": "Latin",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3011",
+"answer": "an Italic language",
+"claude": "Partial",
+"p_yes": 0.008061990141868591,
+"judge": "Related"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3011",
+"answer": "Greek",
+"claude": "Related",
+"p_yes": 9.422445828022319e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3011",
+"answer": "Swahili",
+"claude": "Wrong",
+"p_yes": 6.758262394157555e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3613",
+"answer": "Cyrillic",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3613",
+"answer": "a Slavic script",
+"claude": "Partial",
+"p_yes": 0.0005378764471970499,
+"judge": "Related"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3613",
+"answer": "Greek alphabet",
+"claude": "Related",
+"p_yes": 2.5907066714125904e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3613",
+"answer": "Arabic",
+"claude": "Wrong",
+"p_yes": 7.734421814120651e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3651",
+"answer": "Helsinki",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3651",
+"answer": "a Finnish city",
+"claude": "Partial",
+"p_yes": 0.9883127808570862,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3651",
+"answer": "Riga",
+"claude": "Related",
+"p_yes": 1.7429788101708255e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_3651",
+"answer": "Madrid",
+"claude": "Wrong",
+"p_yes": 4.6448813684207835e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_4251",
+"answer": "New Haven",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_4251",
+"answer": "Connecticut",
+"claude": "Partial",
+"p_yes": 0.9984512329101562,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_4251",
+"answer": "Hartford",
+"claude": "Related",
+"p_yes": 7.889264452387579e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "jp_4251",
+"answer": "Seattle",
+"claude": "Wrong",
+"p_yes": 5.838248284817382e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_186",
+"answer": "Gertrude",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_186",
+"answer": "the Queen of Denmark",
+"claude": "Nearly",
+"p_yes": 8.13969654700486e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_186",
+"answer": "Ophelia",
+"claude": "Related",
+"p_yes": 1.571343055672969e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_186",
+"answer": "Marie Curie",
+"claude": "Wrong",
+"p_yes": 1.0799672267580718e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_5831",
+"answer": "Deadly nightshade",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_5831",
+"answer": "nightshade",
+"claude": "Nearly",
+"p_yes": 0.9996380805969238,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_5831",
+"answer": "Foxglove",
+"claude": "Related",
+"p_yes": 3.889111610533291e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_5831",
+"answer": "Sunflower",
+"claude": "Wrong",
+"p_yes": 1.386705417161238e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_7632",
+"answer": "Frankfurt",
+"claude": "Correct",
+"p_yes": 0.9999990463256836,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_7632",
+"answer": "Hesse",
+"claude": "Partial",
+"p_yes": 0.0003569705877453089,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_7632",
+"answer": "Berlin",
+"claude": "Related",
+"p_yes": 4.406940590229169e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_7632",
+"answer": "Tokyo",
+"claude": "Wrong",
+"p_yes": 1.621222978087644e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9040",
+"answer": "What",
+"claude": "Correct",
+"p_yes": 0.9999992251396179,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9040",
+"answer": "Wh",
+"claude": "Partial",
+"p_yes": 0.0900929868221283,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9040",
+"answer": "Where",
+"claude": "Related",
+"p_yes": 0.00042388477595523,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9040",
+"answer": "Seven",
+"claude": "Wrong",
+"p_yes": 7.338207979046274e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9267",
+"answer": "Skoda",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9267",
+"answer": "Volkswagen Group",
+"claude": "Partial",
+"p_yes": 0.04742587357759476,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9267",
+"answer": "Seat",
+"claude": "Related",
+"p_yes": 3.321418626001105e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_9267",
+"answer": "Ferrari",
+"claude": "Wrong",
+"p_yes": 8.953243479936646e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_10750",
+"answer": "Black Swan",
+"claude": "Correct",
+"p_yes": 0.9999657273292542,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_10750",
+"answer": "Swan",
+"claude": "Nearly",
+"p_yes": 0.3345894515514374,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_10750",
+"answer": "White Swan",
+"claude": "Related",
+"p_yes": 6.475946747741546e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_10750",
+"answer": "Titanic",
+"claude": "Wrong",
+"p_yes": 2.699578374176781e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_11415",
+"answer": "Dragon",
+"claude": "Correct",
+"p_yes": 0.9999955892562866,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_11415",
+"answer": "a mythical creature",
+"claude": "Partial",
+"p_yes": 0.9991440773010254,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_11415",
+"answer": "Snake",
+"claude": "Related",
+"p_yes": 2.2125672330730595e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_11415",
+"answer": "Elephant",
+"claude": "Wrong",
+"p_yes": 1.1979307146248175e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_13921",
+"answer": "Los Angeles",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_13921",
+"answer": "California",
+"claude": "Partial",
+"p_yes": 0.0001634647633181885,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_13921",
+"answer": "San Francisco",
+"claude": "Related",
+"p_yes": 3.028843309493823e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_13921",
+"answer": "London",
+"claude": "Wrong",
+"p_yes": 9.23744991609965e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_14380",
+"answer": "Demeter",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_14380",
+"answer": "an earth goddess",
+"claude": "Partial",
+"p_yes": 0.8175743818283081,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_14380",
+"answer": "Persephone",
+"claude": "Related",
+"p_yes": 0.985042929649353,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_14380",
+"answer": "Thor",
+"claude": "Wrong",
+"p_yes": 3.2937141902777967e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_21713",
+"answer": "Pete Seeger",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_21713",
+"answer": "Seeger",
+"claude": "Nearly",
+"p_yes": 0.9999979138374329,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_21713",
+"answer": "Woody Guthrie",
+"claude": "Related",
+"p_yes": 9.721546803120873e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_21713",
+"answer": "Elvis Presley",
+"claude": "Wrong",
+"p_yes": 1.0799672267580718e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_22083",
+"answer": "Tunisia",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_22083",
+"answer": "North Africa",
+"claude": "Partial",
+"p_yes": 0.9933072328567505,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_22083",
+"answer": "Tanzania",
+"claude": "Related",
+"p_yes": 7.901209464478143e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_22083",
+"answer": "Norway",
+"claude": "Wrong",
+"p_yes": 8.764247638737288e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_25785",
+"answer": "Gloucestershire",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_25785",
+"answer": "the Cotswolds",
+"claude": "Partial",
+"p_yes": 2.127807238139212e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_25785",
+"answer": "Gloucester",
+"claude": "Related",
+"p_yes": 0.9997262358665466,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "sfq_25785",
+"answer": "Texas",
+"claude": "Wrong",
+"p_yes": 8.410793839175312e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_4333",
+"answer": "Labradoodle",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_4333",
+"answer": "a doodle",
+"claude": "Nearly",
+"p_yes": 0.9284088611602783,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_4333",
+"answer": "Cockapoo",
+"claude": "Related",
+"p_yes": 6.339208084682468e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_4333",
+"answer": "Dalmatian",
+"claude": "Wrong",
+"p_yes": 6.758262394157555e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_5120",
+"answer": "Shaun of the Dead",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_5120",
+"answer": "Shaun",
+"claude": "Nearly",
+"p_yes": 0.9740426540374756,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_5120",
+"answer": "Dawn of the Dead",
+"claude": "Related",
+"p_yes": 3.169326373608783e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_5120",
+"answer": "Titanic",
+"claude": "Wrong",
+"p_yes": 1.8189617589925433e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8616",
+"answer": "Piccolo",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8616",
+"answer": "a small flute",
+"claude": "Nearly",
+"p_yes": 0.005911068990826607,
+"judge": "Partial"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8616",
+"answer": "Fife",
+"claude": "Related",
+"p_yes": 2.2159488466400035e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8616",
+"answer": "Tuba",
+"claude": "Wrong",
+"p_yes": 1.2501528701136522e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8974",
+"answer": "Omertà",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8974",
+"answer": "Omer",
+"claude": "Nearly",
+"p_yes": 0.9669139981269836,
+"judge": "Nearly"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8974",
+"answer": "Vendetta",
+"claude": "Related",
+"p_yes": 5.315785500670245e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_8974",
+"answer": "Karaoke",
+"claude": "Wrong",
+"p_yes": 3.028843309493823e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_10500",
+"answer": "Sweden",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_10500",
+"answer": "Scandinavia",
+"claude": "Partial",
+"p_yes": 0.02161533571779728,
+"judge": "Related"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_10500",
+"answer": "Switzerland",
+"claude": "Related",
+"p_yes": 1.1142490485838152e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_10500",
+"answer": "Brazil",
+"claude": "Wrong",
+"p_yes": 1.1861119197931203e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_11384",
+"answer": "Cyclades",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_11384",
+"answer": "the Aegean islands",
+"claude": "Partial",
+"p_yes": 0.00023050665913615376,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_11384",
+"answer": "Dodecanese",
+"claude": "Related",
+"p_yes": 1.5229980832032197e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "odql_11384",
+"answer": "Hawaii",
+"claude": "Wrong",
+"p_yes": 2.3588654585182667e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bt_1394",
+"answer": "John Galliano",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "bt_1394",
+"answer": "Galliano",
+"claude": "Nearly",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "bt_1394",
+"answer": "Karl Lagerfeld",
+"claude": "Related",
+"p_yes": 0.000305348978145048,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "bt_1394",
+"answer": "Pablo Picasso",
+"claude": "Wrong",
+"p_yes": 5.152235615923928e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qf_590",
+"answer": "February",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qf_590",
+"answer": "winter",
+"claude": "Partial",
+"p_yes": 1.4285517863754649e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qf_590",
+"answer": "January",
+"claude": "Related",
+"p_yes": 3.187566335327574e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qf_590",
+"answer": "July",
+"claude": "Wrong",
+"p_yes": 7.496458920286386e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qg_984",
+"answer": "Yuri Gagarin",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qg_984",
+"answer": "Gagarin",
+"claude": "Nearly",
+"p_yes": 0.9999962449073792,
+"judge": "Correct"
+},
+{
+"corpus": "triviaqa",
+"id": "qg_984",
+"answer": "Alexei Leonov",
+"claude": "Related",
+"p_yes": 4.54683188877425e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "triviaqa",
+"id": "qg_984",
+"answer": "Leo Tolstoy",
+"claude": "Wrong",
+"p_yes": 1.4761401878615743e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "7",
+"answer": "James I",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "7",
+"answer": "King James",
+"claude": "Nearly",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "7",
+"answer": "James II",
+"claude": "Related",
+"p_yes": 3.523561463225633e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "7",
+"answer": "Napoleon",
+"claude": "Wrong",
+"p_yes": 3.889111610533291e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "17",
+"answer": "Anakin Skywalker",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "17",
+"answer": "Anakin",
+"claude": "Nearly",
+"p_yes": 0.9999991655349731,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "17",
+"answer": "Luke Skywalker",
+"claude": "Related",
+"p_yes": 2.4579944124525355e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "17",
+"answer": "Harry Potter",
+"claude": "Wrong",
+"p_yes": 7.811481737007853e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "23",
+"answer": "291",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "23",
+"answer": "about 290",
+"claude": "Nearly",
+"p_yes": 0.9992791414260864,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "23",
+"answer": "219",
+"claude": "Related",
+"p_yes": 1.172642328128859e-06,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "23",
+"answer": "12",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "51",
+"answer": "Aorta",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "51",
+"answer": "an artery",
+"claude": "Partial",
+"p_yes": 0.0011335688177496195,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "51",
+"answer": "Vena cava",
+"claude": "Related",
+"p_yes": 1.0246444048789272e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "51",
+"answer": "Femur",
+"claude": "Wrong",
+"p_yes": 7.734421814120651e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "78",
+"answer": "Bartolomeu Dias",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "78",
+"answer": "Dias",
+"claude": "Nearly",
+"p_yes": 0.9999324679374695,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "78",
+"answer": "Vasco da Gama",
+"claude": "Related",
+"p_yes": 2.908345231844578e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "78",
+"answer": "Isaac Newton",
+"claude": "Wrong",
+"p_yes": 1.5381733931008057e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "112",
+"answer": "Hermia",
+"claude": "Correct",
+"p_yes": 0.999946117401123,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "112",
+"answer": "one of the Athenian women",
+"claude": "Partial",
+"p_yes": 0.04468086361885071,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "112",
+"answer": "Titania",
+"claude": "Related",
+"p_yes": 2.4061034764599754e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "112",
+"answer": "Marie Antoinette",
+"claude": "Wrong",
+"p_yes": 3.576360541046597e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "140",
+"answer": "Exodus 20:7",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "140",
+"answer": "Exodus",
+"claude": "Nearly",
+"p_yes": 0.00018522577011026442,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "140",
+"answer": "Exodus 20:13",
+"claude": "Related",
+"p_yes": 0.00022871329565532506,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "140",
+"answer": "Hamlet, Act 3",
+"claude": "Wrong",
+"p_yes": 3.466327029855165e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "148",
+"answer": "Melvil Dewey",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "148",
+"answer": "Dewey",
+"claude": "Nearly",
+"p_yes": 0.999220609664917,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "148",
+"answer": "John Dewey",
+"claude": "Related",
+"p_yes": 0.0007793661206960678,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "148",
+"answer": "Isaac Newton",
+"claude": "Wrong",
+"p_yes": 6.475946747741546e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "223",
+"answer": "Canada",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "223",
+"answer": "North America",
+"claude": "Partial",
+"p_yes": 0.9553191661834717,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "223",
+"answer": "Russia",
+"claude": "Related",
+"p_yes": 1.8925145923276432e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "223",
+"answer": "Paraguay",
+"claude": "Wrong",
+"p_yes": 8.059445235630847e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "266",
+"answer": "1994",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "266",
+"answer": "the 1990s",
+"claude": "Nearly",
+"p_yes": 0.0034834244288504124,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "266",
+"answer": "1990",
+"claude": "Related",
+"p_yes": 2.5466397346463054e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "266",
+"answer": "1066",
+"claude": "Wrong",
+"p_yes": 2.0377488851863745e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "287",
+"answer": "1966",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "287",
+"answer": "the 1960s",
+"claude": "Nearly",
+"p_yes": 0.29421496391296387,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "287",
+"answer": "1996",
+"claude": "Related",
+"p_yes": 2.2380292818979797e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "287",
+"answer": "1812",
+"claude": "Wrong",
+"p_yes": 8.494600223230009e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "452",
+"answer": "George II",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "452",
+"answer": "George",
+"claude": "Nearly",
+"p_yes": 0.9996170401573181,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "452",
+"answer": "George III",
+"claude": "Related",
+"p_yes": 1.2878956567874411e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "452",
+"answer": "Julius Caesar",
+"claude": "Wrong",
+"p_yes": 8.233249104705465e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "582",
+"answer": "Energy loss",
+"claude": "Correct",
+"p_yes": 0.9999987483024597,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "582",
+"answer": "energy",
+"claude": "Nearly",
+"p_yes": 0.9996079802513123,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "582",
+"answer": "Magnetic flux",
+"claude": "Related",
+"p_yes": 7.071898380672792e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "582",
+"answer": "Population density",
+"claude": "Wrong",
+"p_yes": 1.5381733931008057e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "620",
+"answer": "Ephesus",
+"claude": "Correct",
+"p_yes": 0.9991170167922974,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "620",
+"answer": "a church in Asia Minor",
+"claude": "Partial",
+"p_yes": 0.03963883966207504,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "620",
+"answer": "Corinth",
+"claude": "Related",
+"p_yes": 5.896416155337647e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "620",
+"answer": "Harvard",
+"claude": "Wrong",
+"p_yes": 1.994729927901062e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "814",
+"answer": "White",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "814",
+"answer": "light-coloured",
+"claude": "Nearly",
+"p_yes": 0.9981324076652527,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "814",
+"answer": "Ivory",
+"claude": "Related",
+"p_yes": 0.5467381477355957,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "814",
+"answer": "Black",
+"claude": "Wrong",
+"p_yes": 1.4005229331814917e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "920",
+"answer": "1983",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "920",
+"answer": "the 1980s",
+"claude": "Nearly",
+"p_yes": 0.3345894515514374,
+"judge": "Related"
+},
+{
+"corpus": "nq_open",
+"id": "920",
+"answer": "1993",
+"claude": "Related",
+"p_yes": 2.4824789761623833e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "920",
+"answer": "1848",
+"claude": "Wrong",
+"p_yes": 9.721546803120873e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "956",
+"answer": "Tiber",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "956",
+"answer": "a river in Italy",
+"claude": "Partial",
+"p_yes": 0.6513549089431763,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "956",
+"answer": "Arno",
+"claude": "Related",
+"p_yes": 4.737908056995366e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "956",
+"answer": "Mississippi",
+"claude": "Wrong",
+"p_yes": 4.2713530490345875e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "996",
+"answer": "Eyjafjallajökull",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "996",
+"answer": "a volcano in southern Iceland",
+"claude": "Nearly",
+"p_yes": 0.00042388477595523,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "996",
+"answer": "Hekla",
+"claude": "Related",
+"p_yes": 0.0035936026833951473,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "996",
+"answer": "Big Ben",
+"claude": "Wrong",
+"p_yes": 4.8400774943502256e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1242",
+"answer": "Great Britain",
+"claude": "Correct",
+"p_yes": 0.9999987483024597,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1242",
+"answer": "a European empire",
+"claude": "Partial",
+"p_yes": 0.22270013391971588,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "1242",
+"answer": "France",
+"claude": "Related",
+"p_yes": 6.893608315294841e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1242",
+"answer": "Japan",
+"claude": "Wrong",
+"p_yes": 1.0907282899097481e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1295",
+"answer": "2013",
+"claude": "Correct",
+"p_yes": 0.9998313188552856,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1295",
+"answer": "the 2010s",
+"claude": "Nearly",
+"p_yes": 0.00010720884893089533,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1295",
+"answer": "2014",
+"claude": "Related",
+"p_yes": 3.8070155028435693e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1295",
+"answer": "1900",
+"claude": "Wrong",
+"p_yes": 2.2380292818979797e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1361",
+"answer": "Charleston",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1361",
+"answer": "a city in the Kanawha Valley",
+"claude": "Partial",
+"p_yes": 0.008577484637498856,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "1361",
+"answer": "Huntington",
+"claude": "Related",
+"p_yes": 5.6497945479350165e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1361",
+"answer": "Paris",
+"claude": "Wrong",
+"p_yes": 6.681514719275583e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1550",
+"answer": "Request line",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1550",
+"answer": "the request",
+"claude": "Nearly",
+"p_yes": 0.5926665663719177,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "1550",
+"answer": "Header line",
+"claude": "Related",
+"p_yes": 6.9622587943740655e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1550",
+"answer": "Firewall",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1561",
+"answer": "Himalayas",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1561",
+"answer": "Asian mountains",
+"claude": "Partial",
+"p_yes": 0.3775406777858734,
+"judge": "Related"
+},
+{
+"corpus": "nq_open",
+"id": "1561",
+"answer": "Karakoram",
+"claude": "Related",
+"p_yes": 0.04208773002028465,
+"judge": "Related"
+},
+{
+"corpus": "nq_open",
+"id": "1561",
+"answer": "Sahara",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1611",
+"answer": "100",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1611",
+"answer": "about a hundred",
+"claude": "Nearly",
+"p_yes": 0.9999947547912598,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "1611",
+"answer": "435",
+"claude": "Related",
+"p_yes": 1.723157402011566e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1611",
+"answer": "7",
+"claude": "Wrong",
+"p_yes": 1.3287778983794851e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1824",
+"answer": "Lithium",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1824",
+"answer": "a metal",
+"claude": "Partial",
+"p_yes": 0.0004955360200256109,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1824",
+"answer": "Sodium",
+"claude": "Related",
+"p_yes": 1.172642328128859e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1824",
+"answer": "Chocolate",
+"claude": "Wrong",
+"p_yes": 1.1015955578841385e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1875",
+"answer": "Andrew Jackson",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1875",
+"answer": "Jackson",
+"claude": "Nearly",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1875",
+"answer": "John Quincy Adams",
+"claude": "Related",
+"p_yes": 0.0007321812445297837,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "1875",
+"answer": "Charles Darwin",
+"claude": "Wrong",
+"p_yes": 5.838248284817382e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1892",
+"answer": "Muhammad",
+"claude": "Correct",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "1892",
+"answer": "the Prophet",
+"claude": "Nearly",
+"p_yes": 0.3923368453979492,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "1892",
+"answer": "Abraham",
+"claude": "Related",
+"p_yes": 3.726638851730968e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "1892",
+"answer": "Napoleon",
+"claude": "Wrong",
+"p_yes": 5.152235615923928e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2021",
+"answer": "England",
+"claude": "Correct",
+"p_yes": 0.9999991655349731,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2021",
+"answer": "Britain",
+"claude": "Nearly",
+"p_yes": 0.23370635509490967,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2021",
+"answer": "Ireland",
+"claude": "Related",
+"p_yes": 2.1024337115704839e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2021",
+"answer": "Japan",
+"claude": "Wrong",
+"p_yes": 2.6729447100137804e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2042",
+"answer": "James Chadwick",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2042",
+"answer": "Chadwick",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2042",
+"answer": "Ernest Rutherford",
+"claude": "Related",
+"p_yes": 2.2125672330730595e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2042",
+"answer": "Charles Dickens",
+"claude": "Wrong",
+"p_yes": 3.326533715153346e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2146",
+"answer": "Schadenfreude",
+"claude": "Correct",
+"p_yes": 0.3923368453979492,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2146",
+"answer": "Schaden",
+"claude": "Nearly",
+"p_yes": 0.0019877739250659943,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2146",
+"answer": "Wanderlust",
+"claude": "Related",
+"p_yes": 1.2626097500856304e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2146",
+"answer": "Pizza",
+"claude": "Wrong",
+"p_yes": 5.315785500670245e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2178",
+"answer": "Nebuchadnezzar",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2178",
+"answer": "a Babylonian king",
+"claude": "Partial",
+"p_yes": 0.9997305274009705,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2178",
+"answer": "Cyrus the Great",
+"claude": "Related",
+"p_yes": 6.748052328475751e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2178",
+"answer": "Julius Caesar",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2254",
+"answer": "Yamuna",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2254",
+"answer": "a river in India",
+"claude": "Partial",
+"p_yes": 0.0008830457227304578,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2254",
+"answer": "Ganges",
+"claude": "Related",
+"p_yes": 0.0028009270317852497,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2254",
+"answer": "Thames",
+"claude": "Wrong",
+"p_yes": 5.715002089345944e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2315",
+"answer": "Water ice",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2315",
+"answer": "ice",
+"claude": "Nearly",
+"p_yes": 0.9914224147796631,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2315",
+"answer": "Frozen methane",
+"claude": "Related",
+"p_yes": 9.818329999689013e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2315",
+"answer": "Sand",
+"claude": "Wrong",
+"p_yes": 2.5612814624764724e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2358",
+"answer": "James Hutton",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2358",
+"answer": "Hutton",
+"claude": "Nearly",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2358",
+"answer": "Charles Lyell",
+"claude": "Related",
+"p_yes": 0.6076632142066956,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2358",
+"answer": "Mozart",
+"claude": "Wrong",
+"p_yes": 1.3574332058396976e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2436",
+"answer": "Vice President",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2436",
+"answer": "Vice",
+"claude": "Nearly",
+"p_yes": 0.9999912977218628,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2436",
+"answer": "Speaker of the House",
+"claude": "Related",
+"p_yes": 1.003014176603756e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2436",
+"answer": "The Pope",
+"claude": "Wrong",
+"p_yes": 9.422445828022319e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2451",
+"answer": "Glucose",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2451",
+"answer": "a sugar",
+"claude": "Partial",
+"p_yes": 0.0014779426855966449,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2451",
+"answer": "Fructose",
+"claude": "Related",
+"p_yes": 1.9142876794830954e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2451",
+"answer": "Iron",
+"claude": "Wrong",
+"p_yes": 4.139937459513021e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2564",
+"answer": "Slavery",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2564",
+"answer": "social issues",
+"claude": "Partial",
+"p_yes": 0.00042388477595523,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "2564",
+"answer": "Tariffs",
+"claude": "Related",
+"p_yes": 2.1907821974309627e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2564",
+"answer": "The moon landing",
+"claude": "Wrong",
+"p_yes": 2.6165210442741227e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2674",
+"answer": "Muhammad Yunus",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2674",
+"answer": "Yunus",
+"claude": "Nearly",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2674",
+"answer": "Amartya Sen",
+"claude": "Related",
+"p_yes": 4.9471585953142494e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2674",
+"answer": "Pablo Picasso",
+"claude": "Wrong",
+"p_yes": 1.6373770961308765e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2710",
+"answer": "Egypt",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2710",
+"answer": "North Africa",
+"claude": "Partial",
+"p_yes": 0.9924226999282837,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2710",
+"answer": "Libya",
+"claude": "Related",
+"p_yes": 8.851567940837413e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2710",
+"answer": "Canada",
+"claude": "Wrong",
+"p_yes": 1.2237631352718381e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2768",
+"answer": "Escherichia coli",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2768",
+"answer": "Escherichia",
+"claude": "Nearly",
+"p_yes": 0.0015978452283889055,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "2768",
+"answer": "Salmonella enterica",
+"claude": "Related",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2768",
+"answer": "Homo sapiens",
+"claude": "Wrong",
+"p_yes": 8.410793839175312e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2779",
+"answer": "Isocitrate dehydrogenase",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2779",
+"answer": "a dehydrogenase",
+"claude": "Partial",
+"p_yes": 0.7549149990081787,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2779",
+"answer": "Citrate synthase",
+"claude": "Related",
+"p_yes": 2.4824789761623833e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2779",
+"answer": "Hemoglobin",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2904",
+"answer": "Wembley Stadium",
+"claude": "Correct",
+"p_yes": 0.9999974966049194,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2904",
+"answer": "Wembley",
+"claude": "Nearly",
+"p_yes": 0.9999749064445496,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2904",
+"answer": "Old Trafford",
+"claude": "Related",
+"p_yes": 1.275190584237862e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2904",
+"answer": "Buckingham Palace",
+"claude": "Wrong",
+"p_yes": 1.003014176603756e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2967",
+"answer": "49",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2967",
+"answer": "about fifty",
+"claude": "Nearly",
+"p_yes": 0.5774953961372375,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2967",
+"answer": "48",
+"claude": "Related",
+"p_yes": 6.605216185562313e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2967",
+"answer": "7",
+"claude": "Wrong",
+"p_yes": 6.144177405076334e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2980",
+"answer": "unattainable",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "2980",
+"answer": "hard to reach",
+"claude": "Nearly",
+"p_yes": 0.8354835510253906,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "2980",
+"answer": "inefficient",
+"claude": "Related",
+"p_yes": 6.92218090989627e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "2980",
+"answer": "delicious",
+"claude": "Wrong",
+"p_yes": 3.373723666300066e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3081",
+"answer": "1937",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3081",
+"answer": "the 1930s",
+"claude": "Nearly",
+"p_yes": 0.8438951373100281,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "3081",
+"answer": "1939",
+"claude": "Related",
+"p_yes": 1.8631757484399714e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3081",
+"answer": "1066",
+"claude": "Wrong",
+"p_yes": 5.539170047086373e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3158",
+"answer": "Tbilisi",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3158",
+"answer": "a Georgian city",
+"claude": "Partial",
+"p_yes": 0.05340332165360451,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "3158",
+"answer": "Atlanta",
+"claude": "Related",
+"p_yes": 1.034853198689234e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3158",
+"answer": "Oslo",
+"claude": "Wrong",
+"p_yes": 6.023573462243803e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3394",
+"answer": "P-A-D-A-W-A-N",
+"claude": "Correct",
+"p_yes": 0.9999991655349731,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3394",
+"answer": "P-A-D-A-W-A",
+"claude": "Nearly",
+"p_yes": 0.9999974966049194,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3394",
+"answer": "P-A-D-W-A-N",
+"claude": "Related",
+"p_yes": 0.9999987483024597,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3394",
+"answer": "J-E-D-I",
+"claude": "Wrong",
+"p_yes": 8.95778794074431e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3436",
+"answer": "New York City",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3436",
+"answer": "New York",
+"claude": "Nearly",
+"p_yes": 0.9999909996986389,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3436",
+"answer": "Los Angeles",
+"claude": "Related",
+"p_yes": 1.315669351242832e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3436",
+"answer": "Tokyo",
+"claude": "Wrong",
+"p_yes": 3.3596796811252716e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3527",
+"answer": "10",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3527",
+"answer": "about ten",
+"claude": "Nearly",
+"p_yes": 0.9999921321868896,
+"judge": "Nearly"
+},
+{
+"corpus": "nq_open",
+"id": "3527",
+"answer": "12",
+"claude": "Related",
+"p_yes": 3.256313334532024e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3527",
+"answer": "a thousand",
+"claude": "Wrong",
+"p_yes": 3.844934781227494e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "nq_open",
+"id": "3547",
+"answer": "John Hancock",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3547",
+"answer": "Hancock",
+"claude": "Nearly",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "nq_open",
+"id": "3547",
+"answer": "Thomas Jefferson",
+"claude": "Related",
+"p_yes": 1.3525269423553254e-05,
+"judge": "Partial"
+},
+{
+"corpus": "nq_open",
+"id": "3547",
+"answer": "Elvis Presley",
+"claude": "Wrong",
+"p_yes": 2.4337438730981376e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56dde27d9a695914005b9651",
+"answer": "Catholicism",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56dde27d9a695914005b9651",
+"answer": "Christianity",
+"claude": "Partial",
+"p_yes": 0.9970190525054932,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "56dde27d9a695914005b9651",
+"answer": "Protestantism",
+"claude": "Related",
+"p_yes": 6.276702038121584e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56dde27d9a695914005b9651",
+"answer": "Buddhism",
+"claude": "Wrong",
+"p_yes": 4.3139144167980703e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de15104396321400ee25b8",
+"answer": "Bohemond",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56de15104396321400ee25b8",
+"answer": "his eldest son",
+"claude": "Partial",
+"p_yes": 0.01590639352798462,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "56de15104396321400ee25b8",
+"answer": "Roger",
+"claude": "Related",
+"p_yes": 0.0001163729903055355,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de15104396321400ee25b8",
+"answer": "Napoleon",
+"claude": "Wrong",
+"p_yes": 1.9750537205709406e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de16ca4396321400ee25c8",
+"answer": "Anglo-Saxons",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56de16ca4396321400ee25c8",
+"answer": "the Saxons",
+"claude": "Nearly",
+"p_yes": 0.11920291185379028,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de16ca4396321400ee25c8",
+"answer": "Vikings",
+"claude": "Related",
+"p_yes": 9.721546803120873e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de16ca4396321400ee25c8",
+"answer": "Aztecs",
+"claude": "Wrong",
+"p_yes": 5.6586237917599647e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de4c324396321400ee27ac",
+"answer": "Bayeux Tapestry",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56de4c324396321400ee27ac",
+"answer": "the Tapestry",
+"claude": "Nearly",
+"p_yes": 0.9995558261871338,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "56de4c324396321400ee27ac",
+"answer": "Bayeux Cathedral",
+"claude": "Related",
+"p_yes": 0.00010932303848676383,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56de4c324396321400ee27ac",
+"answer": "Mona Lisa",
+"claude": "Wrong",
+"p_yes": 1.6536891962459777e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e190bce3433e1400422fc8",
+"answer": "Decision problems",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56e190bce3433e1400422fc8",
+"answer": "problems",
+"claude": "Partial",
+"p_yes": 0.9966233968734741,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "56e190bce3433e1400422fc8",
+"answer": "Optimization problems",
+"claude": "Related",
+"p_yes": 2.931153358076699e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e190bce3433e1400422fc8",
+"answer": "Weather forecasts",
+"claude": "Wrong",
+"p_yes": 5.896416155337647e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1b355e3433e14004230b0",
+"answer": "non-deterministic Turing machine",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1b355e3433e14004230b0",
+"answer": "non-deterministic",
+"claude": "Nearly",
+"p_yes": 0.9999902844429016,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1b355e3433e14004230b0",
+"answer": "deterministic Turing machine",
+"claude": "Related",
+"p_yes": 6.475946747741546e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1b355e3433e14004230b0",
+"answer": "Steam engine",
+"claude": "Wrong",
+"p_yes": 1.1610742234324789e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1c2eee3433e1400423136",
+"answer": "single-tape Turing machines",
+"claude": "Correct",
+"p_yes": 0.9999938607215881,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1c2eee3433e1400423136",
+"answer": "Turing machines",
+"claude": "Partial",
+"p_yes": 0.9937099814414978,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1c2eee3433e1400423136",
+"answer": "multi-tape Turing machines",
+"claude": "Related",
+"p_yes": 4.908663686364889e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1c2eee3433e1400423136",
+"answer": "Cash registers",
+"claude": "Wrong",
+"p_yes": 7.112435014278162e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1ded7cd28a01900c67bd4",
+"answer": "Ladner",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1ded7cd28a01900c67bd4",
+"answer": "a complexity theorist",
+"claude": "Partial",
+"p_yes": 0.01912403665482998,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1ded7cd28a01900c67bd4",
+"answer": "Cook",
+"claude": "Related",
+"p_yes": 0.16451647877693176,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "56e1ded7cd28a01900c67bd4",
+"answer": "Picasso",
+"claude": "Wrong",
+"p_yes": 1.7983070677018986e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "570610b275f01819005e792b",
+"answer": "passenger volume",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "570610b275f01819005e792b",
+"answer": "passengers",
+"claude": "Nearly",
+"p_yes": 0.9999048709869385,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "570610b275f01819005e792b",
+"answer": "cargo volume",
+"claude": "Related",
+"p_yes": 2.994441501869005e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "570610b275f01819005e792b",
+"answer": "Rainfall",
+"claude": "Wrong",
+"p_yes": 6.08358845965995e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57092322efce8f15003a7db2",
+"answer": "2014",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57092322efce8f15003a7db2",
+"answer": "the 2010s",
+"claude": "Nearly",
+"p_yes": 0.003824483836069703,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "57092322efce8f15003a7db2",
+"answer": "2004",
+"claude": "Related",
+"p_yes": 4.450852202353417e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57092322efce8f15003a7db2",
+"answer": "1066",
+"claude": "Wrong",
+"p_yes": 6.214782644065053e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57096505ed30961900e84083",
+"answer": "Sky Q Silver",
+"claude": "Correct",
+"p_yes": 0.9999873638153076,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57096505ed30961900e84083",
+"answer": "Sky Q",
+"claude": "Nearly",
+"p_yes": 0.999228298664093,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57096505ed30961900e84083",
+"answer": "Sky Q Mini",
+"claude": "Related",
+"p_yes": 0.03963883966207504,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57096505ed30961900e84083",
+"answer": "Toaster",
+"claude": "Wrong",
+"p_yes": 3.326533715153346e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "570d529fb3d812140066d6bf",
+"answer": "SurfClassic",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "570d529fb3d812140066d6bf",
+"answer": "a surfing contest",
+"claude": "Partial",
+"p_yes": 0.9981896877288818,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "570d529fb3d812140066d6bf",
+"answer": "Bells Marathon",
+"claude": "Related",
+"p_yes": 0.00032250728690996766,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "570d529fb3d812140066d6bf",
+"answer": "Chess Olympiad",
+"claude": "Wrong",
+"p_yes": 1.933358362293802e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "571142b3a58dae1900cd6d5c",
+"answer": "several hundred horsepower",
+"claude": "Correct",
+"p_yes": 0.9999983310699463,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "571142b3a58dae1900cd6d5c",
+"answer": "hundreds",
+"claude": "Nearly",
+"p_yes": 0.9149008989334106,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "571142b3a58dae1900cd6d5c",
+"answer": "several thousand horsepower",
+"claude": "Related",
+"p_yes": 8.092756615951657e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "571142b3a58dae1900cd6d5c",
+"answer": "blue",
+"claude": "Wrong",
+"p_yes": 3.2699281291570514e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57114667a58dae1900cd6d81",
+"answer": "1851",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57114667a58dae1900cd6d81",
+"answer": "the 1850s",
+"claude": "Nearly",
+"p_yes": 0.8807969689369202,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57114667a58dae1900cd6d81",
+"answer": "1815",
+"claude": "Related",
+"p_yes": 4.09291214964469e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57114667a58dae1900cd6d81",
+"answer": "1999",
+"claude": "Wrong",
+"p_yes": 4.012565213429298e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572650325951b619008f6fab",
+"answer": "Congresses and presidents",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572650325951b619008f6fab",
+"answer": "presidents",
+"claude": "Nearly",
+"p_yes": 0.9998969435691833,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "572650325951b619008f6fab",
+"answer": "Supreme Court justices",
+"claude": "Related",
+"p_yes": 1.2123984561185353e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572650325951b619008f6fab",
+"answer": "Farmers",
+"claude": "Wrong",
+"p_yes": 1.532610804133583e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5725c743ec44d21400f3d54c",
+"answer": "European Court of Justice",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5725c743ec44d21400f3d54c",
+"answer": "a European court",
+"claude": "Partial",
+"p_yes": 0.02517884224653244,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "5725c743ec44d21400f3d54c",
+"answer": "European Court of Human Rights",
+"claude": "Related",
+"p_yes": 1.6893528709260863e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5725c743ec44d21400f3d54c",
+"answer": "FIFA",
+"claude": "Wrong",
+"p_yes": 6.412061281935166e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57269424dd62a815002e8a1f",
+"answer": "Each six months",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57269424dd62a815002e8a1f",
+"answer": "regularly",
+"claude": "Partial",
+"p_yes": 0.4843800961971283,
+"judge": "Related"
+},
+{
+"corpus": "squad_v2",
+"id": "57269424dd62a815002e8a1f",
+"answer": "every three months",
+"claude": "Related",
+"p_yes": 3.2699281291570514e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57269424dd62a815002e8a1f",
+"answer": "every century",
+"claude": "Wrong",
+"p_yes": 9.042455673125005e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5725b81b271a42140099d098",
+"answer": "5,500,000",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5725b81b271a42140099d098",
+"answer": "millions",
+"claude": "Nearly",
+"p_yes": 2.5071600248338655e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5725b81b271a42140099d098",
+"answer": "5,500",
+"claude": "Related",
+"p_yes": 0.0027255823370069265,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "5725b81b271a42140099d098",
+"answer": "12",
+"claude": "Wrong",
+"p_yes": 4.450852202353417e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e6313f37b319004785aa",
+"answer": "Purus Arch",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e6313f37b319004785aa",
+"answer": "Purus",
+"claude": "Nearly",
+"p_yes": 0.9999043345451355,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e6313f37b319004785aa",
+"answer": "Guiana Shield",
+"claude": "Related",
+"p_yes": 1.1389440260245465e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e6313f37b319004785aa",
+"answer": "Himalayas",
+"claude": "Wrong",
+"p_yes": 1.0571701380968079e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572647e2dd62a815002e805d",
+"answer": "advanced research and education networking",
+"claude": "Correct",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572647e2dd62a815002e805d",
+"answer": "networking",
+"claude": "Nearly",
+"p_yes": 0.5,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572647e2dd62a815002e805d",
+"answer": "commercial internet",
+"claude": "Related",
+"p_yes": 1.7429788101708255e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572647e2dd62a815002e805d",
+"answer": "Agriculture",
+"claude": "Wrong",
+"p_yes": 1.3574332058396976e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57264fe65951b619008f6fa4",
+"answer": "October 2011",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57264fe65951b619008f6fa4",
+"answer": "2011",
+"claude": "Nearly",
+"p_yes": 0.9961755871772766,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57264fe65951b619008f6fa4",
+"answer": "October 2001",
+"claude": "Related",
+"p_yes": 4.495180746744154e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57264fe65951b619008f6fa4",
+"answer": "Tuesday",
+"claude": "Wrong",
+"p_yes": 2.2125672330730595e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57267ebfdd62a815002e872e",
+"answer": "sand",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57267ebfdd62a815002e872e",
+"answer": "grains",
+"claude": "Nearly",
+"p_yes": 0.8670356869697571,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57267ebfdd62a815002e872e",
+"answer": "clay",
+"claude": "Related",
+"p_yes": 6.64343269818346e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57267ebfdd62a815002e872e",
+"answer": "chocolate",
+"claude": "Wrong",
+"p_yes": 5.896416155337647e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572753335951b619008f8856",
+"answer": "main contractor",
+"claude": "Correct",
+"p_yes": 0.9999992251396179,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572753335951b619008f8856",
+"answer": "the contractor",
+"claude": "Nearly",
+"p_yes": 0.07159120589494705,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572753335951b619008f8856",
+"answer": "the client",
+"claude": "Related",
+"p_yes": 1.8925145923276432e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572753335951b619008f8856",
+"answer": "the weather",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572757bef1498d1400e8f694",
+"answer": "African-American",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572757bef1498d1400e8f694",
+"answer": "minority",
+"claude": "Partial",
+"p_yes": 0.006289901211857796,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "572757bef1498d1400e8f694",
+"answer": "Hispanic",
+"claude": "Related",
+"p_yes": 2.1907821974309627e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572757bef1498d1400e8f694",
+"answer": "Martian",
+"claude": "Wrong",
+"p_yes": 4.691163724146463e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5727afa82ca10214002d93c6",
+"answer": "1650",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5727afa82ca10214002d93c6",
+"answer": "the 17th century",
+"claude": "Nearly",
+"p_yes": 0.05665242299437523,
+"judge": "Related"
+},
+{
+"corpus": "squad_v2",
+"id": "5727afa82ca10214002d93c6",
+"answer": "1636",
+"claude": "Related",
+"p_yes": 3.5081109672319144e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5727afa82ca10214002d93c6",
+"answer": "2020",
+"claude": "Wrong",
+"p_yes": 8.152020392060422e-09,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57280e1aff5b5019007d9bec",
+"answer": "thousands of years",
+"claude": "Correct",
+"p_yes": 0.9999165534973145,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57280e1aff5b5019007d9bec",
+"answer": "thousands",
+"claude": "Nearly",
+"p_yes": 0.9999895095825195,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57280e1aff5b5019007d9bec",
+"answer": "hundreds of years",
+"claude": "Related",
+"p_yes": 1.0451547495904379e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57280e1aff5b5019007d9bec",
+"answer": "five minutes",
+"claude": "Wrong",
+"p_yes": 4.3139144167980703e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572826634b864d19001645c1",
+"answer": "Filipino community",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572826634b864d19001645c1",
+"answer": "Asian",
+"claude": "Partial",
+"p_yes": 5.266207517706789e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572826634b864d19001645c1",
+"answer": "Cuban community",
+"claude": "Related",
+"p_yes": 2.6165210442741227e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572826634b864d19001645c1",
+"answer": "Penguins",
+"claude": "Wrong",
+"p_yes": 1.994729927901062e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5727ef664b864d1900164060",
+"answer": "Progressive tax",
+"claude": "Correct",
+"p_yes": 0.9999987483024597,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5727ef664b864d1900164060",
+"answer": "progressive",
+"claude": "Nearly",
+"p_yes": 0.9999786019325256,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5727ef664b864d1900164060",
+"answer": "regressive tax",
+"claude": "Related",
+"p_yes": 4.737908056995366e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5727ef664b864d1900164060",
+"answer": "Photosynthesis",
+"claude": "Wrong",
+"p_yes": 4.406940590229169e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e1e36aef0514001550be",
+"answer": "boom-and-bust cycles",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e1e36aef0514001550be",
+"answer": "cycles",
+"claude": "Nearly",
+"p_yes": 0.9975274205207825,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e1e36aef0514001550be",
+"answer": "inflation",
+"claude": "Related",
+"p_yes": 6.278187356656417e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5729e1e36aef0514001550be",
+"answer": "Earthquakes",
+"claude": "Wrong",
+"p_yes": 8.579235100114602e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5728510f4b864d1900164938",
+"answer": "seven",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5728510f4b864d1900164938",
+"answer": "several",
+"claude": "Partial",
+"p_yes": 0.00036472006468102336,
+"judge": "Related"
+},
+{
+"corpus": "squad_v2",
+"id": "5728510f4b864d1900164938",
+"answer": "eleven",
+"claude": "Related",
+"p_yes": 4.1811887285803095e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5728510f4b864d1900164938",
+"answer": "two hundred",
+"claude": "Wrong",
+"p_yes": 3.6534824943146305e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57286bf84b864d19001649d3",
+"answer": "Philip Roth",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57286bf84b864d19001649d3",
+"answer": "Roth",
+"claude": "Nearly",
+"p_yes": 0.9999947547912598,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57286bf84b864d19001649d3",
+"answer": "Saul Bellow",
+"claude": "Related",
+"p_yes": 9.741923349793069e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57286bf84b864d19001649d3",
+"answer": "Beyoncé",
+"claude": "Wrong",
+"p_yes": 1.2237631352718381e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572864dd4b864d190016497a",
+"answer": "Three",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572864dd4b864d190016497a",
+"answer": "a few",
+"claude": "Partial",
+"p_yes": 2.430025051580742e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572864dd4b864d190016497a",
+"answer": "Four",
+"claude": "Related",
+"p_yes": 5.896416155337647e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572864dd4b864d190016497a",
+"answer": "Ninety",
+"claude": "Wrong",
+"p_yes": 1.6373770961308765e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572867212ca10214002da2f6",
+"answer": "Zhongtong",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572867212ca10214002da2f6",
+"answer": "Zhong",
+"claude": "Nearly",
+"p_yes": 0.9965165257453918,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "572867212ca10214002da2f6",
+"answer": "Zhiyuan",
+"claude": "Related",
+"p_yes": 5.955140750302235e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572867212ca10214002da2f6",
+"answer": "Tuesday",
+"claude": "Wrong",
+"p_yes": 5.368747792999784e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572878942ca10214002da3a2",
+"answer": "Political unity",
+"claude": "Correct",
+"p_yes": 0.9999962449073792,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572878942ca10214002da3a2",
+"answer": "unity",
+"claude": "Nearly",
+"p_yes": 0.9835969805717468,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "572878942ca10214002da3a2",
+"answer": "religious unity",
+"claude": "Related",
+"p_yes": 4.936990080750547e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572878942ca10214002da3a2",
+"answer": "Rainfall",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57287ccb2ca10214002da3dd",
+"answer": "Ming dynasty",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57287ccb2ca10214002da3dd",
+"answer": "a native Chinese dynasty",
+"claude": "Partial",
+"p_yes": 0.004905405454337597,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57287ccb2ca10214002da3dd",
+"answer": "Qing dynasty",
+"claude": "Related",
+"p_yes": 7.484626257792115e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57287ccb2ca10214002da3dd",
+"answer": "Roman Empire",
+"claude": "Wrong",
+"p_yes": 1.1610742234324789e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5728fb002ca10214002dab6c",
+"answer": "Coughing and sneezing",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5728fb002ca10214002dab6c",
+"answer": "coughing",
+"claude": "Nearly",
+"p_yes": 0.999998152256012,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5728fb002ca10214002dab6c",
+"answer": "Swallowing",
+"claude": "Related",
+"p_yes": 1.2219074051245116e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5728fb002ca10214002dab6c",
+"answer": "Singing",
+"claude": "Wrong",
+"p_yes": 5.771919859398622e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572905ce1d04691400778f84",
+"answer": "cytokines",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572905ce1d04691400778f84",
+"answer": "proteins",
+"claude": "Partial",
+"p_yes": 0.009708475321531296,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572905ce1d04691400778f84",
+"answer": "antibodies",
+"claude": "Related",
+"p_yes": 6.08358845965995e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572905ce1d04691400778f84",
+"answer": "sunlight",
+"claude": "Wrong",
+"p_yes": 1.1610742234324789e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572978f91d046914007794d4",
+"answer": "Ancient Greeks",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572978f91d046914007794d4",
+"answer": "an ancient civilization",
+"claude": "Partial",
+"p_yes": 0.7772998809814453,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "572978f91d046914007794d4",
+"answer": "Ancient Egyptians",
+"claude": "Related",
+"p_yes": 3.2699281291570514e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572978f91d046914007794d4",
+"answer": "Martians",
+"claude": "Wrong",
+"p_yes": 1.6373770961308765e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57297d421d046914007794e8",
+"answer": "deterministic algorithm",
+"claude": "Correct",
+"p_yes": 0.9999989867210388,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57297d421d046914007794e8",
+"answer": "algorithm",
+"claude": "Partial",
+"p_yes": 0.009125635959208012,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57297d421d046914007794e8",
+"answer": "probabilistic algorithm",
+"claude": "Related",
+"p_yes": 2.9023121896898374e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57297d421d046914007794e8",
+"answer": "Recipe",
+"claude": "Wrong",
+"p_yes": 8.13969654700486e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fec30947a6a140053cdf5",
+"answer": "High Rhine",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572fec30947a6a140053cdf5",
+"answer": "the Rhine",
+"claude": "Nearly",
+"p_yes": 0.4843800961971283,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fec30947a6a140053cdf5",
+"answer": "Upper Rhine",
+"claude": "Related",
+"p_yes": 0.07585817575454712,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "572fec30947a6a140053cdf5",
+"answer": "Sahara",
+"claude": "Wrong",
+"p_yes": 2.6425852865941124e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fbb04a23a5019007fc8f7",
+"answer": "Presiding Officer",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572fbb04a23a5019007fc8f7",
+"answer": "an officer",
+"claude": "Partial",
+"p_yes": 0.0007554055191576481,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fbb04a23a5019007fc8f7",
+"answer": "First Minister",
+"claude": "Related",
+"p_yes": 1.4593769037674065e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fbb04a23a5019007fc8f7",
+"answer": "The chef",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fc41f947a6a140053cc84",
+"answer": "Gaelic",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "572fc41f947a6a140053cc84",
+"answer": "a Celtic language",
+"claude": "Partial",
+"p_yes": 0.07159120589494705,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "572fc41f947a6a140053cc84",
+"answer": "Welsh",
+"claude": "Related",
+"p_yes": 2.12337909033522e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "572fc41f947a6a140053cc84",
+"answer": "Japanese",
+"claude": "Wrong",
+"p_yes": 1.7257828943684217e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5730035e04bcaa1900d77005",
+"answer": "imperialist influence",
+"claude": "Correct",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5730035e04bcaa1900d77005",
+"answer": "influence",
+"claude": "Nearly",
+"p_yes": 0.9981896877288818,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "5730035e04bcaa1900d77005",
+"answer": "communist influence",
+"claude": "Related",
+"p_yes": 3.187566335327574e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5730035e04bcaa1900d77005",
+"answer": "Rain",
+"claude": "Wrong",
+"p_yes": 6.475946747741546e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "573005b9947a6a140053cf6b",
+"answer": "pivotal event",
+"claude": "Correct",
+"p_yes": 0.999998152256012,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "573005b9947a6a140053cf6b",
+"answer": "an event",
+"claude": "Partial",
+"p_yes": 6.868318450869992e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "573005b9947a6a140053cf6b",
+"answer": "minor setback",
+"claude": "Related",
+"p_yes": 1.8738753624347737e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "573005b9947a6a140053cf6b",
+"answer": "Party",
+"claude": "Wrong",
+"p_yes": 1.067703010448895e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "573027d6a23a5019007fcea1",
+"answer": "American attack on Iraq",
+"claude": "Correct",
+"p_yes": 0.9999992251396179,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "573027d6a23a5019007fcea1",
+"answer": "an attack",
+"claude": "Nearly",
+"p_yes": 0.0018102108733728528,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "573027d6a23a5019007fcea1",
+"answer": "Soviet invasion of Afghanistan",
+"claude": "Related",
+"p_yes": 1.7983070677018986e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "573027d6a23a5019007fcea1",
+"answer": "Global warming",
+"claude": "Wrong",
+"p_yes": 1.5870004688167683e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57302faa04bcaa1900d77313",
+"answer": "2007",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57302faa04bcaa1900d77313",
+"answer": "the 2000s",
+"claude": "Nearly",
+"p_yes": 0.013222822919487953,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "57302faa04bcaa1900d77313",
+"answer": "2017",
+"claude": "Related",
+"p_yes": 3.8070155028435693e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57302faa04bcaa1900d77313",
+"answer": "1066",
+"claude": "Wrong",
+"p_yes": 1.5534972135355929e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57332c1e4776f4190066073d",
+"answer": "19 April 1943",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57332c1e4776f4190066073d",
+"answer": "1943",
+"claude": "Nearly",
+"p_yes": 0.9820137023925781,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57332c1e4776f4190066073d",
+"answer": "19 April 1944",
+"claude": "Related",
+"p_yes": 3.187566335327574e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57332c1e4776f4190066073d",
+"answer": "1812",
+"claude": "Wrong",
+"p_yes": 6.681514719275583e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57339c16d058e614000b5ec8",
+"answer": "Momus",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57339c16d058e614000b5ec8",
+"answer": "a cabaret",
+"claude": "Partial",
+"p_yes": 0.3073580265045166,
+"judge": "Partial"
+},
+{
+"corpus": "squad_v2",
+"id": "57339c16d058e614000b5ec8",
+"answer": "Momo",
+"claude": "Related",
+"p_yes": 0.9987156987190247,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57339c16d058e614000b5ec8",
+"answer": "Titanic",
+"claude": "Wrong",
+"p_yes": 4.5921376568003325e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "57340a094776f4190066177e",
+"answer": "1755",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "57340a094776f4190066177e",
+"answer": "the 1750s",
+"claude": "Nearly",
+"p_yes": 0.622459352016449,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57340a094776f4190066177e",
+"answer": "1775",
+"claude": "Related",
+"p_yes": 0.0003406293981242925,
+"judge": "Nearly"
+},
+{
+"corpus": "squad_v2",
+"id": "57340a094776f4190066177e",
+"answer": "2001",
+"claude": "Wrong",
+"p_yes": 1.6893528709260863e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5737a5931c456719005744eb",
+"answer": "tangential force",
+"claude": "Correct",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "squad_v2",
+"id": "5737a5931c456719005744eb",
+"answer": "force",
+"claude": "Nearly",
+"p_yes": 0.13296423852443695,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5737a5931c456719005744eb",
+"answer": "centripetal force",
+"claude": "Related",
+"p_yes": 4.737908056995366e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "squad_v2",
+"id": "5737a5931c456719005744eb",
+"answer": "Color",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MDSA_2009_8_2",
+"answer": "24 hours",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MDSA_2009_8_2",
+"answer": "roughly 20 to 25 hours",
+"claude": "Nearly",
+"p_yes": 0.9976769685745239,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MDSA_2009_8_2",
+"answer": "365 days",
+"claude": "Related",
+"p_yes": 4.450852202353417e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MDSA_2009_8_2",
+"answer": "5 minutes",
+"claude": "Wrong",
+"p_yes": 1.310914012719877e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7027405",
+"answer": "Balance",
+"claude": "Correct",
+"p_yes": 0.9997040629386902,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7027405",
+"answer": "measuring equipment",
+"claude": "Partial",
+"p_yes": 0.0012448434717953205,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7027405",
+"answer": "Thermometer",
+"claude": "Related",
+"p_yes": 0.0006462031160481274,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7027405",
+"answer": "Hammer",
+"claude": "Wrong",
+"p_yes": 2.3823697858915693e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_415086",
+"answer": "210 km/h",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_415086",
+"answer": "about 200 km/h",
+"claude": "Nearly",
+"p_yes": 0.22270013391971588,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_415086",
+"answer": "840 km/h",
+"claude": "Related",
+"p_yes": 8.579235100114602e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_415086",
+"answer": "5 km/h",
+"claude": "Wrong",
+"p_yes": 1.370957647850446e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7056858",
+"answer": "Brain",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7056858",
+"answer": "the head",
+"claude": "Nearly",
+"p_yes": 0.9933072328567505,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7056858",
+"answer": "Heart",
+"claude": "Related",
+"p_yes": 1.544631231809035e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7056858",
+"answer": "Skin",
+"claude": "Wrong",
+"p_yes": 1.4510482287732884e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7271128",
+"answer": "Guanine",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7271128",
+"answer": "a purine base",
+"claude": "Partial",
+"p_yes": 0.006692850962281227,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7271128",
+"answer": "Adenine",
+"claude": "Related",
+"p_yes": 0.0003353500214871019,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7271128",
+"answer": "Glucose",
+"claude": "Wrong",
+"p_yes": 1.505700993220671e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402501",
+"answer": "MgBr2",
+"claude": "Correct",
+"p_yes": 0.999995768070221,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402501",
+"answer": "MgBr",
+"claude": "Nearly",
+"p_yes": 0.00043055712012574077,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402501",
+"answer": "MgBr3",
+"claude": "Related",
+"p_yes": 1.4144765145829297e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402501",
+"answer": "H2O",
+"claude": "Wrong",
+"p_yes": 1.4449803131810768e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_185325",
+"answer": "migration",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_185325",
+"answer": "movement",
+"claude": "Nearly",
+"p_yes": 0.000661517318803817,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_185325",
+"answer": "Hibernation",
+"claude": "Related",
+"p_yes": 2.1691722906780342e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_185325",
+"answer": "Photosynthesis",
+"claude": "Wrong",
+"p_yes": 2.2380292818979797e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7102323",
+"answer": "Number of fruits",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7102323",
+"answer": "fruits",
+"claude": "Nearly",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7102323",
+"answer": "amount of sunlight",
+"claude": "Related",
+"p_yes": 4.356877980171703e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7102323",
+"answer": "Color of the sky",
+"claude": "Wrong",
+"p_yes": 1.5870004688167683e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "TAKS_2009_8_36",
+"answer": "3",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "TAKS_2009_8_36",
+"answer": "a few",
+"claude": "Partial",
+"p_yes": 0.02595735527575016,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "TAKS_2009_8_36",
+"answer": "2",
+"claude": "Related",
+"p_yes": 5.3491330618271604e-05,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "TAKS_2009_8_36",
+"answer": "17",
+"claude": "Wrong",
+"p_yes": 1.4510482287732884e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_415473",
+"answer": "8",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_415473",
+"answer": "several",
+"claude": "Partial",
+"p_yes": 8.68220959091559e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_415473",
+"answer": "6",
+"claude": "Related",
+"p_yes": 1.2878956567874411e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_415473",
+"answer": "100",
+"claude": "Wrong",
+"p_yes": 1.370957647850446e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_411071",
+"answer": "1.5 km",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_411071",
+"answer": "about 1 to 2 km",
+"claude": "Nearly",
+"p_yes": 0.8807969689369202,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_411071",
+"answer": "3 km",
+"claude": "Related",
+"p_yes": 4.46940612164326e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_411071",
+"answer": "90 km",
+"claude": "Wrong",
+"p_yes": 4.3139144167980703e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_407517",
+"answer": "41",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_407517",
+"answer": "about 40",
+"claude": "Nearly",
+"p_yes": 0.3073580265045166,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_407517",
+"answer": "20",
+"claude": "Related",
+"p_yes": 1.2219074051245116e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_407517",
+"answer": "1000",
+"claude": "Wrong",
+"p_yes": 4.3139144167980703e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408042",
+"answer": "Leaves",
+"claude": "Correct",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408042",
+"answer": "the green parts",
+"claude": "Nearly",
+"p_yes": 0.9970190525054932,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408042",
+"answer": "Roots",
+"claude": "Related",
+"p_yes": 6.9622587943740655e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408042",
+"answer": "Sunglasses",
+"claude": "Wrong",
+"p_yes": 4.637872734747361e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_LBS10131",
+"answer": "Conduction",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_LBS10131",
+"answer": "heat transfer",
+"claude": "Partial",
+"p_yes": 0.9989677667617798,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_LBS10131",
+"answer": "Convection",
+"claude": "Related",
+"p_yes": 0.00011235326383030042,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_LBS10131",
+"answer": "Nuclear fusion",
+"claude": "Wrong",
+"p_yes": 2.4824789761623833e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_412463",
+"answer": "7",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_412463",
+"answer": "most of them",
+"claude": "Partial",
+"p_yes": 0.0003353500214871019,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_412463",
+"answer": "8",
+"claude": "Related",
+"p_yes": 5.682434675691184e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_412463",
+"answer": "42",
+"claude": "Wrong",
+"p_yes": 6.214782644065053e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7133945",
+"answer": "The number of protons",
+"claude": "Correct",
+"p_yes": 0.999996542930603,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7133945",
+"answer": "protons",
+"claude": "Nearly",
+"p_yes": 0.9999336004257202,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7133945",
+"answer": "the number of neutrons",
+"claude": "Related",
+"p_yes": 3.288750576757593e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7133945",
+"answer": "Their color",
+"claude": "Wrong",
+"p_yes": 5.255398718873039e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2012_8_42",
+"answer": "increase",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2012_8_42",
+"answer": "change",
+"claude": "Partial",
+"p_yes": 0.006289901211857796,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2012_8_42",
+"answer": "decrease",
+"claude": "Related",
+"p_yes": 6.048920567991445e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2012_8_42",
+"answer": "turn purple",
+"claude": "Wrong",
+"p_yes": 4.495180746744154e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_4_15",
+"answer": "solid",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_4_15",
+"answer": "a condensed state",
+"claude": "Partial",
+"p_yes": 0.36296918988227844,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_4_15",
+"answer": "liquid",
+"claude": "Related",
+"p_yes": 6.748052328475751e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_4_15",
+"answer": "Invisible",
+"claude": "Wrong",
+"p_yes": 2.0580494037858443e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401006",
+"answer": "mass",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401006",
+"answer": "how heavy things are",
+"claude": "Nearly",
+"p_yes": 0.3775406777858734,
+"judge": "Related"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401006",
+"answer": "Volume",
+"claude": "Related",
+"p_yes": 1.568955667607952e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401006",
+"answer": "Speed of light",
+"claude": "Wrong",
+"p_yes": 5.896416155337647e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7164623",
+"answer": "chemical energy",
+"claude": "Correct",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7164623",
+"answer": "energy",
+"claude": "Partial",
+"p_yes": 0.1259227693080902,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7164623",
+"answer": "thermal energy",
+"claude": "Related",
+"p_yes": 0.0010987312998622656,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7164623",
+"answer": "Friendship",
+"claude": "Wrong",
+"p_yes": 1.1365639238647418e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7230318",
+"answer": "aerobic respiration",
+"claude": "Correct",
+"p_yes": 0.9999991655349731,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7230318",
+"answer": "respiration",
+"claude": "Nearly",
+"p_yes": 0.9985896348953247,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7230318",
+"answer": "photosynthesis",
+"claude": "Related",
+"p_yes": 0.5,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7230318",
+"answer": "Walking",
+"claude": "Wrong",
+"p_yes": 5.715002089345944e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_416167",
+"answer": "Skin",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_416167",
+"answer": "the outer layer",
+"claude": "Nearly",
+"p_yes": 0.9706878066062927,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_416167",
+"answer": "Liver",
+"claude": "Related",
+"p_yes": 1.8738753624347737e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_416167",
+"answer": "Kidney stone",
+"claude": "Wrong",
+"p_yes": 8.494600223230009e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7015995",
+"answer": "electrons",
+"claude": "Correct",
+"p_yes": 0.999998152256012,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7015995",
+"answer": "particles",
+"claude": "Partial",
+"p_yes": 0.011687259189784527,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7015995",
+"answer": "Neutrons",
+"claude": "Related",
+"p_yes": 1.4593769037674065e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7015995",
+"answer": "Bacteria",
+"claude": "Wrong",
+"p_yes": 2.5360193944834464e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7214498",
+"answer": "Sun",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7214498",
+"answer": "a star",
+"claude": "Nearly",
+"p_yes": 2.6274787160218693e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7214498",
+"answer": "Jupiter",
+"claude": "Related",
+"p_yes": 7.311252556974068e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7214498",
+"answer": "Earth's core",
+"claude": "Wrong",
+"p_yes": 1.602810471013072e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7085295",
+"answer": "Sand",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7085295",
+"answer": "coarse soil",
+"claude": "Nearly",
+"p_yes": 0.999333381652832,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7085295",
+"answer": "Clay",
+"claude": "Related",
+"p_yes": 3.6119822652835865e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7085295",
+"answer": "Water",
+"claude": "Wrong",
+"p_yes": 5.235441494733095e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_417143",
+"answer": "Green",
+"claude": "Correct",
+"p_yes": 0.9999987483024597,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_417143",
+"answer": "a mixed colour",
+"claude": "Partial",
+"p_yes": 0.9626731276512146,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_417143",
+"answer": "Blue",
+"claude": "Related",
+"p_yes": 0.00014653125253971666,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_417143",
+"answer": "Black",
+"claude": "Wrong",
+"p_yes": 1.2098660135961836e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400884",
+"answer": "5",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400884",
+"answer": "several",
+"claude": "Partial",
+"p_yes": 0.0004583129775710404,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400884",
+"answer": "3",
+"claude": "Related",
+"p_yes": 7.811481737007853e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400884",
+"answer": "15",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407710",
+"answer": "Hypothesis",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407710",
+"answer": "a guess",
+"claude": "Nearly",
+"p_yes": 0.9796676635742188,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407710",
+"answer": "Conclusion",
+"claude": "Related",
+"p_yes": 3.726638851730968e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407710",
+"answer": "Recipe",
+"claude": "Wrong",
+"p_yes": 1.2098660135961836e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "CSZ30338",
+"answer": "4.5 kilometers",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "CSZ30338",
+"answer": "about 4 km",
+"claude": "Nearly",
+"p_yes": 0.2120688259601593,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "CSZ30338",
+"answer": "9 kilometers",
+"claude": "Related",
+"p_yes": 5.682434675691184e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "CSZ30338",
+"answer": "30 kilometers",
+"claude": "Wrong",
+"p_yes": 3.92786347447327e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7130620",
+"answer": "Mass",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7130620",
+"answer": "an amount",
+"claude": "Partial",
+"p_yes": 0.0026316745206713676,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7130620",
+"answer": "Volume",
+"claude": "Related",
+"p_yes": 0.00019716937094926834,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7130620",
+"answer": "Color",
+"claude": "Wrong",
+"p_yes": 0.00014653125253971666,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_400233",
+"answer": "Sedimentary rock",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_400233",
+"answer": "sediment",
+"claude": "Nearly",
+"p_yes": 0.9820137023925781,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_400233",
+"answer": "Metamorphic rock",
+"claude": "Related",
+"p_yes": 4.157365765422583e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_400233",
+"answer": "Glass",
+"claude": "Wrong",
+"p_yes": 5.184567271498963e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_404820",
+"answer": "52",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_404820",
+"answer": "about 50",
+"claude": "Nearly",
+"p_yes": 0.0003150388365611434,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_404820",
+"answer": "24",
+"claude": "Related",
+"p_yes": 3.844934781227494e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_404820",
+"answer": "3",
+"claude": "Wrong",
+"p_yes": 7.411278147628764e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_409266",
+"answer": "The mass of the Earth.",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_409266",
+"answer": "mass",
+"claude": "Nearly",
+"p_yes": 0.9962927103042603,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_409266",
+"answer": "the rotation of the Earth",
+"claude": "Related",
+"p_yes": 1.8058517525787465e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_409266",
+"answer": "The Moon's light",
+"claude": "Wrong",
+"p_yes": 9.132547234003141e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MCAS_2005_9_6",
+"answer": "3000 N",
+"claude": "Correct",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MCAS_2005_9_6",
+"answer": "about 3000",
+"claude": "Nearly",
+"p_yes": 0.9998074173927307,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MCAS_2005_9_6",
+"answer": "1500 N",
+"claude": "Related",
+"p_yes": 3.5559837670007255e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MCAS_2005_9_6",
+"answer": "2 N",
+"claude": "Wrong",
+"p_yes": 1.2878956567874411e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408706",
+"answer": "June",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408706",
+"answer": "summer",
+"claude": "Nearly",
+"p_yes": 0.9890130162239075,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408706",
+"answer": "December",
+"claude": "Related",
+"p_yes": 3.8070155028435693e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_408706",
+"answer": "Midnight",
+"claude": "Wrong",
+"p_yes": 4.936990080750547e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_409317",
+"answer": "34.98 km/sec",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_409317",
+"answer": "about 35 km/sec",
+"claude": "Nearly",
+"p_yes": 0.00036829779855906963,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_409317",
+"answer": "35.02 km/sec",
+"claude": "Related",
+"p_yes": 0.00043055712012574077,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_409317",
+"answer": "7 km/sec",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407382",
+"answer": "They both reproduce by laying eggs.",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407382",
+"answer": "they reproduce",
+"claude": "Partial",
+"p_yes": 0.9579122066497803,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407382",
+"answer": "they both have feathers",
+"claude": "Related",
+"p_yes": 0.0001022998767439276,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_407382",
+"answer": "they both are plants",
+"claude": "Wrong",
+"p_yes": 2.3090719025731232e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_402256",
+"answer": "Embryo",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_402256",
+"answer": "a young stage",
+"claude": "Partial",
+"p_yes": 0.00010889692202908918,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_402256",
+"answer": "Seedling",
+"claude": "Related",
+"p_yes": 2.6425852865941124e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_402256",
+"answer": "Adult",
+"claude": "Wrong",
+"p_yes": 4.5921376568003325e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402563",
+"answer": "+1",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402563",
+"answer": "positive",
+"claude": "Nearly",
+"p_yes": 0.9992445111274719,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402563",
+"answer": "-1",
+"claude": "Related",
+"p_yes": 1.1936030205106363e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_402563",
+"answer": "0",
+"claude": "Wrong",
+"p_yes": 5.594337380898651e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "OHAT_2010_8_8",
+"answer": "Parasitism",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "OHAT_2010_8_8",
+"answer": "a symbiosis",
+"claude": "Partial",
+"p_yes": 0.0002959572011604905,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "OHAT_2010_8_8",
+"answer": "Mutualism",
+"claude": "Related",
+"p_yes": 4.222835286782356e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "OHAT_2010_8_8",
+"answer": "Photosynthesis",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7236740",
+"answer": "5 years",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7236740",
+"answer": "a few years",
+"claude": "Partial",
+"p_yes": 0.0035936026833951473,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7236740",
+"answer": "10 years",
+"claude": "Related",
+"p_yes": 7.484626257792115e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7236740",
+"answer": "100 years",
+"claude": "Wrong",
+"p_yes": 7.031182758510113e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "ACTAAP_2009_5_8",
+"answer": "Cell wall",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "ACTAAP_2009_5_8",
+"answer": "a wall",
+"claude": "Nearly",
+"p_yes": 0.9525740742683411,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "ACTAAP_2009_5_8",
+"answer": "Cell membrane",
+"claude": "Related",
+"p_yes": 0.0001584362325957045,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "ACTAAP_2009_5_8",
+"answer": "Heart",
+"claude": "Wrong",
+"p_yes": 4.450852202353417e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MEA_2013_8_8",
+"answer": "18",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MEA_2013_8_8",
+"answer": "about 20",
+"claude": "Nearly",
+"p_yes": 0.011687259189784527,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MEA_2013_8_8",
+"answer": "17",
+"claude": "Related",
+"p_yes": 5.5189226259244606e-05,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "MEA_2013_8_8",
+"answer": "32",
+"claude": "Wrong",
+"p_yes": 2.785272386063298e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7238945",
+"answer": "Rr",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7238945",
+"answer": "R",
+"claude": "Partial",
+"p_yes": 0.03963883966207504,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7238945",
+"answer": "RR",
+"claude": "Related",
+"p_yes": 0.851952850818634,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7238945",
+"answer": "Xy",
+"claude": "Wrong",
+"p_yes": 7.76695287640905e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401585",
+"answer": "Summer",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401585",
+"answer": "a warm season",
+"claude": "Nearly",
+"p_yes": 0.00012030133802909404,
+"judge": "Related"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401585",
+"answer": "Spring",
+"claude": "Related",
+"p_yes": 2.0580494037858443e-06,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401585",
+"answer": "Winter",
+"claude": "Wrong",
+"p_yes": 1.5534972135355929e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400091",
+"answer": "25%",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400091",
+"answer": "about 20 to 30%",
+"claude": "Nearly",
+"p_yes": 0.9525740742683411,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400091",
+"answer": "50%",
+"claude": "Related",
+"p_yes": 0.0001634647633181885,
+"judge": "Partial"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400091",
+"answer": "100%",
+"claude": "Wrong",
+"p_yes": 1.4144765145829297e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7017045",
+"answer": "Sound waves",
+"claude": "Correct",
+"p_yes": 0.999373733997345,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7017045",
+"answer": "waves",
+"claude": "Partial",
+"p_yes": 0.0015978452283889055,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7017045",
+"answer": "Radio waves",
+"claude": "Related",
+"p_yes": 0.005911068990826607,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_7017045",
+"answer": "Visible light",
+"claude": "Wrong",
+"p_yes": 0.43782347440719604,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400750",
+"answer": "9",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400750",
+"answer": "about 10",
+"claude": "Nearly",
+"p_yes": 0.0028009270317852497,
+"judge": "Nearly"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400750",
+"answer": "8",
+"claude": "Related",
+"p_yes": 8.93969991011545e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_400750",
+"answer": "90",
+"claude": "Wrong",
+"p_yes": 1.8738753624347737e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_8_5",
+"answer": "47",
+"claude": "Correct",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_8_5",
+"answer": "about half",
+"claude": "Nearly",
+"p_yes": 0.0015487613854929805,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_8_5",
+"answer": "94",
+"claude": "Related",
+"p_yes": 2.699578374176781e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "NYSEDREGENTS_2008_8_5",
+"answer": "3",
+"claude": "Wrong",
+"p_yes": 1.0783315701701213e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401168",
+"answer": "switch",
+"claude": "Correct",
+"p_yes": 0.9999996423721313,
+"judge": "Correct"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401168",
+"answer": "a device",
+"claude": "Partial",
+"p_yes": 0.03308597952127457,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401168",
+"answer": "Resistor",
+"claude": "Related",
+"p_yes": 5.594337380898651e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "arc_challenge_closed",
+"id": "Mercury_SC_401168",
+"answer": "Lamp",
+"claude": "Wrong",
+"p_yes": 0.00011082785204052925,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8a3e745542996c9b8d5e70",
+"answer": "Arena of Khazan",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8a3e745542996c9b8d5e70",
+"answer": "Khazan",
+"claude": "Nearly",
+"p_yes": 0.9997545480728149,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8a3e745542996c9b8d5e70",
+"answer": "Arena of Doom",
+"claude": "Related",
+"p_yes": 5.6497945479350165e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8a3e745542996c9b8d5e70",
+"answer": "Monopoly",
+"claude": "Wrong",
+"p_yes": 3.156127093006944e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abbf698554299114383a0b5",
+"answer": "English Electric Canberra",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abbf698554299114383a0b5",
+"answer": "Canberra",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abbf698554299114383a0b5",
+"answer": "Avro Lancaster",
+"claude": "Related",
+"p_yes": 1.933358362293802e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abbf698554299114383a0b5",
+"answer": "Boeing 747",
+"claude": "Wrong",
+"p_yes": 2.4337438730981376e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a80840f554299485f59863b",
+"answer": "Charmed",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a80840f554299485f59863b",
+"answer": "a WB drama",
+"claude": "Partial",
+"p_yes": 3.5356257285457104e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a80840f554299485f59863b",
+"answer": "Buffy the Vampire Slayer",
+"claude": "Related",
+"p_yes": 1.7603430251256214e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a80840f554299485f59863b",
+"answer": "Friends",
+"claude": "Wrong",
+"p_yes": 4.88830494305148e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8c4c625542995e66a475a1",
+"answer": "B-17 Flying Fortress bomber",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8c4c625542995e66a475a1",
+"answer": "a bomber",
+"claude": "Partial",
+"p_yes": 0.014063626527786255,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8c4c625542995e66a475a1",
+"answer": "B-29 Superfortress",
+"claude": "Related",
+"p_yes": 3.466327029855165e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8c4c625542995e66a475a1",
+"answer": "Cessna 172",
+"claude": "Wrong",
+"p_yes": 3.326533715153346e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a74ce9655429974ef308c6c",
+"answer": "Lush Ltd.",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a74ce9655429974ef308c6c",
+"answer": "Lush",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a74ce9655429974ef308c6c",
+"answer": "The Body Shop",
+"claude": "Related",
+"p_yes": 2.392351052549202e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a74ce9655429974ef308c6c",
+"answer": "McDonald's",
+"claude": "Wrong",
+"p_yes": 6.615601222392797e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac02e31554299294b218f3f",
+"answer": "Gal Gadot",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac02e31554299294b218f3f",
+"answer": "Gadot",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac02e31554299294b218f3f",
+"answer": "Margot Robbie",
+"claude": "Related",
+"p_yes": 0.0006667022244073451,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac02e31554299294b218f3f",
+"answer": "Barack Obama",
+"claude": "Wrong",
+"p_yes": 1.2237631352718381e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7b46e55542995eb53be8e5",
+"answer": "Ordos City",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7b46e55542995eb53be8e5",
+"answer": "Ordos",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7b46e55542995eb53be8e5",
+"answer": "Baotou",
+"claude": "Related",
+"p_yes": 4.356877980171703e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7b46e55542995eb53be8e5",
+"answer": "Paris",
+"claude": "Wrong",
+"p_yes": 1.4449803131810768e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5add67915542992200553af8",
+"answer": "The Crowned Prince of the Philadelphia Mob",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5add67915542992200553af8",
+"answer": "The Crowned Prince",
+"claude": "Nearly",
+"p_yes": 0.9947799444198608,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5add67915542992200553af8",
+"answer": "The Iceman",
+"claude": "Related",
+"p_yes": 2.3552609491162002e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5add67915542992200553af8",
+"answer": "Santa Claus",
+"claude": "Wrong",
+"p_yes": 1.3287778983794851e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7ad9865542995eb53be8aa",
+"answer": "Honda Ballade",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7ad9865542995eb53be8aa",
+"answer": "Ballade",
+"claude": "Nearly",
+"p_yes": 0.9999991655349731,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7ad9865542995eb53be8aa",
+"answer": "Honda Accord",
+"claude": "Related",
+"p_yes": 1.4593769037674065e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7ad9865542995eb53be8aa",
+"answer": "Ford Mustang",
+"claude": "Wrong",
+"p_yes": 7.265817458801394e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88a19a5542997e5c09a64b",
+"answer": "moth",
+"claude": "Correct",
+"p_yes": 0.9999978542327881,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88a19a5542997e5c09a64b",
+"answer": "an insect",
+"claude": "Partial",
+"p_yes": 0.002550913020968437,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88a19a5542997e5c09a64b",
+"answer": "butterfly",
+"claude": "Related",
+"p_yes": 2.5466397346463054e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88a19a5542997e5c09a64b",
+"answer": "whale",
+"claude": "Wrong",
+"p_yes": 2.2380292818979797e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae533535542993aec5ec173",
+"answer": "political correctness",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae533535542993aec5ec173",
+"answer": "correctness",
+"claude": "Nearly",
+"p_yes": 0.00036829779855906963,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae533535542993aec5ec173",
+"answer": "censorship",
+"claude": "Related",
+"p_yes": 3.0959115974837914e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae533535542993aec5ec173",
+"answer": "photosynthesis",
+"claude": "Wrong",
+"p_yes": 5.203573891776614e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845e9055429933447460ec",
+"answer": "Sacramento Kings",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845e9055429933447460ec",
+"answer": "the Kings",
+"claude": "Nearly",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845e9055429933447460ec",
+"answer": "Sacramento River Cats",
+"claude": "Related",
+"p_yes": 6.748052328475751e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845e9055429933447460ec",
+"answer": "Real Madrid",
+"claude": "Wrong",
+"p_yes": 3.541076409874222e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0132d55429925eb1afc00",
+"answer": "George Washington Bridge",
+"claude": "Correct",
+"p_yes": 0.999999463558197,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0132d55429925eb1afc00",
+"answer": "a bridge",
+"claude": "Partial",
+"p_yes": 0.8438951373100281,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0132d55429925eb1afc00",
+"answer": "Brooklyn Bridge",
+"claude": "Related",
+"p_yes": 0.0019877739250659943,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0132d55429925eb1afc00",
+"answer": "Eiffel Tower",
+"claude": "Wrong",
+"p_yes": 1.933358362293802e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae27f22554299495565da8d",
+"answer": "1926",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae27f22554299495565da8d",
+"answer": "the 1920s",
+"claude": "Nearly",
+"p_yes": 0.0014103582361713052,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae27f22554299495565da8d",
+"answer": "1962",
+"claude": "Related",
+"p_yes": 2.2380292818979797e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae27f22554299495565da8d",
+"answer": "1492",
+"claude": "Wrong",
+"p_yes": 1.8370862164829305e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae5d63b5542996de7b71a2d",
+"answer": "small forward",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae5d63b5542996de7b71a2d",
+"answer": "forward",
+"claude": "Nearly",
+"p_yes": 0.19682618975639343,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae5d63b5542996de7b71a2d",
+"answer": "power forward",
+"claude": "Related",
+"p_yes": 2.8520929845399223e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae5d63b5542996de7b71a2d",
+"answer": "goalkeeper",
+"claude": "Wrong",
+"p_yes": 5.838248284817382e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf8d275542993344016cfb",
+"answer": "Steven Selling",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf8d275542993344016cfb",
+"answer": "Selling",
+"claude": "Nearly",
+"p_yes": 0.9999586343765259,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf8d275542993344016cfb",
+"answer": "Steven Spielberg",
+"claude": "Related",
+"p_yes": 0.9840936660766602,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf8d275542993344016cfb",
+"answer": "Jane Austen",
+"claude": "Wrong",
+"p_yes": 5.838248284817382e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7d61645542997cc2c47455",
+"answer": "Hanford Site",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7d61645542997cc2c47455",
+"answer": "Hanford",
+"claude": "Nearly",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7d61645542997cc2c47455",
+"answer": "Los Alamos",
+"claude": "Related",
+"p_yes": 6.144177405076334e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7d61645542997cc2c47455",
+"answer": "Disneyland",
+"claude": "Wrong",
+"p_yes": 8.233249104705465e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adc7b855542994650320d1e",
+"answer": "Wayne County",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adc7b855542994650320d1e",
+"answer": "Wayne",
+"claude": "Nearly",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adc7b855542994650320d1e",
+"answer": "Oakland County",
+"claude": "Related",
+"p_yes": 2.1691722906780342e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adc7b855542994650320d1e",
+"answer": "Kyoto",
+"claude": "Wrong",
+"p_yes": 1.621222978087644e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab5ecd75542992aa134a3e6",
+"answer": "John de Mol Jr.",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab5ecd75542992aa134a3e6",
+"answer": "de Mol",
+"claude": "Nearly",
+"p_yes": 0.9999121427536011,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab5ecd75542992aa134a3e6",
+"answer": "Rupert Murdoch",
+"claude": "Related",
+"p_yes": 2.1477712053297182e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab5ecd75542992aa134a3e6",
+"answer": "Mozart",
+"claude": "Wrong",
+"p_yes": 7.571148330498545e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab29ec6554299194fa93473",
+"answer": "Spy Kids",
+"claude": "Correct",
+"p_yes": 0.9999992251396179,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab29ec6554299194fa93473",
+"answer": "Spy",
+"claude": "Nearly",
+"p_yes": 0.9241418838500977,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab29ec6554299194fa93473",
+"answer": "Sin City",
+"claude": "Related",
+"p_yes": 7.920142707007471e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab29ec6554299194fa93473",
+"answer": "Monopoly",
+"claude": "Wrong",
+"p_yes": 6.276702038121584e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abda2b755429933744ab80f",
+"answer": "1918",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abda2b755429933744ab80f",
+"answer": "the 1910s",
+"claude": "Nearly",
+"p_yes": 2.392351052549202e-05,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abda2b755429933744ab80f",
+"answer": "1945",
+"claude": "Related",
+"p_yes": 2.6165210442741227e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5abda2b755429933744ab80f",
+"answer": "1066",
+"claude": "Wrong",
+"p_yes": 9.329494332632748e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87106555429960ec39b71f",
+"answer": "Rob Reiner",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87106555429960ec39b71f",
+"answer": "Reiner",
+"claude": "Nearly",
+"p_yes": 0.9999464750289917,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87106555429960ec39b71f",
+"answer": "Carl Reiner",
+"claude": "Related",
+"p_yes": 0.00034599151695147157,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87106555429960ec39b71f",
+"answer": "Beyoncé",
+"claude": "Wrong",
+"p_yes": 2.3090719025731232e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab2beba554299166977408f",
+"answer": "George III",
+"claude": "Correct",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab2beba554299166977408f",
+"answer": "George",
+"claude": "Nearly",
+"p_yes": 0.999312162399292,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab2beba554299166977408f",
+"answer": "George IV",
+"claude": "Related",
+"p_yes": 4.391049515106715e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab2beba554299166977408f",
+"answer": "Julius Caesar",
+"claude": "Wrong",
+"p_yes": 4.495180746744154e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae73ddb554299572ea5478d",
+"answer": "Anahí",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae73ddb554299572ea5478d",
+"answer": "a Mexican singer",
+"claude": "Partial",
+"p_yes": 0.014503578655421734,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae73ddb554299572ea5478d",
+"answer": "Thalía",
+"claude": "Related",
+"p_yes": 8.233249104705465e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae73ddb554299572ea5478d",
+"answer": "Albert Einstein",
+"claude": "Wrong",
+"p_yes": 1.0246444048789272e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac4f04e5542995c82c4ad81",
+"answer": "Vilnius Old Town",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac4f04e5542995c82c4ad81",
+"answer": "Vilnius",
+"claude": "Nearly",
+"p_yes": 0.9999995231628418,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac4f04e5542995c82c4ad81",
+"answer": "Riga Old Town",
+"claude": "Related",
+"p_yes": 3.92786347447327e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac4f04e5542995c82c4ad81",
+"answer": "Grand Canyon",
+"claude": "Wrong",
+"p_yes": 2.0176445403308207e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8af92c55429950cd6afc33",
+"answer": "Bill Clinton",
+"claude": "Correct",
+"p_yes": 0.9999992251396179,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8af92c55429950cd6afc33",
+"answer": "Clinton",
+"claude": "Nearly",
+"p_yes": 0.9999990463256836,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8af92c55429950cd6afc33",
+"answer": "Hillary Clinton",
+"claude": "Related",
+"p_yes": 6.9622587943740655e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8af92c55429950cd6afc33",
+"answer": "Napoleon",
+"claude": "Wrong",
+"p_yes": 1.2098660135961836e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf715b5542992d7e9f9354",
+"answer": "Sturt",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf715b5542992d7e9f9354",
+"answer": "Adelaide",
+"claude": "Partial",
+"p_yes": 0.00019716937094926834,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf715b5542992d7e9f9354",
+"answer": "Stuart",
+"claude": "Related",
+"p_yes": 0.9991958141326904,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adf715b5542992d7e9f9354",
+"answer": "Tokyo",
+"claude": "Wrong",
+"p_yes": 9.625644281641144e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0223f5542992a796dec9f",
+"answer": "1909 Cuban-American Major League Clubs Series",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0223f5542992a796dec9f",
+"answer": "1909 series",
+"claude": "Nearly",
+"p_yes": 0.9975274205207825,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0223f5542992a796dec9f",
+"answer": "1909 World Series",
+"claude": "Related",
+"p_yes": 1.2219074051245116e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0223f5542992a796dec9f",
+"answer": "Wimbledon",
+"claude": "Wrong",
+"p_yes": 6.412061281935166e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a807e6f5542995d8a8ddf80",
+"answer": "British Army",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a807e6f5542995d8a8ddf80",
+"answer": "the British",
+"claude": "Nearly",
+"p_yes": 4.13354100601282e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a807e6f5542995d8a8ddf80",
+"answer": "Royal Navy",
+"claude": "Related",
+"p_yes": 4.400118996272795e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a807e6f5542995d8a8ddf80",
+"answer": "Boy Scouts",
+"claude": "Wrong",
+"p_yes": 4.993718505375e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae31d5a5542990afbd1e0b1",
+"answer": "Wolfgang Amadeus Mozart",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae31d5a5542990afbd1e0b1",
+"answer": "an Austrian composer",
+"claude": "Partial",
+"p_yes": 0.9196425676345825,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae31d5a5542990afbd1e0b1",
+"answer": "Johann Strauss",
+"claude": "Related",
+"p_yes": 4.647438618121669e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae31d5a5542990afbd1e0b1",
+"answer": "Elvis Presley",
+"claude": "Wrong",
+"p_yes": 1.3574332058396976e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d6d4e554299441c6b9fdb",
+"answer": "Legoland Billund",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d6d4e554299441c6b9fdb",
+"answer": "Billund",
+"claude": "Nearly",
+"p_yes": 0.9999781847000122,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d6d4e554299441c6b9fdb",
+"answer": "Legoland Windsor",
+"claude": "Related",
+"p_yes": 1.7097476302296855e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d6d4e554299441c6b9fdb",
+"answer": "Disneyland",
+"claude": "Wrong",
+"p_yes": 4.3139144167980703e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae22eae554299495565da30",
+"answer": "310",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae22eae554299495565da30",
+"answer": "about 300",
+"claude": "Nearly",
+"p_yes": 0.9992903470993042,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae22eae554299495565da30",
+"answer": "3,100",
+"claude": "Related",
+"p_yes": 7.311252556974068e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae22eae554299495565da30",
+"answer": "5 million",
+"claude": "Wrong",
+"p_yes": 7.338207979046274e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87081755429960ec39b6fe",
+"answer": "Daredevil",
+"claude": "Correct",
+"p_yes": 0.9999990463256836,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87081755429960ec39b6fe",
+"answer": "a Marvel show",
+"claude": "Partial",
+"p_yes": 0.0021827169694006443,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87081755429960ec39b6fe",
+"answer": "Luke Cage",
+"claude": "Related",
+"p_yes": 0.00010554683103691787,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a87081755429960ec39b6fe",
+"answer": "Friends",
+"claude": "Wrong",
+"p_yes": 1.6536891962459777e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adfb10855429942ec259af9",
+"answer": "Austrian Volksbanks",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adfb10855429942ec259af9",
+"answer": "Volksbanks",
+"claude": "Nearly",
+"p_yes": 0.999997079372406,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adfb10855429942ec259af9",
+"answer": "Erste Bank",
+"claude": "Related",
+"p_yes": 0.0003250358277000487,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5adfb10855429942ec259af9",
+"answer": "NASA",
+"claude": "Wrong",
+"p_yes": 4.139937459513021e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8760e75542996e4f3087af",
+"answer": "Cartoon Cartoon Fridays",
+"claude": "Correct",
+"p_yes": 0.9999997019767761,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8760e75542996e4f3087af",
+"answer": "Cartoon Fridays",
+"claude": "Nearly",
+"p_yes": 0.999993085861206,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8760e75542996e4f3087af",
+"answer": "Toonami",
+"claude": "Related",
+"p_yes": 4.6112763811834157e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8760e75542996e4f3087af",
+"answer": "CNN",
+"claude": "Wrong",
+"p_yes": 1.4144765145829297e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac2782d55429963665199cc",
+"answer": "7 June 1926 to 17 December 1926",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac2782d55429963665199cc",
+"answer": "1926",
+"claude": "Nearly",
+"p_yes": 0.0024726230185478926,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac2782d55429963665199cc",
+"answer": "7 June 1928 to 17 December 1928",
+"claude": "Related",
+"p_yes": 4.691163724146463e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac2782d55429963665199cc",
+"answer": "1492",
+"claude": "Wrong",
+"p_yes": 2.699578374176781e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0dcf25542996f0d89cc2c",
+"answer": "Jane Mayer",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0dcf25542996f0d89cc2c",
+"answer": "Mayer",
+"claude": "Nearly",
+"p_yes": 0.9999569654464722,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0dcf25542996f0d89cc2c",
+"answer": "John Mayer",
+"claude": "Related",
+"p_yes": 4.165956488577649e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac0dcf25542996f0d89cc2c",
+"answer": "Queen Victoria",
+"claude": "Wrong",
+"p_yes": 1.1253516873921399e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0bc185542993d6555ec29",
+"answer": "Ben Savage",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0bc185542993d6555ec29",
+"answer": "Savage",
+"claude": "Nearly",
+"p_yes": 0.9999827146530151,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0bc185542993d6555ec29",
+"answer": "Fred Savage",
+"claude": "Related",
+"p_yes": 0.0900929868221283,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0bc185542993d6555ec29",
+"answer": "Albert Einstein",
+"claude": "Wrong",
+"p_yes": 2.4337438730981376e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab67aba55429954757d32e7",
+"answer": "Imperial Japanese Army",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab67aba55429954757d32e7",
+"answer": "Japanese forces",
+"claude": "Nearly",
+"p_yes": 0.949669361114502,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab67aba55429954757d32e7",
+"answer": "Imperial Japanese Navy",
+"claude": "Related",
+"p_yes": 5.043476676291903e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab67aba55429954757d32e7",
+"answer": "French Foreign Legion",
+"claude": "Wrong",
+"p_yes": 2.87368607132521e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845d735542996488c2e52e",
+"answer": "Virginia",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845d735542996488c2e52e",
+"answer": "a US state",
+"claude": "Partial",
+"p_yes": 0.000305348978145048,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845d735542996488c2e52e",
+"answer": "West Virginia",
+"claude": "Related",
+"p_yes": 2.4061034764599754e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a845d735542996488c2e52e",
+"answer": "Texas",
+"claude": "Wrong",
+"p_yes": 1.6893528709260863e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0db8955429924de1b71a1",
+"answer": "1993",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0db8955429924de1b71a1",
+"answer": "the 1990s",
+"claude": "Nearly",
+"p_yes": 0.0034834244288504124,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0db8955429924de1b71a1",
+"answer": "1996",
+"claude": "Related",
+"p_yes": 3.187566335327574e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ae0db8955429924de1b71a1",
+"answer": "1812",
+"claude": "Wrong",
+"p_yes": 1.315669351242832e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7768cb5542993569682d88",
+"answer": "Shery",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7768cb5542993569682d88",
+"answer": "a Guatemalan singer",
+"claude": "Partial",
+"p_yes": 0.04742587357759476,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7768cb5542993569682d88",
+"answer": "Shakira",
+"claude": "Related",
+"p_yes": 9.00981467566453e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a7768cb5542993569682d88",
+"answer": "Mozart",
+"claude": "Wrong",
+"p_yes": 9.329494332632748e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab51dbd5542996a3a96a023",
+"answer": "Kentucky River",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab51dbd5542996a3a96a023",
+"answer": "a river in Kentucky",
+"claude": "Partial",
+"p_yes": 0.05033063143491745,
+"judge": "Partial"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab51dbd5542996a3a96a023",
+"answer": "Ohio River",
+"claude": "Related",
+"p_yes": 4.1811887285803095e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab51dbd5542996a3a96a023",
+"answer": "Nile",
+"claude": "Wrong",
+"p_yes": 4.450852202353417e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac313145542995ef918c0ed",
+"answer": "Benoît Jacquot",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac313145542995ef918c0ed",
+"answer": "Jacquot",
+"claude": "Nearly",
+"p_yes": 0.999997079372406,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac313145542995ef918c0ed",
+"answer": "Jacques Audiard",
+"claude": "Related",
+"p_yes": 3.176297468598932e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac313145542995ef918c0ed",
+"answer": "Steven Spielberg",
+"claude": "Wrong",
+"p_yes": 1.4449803131810768e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d0c1b5542994ba4e3dbb3",
+"answer": "Tamil",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d0c1b5542994ba4e3dbb3",
+"answer": "an Indian language",
+"claude": "Partial",
+"p_yes": 0.01798621192574501,
+"judge": "Related"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d0c1b5542994ba4e3dbb3",
+"answer": "Telugu",
+"claude": "Related",
+"p_yes": 3.3596796811252716e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8d0c1b5542994ba4e3dbb3",
+"answer": "Swedish",
+"claude": "Wrong",
+"p_yes": 2.87368607132521e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac54cef5542993e66e822da",
+"answer": "American burlesque",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac54cef5542993e66e822da",
+"answer": "burlesque",
+"claude": "Nearly",
+"p_yes": 0.9999918341636658,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac54cef5542993e66e822da",
+"answer": "vaudeville",
+"claude": "Related",
+"p_yes": 0.10087861120700836,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ac54cef5542993e66e822da",
+"answer": "Rodeo",
+"claude": "Wrong",
+"p_yes": 8.801102922006976e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88f180554299206df2b3cc",
+"answer": "Unification Church",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88f180554299206df2b3cc",
+"answer": "the Church",
+"claude": "Partial",
+"p_yes": 0.9808760285377502,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88f180554299206df2b3cc",
+"answer": "Church of Scientology",
+"claude": "Related",
+"p_yes": 2.2082500436226837e-05,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a88f180554299206df2b3cc",
+"answer": "NASA",
+"claude": "Wrong",
+"p_yes": 1.4449803131810768e-07,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8656ca554299211dda2afc",
+"answer": "Rose Byrne",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8656ca554299211dda2afc",
+"answer": "Byrne",
+"claude": "Nearly",
+"p_yes": 0.9999809861183167,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8656ca554299211dda2afc",
+"answer": "Isla Fisher",
+"claude": "Related",
+"p_yes": 0.0023231622762978077,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5a8656ca554299211dda2afc",
+"answer": "Albert Einstein",
+"claude": "Wrong",
+"p_yes": 1.2626097500856304e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab9405c554299743d22ea7c",
+"answer": "Annapolis, Maryland",
+"claude": "Correct",
+"p_yes": 1.0,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab9405c554299743d22ea7c",
+"answer": "Maryland",
+"claude": "Nearly",
+"p_yes": 0.9579122066497803,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab9405c554299743d22ea7c",
+"answer": "Baltimore, Maryland",
+"claude": "Related",
+"p_yes": 4.09291214964469e-06,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab9405c554299743d22ea7c",
+"answer": "Paris, France",
+"claude": "Wrong",
+"p_yes": 2.5907066714125904e-08,
+"judge": "Wrong"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab87fa255429934fafe6e00",
+"answer": "1693",
+"claude": "Correct",
+"p_yes": 0.9999999403953552,
+"judge": "Correct"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab87fa255429934fafe6e00",
+"answer": "about 1,700",
+"claude": "Nearly",
+"p_yes": 0.9997175335884094,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab87fa255429934fafe6e00",
+"answer": "1,963",
+"claude": "Related",
+"p_yes": 0.00012731109745800495,
+"judge": "Nearly"
+},
+{
+"corpus": "hotpotqa",
+"id": "5ab87fa255429934fafe6e00",
+"answer": "12",
+"claude": "Wrong",
+"p_yes": 1.1365639238647418e-06,
+"judge": "Wrong"
+}
+]

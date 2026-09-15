@@ -23,7 +23,7 @@ from foqlens import corpora
 from foqlens.io import answers_path, append_verdicts, read_answers, read_verdicts, write_json
 from foqlens.prompt_variants import SETUPS
 from foqlens.reading_sheet import DEFAULTS, Sheet, parse_marks, render
-from foqlens.selection import JUDGE_YES, ClaudeVerdict, Turn, Verdict, turn, verdict
+from foqlens.selection import JUDGE_YES, ClaudeVerdict, Turn, Verdict, turn, two_way_choice, verdict
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -96,11 +96,12 @@ def passed(args: argparse.Namespace) -> None:
                 agree["judge"] += (a.judge_with_reference > JUDGE_YES) == (v == Verdict.KNOWN)
             elif (t := turn(a, answerable)) is not None:
                 waiting[t.name] += 1
+        two_way = [i for i in known if two_way_choice(rows[i].question, rows[i].answers)]
         summary[corpus] = {"answers": len(answers), "passed": len(known), "read": len(read),
                            "agreement_with_claude": {k: n / len(read) for k, n in agree.items()} if read else {},
                            "waiting": dict(waiting), "reasons": dict(reasons),
-                           "passed_ids": known, "abstained_ids": abstained}
-        print(f"{corpus:22} passed {len(known):5}  read {len(read):5}  waiting {dict(waiting)}")
+                           "passed_ids": known, "two_way_ids": two_way, "abstained_ids": abstained}
+        print(f"{corpus:22} passed {len(known):5} (two-way {len(two_way):4})  read {len(read):5}  waiting {dict(waiting)}")
     write_json(args.root / f"passed-{args.level}.json", summary)
 
 

@@ -6,7 +6,7 @@ import pytest
 
 from foqlens.io import answers_path, append_answers, append_verdicts, read_answers, read_verdicts, written_ids
 from foqlens.selection import (Answer, ClaudeVerdict, FrozenCorpus, Reading, Reason, Turn, Verdict, split_reasoning,
-                               strip_markup, turn, verdict)
+                               strip_markup, turn, two_way_choice, verdict)
 
 ANSWER = Answer(corpus="triviaqa", id="tc_1", revision="0f7faf33", model="google/gemma-4-E2B-it@3e22461f",
                 level="bf16", prompt="short-0shot", reply="Paris", answer="Paris", reasoning=None,
@@ -130,6 +130,19 @@ def test_claude_verdicts_survive_their_round_trip_and_a_second_reading_wins(tmp_
     assert read["tc_1"] == replace(first, reading=Reading.OTHER_WORDS)
     assert read["tc_2"].reading is Reading.RIGHT
     assert ClaudeVerdict.from_json(first.to_json()) == first
+
+
+@pytest.mark.parametrize("question, references, two_way", [
+    ("Who is older, Annie Morton or Terry Richardson?", ("Terry Richardson",), True),
+    ("Which writer was from England, Henry Roth or Robert Erskine Childers?", ("Robert Erskine Childers DSC",), True),
+    ("Can BSkyB veto the presence of channels on their EPG?", ("no", "no"), True),
+    ("is greenland part of europe or north america", ("North America",), True),
+    ("What river flows through the Grand Canyon?", ("Colorado",), False),
+    ("Macbeth belonged to which royal house or dynasty?", ("House of Dunkeld",), False),  # "or" names no options
+    ("What mythical god has a hammer called Mjolnir, or Miolnir?", ("Thor",), False),
+])
+def test_a_guess_between_two_named_options_or_yes_no_is_marked(question, references, two_way):
+    assert two_way_choice(question, references) is two_way
 
 
 def test_the_frozen_corpus_survives_its_round_trip():

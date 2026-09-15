@@ -96,6 +96,31 @@ def is_refusal(text: str) -> bool:
     return bool(REFUSAL.search(text))
 
 
+# A question that asks yes or no, or names two candidates and asks which ("Who is older, A or B?"), is
+# answered right half the time by a guess. It stays in the corpus, marked, and is counted apart
+# (Volodya 15.09): its chance floor is 0.5, and a coarse model may lean to one side - "yes", or the
+# first name.
+TWO_WAY = re.compile(r"\bor\b", re.IGNORECASE)
+YES_NO = frozenset({"yes", "no"})
+WORD = re.compile(r"\w+")
+NAMED_SHARE = 0.5  # more than half the answer's words stand in the question: it is one of the options named there
+SHORT_WORD = 2     # "of", "a", "de" name nothing
+
+
+def two_way_choice(question: str, references: tuple[str, ...]) -> bool:
+    """Yes or no, or one of two options the question itself names: a guess is right half the time."""
+    if any(r.strip().lower() in YES_NO for r in references):
+        return True
+    if not TWO_WAY.search(question):
+        return False
+    asked = set(WORD.findall(question.lower()))
+    for reference in references:
+        named = [w for w in WORD.findall(reference.lower()) if len(w) > SHORT_WORD]
+        if named and sum(w in asked for w in named) / len(named) > NAMED_SHARE:
+            return True
+    return False
+
+
 @dataclass(frozen=True)
 class Answer:
     """One question answered once: a line of answers/<level>/<corpus>.jsonl."""

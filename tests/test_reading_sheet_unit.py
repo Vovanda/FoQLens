@@ -53,6 +53,11 @@ def test_a_long_text_is_cut_with_a_mark_and_the_passage_shown_only_when_asked():
     assert "   P: The passage. It goes on." in render([ANSWER], rows, passage=True)
 
 
+def test_a_reference_given_by_several_annotators_is_shown_once():
+    rows = {"tc_1": replace(ROW, answers=("ministers", "different ministers", "ministers", "ministers"))}
+    assert "REF: ministers / different ministers | A:" in render([ANSWER], rows)
+
+
 def test_a_question_without_an_answer_says_so_on_the_sheet():
     assert "REF: (the passage has no answer)" in render([ANSWER], {"tc_1": replace(ROW, answers=())})
 

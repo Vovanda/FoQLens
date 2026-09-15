@@ -61,7 +61,9 @@ def render(answers: list[Answer], rows: dict[str, Row], passage: bool = False) -
     lines = []
     for k, answer in enumerate(answers, 1):
         row = rows[answer.id]
-        references = " / ".join(row.answers[:REFERENCES_SHOWN]) or "(the passage has no answer)"
+        # SQuAD lists a reference once per annotator, most of them the same span.
+        distinct = tuple(dict.fromkeys(row.answers))
+        references = " / ".join(distinct[:REFERENCES_SHOWN]) or "(the passage has no answer)"
         lines.append(f"{k}. Q: {flat(row.question, QUESTION_CHARS)} | REF: {references} | "
                      f"A: {flat(answer.answer or '', ANSWER_CHARS)}")
         if passage and row.context:

@@ -21,9 +21,10 @@ from pathlib import Path
 from foqlens import corpora
 from foqlens import model as fm
 from foqlens.answering import JUDGE_BATCH, Asking, level_label
+from foqlens.attention import PLANS, SPLIT
 from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
-from foqlens.graph_decode import STATIC
+from foqlens.graph_decode import StaticDecoder
 from foqlens.gpu_share import default_share
 from foqlens.io import answers_path, append_answers, read_frozen, write_json, written_ids
 from foqlens.judging import ModelJudge, NotJudged
@@ -46,8 +47,9 @@ TRAIN_POOL = 2000
 # its answer line on 12%, solve-brief never did.
 FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passage-0",
                  "arc_challenge_closed": "solve-0", "arc_easy_closed": "solve-brief", "hotpotqa": "justify"}
-# static: the static cache with every step a CUDA graph (foqlens.graph_decode); dynamic: the reference loop.
-DECODERS = {"static": STATIC, "dynamic": DYNAMIC}
+# static: the static cache with every step a CUDA graph (foqlens.graph_decode), on the kernels of the attention
+# plan; dynamic: the reference loop, which stays on the process's default kernel, math, whatever the plan.
+DECODERS = {"static": lambda plan: StaticDecoder(attention=plan), "dynamic": lambda plan: DYNAMIC}
 UNJUDGED = "unjudged"  # where a baked level's answers wait for the bf16 judge
 
 
@@ -65,19 +67,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out", type=Path, default=Path("runs/reference/stage1"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     parser.add_argument("--decoder", choices=list(DECODERS), default="static")
+    parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name,
+                        help="sdpa kernels per phase (foqlens.attention): the prefill always on math")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
     model_id, level = MODELS[args.model], LEVELS[args.level]
+    plan = PLANS[args.attention]
     bench = Bench.load(model_id, gpu_share=args.gpu_share)
     tokenizer = bench.tokenizer
     fmt = fm.prompt_format(model_id, tokenizer)
     # A quantized level is baked into the weights - one unpacking, the step and the memory of bf16 - and
     # so cannot judge: its answers wait in unjudged/ for the bf16 judge of scripts/rejudge_answers.py.
     if level is Level.BF16:
-        judge, root = ModelJudge.build(bench.model, tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH), "answers"
+        judge = ModelJudge.build(bench.model, tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH, kernels=plan.judge)
+        root = "answers"
     else:
         bench.ctl.bake(level)
         judge, root = NotJudged(), UNJUDGED
@@ -106,6 +112,7 @@ def main(argv: list[str] | None = None) -> Path:
     schedule = Schedule.build({c: list(r) for c, r in rows.items()}, args.seed)
     written = {c: written_ids(p) for c, p in paths.items()}
     rounds_done = 0
+    decoder = DECODERS[args.decoder](plan)
     with GpuMonitor() as gpu:
         progress = Progress(schedule.rounds, "round")
         for k, todo in schedule.pending(written):
@@ -115,7 +122,7 @@ def main(argv: list[str] | None = None) -> Path:
                 asking = askings[corpus]
                 for chunk in asking.batches(fmt, tokenizer, [rows[corpus][i] for i in ids]):
                     append_answers(paths[corpus], asking.answer(bench.model, tokenizer, bench.ctl, fmt, judge,
-                                                                chunk, bench.throttle, DECODERS[args.decoder]))
+                                                                chunk, bench.throttle, decoder))
             rounds_done += 1
             print(progress.step(f"round {k}"), flush=True)
 
@@ -123,7 +130,7 @@ def main(argv: list[str] | None = None) -> Path:
     # A corpus answered later joins the corpora answered before: their counts stay in the summary.
     earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder,
+        "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder, "attention": args.attention,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
         "rounds_this_run": rounds_done, "written_to": root,

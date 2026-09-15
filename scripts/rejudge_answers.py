@@ -21,6 +21,7 @@ from pathlib import Path
 from foqlens import corpora
 from foqlens import model as fm
 from foqlens.answering import JUDGE_BATCH, rejudge
+from foqlens.attention import PLANS, SPLIT
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.io import answers_path, append_answers, read_answers, read_frozen, write_json, written_ids
@@ -43,6 +44,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--frozen", type=Path, required=True, help="folder of frozen corpus files")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--gpu-share", type=float, default=default_share())
+    parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name,
+                        help="sdpa kernels per phase (foqlens.attention); the judge runs on the plan's judge kernels")
     return parser.parse_args(argv)
 
 
@@ -51,7 +54,7 @@ def main(argv: list[str] | None = None) -> Path:
     model_id = MODELS[args.model]
     bench = Bench.load(model_id, gpu_share=args.gpu_share)
     judge = ModelJudge.build(bench.model, bench.tokenizer, bench.ctl, fm.prompt_format(model_id, bench.tokenizer),
-                             batch_size=JUDGE_BATCH)
+                             batch_size=JUDGE_BATCH, kernels=PLANS[args.attention].judge)
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
 
@@ -79,7 +82,8 @@ def main(argv: list[str] | None = None) -> Path:
                 print(progress.step(f"{corpus} {start + len(answers[chunk])}/{len(answers)}"), flush=True)
 
     target = out / f"summary-judged-{args.level}.json"
-    write_json(target, {"model": name, "level": args.level, "frozen": str(args.frozen), "answers": str(args.answers),
+    write_json(target, {"model": name, "level": args.level, "attention": args.attention,
+                        "frozen": str(args.frozen), "answers": str(args.answers),
                         "judged": {c: len(written_ids(p)) for c, (p, _, _) in todo.items()},
                         "gpu": gpu.summary(), "pacer": bench.throttle.stats()})
     print(f"written {target}", flush=True)

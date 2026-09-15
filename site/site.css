@@ -8,6 +8,10 @@
   --rung-6: #9fd3c7;
   --rung-8: #f2c14e;
   --refuted: #e08d79;   /* the one colour outside the ladder: a verdict that did not hold */
+  /* the status of a roadmap item, from the ladder: done mint, now blue, waiting amber */
+  --done: var(--rung-6);
+  --now: var(--rung-4);
+  --wait: var(--rung-8);
 
   --ground: #0e1526;
   --ground-deep: #090e1a;
@@ -32,6 +36,8 @@
   --l-focus: var(--rung-8);        /* the same amber in both themes - the accent belongs to the ladder */
   --l-focus-text: #9a6c0c;         /* gold: the amber of the ladder, deep enough to read on white */
   --l-sheen-1: #16233f; --l-sheen-2: #24645a; --l-sheen-3: #d9a11f;
+  /* the statuses as text on white: the mint and the amber of the ladder go deep enough to read */
+  --l-done: #1f7a63; --l-now: var(--rung-2); --l-wait: var(--l-focus-text);
 
   /* the sheen of the wordmark: light letters at night, dark ones by day - on a near-white field the
      pale gradient was invisible */
@@ -59,14 +65,14 @@
 :root[data-theme="light"] {
   --ground: var(--l-ground); --ground-deep: var(--l-ground-deep);
   --panel: var(--l-panel); --panel-2: var(--l-panel-2);
-  --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text);
+  --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text); --done: var(--l-done); --now: var(--l-now); --wait: var(--l-wait);
   --sheen-1: var(--l-sheen-1); --sheen-2: var(--l-sheen-2); --sheen-3: var(--l-sheen-3);
 }
 @media (prefers-color-scheme: light) {
   :root[data-theme="auto"] {
     --ground: var(--l-ground); --ground-deep: var(--l-ground-deep);
     --panel: var(--l-panel); --panel-2: var(--l-panel-2);
-    --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text);
+    --line: var(--l-line); --text: var(--l-text); --muted: var(--l-muted); --focus: var(--l-focus); --focus-text: var(--l-focus-text); --done: var(--l-done); --now: var(--l-now); --wait: var(--l-wait);
     --sheen-1: var(--l-sheen-1); --sheen-2: var(--l-sheen-2); --sheen-3: var(--l-sheen-3);
   }
 }
@@ -289,6 +295,9 @@ th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
 .tag--yes { color: var(--rung-8); }
 .tag--no { color: var(--refuted); }
 .tag--legacy { color: var(--muted); }
+.tag--done { color: var(--done); }
+.tag--now { color: var(--now); }
+.tag--wait { color: var(--wait); }
 
 /* The rule above the footer runs at the width of the content, not of the window: a line across
    the whole page would cut the sheet off from the panel standing beside it. */

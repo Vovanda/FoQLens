@@ -1,0 +1,843 @@
+{"corpus": "triviaqa", "id": "qw_7149", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2634", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2396", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_404", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3695", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1687", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6057", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3535", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_845", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_604", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "broader than the reference, and true: the tree gives rubber, the ban covered alcohol"}
+{"corpus": "triviaqa", "id": "qw_3162", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_6386", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1788", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4611", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2640", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5053", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15678", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_848", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1200", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "broader than the reference, and true: the tree gives rubber, the ban covered alcohol"}
+{"corpus": "triviaqa", "id": "wh_138", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_9015", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3289", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_8319", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2677", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8523", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6957", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11293", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_137", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_12956", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4374", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_8785", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_2713", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "dpql_962", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "jp_3637", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_6543", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "the airport itself; the reference lists both names"}
+{"corpus": "triviaqa", "id": "sfq_21739", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_2701", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22280", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_12534", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qb_4157", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_9338", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_9025", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_18703", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_1245", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4228", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_1726", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3954", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_4101", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bt_2284", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_21768", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2568", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_856", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2957", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_476", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11192", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_6312", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_8267", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_3229", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_5986", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4688", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2489", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_901", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3465", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_7153", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_1963", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_1813", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_3878", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qz_5684", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2758", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_5791", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22425", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3417", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14484", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2471", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bb_1960", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_8809", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23762", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8247", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qz_5877", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_6328", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_2085", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_1152", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5420", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_6935", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_100", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qf_3699", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8522", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1280", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_5945", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_740", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "jp_1212", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_385", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_364", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_12261", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_9154", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_5329", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3975", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_261", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_4513", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6697", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2920", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3100", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_10529", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23311", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2553", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4230", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1061", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_13430", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_1763", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2100", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "the brain, a part of what the carotids supply"}
+{"corpus": "triviaqa", "id": "odql_9867", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15541", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_1021", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_396", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "three of the four words"}
+{"corpus": "triviaqa", "id": "dpql_3621", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_3103", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4937", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_2218", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qb_2381", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2002", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14862", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_19880", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_8569", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_3278", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_4808", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_4308", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_384", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_931", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_6077", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11383", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_839", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_859", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_1297", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7866", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2153", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3958", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2312", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_16104", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_14182", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_5355", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "tb_1945", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1513", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_6789", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_13642", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11522", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "wh_421", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "odql_1810", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_6756", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5255", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_9117", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_12305", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3011", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_7409", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_2526", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2861", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_935", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_14137", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_6520", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_3557", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_752", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22454", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_23992", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_9001", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2687", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3192", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_12439", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_2609", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6792", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2028", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_10008", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22682", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15912", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2406", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_25843", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_12223", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2881", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_227", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1580", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "the Isle of Man, misnamed"}
+{"corpus": "triviaqa", "id": "jp_3330", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_10839", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14413", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "wh_2249", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_24523", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4931", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_12135", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_10917", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_5184", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_16444", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_8442", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_15107", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_13272", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_3474", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_259", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_216", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2321", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_13757", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_1751", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_8520", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_3316", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_221", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_5336", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22957", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_1975", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "tc_288", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_7880", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2923", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_10565", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_2975", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2330", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_4139", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_9184", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8009", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "a strait, but not between England and France"}
+{"corpus": "triviaqa", "id": "odql_3663", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1391", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2047", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_1234", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3343", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1332", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_748", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bb_563", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_5216", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_1254", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_1329", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_4109", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5493", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_2901", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9310", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_297", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bb_4917", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7976", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15213", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_2286", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4415", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_9882", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_5520", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11726", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2152", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_21320", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_5527", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "odql_3569", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8134", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_951", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_3310", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_24375", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_4243", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_2629", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_11342", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_2120", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4541", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_7147", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_393", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_9842", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_1704", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7263", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_3954", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_20871", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_5165", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2367", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1343", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_416", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_12424", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4456", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1164", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_3423", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_723", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11099", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_1574", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3684", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1350", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_15859", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "fear of eyes is one of the definitions"}
+{"corpus": "triviaqa", "id": "bb_3733", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_160", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_10673", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_774", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_14100", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8957", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3161", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_6777", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4965", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_18159", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2323", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_798", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "wh_1787", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_14021", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_6046", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_3456", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bt_750", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2669", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_7159", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_1029", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_320", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_7935", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6002", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_11221", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_757", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11946", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "broader than the reference, and true"}
+{"corpus": "triviaqa", "id": "bb_3033", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "broader than the reference, and true"}
+{"corpus": "triviaqa", "id": "bt_4573", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "jp_777", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4028", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11443", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "odql_12278", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_3627", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2423", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9645", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_9190", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "jp_1928", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_5775", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7700", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3496", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "the crystal, hedged with a mirror"}
+{"corpus": "triviaqa", "id": "tc_1754", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5082", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_206", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23191", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_13197", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_236", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1467", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4266", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1929", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_9805", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "odql_5682", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8139", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_2329", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_6946", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_107", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "the patent is the mouse's; the reference and the answer both miss it"}
+{"corpus": "triviaqa", "id": "qb_9820", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_4576", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2525", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_11822", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_3868", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_1587", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3847", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_938", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qg_3766", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9993", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_3379", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_4458", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_2818", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_66", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_4300", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_10502", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3200", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2672", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_2902", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_5418", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_301", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11644", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2326", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8831", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_460", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2648", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_10443", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_1298", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_951", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3970", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_15968", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_25100", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_4016", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_9584", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_1872", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qz_4979", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_19", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_17107", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qg_3080", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_1721", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_4810", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_4368", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_5932", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_5233", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_744", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23329", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8684", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5438", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3601", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_10823", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2734", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7685", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6664", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4945", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4224", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_10593", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_5204", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_1544", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_403", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_10701", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_1702", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_8203", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7353", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9606", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_5532", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9761", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_20635", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_2655", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3148", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8614", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_9298", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_3151", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2299", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_6142", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qz_1915", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1999", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8127", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_10047", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_1615", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_7235", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_14342", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_3055", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4827", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_2689", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bb_7795", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1163", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6943", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_1443", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_7766", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3981", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_11543", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7653", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_3243", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_12818", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_17520", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_24077", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "the capital, which names the country"}
+{"corpus": "triviaqa", "id": "odql_11908", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_2220", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6193", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qf_2342", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3778", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19559", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3992", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1047", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2332", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "jp_3095", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2616", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2463", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_1821", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bt_959", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_19297", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4635", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_4301", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_1714", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_947", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6219", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4707", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2283", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qg_1376", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2050", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_5624", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_2451", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qb_2496", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_6128", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_13780", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_4092", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_21248", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_12578", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_5505", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_1933", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_16982", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5636", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_8269", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5707", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19855", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_5484", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3465", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2202", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11549", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qb_8049", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_1392", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_2575", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_17657", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_16123", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1864", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2053", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_7155", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3775", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6782", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_8735", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_2609", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11069", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_9261", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_8454", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_10445", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1009", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_4093", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "the number, not Friday the 13th"}
+{"corpus": "triviaqa", "id": "odql_12438", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_25707", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19994", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_9345", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_15075", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_2309", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qg_3921", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_1683", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_189", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_3963", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_3204", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_2754", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_180", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6124", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_1843", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_379", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_14119", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11715", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_1223", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qz_5410", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "qb_3225", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_1628", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_616", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bt_2036", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4053", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_811", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3204", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6227", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "qz_349", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_10251", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_779", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3197", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_21", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2667", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6673", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_3158", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2781", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_18141", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11478", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_1137", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_4382", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5867", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8642", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "odql_13310", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_1091", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_3656", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14911", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_7896", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_7148", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2987", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "sfq_5770", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_6074", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_3652", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_6969", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_1303", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_16", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3592", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_2119", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_7212", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "the small head comes of a small brain"}
+{"corpus": "triviaqa", "id": "qg_2400", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_5588", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "qw_9482", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_1527", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_3583", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_13010", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_12761", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_296", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_1774", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3900", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_12970", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_16267", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_4907", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2887", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_4381", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_22505", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1607", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_3650", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_607", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3333", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2870", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_9194", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bb_5924", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8662", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14421", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_8788", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_1557", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23388", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_668", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "tc_3086", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_4985", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15086", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2838", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_13790", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_1989", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_1345", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_6808", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_3140", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "wh_451", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_41", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_928", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_7920", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9793", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_2562", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_3920", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_21697", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_5116", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_1764", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "qb_7845", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "qw_9736", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "wh_3295", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4882", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_5622", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_9204", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_132", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1768", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_3556", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_2205", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_304", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5301", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19958", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_19481", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_2646", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_13399", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "odql_5521", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_4776", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_743", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2681", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_14711", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_3969", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "dpql_383", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_2538", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_20695", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_3302", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14845", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_1586", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3145", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_10145", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2437", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2073", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1869", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_5425", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4069", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_307", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_763", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_6561", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15291", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_456", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tb_1099", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_3321", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3952", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_439", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3332", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_10151", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_7876", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_14089", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3648", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_4055", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_12589", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_20405", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_10327", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2188", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "sfq_1144", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_7691", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_5249", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_1870", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19115", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_17775", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_701", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2541", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_1399", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_7782", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1688", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_487", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_919", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_14433", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_1221", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_14829", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_5126", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_12046", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_1294", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "sweating, overstated as excessive"}
+{"corpus": "triviaqa", "id": "dpql_452", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5796", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_6267", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_204", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_3291", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_4517", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_711", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_77", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_8891", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_1068", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "odql_11035", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qf_3641", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_1269", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "odql_8447", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9153", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_879", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "wh_1355", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1303", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_1313", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_1110", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_12049", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_48", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_1127", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_1382", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qz_4548", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_9715", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_16065", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_13685", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_15601", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4432", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23983", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_20018", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_6447", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_269", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_85", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_5368", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_24575", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_1834", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_1254", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_4682", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14959", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_548", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "sfq_15533", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9438", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2657", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qg_2701", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_16353", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_20548", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_593", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "tc_2699", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_921", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_8921", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22058", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_240", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_97", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_4325", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_5927", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_3142", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "qw_9549", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_20", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3973", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_13241", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_385", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_1706", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_6992", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_3006", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_5614", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_7903", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_4331", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_241", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_257", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_3708", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_8316", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_2482", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_8726", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_25646", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qz_4637", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2681", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_3301", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3951", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_14830", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "qw_16199", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19882", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_1253", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_9341", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_1812", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_7377", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_121", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_3058", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15971", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_328", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_4653", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_2338", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_494", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_7091", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_6084", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_1914", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_3708", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_22884", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_8058", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2476", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_12214", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_3903", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2550", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_19740", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_397", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "sfq_12491", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_14417", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_6389", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_2109", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_3147", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_12773", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_921", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_2831", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bt_2548", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "triviaqa", "id": "odql_1853", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_5", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "tc_2744", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_7836", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_5321", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_15046", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_2528", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qz_6046", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_5335", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_4976", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_14979", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_14555", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_2269", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_8062", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_3084", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_1240", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "triviaqa", "id": "bb_5444", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_1676", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_1762", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2587", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2243", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qw_12390", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "odql_12656", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_9214", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_854", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_973", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bb_6635", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_5188", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_6990", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5685", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_3808", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_2190", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_3105", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qb_8871", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_10351", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_16452", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11524", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5235", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "water ice, not the flowing water announced"}
+{"corpus": "triviaqa", "id": "jp_3490", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_2233", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_11279", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_3015", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_5975", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "wh_871", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bt_3896", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_2823", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "jp_159", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_3732", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_11886", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bt_1759", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qg_2206", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "dpql_2484", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "sfq_2570", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "tc_2829", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "odql_4851", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "bt_2104", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "bb_1257", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_12892", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qw_10908", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23625", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "qf_2116", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "dpql_1208", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qg_4308", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "triviaqa", "id": "sfq_23359", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "triviaqa", "id": "qb_7213", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}

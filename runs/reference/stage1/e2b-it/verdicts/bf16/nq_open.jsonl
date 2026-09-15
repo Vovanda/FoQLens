@@ -1,0 +1,490 @@
+{"corpus": "nq_open", "id": "863", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "477", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "39", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2925", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1309", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "726", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "302", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2819", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "448", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3125", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3580", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3139", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "507", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3356", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1653", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2858", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3149", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3380", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "262", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "709", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2237", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3186", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2597", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3359", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "114", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2315", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1318", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1727", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2940", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "281", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2784", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1751", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1398", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3108", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1391", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2409", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2795", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1879", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3376", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "379", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "38", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2741", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1922", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1299", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2468", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2140", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2346", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3243", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2478", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "933", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1598", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "549", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "570", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "747", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2286", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2271", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1978", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1915", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3584", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1874", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3459", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2481", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "200", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "467", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "423", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2575", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1827", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1354", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1509", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2943", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1105", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3447", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1903", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "769", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1384", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2326", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1494", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "225", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2081", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1019", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3221", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "922", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "10", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1845", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "34", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2086", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "55", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "306", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "3432", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1950", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1034", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1722", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "474", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1497", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1110", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3193", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1150", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "299", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2284", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "797", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2588", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2867", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1082", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1681", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "685", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1876", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "634", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3080", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3308", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1388", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1136", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1564", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "the pharaoh, not the god he raised"}
+{"corpus": "nq_open", "id": "20", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "284", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1023", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "873", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2914", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2523", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1902", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2490", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3047", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1700", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "2013", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2561", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "206", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2218", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "235", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1488", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2808", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2055", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "501", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1241", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3041", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2832", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "710", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2401", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "463", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "567", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "593", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1946", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "2593", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1029", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "581", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2184", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "150", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2775", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2586", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1798", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1262", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3484", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2703", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2454", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1090", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1359", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2717", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1590", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2851", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "285", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "904", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "921", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2264", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "the reference is wrong too - Melbourne was the first capital, Ponce de León the first landing"}
+{"corpus": "nq_open", "id": "3517", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2699", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1387", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2398", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1324", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2988", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2718", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "219", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "794", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2338", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1347", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3136", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "156", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "981", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2570", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3505", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "415", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2835", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2311", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2128", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "2463", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2566", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2767", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "89", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "713", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "568", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1230", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "3491", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1337", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2620", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3021", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "6", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1138", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3276", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3066", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1325", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1158", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3204", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2952", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "45", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3594", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1094", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "3277", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2201", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1957", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1674", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3109", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1937", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1627", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3331", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "332", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1295", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3602", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "618", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "545", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2416", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2441", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1200", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1253", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1133", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2321", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1850", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "101", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2255", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1673", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "2038", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "the reference is wrong too - Melbourne was the first capital, Ponce de León the first landing"}
+{"corpus": "nq_open", "id": "916", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "385", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1863", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2949", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2333", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "230", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "464", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2318", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1048", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "95", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "862", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2021", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1749", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1256", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1684", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1327", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2455", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "3008", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3183", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2830", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "480", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3374", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "483", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1294", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1056", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2467", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3518", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1620", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2358", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "131", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3549", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "967", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1639", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2209", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "758", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2269", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2063", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "573", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2412", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "893", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1834", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "813", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "692", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3446", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3495", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1184", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "417", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3123", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1928", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3553", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "626", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "485", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2964", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3379", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2456", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "21", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3064", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1467", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "620", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1093", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "591", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "803", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2576", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3437", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1582", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "688", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "196", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "296", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2102", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2539", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3229", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1842", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1720", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2720", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1303", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1894", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1112", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2115", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1573", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3385", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "430", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2177", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2697", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3474", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2827", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1712", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3544", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "191", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1375", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1554", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "490", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1292", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3384", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "433", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1530", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1237", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2290", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3042", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2406", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1971", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2518", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2568", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1086", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1217", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2754", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3605", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "298", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "919", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "2293", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2885", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2411", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2904", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1049", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2058", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2928", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2148", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "954", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1143", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1777", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1920", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "111", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1658", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1055", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2810", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1052", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "875", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1665", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "920", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "427", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3349", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1192", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "141", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3430", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1721", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "Super Bowl LVII of the 2022 season, after the reference was written"}
+{"corpus": "nq_open", "id": "2969", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2721", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "365", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2765", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1219", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1421", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1618", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "307", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3206", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2071", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1802", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "133", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2183", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "511", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "Sojourner of Mars Pathfinder, 1997, was the first rover; the reference dates a later one"}
+{"corpus": "nq_open", "id": "2250", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1050", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "48", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2180", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "338", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "193", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1123", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1519", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "168", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "197", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2048", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3004", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2956", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "559", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1428", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2604", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1267", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "106", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1993", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "3201", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1226", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3009", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "943", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3336", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "882", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1987", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "70", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1214", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1323", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2957", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1418", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "181", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1274", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1948", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "670", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1556", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1527", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "1320", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": "Turkish is Turkic, not Uralic; the reference is wrong too"}
+{"corpus": "nq_open", "id": "2111", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1864", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2726", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3316", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": "each house sets its own rules; the reference names the Senate alone"}
+{"corpus": "nq_open", "id": "1153", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3369", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2444", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1589", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2466", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1784", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1393", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2912", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "494", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1504", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1869", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2043", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "363", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "682", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1455", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2600", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "995", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "390", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1679", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2982", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2142", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2552", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "547", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1146", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "388", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2350", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "808", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "1723", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1729", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1865", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2364", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "988", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3114", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3332", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2472", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1781", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1406", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "2711", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1941", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "751", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2991", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "584", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1745", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1907", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2853", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1797", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "112", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2369", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2135", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2540", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "3421", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "255", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "466", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3520", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "a category instead of the thing"}
+{"corpus": "nq_open", "id": "1426", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1211", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "478", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3285", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1969", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2602", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "327", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1167", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "902", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2349", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "291", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2759", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "nq_open", "id": "2210", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "569", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "3255", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "2143", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "repeats words of the question"}
+{"corpus": "nq_open", "id": "308", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "159", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "nq_open", "id": "1528", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}

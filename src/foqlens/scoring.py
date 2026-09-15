@@ -5,11 +5,14 @@ Two instruments, both producing one score per block over all controlled modules,
 - BlockScorer - the naive score: the L2 norm of a block's output,
   averaged over the tokens a center mode selects ("norm", "pooled", "attention");
 - GradientScorer - gradient x activation: the first-order estimate of
-  the change in the query's own language-model loss if the block's output were zeroed.
+  the change in the query's own language-model loss if the block's output were zeroed. In two forms from one
+  backward pass: "gradient", |sum| of the block's terms, and "gradient_magnitude", the sum of their |.|, whose
+  terms cannot cancel (issue #17).
 
 Both work on right-padded batches. Background subtraction is done by the caller.
 
 Invariants:
+- Invariant: "gradient_magnitude" >= "gradient" for every block, equal where all the block's terms share a sign.
 - Invariant: padding and the first token (<bos>) never contribute to a mask.
 - Invariant: the same texts in the same batch give identical masks - with sdpa attention too: the
   gradient pass runs attention on GRADIENT_ATTENTION, whose backward is deterministic.
@@ -123,23 +126,41 @@ def block_scores(output: torch.Tensor, weights: torch.Tensor, block_rows: int) -
     return weighted_block_scores(block_norms(output[None], block_rows), weights[None])[0]
 
 
-def taylor_block_scores(
+def taylor_terms(
     output: torch.Tensor, grad: torch.Tensor, block_rows: int, valid: torch.Tensor | None = None
 ) -> torch.Tensor:
-    """|sum over valid tokens and block rows of grad * output|: [(batch,) seq, out] -> [(batch,) n_blocks].
+    """grad * output of every valid token and row, by block: [(batch,) seq, out] -> [batch, seq, n_blocks, block_rows].
 
-    valid [(batch,) seq] marks counted tokens; by default every token except position 0.
+    valid [(batch,) seq] marks counted tokens; by default every token except position 0. A single
+    sequence comes back with a batch of one.
     """
-    single = output.dim() == 2
-    if single:
+    if output.dim() == 2:
         output, grad = output[None], grad[None]
         valid = None if valid is None else valid[None]
     if valid is None:
         valid = torch.ones(output.shape[:2], device=output.device)
         valid[:, 0] = 0
-    prod = grad.float() * output.float() * valid[..., None].float()
-    scores = _blocks(prod, block_rows).sum(dim=(1, 3)).abs()
-    return scores[0] if single else scores
+    return _blocks(grad.float() * output.float() * valid[..., None].float(), block_rows)
+
+
+def taylor_block_scores(
+    output: torch.Tensor, grad: torch.Tensor, block_rows: int, valid: torch.Tensor | None = None
+) -> torch.Tensor:
+    """|sum over valid tokens and block rows of grad * output|: [(batch,) seq, out] -> [(batch,) n_blocks]."""
+    scores = taylor_terms(output, grad, block_rows, valid).sum(dim=(1, 3)).abs()
+    return scores[0] if output.dim() == 2 else scores
+
+
+def taylor_block_magnitudes(
+    output: torch.Tensor, grad: torch.Tensor, block_rows: int, valid: torch.Tensor | None = None
+) -> torch.Tensor:
+    """sum over valid tokens and block rows of |grad * output|: [(batch,) seq, out] -> [(batch,) n_blocks].
+
+    The form whose terms cannot cancel (issue #17): |sum| over a large group correlates poorly with
+    importance because its terms of opposite sign cancel (Molchanov et al. 2019).
+    """
+    scores = taylor_terms(output, grad, block_rows, valid).abs().sum(dim=(1, 3))
+    return scores[0] if output.dim() == 2 else scores
 
 
 def sequence_losses(logits: torch.Tensor, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
@@ -231,21 +252,26 @@ class BlockNormRecorder(_HookSet):
 class TaylorRecorder(_HookSet):
     """Gradient x activation block scores of every module, [batch, n_blocks], reduced in a gradient hook.
 
-    The module's output gradient is consumed where backward produces it and never retained.
-    valid [batch, seq] marks the tokens that count.
+    Both forms come from the one tensor of terms: scores |sum| (taylor_block_scores) and magnitudes
+    sum |.| (taylor_block_magnitudes); the absolute value is taken in place after the signed sum, so
+    the second form costs no second copy. The module's output gradient is consumed where backward
+    produces it and never retained. valid [batch, seq] marks the tokens that count.
     """
 
     def __init__(self, modules: dict[str, MixedPrecisionLinear], valid: torch.Tensor):
         super().__init__(modules)
         self.valid = valid
         self.scores: dict[str, torch.Tensor] = {}
+        self.magnitudes: dict[str, torch.Tensor] = {}
 
     def _hook(self, name: str, module: MixedPrecisionLinear):
         def hook(_m: nn.Module, _inputs, output: torch.Tensor) -> None:
             activation = output.detach()
 
             def on_grad(grad: torch.Tensor) -> None:
-                self.scores[name] = taylor_block_scores(activation, grad, module.block_rows, self.valid)
+                terms = taylor_terms(activation, grad, module.block_rows, self.valid)
+                self.scores[name] = terms.sum(dim=(1, 3)).abs()
+                self.magnitudes[name] = terms.abs_().sum(dim=(1, 3))
 
             output.register_hook(on_grad)
 
@@ -319,8 +345,10 @@ class GradientScorer:
             # summed per-sequence means: each sequence's gradient is that of its own mean loss
             losses = chunked_sequence_losses(model, hidden, enc["input_ids"], enc["attention_mask"], self.loss_chunk)
             losses.sum().backward()
-        vectors = torch.cat([rec.scores[n] for n in self.modules], dim=1).cpu().numpy()
-        return [{"gradient": (vectors[b], list(range(1, n)))} for b, n in enumerate(_lengths(enc["attention_mask"]))]
+        forms = {form: torch.cat([rec_form[n] for n in self.modules], dim=1).cpu().numpy()
+                 for form, rec_form in (("gradient", rec.scores), ("gradient_magnitude", rec.magnitudes))}
+        return [{form: (vectors[b], list(range(1, n))) for form, vectors in forms.items()}
+                for b, n in enumerate(_lengths(enc["attention_mask"]))]
 
     def score(self, model: nn.Module, tokenizer, text: str) -> Scored:
         return self.score_batch(model, tokenizer, [text])[0]

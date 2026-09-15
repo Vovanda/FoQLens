@@ -73,6 +73,18 @@ class GradientMask:
         return [r["gradient"][0] for r in self.scorer.score_batch(model, tokenizer, texts)]
 
 
+@dataclass(frozen=True)
+class GradientMagnitudeMask:
+    """The same backward pass summed as |gradient x activation|: terms of opposite sign do not cancel (issue #17)."""
+
+    scorer: GradientScorer
+    batch_size: int
+    name: str = "gradient_magnitude"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return [r["gradient_magnitude"][0] for r in self.scorer.score_batch(model, tokenizer, texts)]
+
+
 class ModelSource(Enum):
     """Where the bench takes its model from: the cut .refocustensors folder, read to the source (FILE) or only to its
     depths with no source weight of a controlled module loaded (RESIDENT - D2 ... D8, no bf16, so no masks), or the

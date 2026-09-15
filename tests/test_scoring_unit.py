@@ -14,6 +14,7 @@ from foqlens.scoring import (
     gini,
     normalized_entropy,
     sequence_losses,
+    taylor_block_magnitudes,
     taylor_block_scores,
     token_weights,
     weighted_block_scores,
@@ -84,6 +85,27 @@ def test_taylor_block_scores_sum_grad_times_output_per_block_without_bos():
     output[2, 0:64], grad[2, 0:64] = 1.0, -0.25  # block 0 again: -16, the sum is signed before abs
     output[1, 128:130], grad[1, 128:130] = -3.0, 1.0  # block 2: -6 -> 6
     assert taylor_block_scores(output, grad, block_rows=64).tolist() == pytest.approx([48.0, 0.0, 6.0])
+
+
+def test_taylor_magnitudes_do_not_cancel_where_the_signed_sum_does():
+    output = torch.zeros(3, 128)
+    grad = torch.zeros(3, 128)
+    output[1, 0:64], grad[1, 0:64] = 1.0, 1.0  # block 0: +64 at one token
+    output[2, 0:64], grad[2, 0:64] = 1.0, -1.0  # and -64 at another: |sum| = 0, sum |.| = 128
+    output[1:, 64:128], grad[1:, 64:128] = 2.0, 0.5  # block 1: every term +1, the two forms agree
+    assert taylor_block_scores(output, grad, 64).tolist() == pytest.approx([0.0, 128.0])
+    assert taylor_block_magnitudes(output, grad, 64).tolist() == pytest.approx([128.0, 128.0])
+
+
+def test_taylor_magnitudes_are_never_below_the_signed_sum():
+    torch.manual_seed(0)
+    output, grad = torch.randn(2, 7, 130), torch.randn(2, 7, 130)
+    valid = torch.tensor([[0, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 0, 0, 0]])
+    signed = taylor_block_scores(output, grad, 64, valid)
+    magnitudes = taylor_block_magnitudes(output, grad, 64, valid)
+    assert torch.all(magnitudes >= signed - 1e-5)
+    same_sign = taylor_block_magnitudes(output.abs(), grad.abs(), 64, valid)
+    torch.testing.assert_close(same_sign, taylor_block_scores(output.abs(), grad.abs(), 64, valid))
 
 
 def test_taylor_block_scores_skip_padding_in_a_batch():

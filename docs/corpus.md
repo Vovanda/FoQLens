@@ -6,18 +6,11 @@ title: The corpus
 
 How questions get into the bench; the source of truth for it.
 
-## The first corpus, measured
+## The first corpus
 
-Four MMLU subjects (high-school biology, mathematics, prehistory, high-school geography), four options,
-scored by which of " A" … " D" the model ranks highest.
-
-| Measured | Value |
-| --- | --- |
-| questions right under every order of the options - the core | 121 of 395, 31% |
-| mathematics: core | 3 of 100; 91 of them ask for a computed value, and the format gave one token to answer in |
-| global_facts: core | 3.4%; 69% of its questions have all-numeric options |
-| zone layout against uniform quantization at the same cost | −5.1 points of accuracy inside the core, +1.0 outside; no interval clears |
-| letter C picked, over six orders | the full model 29%, a zone layout 35% |
+The first corpus chosen - four MMLU subjects with a letter to pick - was rejected. Reordering the options and asking the same
+question without them showed that the model did not know most of the questions, and the letter hid it.
+The requirements below are what that taught.
 
 ## What a corpus has to satisfy
 
@@ -40,7 +33,7 @@ scored by which of " A" … " D" the model ranks highest.
 **The model writes its own answer, in every regime.** It is given the question - with a passage or
 without one - and writes the answer itself; it never sees options. What it writes is compared with the
 reference answer of the dataset, and three judges read it: exact match and token F1 as SQuAD scores
-them; the full model, asked whether the answer agrees with the reference; and Claude, who reads every
+them; the full model, grading the answer as an exam against the reference; and Claude, who reads every
 answer the first two do not settle. Where they disagree, Claude's verdict decides. No options to lean
 on, nothing to reorder, a continuous scale. Code: `src/foqlens/extractive.py`.
 
@@ -71,6 +64,67 @@ passage - reasoning over a text, not knowledge held in the weights.
 If the zones help as much when the answer is sitting in the context as when it is only in the weights,
 the mechanism is not doing what it is claimed to do. That is the test the old corpus could not run.
 
+## Selection on E2B-it: what came up, what was done, where it stands
+
+**The model.** The corpus is selected on gemma-4-E2B-it, not on the base checkpoint. The base does not
+follow requests - it writes no ARC solution and no HotpotQA justification - and as a judge without the
+reference it could not tell a right answer from a wrong one. The -it checkpoint is pinned by revision;
+the base stays for what needs no instructions.
+
+**Stage 1.** The model answered every question of the five datasets but the 1% spent on choosing the
+prompt: 33,421 answers. Each decoding step is one CUDA graph, 5-6 times faster than the loop; the whole
+run took 92 minutes.
+
+**Three judges.** Exact match and F1 against the reference; the model itself, with a Yes/No verdict
+against the reference; Claude, reading the answers. Claude's verdict decides. Claude read in four turns,
+from the least settled to the most:
+
+1. where exact match and the judge disagree - 4,667 answers;
+2. where both say no, but not surely - 2,056;
+3. where both surely say no - SQuAD, ARC and HotpotQA in full, TriviaQA and NQ-open on a sample, where
+   the model knows under 2% and the rest stays unread;
+4. where both say yes - 12,122.
+
+21,242 answers read in all.
+
+**What came up.**
+
+- *The judge answers the question itself.* Asked whether an answer "means the same as the reference",
+  the model heard "is it right, as far as I know" and said No to 4% of exact matches ("Captain Flint"
+  against "Captain Flint"). The effect is deterministic - a hundred repeats give one number: it is the
+  prompt, not noise.
+- *Matching the reference is not being right.* 31 of the 37 wrong answers that both exact match and
+  the judge accepted repeat the words of the question: asked who is better known as Barbara
+  McCorquodale, the model answers "Barbara McCorquodale", a name among the reference's aliases.
+- *The full model gives nothing to test a scale on.* Its answers are whole or wrong; the middle of a
+  scale shows only on degraded or coarsened answers.
+- *Shorter is not better.* The same ladder compressed into a CSV table made the judge a yes-sayer: it
+  accepted 22 of 60 wrong answers.
+
+**What was done.**
+
+- One judge on every answer, with no exception for exact matches.
+- The judge grades an exam: the correct answers are known, so it does not answer the question but
+  checks the examinee's answer against them. It sees the question as context.
+- It replies "Yes, grade" on the ladder Correct, Nearly, Partial, Related, Wrong, and an answer counts
+  from Nearly. The ladder is a working choice: better ones likely exist, and there was no time to try
+  them all. The Yes/No is the verdict; the middle grades are a reserve for when the judge uses them, on
+  the incomplete answers of coarsened models. The words were picked for meaning: "less precise" let a
+  wrong neighbour into the accepted grades, and "Hint" was never chosen at all.
+
+**Where it stands.**
+
+- *The corpus is frozen* (`corpus/e2b-it/`). The model knows 17,214 questions - TriviaQA 4,111,
+  NQ-open 812, SQuAD v2 6,123 (552 of them the right answer that the passage holds none), ARC 520,
+  HotpotQA 5,648 - and 1,913 questions it did not know are marked, a tenth of the stage 2 set.
+- *The new judge against Claude's verdicts*, on the 21,242 answers read: agreement 0.888 → 0.930; false
+  noes 1,672 → 501, false yeses 711 → 980. On ARC it is worse than the old one; that is open.
+- *A synthetic check* (`runs/reference/judge-synthetic/e2b-it/`): 250 right answers and three
+  degradations of each, graded by Claude beforehand. Accepted: right 250 of 250, incomplete 72%,
+  partial 24%, wrong but plausible 4%, plainly wrong 0 of 250. The middle grades are named rarely and
+  loosely - "Related" hardly ever, plausible wrong answers are called Wrong: the verdict is right, the
+  grade is not, and the ladder works as a reserve.
+
 ## Candidates, measured
 
 Core measured with `scripts/corpus_calibration.py` on Gemma 4 E2B at bf16, six orders of the options,
@@ -98,6 +152,5 @@ The old set occupied the bottom half of this table, and one of its four subjects
 ## Open
 
 Whether the mask follows the form of the text. On the first corpus reordering the options - same
-question, same meaning - moved a zone layout's accuracy by 6.3 points and its memory by a whole bit,
-while bf16 and uniform quantization repeated exactly. The new corpus has no options to reorder; the
-question is measured again on it.
+question, same meaning - moved a zone layout's result, while bf16 and uniform quantization repeated
+exactly. The new corpus has no options to reorder; the question is measured again on it.

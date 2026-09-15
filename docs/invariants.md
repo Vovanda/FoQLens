@@ -2,7 +2,7 @@
 title: Invariants
 ---
 
-# Invariants of the phenomenon
+# Invariants
 
 What holds no matter how the question is asked. This page is the output of the exploration step
 ([goals.md](goals.md)) and the input to the hypotheses that follow it: a hypothesis worth
@@ -11,9 +11,9 @@ preregistering is a claim about something that already looks invariant, and a mo
 
 Started 2026-09-13.
 
-## What counts as an invariant here
+## What counts as an invariant of the phenomenon
 
-A statement earns a place on this page when all four hold:
+A statement about the phenomenon earns a place on this page when all four hold:
 
 1. **It survives two independent conditions.** Two corpora that do not share their questions, or two
    metrics that do not share their failure mode, or two models. One condition is an observation, not
@@ -23,30 +23,31 @@ A statement earns a place on this page when all four hold:
 3. **It names how it was measured**, down to the run, so that it can be attacked.
 4. **It names what would break it.** A property nobody can imagine falsifying is not a finding.
 
-Invariants of the *code* are a different thing and stay where they are: each module states its own in
-its docstring and has a test for it (`CLAUDE.md`, engineering standards). This page is about the
-phenomenon - the model, the masks, the layouts - not about the implementation.
+Invariants of the *code* live in the docstrings of its modules, each with a test (`CLAUDE.md`,
+engineering standards). This page holds the invariants of the bench - how every measurement is made -
+and of the phenomenon: the model, the masks, the layouts.
 
-## Confirmed
+## The bench
 
-*Empty.* Nothing has yet been measured under two independent conditions.
+- **The judge of every model is the model at its source quality** (bf16): one measure against which
+  quantized models are compared with each other and with models that carry a quantization filter on
+  different bases. Whatever layout is under test, the same model judges. Tested: the judge's verdicts
+  are the same under a D4 layout as at bf16 (`tests/test_it_gpu.py`).
 
-## Candidates
+  Why this measure:
 
-Observed once, under conditions the bench no longer trusts. Each has to be re-measured on a corpus and
-a metric that can carry a verdict before it moves up; several may simply be artifacts of the old setup.
+  1. **The judge knows every question of the corpus.** The corpus is the questions the source model
+     knows, and the judge is that model, shown the reference as well - so it can tell a right answer
+     from a wrong one. The exception is the 10% of questions it did not know: there it leans on the
+     reference alone, and they are counted apart.
+  2. **It is the strongest model on the bench**, the source one at bf16, and the same for every model
+     compared.
+  3. **A conclusion is decided on the discordant questions.** The difference between two models comes
+     only from the questions where their verdicts differ. "One is better than the other" is accepted
+     when the confidence interval of the difference excludes zero and Claude's reading of a sample of
+     the discordant questions agrees with the judge's direction.
 
-| Candidate | Observed | Measured on | What would break it |
-| --- | --- | --- | --- |
-| The mask follows the surface form of the prompt, not only its meaning | reordering the four answer options moved accuracy by 6.3 points and memory by a whole bit, while bf16 and uniform quantization repeated exactly | `runs/reference/address-stability`, 395 questions, 6 orders | the same reordering on a corpus with no options to reorder - if the address is stable there, the effect was the options and not the mask |
-| The cost of a layout depends on the text the mask is read from | the same settings spent 5.24 to 6.24 bits depending only on which ordering the mask was read off | same run | a corpus where memory holds while the text varies |
-| What a model is competent at varies by more than a factor of twenty between corpora | core from 66.9% (ARC-Easy) to 3.0% (school mathematics) | `runs/reference/corpus` | another model with the same ordering of corpora would strengthen it; a different ordering would break the generality |
+## The phenomenon
 
-## Anti-invariants
-
-Things shown *not* to hold, which are as useful and easier to establish.
-
-| Statement | Why it fails |
-| --- | --- |
-| Accuracy on a four-option question measures what the model knows | it is right under every ordering of the options on 31% of the old set, and on 3% of its mathematics subject; the rest moves with the arrangement |
-| A comparison on one order of the options is a comparison | the original order was the best of six for the zone layout and only for it |
+*None yet.* Everything observed so far was measured on the first corpus, which the bench no longer
+trusts.

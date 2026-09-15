@@ -6,7 +6,7 @@ judge or a later reader needs: the question's number at the pinned revision, the
 with, the raw reply and the answer taken from it, and the scores of the two automatic judges.
 
 Three judges decide whether the model knows a question (docs/corpus.md): exact match and F1, the
-model itself asked Yes or No against the reference (foqlens.judging), and Claude, who reads the
+model itself grading the answer as an exam against the reference (foqlens.judging), and Claude, who reads the
 answers. Claude's verdict decides wherever it is given; without it a reply with no answer, an answer
 to a question the passage does not answer, and a refusal are questions the model does not know, and
 otherwise the two automatic judges decide only where they agree, the rest staying open for Claude.

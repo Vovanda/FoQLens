@@ -67,23 +67,24 @@ All predictions were [preregistered](prereg/) in git before each run, as directi
 
 ## Status
 
-**Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](docs/corpus.md).
+**Every hypothesis is untested.** The first corpus chosen - four MMLU subjects with a letter to pick - was
+rejected: the letter does not tell whether the model knows the answer or guesses it
+([corpus.md](docs/corpus.md)).
 
-**What is being rebuilt, in order:** a corpus of what the model knows - the full model answers every question
-of five datasets in its own words, with no options anywhere, and a question stays if the answer is right
-([docs/corpus.md](docs/corpus.md)); three regimes in it - the answer in a passage, only in the weights, split
-across two passages - so that the claim can fail; then a mask that is asked about the answer instead of the
-text. Then the hypotheses, from the first.
+**The corpus of what the model knows is built and frozen:** the full model answered every question of five
+datasets in its own words, with no options anywhere, and a question stays if the answer is right; three
+regimes in it - the answer in a passage, only in the weights, split across two passages - so that the claim
+can fail ([docs/corpus.md](docs/corpus.md)). Next come uniform quantization levels on it as the baseline,
+then a mask that is asked about the answer instead of the text. Then the hypotheses, from the first.
 
 **The question all of it serves:** does the regulator work - the structure where a coarse reading is enough, the
 details where sharpness is needed, a gain over iterations. Saving memory is a secondary goal, plan B: even without
 a gain in quality the mechanism saves memory at the same usability.
 
-**Engineering that stands regardless**, because it does not depend on the questions: one stored copy of the
-weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), 1.63 GiB freed on E2B without the bf16
-copy ([E006](experiments/E006-read-depths/_index.md)), and each block able to store only the depth it is read to
-(depth caps, [E011](experiments/E011-depth-caps/_index.md)). The slices are unpacked before the multiplication, so speed
-and energy would need a kernel that reads only the bits it needs.
+**Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits (residual slices after
+MoBiQuant), with no separate bf16 copy, and each block able to store only the depth it is read to. The slices
+are still unpacked before the multiplication; a kernel that reads only the bits it needs is written and
+tested, and not yet wired into decoding.
 
 ## Reproduce
 
@@ -113,7 +114,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/reading-notes.md`](docs/reading-notes.md) - notes from the papers read, with the passages cited and what FoQLens takes from them.
 - [`docs/station.md`](docs/station.md) - the machine the runs are made on, its limits, and a log of what the runs cost it.
 - [`docs/visual-metaphor.md`](docs/visual-metaphor.md) - how FoQLens is drawn.
-- [`docs/data-sources.md`](docs/data-sources.md) - where the questions of run 1 came from (MMLU-Redux-2.0) and why.
+- [`docs/data-sources.md`](docs/data-sources.md) - where the questions of the first corpus came from (MMLU-Redux-2.0).
 - [`docs/corpus.md`](docs/corpus.md) - the corpus: how it is selected and its three regimes.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:

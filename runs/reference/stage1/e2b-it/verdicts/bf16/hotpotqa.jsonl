@@ -1749,3 +1749,599 @@
 {"corpus": "hotpotqa", "id": "5a8ee3a755429917b4a5be02", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
 {"corpus": "hotpotqa", "id": "5a7fb7985542994857a767d2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
 {"corpus": "hotpotqa", "id": "5a8cfee555429941ae14df5c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a85f5115542991dd0999ed9", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8f69b55542997ba9cb324f", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7746cf5542994aec3b7263", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab808b85542991d3222380d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2ffbd554299677310267b", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7be294554299294a54ab44", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f48e15542992e7d278ce6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adc8977554299438c868de2", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8a803b55429930ff3c0e04", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adf39ce5542995534e8c76d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2cdaa554299657fa29070", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae406245542995dadf242e2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8208ee5542990a1d231f1e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7cb94f554299683c1c6353", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab7c3df5542993667794003", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a74a62b55429916b01641a0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab7ece25542995dae37e9f3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a80c74f554299260e20a158", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b56d655429949d91db557", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adef1b35542993a75d263af", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab91b6c55429934fafe6e5f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae515bb55429913cc204584", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8bb90f5542996e8ac88a02", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab2b61d5542991669774065", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8e08ab5542995085b37393", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab8634e5542990e739ec8de", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a71166d5542994082a3e576", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac26eed55429951e9e685bf", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae5db98554299546bf82fa6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8bc0485542995d1e6f143d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab2da99554299194fa93544", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac25fa955429951e9e6858c", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a79dae35542994f819ef0d3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f732d5542992e7d278d02", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7bc42e554299294a54aabe", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7e4af3554299495941998c", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae63dad55429929b0807afe", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b4d5e5542995d1e6f135c", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a79ca585542996c55b2dc71", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2f79e5542996773102661", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7a1d305542990783324e66", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7dedef5542995f4f40231a", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab2f6bd554299166977415e", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5aba71be5542994dbf01990c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac4c0fc5542997ea680cab1", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7e618155429949594199b0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae791245542997b22f6a7a3", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abd420f55429933744ab75c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81ca835542990a1d231ebd", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae830f05542997ec2727758", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade0fb95542997545bbbe39", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adf86b45542993344016cc1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b7dab5542997f31a41d4c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b128455429971feec463b", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a80c01855429938b61421b8", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7299465542992359bc3131", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a83316b5542993344745fe5", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abe5ee955429976d4830b03", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a72bbfa5542992359bc318d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8e4b7c5542990e94052ab7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac023045542996f0d89cb32", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a876b265542993e715abf33", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab815865542995dae37ea2d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab7f27e5542991d322237d6", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adec96e5542995534e8c712", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae172c155429920d52343de", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5adfee9c55429906c02daa8a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab6bdd255429953192ad36e", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ac279345542990b17b153b0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac05fb55542997d64295a0b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab6cd0e554299710c8d1f68", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81537355429926c1cdad20", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8e8bed5542990e94052b47", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae2120c5542997283cd23ac", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade7feb5542992fa25da799", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae509f655429908b63264ef", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade26db5542997c77aded77", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a89f90a5542992e4fca84be", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab9b29c554299743d22ebae", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adcc5715542990d50227d0a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84b9c95542997b5ce3ff35", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84f8555542997175ce1f3a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3de615542992f92d823a5", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab3d2b7554299233954ffb8", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ac44b47554299194317396c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7319e755429901807daf86", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae679ec5542996d980e7b75", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7509175542993748c897a3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adfd30c55429906c02daa53", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a887bc0554299206df2b2b6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae780a55542997b22f6a79f", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a85ee635542994775f606b4", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae39f405542991a06ce9a02", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7754d85542993735360234", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab58f9a554299488d4d99da", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84b4005542991dd0999d99", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7329a15542991f9a20c65f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a825b0e55429954d2e2eb0c", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a87bada5542994846c1cddc", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3a8985542992f92d82329", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a89e47f5542992e4fca8457", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7b681b554299042af8f767", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7a112a5542990783324e2b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac1620855429964131be1bc", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abe7eb05542993f32c2a12c", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7bf0d75542996dd594b85c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adf0cbd5542993a75d263e0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8601f855429960ec39b5fd", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abcf2b4554299700f9d7937", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8dee2455429917b4a5bce1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab741005542992aa3b8c800", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0b4c15542993d6555ec21", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7d147955429909bec76942", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab78a445542992aa3b8c826", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8769475542993e715abf2b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae6911955429908198fa626", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab7a1f65542991d3222378f", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae5aba0554299546bf82f17", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac4e9ab5542996feb3fe974", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7bb2595542995eb53be99b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a890b895542995153361278", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac06e24554299294b218fd1", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0b0af55429945ae959424", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adf400a5542993a75d2644e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a790364554299029c4b5ee6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adea95055429939a52fe931", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8a410655429970aeb70279", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac4db1d554299076e296e1a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a74760b55429974ef308c03", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adc861c5542994d58a2f62c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab97b27554299131ca4233c", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae1500655429920d52343cc", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abdc18555429965af743e2b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1467a554299422ee99659", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8e024f5542995085b37375", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5add78bf5542992ae4cec57b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1d0e8554299234fd0430a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5aba75e655429955dce3ee3c", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a739323554299623ed4abff", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2610f55429951e9e68593", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7d9d2b5542997cc2c47464", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae527945542993aec5ec167", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5addc7e35542997545bbbdbe", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7770f855429966f1a36d4e", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abf1a6b5542997ec76fd3c1", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a90b3c65542990a984936b7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84aca95542992a431d1a89", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab7f2d05542993667794064", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adeacf955429975fa854f66", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab528a3554299637185c4e5", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac07a17554299294b219000", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7143625542994082a3e71e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a801f215542992bc0c4a6b2", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7faa215542995d8a8ddee8", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae74818554299572ea547ad", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae5e1985542996de7b71a54", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f1ad155429934daa2fce2", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a75d35d5542992d0ec05ffe", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a88c92d5542993b751ca84e", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae20c245542997283cd2367", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7da0de5542990b8f5039d7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1f8235542997f29b3c1cf", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a822a5e55429926c1cdae43", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae47fe255429913cc204482", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abbe09d55429931dba145c0", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5aba92da55429901930fa840", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b515e55429971feec46bb", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a724a2b5542990c210a40bc", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8e5a635542990e94052ae4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab34a76554299233954ff3f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7e7ed05542991319bc94c2", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae22ede554299234fd0441b", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abba91e554299642a094b10", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab3cecd5542992ade7c6eae", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3599b5542992e3233c39d", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a88a8f4554299206df2b320", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a74c3f455429979e2882a0a", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ade51515542992fa25da745", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8ece2e5542995085b37497", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab841d15542990e739ec89d", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5adcdc6c5542992c1e3a2437", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab2659e554299340b5254b2", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8ff6635542995651fb5086", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0f4645542997b2ef7d0aa", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac43c7b5542997ea680ca34", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae2d8fb55429928c42394fa", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abb7ff15542996cc5e4a015", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab5279d5542996a3a96a03f", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b9cd65542997f31a41d8b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a85d6d95542996432c570fb", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac471305542991943173998", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a90b4fe55429916514e7525", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac458f8554299204fd21f2a", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a807ca5554299485f598613", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a78e9a2554299148911f995", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b86645542997f31a41d62", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7790ed5542992a6e59defb", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae62c385542995703ce8b3e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a761e855542994ccc9186e0", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae5e8dc554299546bf82fbe", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab8338155429919ba4e2260", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac3def75542997ea680c95f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8835dc5542994846c1ce2b", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae2c4d75542991a06ce98d0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3f7575542995dadf24277", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab3f6935542992339550019", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a735bae55429901807dafef", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1c2d8554299234fd042ee", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7616755542992d0ec06028", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abe832a55429965af743f29", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8fa20555429918e830d298", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae18b555542997b2ef7d1f7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abdcea955429965af743e5a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae7940c55429952e35ea984", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7e14a65542995ed0d16686", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0120155429925eb1afbfb", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a721dfd55429971e9dc928b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adbfb6b55429947ff17388d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae617285542996de7b71b4c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1925a554299492dc91b48", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7568175542992d0ec05f88", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f567e5542992097ad2f22", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a9052765542995651fb513d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae544035542992663a4f1af", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a89382655429951533612e8", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adf27775542993344016c00", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abd957a5542996e802b47eb", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5aba725455429901930fa7cc", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b14125542992d82986fd5", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abaf4535542996cc5e49f35", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2eec55542990b17b154c1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a89fc665542993b751ca9de", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b20b85542996c9b8d5fb5", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac259585542992f1f2b3868", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab29caa554299545a2cf9d3", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a80cf4c55429938b61421f6", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae6371155429929b0807af1", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab72a035542993667793f5c", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adc54085542994650320cce", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a80e468554299260e20a1a9", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a79b525554299029c4b5f67", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7261635542997f8278398a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab82fe155429919ba4e225a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abfa0be5542990832d3a173", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a80de9b55429938b6142226", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae2cda55542992decbdcdb7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae8096f5542994a481bbe99", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7be2595542997c3ec972ac", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a865d11554299211dda2b0d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8f4c8d554299458435d5a3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae4aba25542995ad6573e12", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7bacf35542997c3ec9724b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abb291355429939ce03dd9e", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8e4d9855429917b4a5bd8d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77863555429949eeb29ec6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adfe37c554299025d62a377", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abdaa0f55429965af743dad", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a83ed9b55429933447460b8", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8ee02955429917b4a5bdfa", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a82c51055429966c78a6a8d", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab281f45542993be8fa9938", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a9064d05542990a9849360f", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f924c55429969796c1aba", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae37e525542992e3233c42d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adcecbd5542992c1e3a24b7", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8ac0595542992d82986f6c", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8ac5595542992d82986f77", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5adc760c5542994650320d11", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab614e5554299488d4d9a9c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adc9d145542994d58a2f67d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abe86365542993f32c2a14d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab93841554299131ca422cb", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adbfffb5542994650320c39", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8eea4a5542990e94052bb7", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8bc1565542996e8ac88a0c", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab5f249554299488d4d9a5d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84f5195542994c784dda9d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae6860e5542991bbc976112", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abb76fa5542992ccd8e7f48", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2e9c45542990b17b154a0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae2fa1b55429928c4239583", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab41b8c5542996a3a969f40", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a843b045542996488c2e518", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae4ca6355429913cc204507", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7db1a15542995ed0d16660", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac3dfb15542995c82c4ac71", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac1f4495542991316484bd2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77d31c55429967ab1052c0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f40055542992e7d278cc0", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7734ce5542993735360217", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8d0940554299585d9e379e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7d27f05542995ed0d1660d", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae7a8d35542994a481bbdbb", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7eb9f355429934daa2fc53", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae4a91d5542995ad6573e09", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade03da5542997dc7907120", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab5fddb554299110f2199af", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac19bf55542994ab5c67d97", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade9c9355429975fa854f1b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae361605542994393b9e69b", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abaf6865542996cc5e49f3c", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a82678a5542995ce29dccfa", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab5ac345542992aa134a37f", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3789b5542992e3233c412", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae351405542994393b9e67f", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7a4f405542994f819ef1c0", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a888b8e5542997e5c09a60a", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abdd0f15542991f6610604d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a72120e55429971e9dc923f", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8642045542991e771815e2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7cba005542990527d55516", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7b9f1f554299294a54aa2a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a729e7b5542992359bc313d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1c3cd554299492dc91b87", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abc091555429965836003f6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a70f1685542994082a3e40f", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7331de5542994cef4bc4a8", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a739d8c55429905862fe073", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a865bbf5542991e77181615", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77ace855429967ab105223", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae1d1a55542997f29b3c138", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8c78a8554299585d9e36bc", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a866e7e554299211dda2b29", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5add750c5542990dbb2f7e53", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8c9fc2554299653c1aa0d4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae7ff745542994a481bbe6e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae69e3f5542996d980e7c61", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0c7b055429945ae95944b", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae127ba55429920d52342d3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac54ca45542993e66e822d5", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a721e0e55429971e9dc928d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84a5dc5542992a431d1a82", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a84eecd5542994c784dda8e", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac4f33355429924173fb507", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0aefe554299603e418437", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f7e3a5542992097ad2f89", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a778cae55429949eeb29eeb", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a762a645542992d0ec0603d", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae8027d5542993210984031", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae2c509554299492dc91c68", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77101d5542994aec3b71d7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8adbf55542992d82986fab", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81d19b55429926c1cdad90", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f6f4b5542994857a76740", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81ed345542995ce29dcc85", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae24b165542996483e64962", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab60aec554299110f2199c3", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7d1765554299452d57bade", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1e6d95542997283cd22c3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac3a364554299391541385d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a832ad55542990548d0b1b5", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a749e1855429979e28829c3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7c96765542990527d554d8", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a746ddc55429929fddd8423", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac507725542994611c8b32a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae471fa55429970de88d965", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5aba97ed55429901930fa84d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7dca645542990b8f503aab", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5aded04755429975fa854fa7", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7a59d15542996c55b2dd67", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab283d9554299449642c8d8", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7b3fc155429931da12ca3a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8f9cdb554299458435d69c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac41b9e5542995c82c4acc4", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abbdf8055429931dba145bb", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7c67c15542990527d55498", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7af2a455429931da12c998", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae14b0655429920d52343a6", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae2a0a1554299495565dae9", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0d5335542990adbacf674", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a860642554299211dda2a3e", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac285335542996773102552", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a79c1185542994bb9457065", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab502ae5542991779162d4c", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a770bb855429937353601b5", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2ae4155429921a00ab030", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7c34905542996dd594b8d5", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab4774d5542991751b4d781", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84b2995542994c784dda11", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abcef9e55429959677d6b52", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac531ea5542994611c8b419", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77691455429966f1a36d2b", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae00b9f554299025d62a3c3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab3e07e55429969a97a81e5", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8077ca5542992bc0c4a729", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8bf6cf5542995e66a47525", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab677e2554299110f219a13", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abdb8ba5542993f32c2a015", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84ee4c5542997175ce1f2b", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae038e955429942ec259c4d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade3af855429939a52fe867", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8f812755429918e830d245", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adfd0d455429942ec259b4d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7da98e5542990b8f503a17", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac264195542992f1f2b38a5", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a78ce79554299029c4b5ea1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a75fa14554299109176e5dc", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae49b705542995ad6573dbc", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a750de95542993748c897ac", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab71f7d554299110f219ab9", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a722fae55429971e9dc9343", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adc126f5542996e685252c5", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2ad5355429921a00ab02c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abcd19c5542993a06baf971", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac538025542996feb3fea41", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab9530a55429970cfb8ea62", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab69f9a554299710c8d1ef8", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a835a265542992ef85e2281", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adf21bc5542993344016bf4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab6e8e6554299710c8d1faf", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8010685542992bc0c4a69a", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab3f24c5542992ade7c6eef", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae361805542992e3233c3c9", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae491155542995ad6573da3", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adec7925542995534e8c70d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a902d5155429933b8a2048d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab8756755429934fafe6dd3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7fb1765542992e7d278d20", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8026a05542992e7d278df8", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8ec02e5542995a26add501", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade4fcc5542997c77adeded", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae152a65542990adbacf74f", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8f38fa55429924144829f5", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae00a27554299025d62a3bb", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a835e215542992ef85e2296", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7651825542992d0ec060a3", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7a616355429941d65f25f7", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a89019a5542995153361259", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8209845542990a1d231f1f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a792f3e554299029c4b5f20", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8f47a55542997ba9cb3219", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a79b495554299148911fa3b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a778b345542992a6e59decf", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7e694a5542997cc2c4753d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae53fcb55429960a22e029e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae33c4d5542992f92d82262", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7a073a5542990783324dfb", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a9072dd5542990a98493656", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abbb116554299642a094b1d", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a81adfc55429903bc27b9a4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae532f85542990ba0bbb20a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a79257b55429974737f79a7", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab925c755429919ba4e23d6", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae34b275542992e3233c371", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a90503755429916514e7470", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab262a4554299340b5254ac", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae2c696554299495565db32", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a83a532554299334474606f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abbfbcf55429965836003cf", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7b735c5542997c3ec9718a", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abadcb35542996606241647", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae0c29c5542993d6555ec46", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae4890a5542995ad6573d60", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab1e3bb554299340b52541a", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab6266555429953192ad277", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7fac0055429969796c1b1b", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae484f855429970de88d999", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a82efe355429966c78a6aa1", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7630105542992d0ec0605a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77121a5542994aec3b71db", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8f72de5542997ba9cb3266", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7412b655429979e28828a1", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab83bd055429919ba4e2279", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab9d7e4554299232ef4a21f", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ae60530554299546bf8301e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a87411d5542994846c1cd37", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5addeb685542992200553bb1", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab9dd9a554299232ef4a231", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab7fbbb5542990e739ec7b0", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a75383a5542996c70cfaeb3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adbfb6855429944faac23e4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f18a35542994959419aa6", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a733b835542991f9a20c6b2", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac3ac1855429939154138ab", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a78b209554299148911f93e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81ff62554299676cceb1c4", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a75462d5542996c70cfaed3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84b6e15542991dd0999daa", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7f9cbd5542994857a7677c", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81ad9855429903bc27b9a3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abc0e095542996583600417", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abfb4235542990832d3a1ca", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7cef5d55429909bec768ac", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8f24cc55429924144829e7", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab3bd7d55429969a97a819f", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac3bff15542995ef918c213", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7a0a2d5542990783324e06", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac2c338554299657fa29039", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7a0e745542990783324e1d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae20427554299234fd04397", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a75eb125542994ccc918659", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a87ef2f55429938390d3eb9", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a793bc95542994bb9456fc3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a9068075542990a9849361a", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0361155429925eb1afc2c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a728fbd5542992359bc30f8", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a810c44554299260e20a221", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8646ec5542991e771815f2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3dce45542994393b9e783", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77bc9955429967ab105256", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade653f55429975fa854ebb", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab281ec554299449642c8d1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3e84b5542996836b02bf0", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8468c95542990548d0b2b1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7a8a9c554299042af8f666", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1e9635542997f29b3c19e", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5aba52e655429939ce03dc94", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b036d55429971feec45fe", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae256c35542994d89d5b3e9", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3fcfc5542995dadf2428c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abbfc2b554299642a094bc9", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab31fea554299194fa9356a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abbd2575542993f40c73bbd", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a87d8355542993e715abfe4", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8752955542994775f607d1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab8ee805542991b5579f051", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ac3a928554299391541389f", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac11139554299294b219083", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ac116595542992a796dedd1", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77cb5e55429967ab1052a7", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1452c554299422ee99654", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7149595542994082a3e76f", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae28f43554299492dc91c2f", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77671255429966f1a36d21", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8481ba5542997175ce1ed4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5add3b035542997545bbbcce", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5add4dd35542992ae4cec507", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab1e7685542993be8fa9877", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8080365542992097ad2fed", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae5df84554299546bf82fa8", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae3d5ec5542992f92d8238c", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a870a8e55429960ec39b707", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5abed6905542990832d3a0ed", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7aa2a255429941d65f270e", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a75140b5542996c70cfae87", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7f54665542992097ad2f1a", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a726b0f5542997f827839be", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a71278c5542994082a3e5e2", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7217f255429971e9dc9260", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae1599155429901ffe4ae7b", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a72a4645542991f9a20c54c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7eb8f655429934daa2fc50", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a8cddd1554299441c6b9f3a", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae268f35542994d89d5b416", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ac3a47f554299391541386d", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abe689a55429976d4830b16", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a866b5b554299211dda2b23", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7455eb55429979e2882908", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae46c9d5542996836b02c9d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8cd291554299441c6b9f14", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7cff5755429907fabef09d", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7e6df35542997cc2c47544", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a77baac5542992a6e59dfa2", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81b7205542990a1d231e79", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7647b85542992d0ec0608a", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a73a7c755429978a71e9068", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a823b0c55429940e5e1a804", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a87184a5542991e771816c5", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab87b2955429934fafe6df4", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abaeda95542992ccd8e7e5d", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8c493e554299653c1aa020", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adc93a4554299438c868e01", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adfcb5455429906c02daa48", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab802085542990e739ec7ca", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae0de1455429924de1b71b4", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7b215f55429931da12c9e3", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5add64065542995b365fab25", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a86458b5542991e771815ec", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5adfa1f9554299025d62a308", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8ba0855542995d1e6f1427", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7b63eb55429931da12ca7e", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5add67705542992ae4cec54f", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae409d955429970de88d89d", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7e1a5455429965cec5ea5f", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5ab72a025542992aa3b8c7b8", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81d0515542990a1d231ed4", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a84c89a5542992a431d1a9c", "level": "bf16", "reading": "no_answer", "date": "2026-09-15", "note": "no answer to what was asked"}
+{"corpus": "hotpotqa", "id": "5a7f1e805542993067513640", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab5c984554299488d4d9a21", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab596d95542992aa134a371", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a81d92f554299676cceb0f9", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a889d18554299206df2b310", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abbdb195542993f40c73bf1", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab925fd554299131ca42281", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7518cb55429916b0164259", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a76db3555429972597f13e7", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5abdb7ff5542993f32c2a011", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae153915542990adbacf752", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a9070dd5542995b442420b5", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ade15f35542997545bbbe47", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a861fa75542994775f60706", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ab5f75e554299637185c64b", "level": "bf16", "reading": "other_words", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a8b922e55429949d91db5e6", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5ae638865542992ae0d1628c", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a75227955429929fddd8508", "level": "bf16", "reading": "wrong", "date": "2026-09-15", "note": ""}
+{"corpus": "hotpotqa", "id": "5a7af08655429931da12c989", "level": "bf16", "reading": "right", "date": "2026-09-15", "note": ""}

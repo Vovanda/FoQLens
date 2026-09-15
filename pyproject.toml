@@ -11,6 +11,7 @@ dependencies = [
     "numpy",
     "scikit-learn",
     "pyarrow>=25.0.1",
+    "duckdb>=1.5.5",
 ]
 
 [dependency-groups]

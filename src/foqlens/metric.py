@@ -10,9 +10,12 @@ answers that, and a new space is a new class behind BlockMetric.
   Euclidean distance between them.
 - neighbour_table: the k nearest blocks of every block in a metric, made symmetric - the graph the
   peaks and hills of a mask are found on (zones.find_ball_zones) and the paths of M4 run along.
-- ResistiveMetric (M4): shortest paths along a neighbour table, every edge as long as its base
-  distance divided by the harmonic mean of the query's activity at its two ends - two half-edges in
-  series (Kirchhoff), so one quiet end closes the edge and one loud end cannot open it more than twice.
+- ResistiveMetric: shortest paths along a neighbour table, every edge as long as its base distance
+  divided by its conductance. The conductance is replaceable (Conductance): HarmonicConductance (M4) is
+  the harmonic mean of the query's activity at the two ends - two half-edges in series (Kirchhoff), so
+  one quiet end closes the edge and one loud end cannot open it more than twice; JumpConductance (M4b,
+  Perona-Malik) falls with the jump of activity between the ends, so a zone stops at the border of the
+  active and the quiet.
 
 Everything is torch on the metric's device, computed in chunks of rows; nothing reads a tensor value on
 the host except the loop of ResistiveMetric.distances, which runs outside any forward pass.
@@ -22,8 +25,9 @@ Invariants:
   inequality holds (tests), and sqrt(2 (1 - corr)) for blocks whose profile varies.
 - Invariant: scaling or shifting one block's profile does not move it, as on the weight map.
 - Invariant: a neighbour table is symmetric and a block is never its own neighbour.
-- Invariant: with activity 1 everywhere a ResistiveMetric is the shortest path of its base table.
-- Invariant: an edge's conductance lies between the smaller activity of its ends and twice that.
+- Invariant: with activity 1 everywhere a ResistiveMetric is the shortest path of its base table, for either conductance.
+- Invariant: a harmonic edge conducts between the smaller activity of its ends and twice that.
+- Invariant: a jump edge conducts 1 where its ends are equally active and less the larger the jump.
 """
 
 from __future__ import annotations
@@ -36,6 +40,7 @@ import torch
 
 EPS = 1e-12
 PAD = -1  # a missing neighbour in a padded table
+MAD_TO_SIGMA = 1.4826  # a normal distribution's standard deviation per median absolute deviation (Black et al. 1998)
 ROW_CHUNK = 1024  # rows of distances built at once: 1024 x 14 708 in float32 is 60 MB
 
 
@@ -117,6 +122,12 @@ def _padded(heads: torch.Tensor, tails: torch.Tensor, lengths: torch.Tensor, n: 
     return table, table_lengths
 
 
+class Conductance(Protocol):
+    def edges(self, table: torch.Tensor) -> torch.Tensor:
+        """The conductance of every edge of a table [n, width]; 0 on padding."""
+        ...
+
+
 def harmonic_conductance(activity: torch.Tensor, table: torch.Tensor) -> torch.Tensor:
     """Conductance of every edge of a table [n, width]: the harmonic mean of the activities at its ends, 0 on padding.
 
@@ -126,6 +137,39 @@ def harmonic_conductance(activity: torch.Tensor, table: torch.Tensor) -> torch.T
     a_j = activity[table.clamp_min(0)]
     c = 2 * a_i * a_j / (a_i + a_j).clamp_min(EPS)
     return torch.where(table == PAD, torch.zeros_like(c), c)
+
+
+@dataclass(frozen=True)
+class HarmonicConductance:
+    """M4: an edge conducts the harmonic mean of the activity at its ends."""
+
+    activity: torch.Tensor
+
+    def edges(self, table: torch.Tensor) -> torch.Tensor:
+        return harmonic_conductance(self.activity, table)
+
+
+@dataclass(frozen=True)
+class JumpConductance:
+    """M4b (Perona-Malik, read through Black et al. 1998): exp(-(a_i - a_j)^2 / K^2) - an edge closes with the jump.
+
+    K is the robust scale of the jumps over all edges, MAD_TO_SIGMA times their median absolute
+    deviation, unless given.
+    """
+
+    activity: torch.Tensor
+    scale: float | None = None
+
+    def edges(self, table: torch.Tensor) -> torch.Tensor:
+        real = table != PAD
+        jump = self.activity[:, None].expand_as(table) - self.activity[table.clamp_min(0)]
+        if self.scale is None:
+            real_jumps = jump[real]
+            k = MAD_TO_SIGMA * (real_jumps - real_jumps.median()).abs().median()
+        else:
+            k = torch.tensor(float(self.scale))
+        c = torch.exp(-((jump / k.clamp_min(EPS)) ** 2))
+        return torch.where(real, c, torch.zeros_like(c))
 
 
 class Surface(Protocol):
@@ -150,21 +194,22 @@ class StillSurface:
 
 
 class MediumSurface:
-    """M4 per question: the graph's paths through a medium of the question's own activity.
+    """M4 (M4b by `medium`) per question: the graph's paths through a medium of the question's own activity.
 
     activity [questions, n_blocks] is how loud every block is on a question (an output energy),
     background [n_blocks] the same on average; the medium is their ratio, so a block that is loud on
     every question - a massive activation - conducts no better than a quiet one that is loud here.
     """
 
-    def __init__(self, table: torch.Tensor, lengths: torch.Tensor, activity: np.ndarray, background: np.ndarray):
+    def __init__(self, table: torch.Tensor, lengths: torch.Tensor, activity: np.ndarray, background: np.ndarray,
+                 medium: type = HarmonicConductance):
         self.table = table.cpu().numpy()
-        self._table, self._lengths = table, lengths
+        self._table, self._lengths, self._medium = table, lengths, medium
         ratio = np.asarray(activity, dtype=np.float64) / np.maximum(np.asarray(background, dtype=np.float64), EPS)
         self._ratio = torch.as_tensor(ratio, dtype=torch.float32, device=lengths.device)
 
     def metric(self, index: int) -> ResistiveMetric:
-        return ResistiveMetric(self._table, self._lengths, self._ratio[index])
+        return ResistiveMetric(self._table, self._lengths, self._medium(self._ratio[index]))
 
 
 def geodesic(table: torch.Tensor, lengths: torch.Tensor) -> ResistiveMetric:
@@ -173,7 +218,7 @@ def geodesic(table: torch.Tensor, lengths: torch.Tensor) -> ResistiveMetric:
     The surface the zones live on is this graph (owner, 2026-09-16): a zone reaching R along it covers
     whatever blocks lie within R by its paths - an arbitrary figure, not a ball cut across the space.
     """
-    return ResistiveMetric(table, lengths, torch.ones(table.shape[0], device=lengths.device))
+    return ResistiveMetric(table, lengths, HarmonicConductance(torch.ones(table.shape[0], device=lengths.device)))
 
 
 def sweep_width(metric: BlockMetric, start: int = 0, sweeps: int = 4) -> float:
@@ -192,12 +237,12 @@ def sweep_width(metric: BlockMetric, start: int = 0, sweeps: int = 4) -> float:
 
 
 class ResistiveMetric:
-    """M4: shortest paths along a neighbour table through a medium whose conductance is the query's activity."""
+    """Shortest paths along a neighbour table through a medium: every edge as long as its base distance over its conductance."""
 
-    def __init__(self, table: torch.Tensor, lengths: torch.Tensor, activity: torch.Tensor):
+    def __init__(self, table: torch.Tensor, lengths: torch.Tensor, conductance: Conductance):
         self.table = table
         self.n_blocks = table.shape[0]
-        c = harmonic_conductance(activity.to(lengths.device, torch.float32), table)
+        c = conductance.edges(table).to(lengths.device, torch.float32)
         self.edges = torch.where(c > 0, lengths / c.clamp_min(EPS), torch.full_like(lengths, torch.inf))
 
     def distances(self, sources: torch.Tensor) -> torch.Tensor:

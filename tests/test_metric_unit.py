@@ -9,6 +9,8 @@ from scipy.sparse.csgraph import dijkstra
 from foqlens.metric import (
     PAD,
     CoactivationMetric,
+    HarmonicConductance,
+    JumpConductance,
     MediumSurface,
     ResistiveMetric,
     geodesic,
@@ -82,7 +84,7 @@ def as_graph(table: torch.Tensor, edges: torch.Tensor) -> csr_matrix:
 def test_with_activity_one_everywhere_the_medium_is_the_shortest_path_of_its_table():
     metric = CoactivationMetric(random_masks(blocks=50, seed=6))
     table, lengths = neighbour_table(metric, k=3)
-    medium = ResistiveMetric(table, lengths, torch.ones(50))
+    medium = ResistiveMetric(table, lengths, HarmonicConductance(torch.ones(50)))
     sources = torch.tensor([0, 7, 31])
     expected = dijkstra(as_graph(table, lengths), indices=sources.numpy())
     np.testing.assert_allclose(medium.distances(sources).numpy(), expected, rtol=1e-5)
@@ -93,7 +95,7 @@ def test_the_geodesic_is_the_medium_at_rest():
     table, lengths = neighbour_table(metric, k=3)
     sources = torch.tensor([1, 5])
     torch.testing.assert_close(geodesic(table, lengths).distances(sources),
-                               ResistiveMetric(table, lengths, torch.ones(40)).distances(sources))
+                               ResistiveMetric(table, lengths, JumpConductance(torch.ones(40))).distances(sources))
 
 
 def line(n: int) -> tuple[torch.Tensor, torch.Tensor]:
@@ -124,10 +126,10 @@ def test_an_edge_conducts_between_the_smaller_activity_of_its_ends_and_twice_tha
 def test_a_quiet_block_holds_the_wave_back():
     n = 10  # a line of blocks; block 5 goes quiet
     table, lengths = line(n)
-    loud = ResistiveMetric(table, lengths, torch.ones(n)).distances(torch.tensor([0]))[0]
+    loud = ResistiveMetric(table, lengths, HarmonicConductance(torch.ones(n))).distances(torch.tensor([0]))[0]
     activity = torch.ones(n)
     activity[5] = 0.01
-    quiet = ResistiveMetric(table, lengths, activity).distances(torch.tensor([0]))[0]
+    quiet = ResistiveMetric(table, lengths, HarmonicConductance(activity)).distances(torch.tensor([0]))[0]
     assert torch.allclose(loud, torch.arange(n, dtype=torch.float32))
     assert torch.allclose(quiet[:5], loud[:5]) and torch.all(quiet[5:] > loud[5:] + 40)
 
@@ -148,3 +150,22 @@ def test_a_block_loud_on_every_question_conducts_no_better_than_its_background()
     activity = np.full((1, 6), 50.0)  # every block as loud as always
     surface = MediumSurface(table, lengths, activity, background=np.full(6, 50.0))
     torch.testing.assert_close(surface.metric(0).distances(torch.tensor([0])), geodesic(table, lengths).distances(torch.tensor([0])))
+
+
+def test_a_jump_edge_conducts_one_between_equals_and_less_the_larger_the_jump():
+    table, _ = line(4)
+    c = JumpConductance(torch.tensor([1.0, 1.0, 2.0, 5.0]), scale=1.0).edges(table)
+    assert c[0, 1] == pytest.approx(1.0)  # 1 -> 1
+    assert c[1, 1] == pytest.approx(float(np.exp(-1.0)))  # 1 -> 2
+    assert c[2, 1] == pytest.approx(float(np.exp(-9.0)))  # 2 -> 5
+    assert c[0, 0] == 0  # padding
+
+
+def test_at_a_border_of_activity_the_jump_medium_stops_the_wave_and_a_smooth_rise_does_not():
+    table, lengths = line(10)
+    border = torch.tensor([1.0] * 5 + [8.0] * 5)  # quiet, then loud: one jump between blocks 4 and 5
+    rise = torch.linspace(1.0, 8.0, 10)  # the same way up in small steps
+    across = ResistiveMetric(table, lengths, JumpConductance(border, scale=1.0)).distances(torch.tensor([0]))[0]
+    smooth = ResistiveMetric(table, lengths, JumpConductance(rise, scale=1.0)).distances(torch.tensor([0]))[0]
+    assert torch.allclose(across[:5], torch.arange(5, dtype=torch.float32))
+    assert across[5] > 1e6 and smooth[9] < 30

@@ -19,10 +19,20 @@ import numpy as np
 from scipy.sparse.csgraph import connected_components
 
 from foqlens import graph_zones as gz
-from foqlens.metric import CoactivationMetric, geodesic, neighbour_table, sweep_width
+from foqlens.metric import (
+    CoactivationMetric,
+    geodesic,
+    graph_report,
+    mutual_nicdm_table,
+    nearest,
+    neighbour_table,
+    nicdm_scale,
+    sweep_width,
+)
 
 FOCUS_AREA = 0.5  # rule 1: the zones as found
 FRONT_AREA = 0.2  # the owner's front: a fifth of the width of the network
+GRAPHS = {"union": neighbour_table, "mutual-nicdm": mutual_nicdm_table}  # how the block graph is built (#4)
 
 
 def main() -> None:
@@ -31,18 +41,22 @@ def main() -> None:
     parser.add_argument("--k", type=int, default=16, help="nearest blocks every block is linked to")
     parser.add_argument("--questions", type=int, default=8, help="questions whose zones are found")
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--graph", choices=sorted(GRAPHS), default="union", help="how the block graph is built")
     args = parser.parse_args()
 
     clock = time.perf_counter()
     masks = np.load(args.masks)
     metric = CoactivationMetric(masks, args.device)
-    table, lengths = neighbour_table(metric, args.k)
+    table, lengths = GRAPHS[args.graph](metric, args.k)
     along = geodesic(table, lengths)
     table_np = table.cpu().numpy()
-    print(f"{masks.shape[0]} questions x {masks.shape[1]} blocks; metric and graph of {args.k} neighbours "
-          f"(up to {table_np.shape[1]} after symmetry) in {time.perf_counter() - clock:.1f} s", flush=True)
+    print(f"{masks.shape[0]} questions x {masks.shape[1]} blocks; metric and {args.graph} graph of {args.k} neighbours "
+          f"(up to {table_np.shape[1]} a block) in {time.perf_counter() - clock:.1f} s", flush=True)
 
     clock = time.perf_counter()
+    lists = {"raw": nearest(metric, args.k)[0], "nicdm": nearest(metric, args.k, scale=nicdm_scale(metric, args.k))[0]}
+    for name, indices in lists.items():
+        print(f"k-nearest lists on the {name} distance: {graph_report(table, indices)}", flush=True)
     n_parts, parts = connected_components(gz.block_graph(table_np), directed=False)
     width = sweep_width(along)
     print(f"graph: {n_parts} component(s), the largest {np.bincount(parts).max()} blocks; width along it "

@@ -129,6 +129,11 @@ def neighbour_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch.Te
     return _padded(torch.cat([a, b]), torch.cat([b, a]), torch.cat([w, w]), metric.n_blocks)
 
 
+def nicdm_scale(metric: BlockMetric, k: int) -> torch.Tensor:
+    """Every block's mean distance to its k nearest: the scale of NICDM, d' = d / sqrt(mu_a mu_b) (Schnitzer et al. 2012)."""
+    return nearest(metric, k)[1].mean(dim=1)
+
+
 def mutual_nicdm_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch.Tensor]:
     """A graph with fewer hubs (#4): mutual nearest neighbours on the NICDM distance, its components joined along a spanning tree.
 
@@ -140,8 +145,7 @@ def mutual_nicdm_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch
     again (Flexer & Stevens 2018). Edge lengths are d'.
     """
     n = metric.n_blocks
-    mu = nearest(metric, k)[1].mean(dim=1)
-    heads, tails, lengths = _directed(*nearest(metric, k, scale=mu))
+    heads, tails, lengths = _directed(*nearest(metric, k, scale=nicdm_scale(metric, k)))
     h, t, w = heads.cpu().numpy(), tails.cpu().numpy(), lengths.cpu().numpy()
     mutual = np.isin(h * n + t, t * n + h)
     _, parts = connected_components(coo_matrix((np.ones(mutual.sum()), (h[mutual], t[mutual])), shape=(n, n)), directed=False)

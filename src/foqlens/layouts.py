@@ -421,6 +421,24 @@ class EqualStrength:
 
 
 @dataclass(frozen=True)
+class ProjectedStrength:
+    """A zone's strength from the heads (owner, 2026-09-16, #19): s_i = clip(A P[:, c_i] / Z, 0, 1).
+
+    signals [questions, units] are the heads' energies against their background, `weights` the
+    projection of #18 onto the blocks (projection.Projection.weights), `scale` Z fixed on calibration so
+    strengths compare across questions.
+    """
+
+    signals: np.ndarray
+    weights: np.ndarray  # [units, n_blocks]
+    scale: float
+
+    def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
+        raw = np.asarray(self.signals[index], dtype=float) @ np.asarray(self.weights)[:, zones_.centers]
+        return np.clip(raw / self.scale, 0.0, 1.0)
+
+
+@dataclass(frozen=True)
 class GraphZoneLayout:
     """Levels from zones on the block graph: zones -> how far each reaches -> lifts -> levels in rungs (#19).
 

@@ -21,6 +21,7 @@ import torch
 
 from foqlens import model as fm
 from foqlens import refocustensors
+from foqlens.activity import HeadEnergyScorer, NeuronActivityScorer
 from foqlens.gpu_monitor import gpu_temperature
 from foqlens.gpu_share import FULL, Cooldown, Pacer, ThermalGuard, Throttle
 from foqlens.precision import Controller, install
@@ -83,6 +84,30 @@ class GradientMagnitudeMask:
 
     def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
         return [r["gradient_magnitude"][0] for r in self.scorer.score_batch(model, tokenizer, texts)]
+
+
+@dataclass(frozen=True)
+class NeuronActivityMask:
+    """Source 2 of #18: phi(gate) * up per group of neurons, on their gate and up blocks - forward only."""
+
+    scorer: NeuronActivityScorer
+    batch_size: int
+    name: str = "neuron_activity"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
+@dataclass(frozen=True)
+class HeadEnergyMask:
+    """Source 3 of #18: every head's output energy at the input of o_proj, on its q_proj blocks - forward only."""
+
+    scorer: HeadEnergyScorer
+    batch_size: int
+    name: str = "head_energy"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
 
 
 class ModelSource(Enum):

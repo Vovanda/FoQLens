@@ -184,7 +184,14 @@ class StaticDecoder:
 
     def tokens(self, model, input_ids, attention_mask, max_new_tokens, stop):
         with sdpa_kernel(list(self.attention.prefill)):
-            run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
+            try:
+                run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
+            except torch.OutOfMemoryError:
+                # The share cap counts reserved memory, and the math prefill asks for one large score matrix:
+                # fragments earlier batches left in the cache blocked 744 MiB with 2.47 GiB reserved and free
+                # (E016 at D6, 2026-09-16). Handing them back and asking once more costs nothing when it succeeds.
+                torch.cuda.empty_cache()
+                run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
         step = GraphedStep(run) if self.graph else run.advance
         try:
             with sdpa_kernel(list(self.attention.decode)):

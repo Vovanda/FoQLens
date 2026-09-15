@@ -49,6 +49,14 @@ def test_same_batch_gives_identical_masks_and_scores(e2b_eager):
     assert np.array_equal(letter_logprobs_batch(model, tokenizer, PROMPTS, ids), letter_logprobs_batch(model, tokenizer, PROMPTS, ids))
 
 
+def test_the_magnitude_form_of_taylor_is_never_below_the_signed_one(e2b_eager):
+    model, tokenizer, ctl = e2b_eager
+    for got in GradientScorer(model, ctl.modules).score_batch(model, tokenizer, TEXTS):
+        signed, magnitude = got["gradient"][0], got["gradient_magnitude"][0]
+        assert magnitude.shape == signed.shape and np.all(magnitude >= signed - 1e-4 * np.abs(signed).max())
+        assert np.any(magnitude > signed * 1.01)  # somewhere the terms of a block do cancel (#17)
+
+
 def test_padding_positions_never_enter_a_mask(e2b_eager):
     model, tokenizer, ctl = e2b_eager
     batched = BlockScorer(ctl.modules).score_batch(model, tokenizer, TEXTS)

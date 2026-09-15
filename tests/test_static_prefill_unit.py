@@ -10,7 +10,7 @@ from foqlens.graph_decode import StaticDecoder
 class FakeRun:
     """A run whose every row is done at once: the decoder returns after the prefill."""
 
-    def __init__(self, model, input_ids, attention_mask, max_new_tokens, stop):
+    def __init__(self, model, input_ids, attention_mask, max_new_tokens, stop, prefill_tokens):
         self.tokens = torch.zeros(input_ids.shape[0], max_new_tokens, dtype=torch.long)
         self.done = torch.ones(input_ids.shape[0], dtype=torch.bool)
 

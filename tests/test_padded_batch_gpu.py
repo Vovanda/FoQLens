@@ -113,3 +113,20 @@ def test_the_judge_gives_on_the_split_plan_the_verdicts_it_gives_on_math(e2b_it_
         verdicts[plan.name] = judge.p_yes(questions, answers, references) > JUDGE_YES
     assert 0 < verdicts["math"].sum() < len(batch)
     assert np.sum(verdicts["math"] != verdicts["split"]) <= JUDGE_FLIPS
+
+
+def test_a_prefill_in_chunks_of_rows_opens_every_row_as_one_pass_and_peaks_no_higher(e2b_it_sdpa, collapsed_batch):
+    model, tokenizer, ctl = e2b_it_sdpa
+    prompts, stop, _ = collapsed_batch
+    ctl.set_all(Level.BF16)
+    longest = max(len(ids) for ids in tokenizer(prompts)["input_ids"])
+    first, peak = {}, {}
+    for name, budget in (("one pass", longest * len(prompts)), ("chunks of 4 rows", longest * 4)):
+        torch.cuda.synchronize()
+        torch.cuda.reset_peak_memory_stats()
+        decoder = StaticDecoder(attention=SPLIT, prefill_tokens=budget)
+        first[name] = [w.text for w in generate_replies(model, tokenizer, prompts, 1, stop, decoder)]
+        peak[name] = torch.cuda.max_memory_allocated()
+    moved = [i for i, (a, b) in enumerate(zip(first["one pass"], first["chunks of 4 rows"])) if a != b]
+    assert len(moved) <= NOISE_ROWS, moved
+    assert peak["chunks of 4 rows"] <= peak["one pass"], peak

@@ -37,6 +37,8 @@ Invariant: memory does not grow from batch to batch - every capture runs on one 
 (capture_stream); measured 2026-09-15: 40 batches in a row, 0.00 MiB a batch (tests/test_graph_decode_gpu.py).
 Invariant: the prefill runs on the prefill kernels of the decoder's attention plan and every step, eager or
 captured, on its decode kernels (foqlens.attention; tests/test_padded_batch_gpu.py).
+Invariant (approximate, bf16): a prefill in chunks of rows opens every row as one pass does, up to bf16's batch
+noise, and peaks no higher (tests/test_padded_batch_gpu.py).
 """
 
 from __future__ import annotations
@@ -52,6 +54,11 @@ from foqlens.attention import MATH_ONLY, AttentionPlan
 from foqlens.generation import STOP_CHECK_EVERY, ends_after, mask_positions
 
 FULL, SLIDING = "full_attention", "sliding_attention"
+# Prompt tokens, padding included, that one prefill pass holds. The math prefill (#14) of a batch filled to
+# answering.BATCH_TOKENS (32k) passed the 21.6 GiB a run at share 0.9 may hold, on HotpotQA's passages (E016 at
+# D6, 2026-09-16: 876 MiB asked with 20.67 GiB allocated); the rows past it are prefilled in chunks into one cache,
+# and the decode batch stays whole.
+PREFILL_TOKENS = 16384
 
 
 def own_kv_layers(config) -> int:
@@ -99,25 +106,47 @@ class StaticRun:
 
     @torch.no_grad()
     def __init__(self, model, input_ids: torch.Tensor, attention_mask: torch.Tensor, max_new_tokens: int,
-                 stop: torch.Tensor):
+                 stop: torch.Tensor, prefill_tokens: int = PREFILL_TOKENS):
         config = model.config.get_text_config(decoder=True)
         batch, prompt = input_ids.shape
         device = input_ids.device
         # a slot for the prompt and one for every token fed back; the last token written is never fed
         length = prompt + max_new_tokens
+        layers = own_kv_layers(config)
         self.model, self.stop = model, stop
-        self.cache = Cache(layers=[StaticLayer(length) for _ in range(own_kv_layers(config))])
+        self.cache = Cache(layers=[StaticLayer(length) for _ in range(layers)])
         self.masks = CacheMasks(attention_mask, length, config.sliding_window)
         self.tokens = torch.empty(batch, max_new_tokens, dtype=torch.long, device=device)
         positions = mask_positions(attention_mask)
-        out = model(input_ids=input_ids, attention_mask=self.masks.prompt(), position_ids=positions,
-                    past_key_values=self.cache, use_cache=True, logits_to_keep=1)
-        self.token = out.logits[:, -1].argmax(-1, keepdim=True)  # [batch, 1]: written at step 0, fed next
+        masks = self.masks.prompt()
+        rows = max(1, prefill_tokens // prompt)
+        logits = []
+        for start in range(0, batch, rows):
+            part = slice(start, start + rows)
+            # one chunk reads straight into the run's cache; several read into their own and are copied in
+            cache = self.cache if rows >= batch else Cache(layers=[StaticLayer(length) for _ in range(layers)])
+            out = model(input_ids=input_ids[part], attention_mask={k: m[part] for k, m in masks.items()},
+                        position_ids=positions[part], past_key_values=cache, use_cache=True, logits_to_keep=1)
+            logits.append(out.logits[:, -1])
+            if cache is not self.cache:
+                self._copy_rows(cache, part, batch)
+        self.token = torch.cat(logits).argmax(-1, keepdim=True)  # [batch, 1]: written at step 0, fed next
         self.tokens[:, :1] = self.token
         self.done = (self.token == stop).any(-1)
         self.position = positions[:, -1:] + 1
         self.slot = torch.full((1,), prompt, dtype=torch.long, device=device)  # where the fed token is cached
         self.column = torch.ones(1, dtype=torch.long, device=device)  # the step the next token is written at
+
+    def _copy_rows(self, part_cache: Cache, rows: slice, batch: int) -> None:
+        """A chunk's keys and values into the run's cache at its rows; the run's cache is allocated at the first chunk."""
+        for whole, part in zip(self.cache.layers, part_cache.layers, strict=True):
+            if not whole.is_initialized:
+                # lazy_initialization reads only shape, dtype and device: an expanded view gives the batch's shape
+                whole.lazy_initialization(part.keys[:1].expand(batch, -1, -1, -1),
+                                          part.values[:1].expand(batch, -1, -1, -1))
+            whole.keys[rows] = part.keys
+            whole.values[rows] = part.values
+            whole.cumulative_length.copy_(part.cumulative_length)
 
     @torch.no_grad()
     def advance(self) -> None:
@@ -181,17 +210,18 @@ class StaticDecoder:
     check_every: int = STOP_CHECK_EVERY
     # The kernels of the prefill and of the steps (foqlens.attention); a graph keeps those it was captured with.
     attention: AttentionPlan = MATH_ONLY
+    prefill_tokens: int = PREFILL_TOKENS  # prompt tokens one prefill pass holds; more are read in chunks of rows
 
     def tokens(self, model, input_ids, attention_mask, max_new_tokens, stop):
         with sdpa_kernel(list(self.attention.prefill)):
             try:
-                run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
+                run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop, self.prefill_tokens)
             except torch.OutOfMemoryError:
                 # The share cap counts reserved memory, and the math prefill asks for one large score matrix:
                 # fragments earlier batches left in the cache blocked 744 MiB with 2.47 GiB reserved and free
                 # (E016 at D6, 2026-09-16). Handing them back and asking once more costs nothing when it succeeds.
                 torch.cuda.empty_cache()
-                run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop)
+                run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop, self.prefill_tokens)
         step = GraphedStep(run) if self.graph else run.advance
         try:
             with sdpa_kernel(list(self.attention.decode)):

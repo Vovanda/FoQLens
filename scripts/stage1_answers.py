@@ -24,7 +24,7 @@ from foqlens.answering import JUDGE_BATCH, Asking, level_label
 from foqlens.attention import PLANS, SPLIT
 from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
-from foqlens.graph_decode import StaticDecoder
+from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
 from foqlens.gpu_share import default_share
 from foqlens.io import answers_path, append_answers, read_frozen, write_json, written_ids
 from foqlens.judging import ModelJudge, NotJudged
@@ -49,7 +49,8 @@ FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passa
                  "arc_challenge_closed": "solve-0", "arc_easy_closed": "solve-brief", "hotpotqa": "justify"}
 # static: the static cache with every step a CUDA graph (foqlens.graph_decode), on the kernels of the attention
 # plan; dynamic: the reference loop, which stays on the process's default kernel, math, whatever the plan.
-DECODERS = {"static": lambda plan: StaticDecoder(attention=plan), "dynamic": lambda plan: DYNAMIC}
+DECODERS = {"static": lambda plan, prefill: StaticDecoder(attention=plan, prefill_tokens=prefill),
+            "dynamic": lambda plan, prefill: DYNAMIC}
 UNJUDGED = "unjudged"  # where a baked level's answers wait for the bf16 judge
 
 
@@ -69,6 +70,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--decoder", choices=list(DECODERS), default="static")
     parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name,
                         help="sdpa kernels per phase (foqlens.attention): the prefill always on math")
+    parser.add_argument("--prefill-tokens", type=int, default=PREFILL_TOKENS,
+                        help="prompt tokens one prefill pass of the static decoder holds; more are read in chunks of rows")
     return parser.parse_args(argv)
 
 
@@ -112,7 +115,7 @@ def main(argv: list[str] | None = None) -> Path:
     schedule = Schedule.build({c: list(r) for c, r in rows.items()}, args.seed)
     written = {c: written_ids(p) for c, p in paths.items()}
     rounds_done = 0
-    decoder = DECODERS[args.decoder](plan)
+    decoder = DECODERS[args.decoder](plan, args.prefill_tokens)
     with GpuMonitor() as gpu:
         progress = Progress(schedule.rounds, "round")
         for k, todo in schedule.pending(written):
@@ -130,7 +133,7 @@ def main(argv: list[str] | None = None) -> Path:
     # A corpus answered later joins the corpora answered before: their counts stay in the summary.
     earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder, "attention": args.attention,
+        "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
         "rounds_this_run": rounds_done, "written_to": root,

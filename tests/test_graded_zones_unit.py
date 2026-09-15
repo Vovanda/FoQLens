@@ -61,8 +61,8 @@ def test_an_unknown_combine_is_refused():
 
 
 def test_the_ceiling_is_the_share_of_the_rungs_above_the_floor():
-    assert [zones.ceiling_of(g, Level.D4).name for g in (0, 0.25, 0.5, 0.75, 1)] == ["D4", "D4", "D6", "D6", "D8"]
-    assert [zones.ceiling_of(g, Level.ZERO).name for g in (0, 0.25, 0.5, 0.75, 1)] == ["ZERO", "D2", "D4", "D6", "D8"]
+    assert [zones.ceiling_of(g, Level.D4).name for g in (0, 0.25, 0.5, 0.75, 1)] == ["D4", "D4", "D6", "D8", "BF16"]
+    assert [zones.ceiling_of(g, Level.ZERO).name for g in (0, 0.25, 0.5, 0.75, 1)] == ["ZERO", "D2", "D4", "D6", "BF16"]
     with pytest.raises(ValueError, match="focus strength"):
         zones.ceiling_of(1.5, Level.D4)
 
@@ -75,8 +75,8 @@ def test_the_default_profile_is_even_and_a_halo_goes_past_the_edge():
 
 
 def test_a_single_zone_reads_its_stepped_profile_exactly():
-    codes = line_layout(focus_area=AS_FOUND, focus_strength=1.0, floor=Level.D4)
-    # stops 0.5 and 1 of a radius of 0.2: D8 within 0.1 of the center, D6 to 0.2, D4 outside
+    codes = line_layout(focus_area=AS_FOUND, focus_strength=0.75, floor=Level.D4)
+    # a ceiling of D8, stops 0.5 and 1 of a radius of 0.2: D8 within 0.1 of the center, D6 to 0.2, D4 outside
     assert set(codes[:30]) == {int(Level.D4)}
     assert set(codes[46:55]) == {int(Level.D8)}
     assert int(Level.D6) in set(codes[31:45])

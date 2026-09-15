@@ -31,15 +31,17 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import ndimage
 
-from foqlens.quant import Level
+from foqlens.quant import LADDER, Level
 
 GRID = 64
 SMOOTH_CELLS = 1.5  # gaussian sigma of the smoothing, in grid cells
 PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field
 MAX_ZONES = 16
-# The ladder of the graded layout: every level a block can be read at, coarse first. What a model can
-# actually carry is a choice of the run, not of the layout - a floor of D4 leaves D2 out of the rings.
-READ_LEVELS = (Level.D2, Level.D4, Level.D6, Level.D8)
+# The rungs a zone can lift a block to: the ladder above ZERO, up to bf16 (docs/quantization-filter.md,
+# rule 2: g = 1 is the top rung). The codes follow the ladder, so levels compare by precision. What a
+# model can actually carry is a choice of the run, not of the layout - a floor of D4 leaves D2 out of the
+# rings, and a run that drops bf16 passes a ladder without it.
+READ_LEVELS = LADDER[1:]
 # A stop past 1 puts a ring outside the zone's radius. On a 2D map a ring out to 1.5 covers 1.25 of
 # the zone's area; further than that it is a second zone, and the size belongs to the focus area.
 MAX_STOP = 1.5

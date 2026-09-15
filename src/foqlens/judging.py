@@ -11,8 +11,13 @@ where the judge checks the examinee's answer against them and does not answer th
 without (is it right, as far as the model knows). The first is the verdict; the second shows how much
 of it the reference carries. The question is rendered in the model's own form (foqlens.prompting).
 
+Shown the reference, the judge also says what kind of answer it is (GRADES): its reply goes on as
+"Yes, Correct", so the verdict it gave and a comma are written in and the kinds are read as the next
+word - one more pass, again without generating.
+
 Invariant: the judge never sees who wrote an answer - its question holds the question, the answer and,
 in one form, the references, and nothing else.
+Invariant: the kind of answer is read after the verdict the judge gave, never after the other one.
 Invariant: the judge reads at bf16 whatever layout is under test, and leaves the model at bf16.
 Invariant: the same prompts in the same batch give the same verdicts (evaluate.letter_logprobs_batch).
 """
@@ -27,8 +32,10 @@ from foqlens.evaluate import letter_logprobs_batch
 from foqlens.extractive import NO_ANSWER
 from foqlens.prompting import PLAIN, USER, PromptFormat
 from foqlens.quant import Level
+from foqlens.selection import JUDGE_YES
 
 VERDICTS = (" Yes", " No")  # the word after the cue "Answer:" (prompting.PromptFormat.cue)
+GRADE_CUE = ","  # between the verdict and the kind of answer, as the prompt asks the reply to be written
 # TriviaQA lists up to dozens of aliases per answer; the first few say what the answer is, the rest
 # only lengthen the prompt.
 MAX_REFERENCES = 5
@@ -82,6 +89,14 @@ def verdict_ids(tokenizer) -> tuple[int, int]:
     return ids[0][0], ids[1][0]
 
 
+def grade_ids(tokenizer) -> tuple[int, ...]:
+    """The kinds of answer, best first, as the word after the verdict and its comma."""
+    ids = [tokenizer(f" {word}", add_special_tokens=False).input_ids for word, _ in GRADES]
+    if any(len(i) != 1 for i in ids):
+        raise ValueError(f"a kind of answer must be one token: {dict(zip((w for w, _ in GRADES), ids))}")
+    return tuple(i[0] for i in ids)
+
+
 @dataclass(frozen=True)
 class ModelJudge:
     """The model at bf16 says whether each answer is right: the probability of Yes, one per answer."""
@@ -93,18 +108,31 @@ class ModelJudge:
     fmt: PromptFormat = PLAIN
     batch_size: int = 16
     name: str = "model_judge"
+    grade_tokens: tuple[int, ...] = ()
 
     @classmethod
     def build(cls, model, tokenizer, ctl, fmt: PromptFormat, **kwargs) -> ModelJudge:
-        return cls(verdict_ids(tokenizer), model, tokenizer, ctl, fmt, **kwargs)
+        return cls(verdict_ids(tokenizer), model, tokenizer, ctl, fmt, grade_tokens=grade_ids(tokenizer), **kwargs)
 
     def p_yes(self, questions: list[str], answers: list[str], references: list[list[str]] | None) -> np.ndarray:
         """`references=None` judges without them; otherwise one list per answer."""
         refs = [None] * len(answers) if references is None else references
         prompts = [judge_prompt(q, a, r, self.fmt) for q, a, r in zip(questions, answers, refs, strict=True)]
+        return np.exp(self._read(prompts, list(self.ids))[:, 0])
+
+    def grades(self, questions: list[str], answers: list[str], references: list[list[str]],
+               p_yes: np.ndarray) -> np.ndarray:
+        """The probabilities of the kinds of answer after the verdict given with the references: [answers, GRADES]."""
+        given = [VERDICTS[0] if p > JUDGE_YES else VERDICTS[1] for p in p_yes]
+        prompts = [judge_prompt(q, a, r, self.fmt) + v + GRADE_CUE
+                   for q, a, r, v in zip(questions, answers, references, given, strict=True)]
+        return np.exp(self._read(prompts, list(self.grade_tokens)))
+
+    def _read(self, prompts: list[str], ids: list[int]) -> np.ndarray:
+        """The next word's probabilities among `ids`, renormalized, at bf16 in batches: log, [prompts, ids]."""
         self.ctl.set_all(Level.BF16)
-        out = np.empty(len(prompts))
+        out = np.empty((len(prompts), len(ids)))
         for start in range(0, len(prompts), self.batch_size):
             chunk = slice(start, start + self.batch_size)
-            out[chunk] = np.exp(letter_logprobs_batch(self.model, self.tokenizer, prompts[chunk], list(self.ids))[:, 0])
+            out[chunk] = letter_logprobs_batch(self.model, self.tokenizer, prompts[chunk], ids)
         return out

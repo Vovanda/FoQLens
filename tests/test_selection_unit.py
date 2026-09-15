@@ -5,7 +5,8 @@ from dataclasses import replace
 import pytest
 
 from foqlens.extractive import NO_ANSWER
-from foqlens.io import answers_path, append_answers, append_verdicts, read_answers, read_verdicts, written_ids
+from foqlens.io import (answers_path, append_answers, append_verdicts, read_answers, read_frozen, read_verdicts,
+                        write_json, written_ids)
 from foqlens.selection import (Answer, ClaudeVerdict, FrozenCorpus, Reading, Reason, Turn, Verdict, freeze,
                                split_reasoning, strip_markup, turn, two_way_choice, verdict)
 
@@ -73,6 +74,16 @@ def test_an_answer_line_survives_its_round_trip(tmp_path):
     append_answers(path, [ANSWER, replace(ANSWER, id="tc_2", reasoning="because")])
     assert read_answers(path) == [ANSWER, replace(ANSWER, id="tc_2", reasoning="because")]
     assert path == tmp_path / "bf16" / "triviaqa.jsonl"
+
+
+def test_the_kinds_of_answer_survive_the_round_trip_and_older_lines_read_without_them(tmp_path):
+    graded = replace(ANSWER, judge_grades=(0.9, 0.05, 0.03, 0.01, 0.01))
+    path = answers_path(tmp_path, "d4", "triviaqa")
+    append_answers(path, [graded])
+    assert read_answers(path) == [graded]
+    older = ANSWER.to_json()
+    del older["judge_grades"]
+    assert Answer.from_json(older) == ANSWER and ANSWER.judge_grades == ()
 
 
 def test_a_restart_appends_and_knows_what_is_written(tmp_path):
@@ -151,6 +162,27 @@ def test_the_frozen_corpus_survives_its_round_trip():
                           kept=("1", "2"), excluded={"3": "unknown:judges_agree"}, tuning=("4",), unknown_share=("3",),
                           two_way=("2",))
     assert FrozenCorpus.from_json(frozen.to_json()) == frozen
+
+
+FROZEN = FrozenCorpus("triviaqa", "0f7faf33", "google/gemma-4-E2B-it@3e22461f", "short-0",
+                      kept=("1", "2"), excluded={"3": "unknown:judges_agree", "5": "unknown:claude"}, tuning=("4",),
+                      unknown_share=("3",))
+
+
+def test_stage2_asks_the_kept_and_the_unknown_share_never_the_tuning(tmp_path):
+    write_json(tmp_path / "triviaqa.json", FROZEN.to_json())
+    assert read_frozen(tmp_path / "triviaqa.json").asked() == ("1", "2", "3")
+
+
+@pytest.mark.parametrize("model, revision, prompt", [
+    ("google/gemma-4-E4B-it@ee0ef602", "0f7faf33", "short-0"),
+    ("google/gemma-4-E2B-it@3e22461f", "other", "short-0"),
+    ("google/gemma-4-E2B-it@3e22461f", "0f7faf33", "short-2a"),
+])
+def test_a_frozen_corpus_is_read_only_for_what_it_was_frozen_with(model, revision, prompt):
+    FROZEN.check("google/gemma-4-E2B-it@3e22461f", "0f7faf33", "short-0")
+    with pytest.raises(ValueError):
+        FROZEN.check(model, revision, prompt)
 
 
 def answered(i, em, judge=None, answer="x"):

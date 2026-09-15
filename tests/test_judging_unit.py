@@ -7,7 +7,8 @@ import pytest
 
 from foqlens import judging
 from foqlens.extractive import NO_ANSWER
-from foqlens.judging import EXAM, GRADES, MAX_REFERENCES, ModelJudge, judge_prompt, judge_question, verdict_ids
+from foqlens.judging import (EXAM, GRADES, MAX_REFERENCES, ModelJudge, grade_ids, judge_prompt, judge_question,
+                             verdict_ids)
 from foqlens.prompting import ChatFormat
 
 CORRECT = "Correct answers (any one is enough): "
@@ -114,3 +115,28 @@ def test_the_judge_reads_at_bf16_in_batches_and_keeps_the_order(monkeypatch):
     assert ctl.levels is not None and ctl.levels.name == "BF16"
     judge.p_yes(["q1"], ["a1"], None)
     assert CORRECT not in seen[-1][0]
+
+
+def test_the_kinds_of_answer_are_single_tokens_or_refused():
+    tok = OneToken(1)
+    assert grade_ids(tok) == (0,) * len(GRADES)
+    assert tok.seen == [f" {word}" for word, _ in GRADES]
+    with pytest.raises(ValueError):
+        grade_ids(OneToken(2))
+
+
+def test_the_kind_of_answer_is_read_after_the_verdict_the_judge_gave(monkeypatch):
+    seen, levels = [], []
+    ctl = Controller()
+
+    def logprobs(model, tok, prompts, ids):
+        seen.extend(prompts)
+        levels.append(ctl.levels)
+        return np.log(np.tile(np.arange(1, len(ids) + 1) / sum(range(1, len(ids) + 1)), (len(prompts), 1)))
+
+    monkeypatch.setattr(judging, "letter_logprobs_batch", logprobs)
+    judge = ModelJudge((1, 2), None, None, ctl, batch_size=2, grade_tokens=(3, 4, 5, 6, 7))
+    got = judge.grades(["q1", "q2", "q3"], ["a1", "a2", "a3"], [["r"], ["r"], ["r"]], np.array([0.9, 0.2, 0.5]))
+    assert got.shape == (3, len(GRADES)) and np.allclose(got.sum(axis=1), 1) and np.allclose(got[:, 0], 1 / 15)
+    assert [p.rsplit("\n", 1)[-1] for p in seen] == ["Answer: Yes,", "Answer: No,", "Answer: No,"]  # 0.5 is not Yes
+    assert all(CORRECT in p for p in seen) and all(level.name == "BF16" for level in levels)

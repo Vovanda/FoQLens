@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from foqlens.evaluate import Question, mc_prompt
-from foqlens.selection import Answer, ClaudeVerdict
+from foqlens.selection import Answer, ClaudeVerdict, FrozenCorpus
 
 
 def read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
@@ -45,6 +45,11 @@ def read_answers(path: Path) -> list[Answer]:
 def written_ids(path: Path) -> set[str]:
     """The questions already answered in this file: a restart skips them."""
     return {a.id for a in read_answers(path)}
+
+
+def read_frozen(path: Path) -> FrozenCorpus:
+    """A frozen corpus file (scripts/freeze_corpus.py): the questions every later run asks."""
+    return FrozenCorpus.from_json(json.loads(path.read_text(encoding="utf-8")))
 
 
 def append_verdicts(path: Path, verdicts: list[ClaudeVerdict]) -> None:

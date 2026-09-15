@@ -6,7 +6,8 @@ import pytest
 from foqlens import model as fm
 from foqlens.extractive import first_line, qa_prompt
 from foqlens.generation import END_OF_TURN, FIRST_LINE, answer_texts, end_ids, generate_answers
-from foqlens.judging import ModelJudge
+from foqlens.evaluate import letter_logprobs_batch
+from foqlens.judging import GRADES, ModelJudge, judge_prompt
 from foqlens.quant import Level
 
 pytestmark = pytest.mark.gpu
@@ -54,6 +55,25 @@ def test_right_answers_get_yes_and_wrong_ones_no(chat, with_references):
     # may be a near tie - such answers go to Claude, the third judge.
     literal = np.array([a.lower() in {r.lower() for r in refs} for a, refs in zip(RIGHT, REFERENCES)])
     assert (right[literal] > 0.5).all()
+
+
+def test_the_kind_of_answer_is_the_word_after_the_verdict_given_as_the_synthetic_check_read_it(chat):
+    """41c12ab's check read the kind after "Answer: Yes," or "Answer: No," on the same prompt: the judge does the same."""
+    model, tokenizer, ctl, fmt, _ = chat
+    judge = ModelJudge.build(model, tokenizer, ctl, fmt)
+    answers, refs = RIGHT + WRONG, REFERENCES + REFERENCES
+    p_yes = judge.p_yes(QUESTIONS * 2, answers, refs)
+    grades = judge.grades(QUESTIONS * 2, answers, refs, p_yes)
+    words = [tokenizer(f" {w}", add_special_tokens=False).input_ids[0] for w, _ in GRADES]
+    prompts = [judge_prompt(q, a, r, fmt) + (" Yes," if p > 0.5 else " No,")
+               for q, a, r, p in zip(QUESTIONS * 2, answers, refs, p_yes)]
+    # The same log-probabilities; the judge takes exp in float64.
+    assert np.array_equal(grades, np.exp(letter_logprobs_batch(model, tokenizer, prompts, words).astype(np.float64)))
+    said = [GRADES[k][0] for k in grades.argmax(axis=1)]
+    print(dict(zip(answers, said)))
+    literal = [a.lower() in {r.lower() for r in rs} for a, rs in zip(RIGHT, REFERENCES)]
+    assert all(s == "Correct" for s, lit in zip(said[:len(RIGHT)], literal) if lit)
+    assert all(s in ("Related", "Wrong") for s in said[len(RIGHT):])
 
 
 def test_the_judge_reads_at_bf16_whatever_layout_was_set(chat):

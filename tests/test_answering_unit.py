@@ -1,9 +1,11 @@
 """One batch answered in one setup: written at its level, judged at bf16, one answer line per question in order."""
 
+from dataclasses import replace
+
 import pytest
 
 from foqlens import answering
-from foqlens.answering import Asking, level_label
+from foqlens.answering import Asking, level_label, rejudge
 from foqlens.corpora import Row
 from foqlens.generation import Reply
 from foqlens.prompt_variants import SETUPS, setup_named
@@ -29,6 +31,13 @@ class Judge:
         self.log.append(("judge", references is not None))
         return [0.9 if a == "Paris" else 0.2 for a in answers]
 
+    def grades(self, questions, answers, references, p_yes):
+        self.log.append(("grades", list(p_yes)))
+        return [KINDS] * len(answers)
+
+
+KINDS = (0.6, 0.2, 0.1, 0.05, 0.05)
+
 
 @pytest.fixture
 def run(monkeypatch):
@@ -46,11 +55,23 @@ def run(monkeypatch):
 def test_a_batch_is_written_at_its_level_then_judged_with_the_reference_and_without(run):
     asking = Asking("arc_challenge_closed", "rev", "m@1", Level.D4, setup_named("arc_challenge_closed", "solve-0"))
     answers = asking.answer(None, None, Controller(run), PLAIN, Judge(run), ROWS)
-    assert run == [("level", Level.D4), ("generate", 2, asking.setup.max_new_tokens), ("judge", True), ("judge", False)]
-    assert [a.id for a in answers] == ["1", "2"]
+    assert run == [("level", Level.D4), ("generate", 2, asking.setup.max_new_tokens), ("judge", True), ("judge", False),
+                   ("grades", [0.9, 0.2])]  # the kinds follow the verdicts shown the reference
+    assert [a.id for a in answers] == ["1", "2"] and answers[0].judge_grades == KINDS
     assert answers[1].reasoning == "It was Marlowe." and answers[1].answer == "Marlowe"
     assert (answers[1].exact_match, answers[1].judge_with_reference, answers[1].stopped) == (0.0, 0.2, False)
     assert (answers[0].exact_match, answers[0].f1, answers[0].level, answers[0].prompt) == (1.0, 1.0, "d4", "solve-0")
+
+
+def test_rejudging_changes_only_the_judges_fields(run):
+    asking = Asking("arc_challenge_closed", "rev", "m@1", Level.BF16, setup_named("arc_challenge_closed", "solve-0"))
+    earlier = [replace(a, judge_with_reference=0.5, judge_without_reference=0.5, judge_grades=())
+               for a in asking.answer(None, None, Controller(run), PLAIN, Judge(run), ROWS)]
+    again = rejudge(Judge(run), earlier, ROWS)
+    assert [(a.judge_with_reference, a.judge_grades) for a in again] == [(0.9, KINDS), (0.2, KINDS)]
+    assert [replace(a, judge_with_reference=0.5, judge_without_reference=0.5, judge_grades=()) for a in again] == earlier
+    with pytest.raises(ValueError):
+        rejudge(Judge(run), earlier, ROWS[::-1])
 
 
 def test_the_prompts_carry_the_setup_and_its_examples():

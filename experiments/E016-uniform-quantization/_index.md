@@ -5,7 +5,7 @@ weight: 16
 hypotheses: [H6]
 statuses: [fixed]
 params:
-  fixed: ""
+  fixed: "cab0c69"
   run: ""
   results: ""
   verdict: ""

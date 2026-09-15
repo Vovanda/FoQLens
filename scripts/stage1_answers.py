@@ -5,9 +5,10 @@ corpus, so a run stopped anywhere leaves every corpus equally far. Every answer 
 <out>/<model>/answers/<level>/<corpus>.jsonl as soon as its batch is written; a restart reads those
 files and asks only what is missing. Within a round the questions go in batches by prompt length.
 The questions spent on choosing the prompt (--tuning, the summary of scripts/prompt_tuning.py) are left out.
+Stage 2 reads only the frozen corpus (--frozen): the kept questions and the unknown share of each file.
 
     uv run python scripts/stage1_answers.py --tuning runs/reference/prompt-tuning/e2b-it/summary.json
-    uv run python scripts/stage1_answers.py --level d4 --tuning ...        # stage 2 at one level
+    uv run python scripts/stage1_answers.py --level d4 --frozen corpus/e2b-it --out runs/E016-uniform-quantization
     uv run python scripts/stage1_answers.py --rounds 1 --out /tmp/stage1   # smoke check: one round
 """
 
@@ -24,7 +25,7 @@ from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.graph_decode import STATIC
 from foqlens.gpu_share import default_share
-from foqlens.io import answers_path, append_answers, write_json, written_ids
+from foqlens.io import answers_path, append_answers, read_frozen, write_json, written_ids
 from foqlens.judging import ModelJudge
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
@@ -55,7 +56,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--corpora", nargs="+", default=list(SETUPS), choices=list(SETUPS))
     parser.add_argument("--level", choices=list(LEVELS), default="bf16")
     parser.add_argument("--setups", type=json.loads, default=FROZEN_SETUPS, help="JSON {corpus: setup name}")
-    parser.add_argument("--tuning", type=Path, default=None, help="summary.json of prompt_tuning.py: its questions are left out")
+    asked = parser.add_mutually_exclusive_group()
+    asked.add_argument("--tuning", type=Path, default=None, help="summary.json of prompt_tuning.py: its questions are left out")
+    asked.add_argument("--frozen", type=Path, default=None, help="folder of frozen corpus files: only what they ask")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--rounds", type=int, default=None, help="stop after this many rounds, for a smoke check")
     parser.add_argument("--out", type=Path, default=Path("runs/reference/stage1"))
@@ -78,8 +81,16 @@ def main(argv: list[str] | None = None) -> Path:
     rows, askings, paths = {}, {}, {}
     for corpus in args.corpora:
         corpus_rows, source = corpora.read(corpus)
-        left_out = set(spent.get(corpus, {}).get("tuning_ids", []))
-        rows[corpus] = {r.id: r for r in corpus_rows if r.id not in left_out}
+        if args.frozen:
+            frozen = read_frozen(args.frozen / f"{corpus}.json")
+            frozen.check(name, source.revision, args.setups[corpus])
+            asked = set(frozen.asked())
+            rows[corpus] = {r.id: r for r in corpus_rows if r.id in asked}
+            if len(rows[corpus]) != len(asked):
+                raise ValueError(f"{corpus}: {len(asked) - len(rows[corpus])} frozen questions are not in the corpus")
+        else:
+            left_out = set(spent.get(corpus, {}).get("tuning_ids", []))
+            rows[corpus] = {r.id: r for r in corpus_rows if r.id not in left_out}
         setup = setup_named(corpus, args.setups[corpus])
         train = corpora.read_train(corpus, TRAIN_POOL) if needs_train(setup) else []
         askings[corpus] = Asking(corpus, source.revision, name, level, setup, examples_for(corpus, setup, train, args.seed))
@@ -107,7 +118,8 @@ def main(argv: list[str] | None = None) -> Path:
     summary = {
         "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
-        "tuning": str(args.tuning) if args.tuning else None, "rounds_this_run": rounds_done,
+        "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
+        "rounds_this_run": rounds_done,
         "answered": {**earlier.get("answered", {}), **{c: len(written_ids(p)) for c, p in paths.items()}},
         "questions": {**earlier.get("questions", {}), **{c: len(r) for c, r in rows.items()}},
         "gpu": gpu.summary(), "pacer": bench.throttle.stats(),

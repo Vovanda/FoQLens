@@ -1,15 +1,17 @@
 """Answering a batch of questions in one setup: what the model writes, the answer taken from it, both automatic judges.
 
 One step shared by every run that collects answers - choosing the prompt, stage 1, stage 2 - so that
-an answer line means the same thing whichever run wrote it.
+an answer line means the same thing whichever run wrote it. Answers written earlier are read again by
+the present judge the same way (`rejudge`): the reply stays, the verdicts are taken anew.
 
 Invariant: a batch is written at the Asking's level and judged at bf16; the level is set again before every batch.
 Invariant: one Answer per row, in the rows' order.
+Invariant: rejudging changes only the judge's fields of an answer.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from foqlens.corpora import Row
 from foqlens.extractive import exact_match, token_f1
@@ -62,12 +64,29 @@ class Asking:
             written = generate_replies(model, tokenizer, self.prompts(fmt, rows), self.setup.max_new_tokens, self.setup.stop,
                                        decoder)
         parts = [self.setup.extract(w.text) for w in written]
-        answers = [a for _, a in parts]
-        questions = [r.question for r in rows]
-        with pacer.batch():
-            with_ref = judge.p_yes(questions, answers, [list(r.answers) for r in rows])
-            without_ref = judge.p_yes(questions, answers, None)
+        judged = judge_answers(judge, rows, [a for _, a in parts], pacer)
         return [Answer(self.corpus, r.id, self.revision, self.model, level_label(self.level), self.setup.name,
                        w.text, a, reasoning, exact_match(a, list(r.answers)), token_f1(a, list(r.answers)),
-                       float(yes), float(no_ref), w.tokens, w.stopped)
-                for r, w, (reasoning, a), yes, no_ref in zip(rows, written, parts, with_ref, without_ref, strict=True)]
+                       yes, no_ref, w.tokens, w.stopped, grades)
+                for r, w, (reasoning, a), (yes, no_ref, grades) in zip(rows, written, parts, judged, strict=True)]
+
+
+def judge_answers(judge, rows: list[Row], answers: list[str | None],
+                  pacer: Pacer = FULL) -> list[tuple[float, float, tuple[float, ...]]]:
+    """Each answer's P(Yes) with the references and without, and the kinds of answer after the first verdict."""
+    questions, references = [r.question for r in rows], [list(r.answers) for r in rows]
+    with pacer.batch():
+        with_ref = judge.p_yes(questions, answers, references)
+        without_ref = judge.p_yes(questions, answers, None)
+        grades = judge.grades(questions, answers, references, with_ref)
+    return [(float(yes), float(no_ref), tuple(float(g) for g in kinds))
+            for yes, no_ref, kinds in zip(with_ref, without_ref, grades, strict=True)]
+
+
+def rejudge(judge, answers: list[Answer], rows: list[Row], pacer: Pacer = FULL) -> list[Answer]:
+    """Answers written earlier, read again by the present judge; `rows` are their questions, in the same order."""
+    if [a.id for a in answers] != [r.id for r in rows]:
+        raise ValueError("each answer is rejudged against its own question")
+    judged = judge_answers(judge, rows, [a.answer for a in answers], pacer)
+    return [replace(a, judge_with_reference=yes, judge_without_reference=no_ref, judge_grades=grades)
+            for a, (yes, no_ref, grades) in zip(answers, judged, strict=True)]

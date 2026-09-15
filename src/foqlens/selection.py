@@ -140,13 +140,16 @@ class Answer:
     judge_without_reference: float  # and not shown it
     tokens: int
     stopped: bool        # it ended on its own rather than at the token limit
+    # The judge's probabilities of the kinds of answer (judging.GRADES, best first) after the verdict it gave
+    # with the reference; empty on the lines written before it gave them (stage 1, 2026-09-15).
+    judge_grades: tuple[float, ...] = ()
 
     def to_json(self) -> dict:
         return asdict(self)
 
     @classmethod
     def from_json(cls, row: dict) -> Answer:
-        return cls(**row)
+        return cls(**{**row, "judge_grades": tuple(row.get("judge_grades", ()))})
 
 
 def tuning_sample(ids: list[str], seed: int, share: float = TUNING_SHARE, floor: int = TUNING_FLOOR) -> list[str]:
@@ -254,6 +257,16 @@ class FrozenCorpus:
     tuning: tuple[str, ...] = ()                # spent on choosing the prompt, never measured on
     unknown_share: tuple[str, ...] = ()          # the 10% of excluded questions stage 2 asks anyway, marked
     two_way: tuple[str, ...] = ()                # kept questions a guess between two answers right half the time
+
+    def asked(self) -> tuple[str, ...]:
+        """What stage 2 asks: the kept questions and the unknown share, never the ones spent on the prompt."""
+        return self.kept + self.unknown_share
+
+    def check(self, model: str, revision: str, prompt: str) -> None:
+        """A run reads the file only for the model, the corpus revision and the prompt it was frozen with."""
+        if (self.model, self.revision, self.prompt) != (model, revision, prompt):
+            raise ValueError(f"{self.corpus} was frozen for {(self.model, self.revision, self.prompt)}, "
+                             f"not {(model, revision, prompt)}")
 
     def to_json(self) -> dict:
         return {**asdict(self), **{name: list(getattr(self, name)) for name in LISTS}}

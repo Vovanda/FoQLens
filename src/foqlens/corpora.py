@@ -129,6 +129,11 @@ CORPORA = {
         Source("allenai/ai2_arc", "ARC-Challenge/test-00000-of-00001.parquet",
                "210d026faf9955653af8916fad021475a3f00453"),
         ("id", "question", "choices", "answerKey"), arc_closed_rows, train="ARC-Challenge/train-00000-of-00001.parquet"),
+    # The same school science, easier: its core is 66.9% where ARC-Challenge's is 41.5% (docs/corpus.md).
+    "arc_easy_closed": Corpus(
+        Source("allenai/ai2_arc", "ARC-Easy/test-00000-of-00001.parquet",
+               "210d026faf9955653af8916fad021475a3f00453"),
+        ("id", "question", "choices", "answerKey"), arc_closed_rows, train="ARC-Easy/train-00000-of-00001.parquet"),
     "squad_v2": Corpus(
         Source("rajpurkar/squad_v2", "squad_v2/validation-00000-of-00001.parquet",
                "3ffb306f725f7d2ce8394bc1873b24868140c412"),

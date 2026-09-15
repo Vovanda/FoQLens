@@ -66,7 +66,8 @@ def test_every_corpus_is_read_at_a_pinned_revision():
 
 @pytest.mark.data
 @pytest.mark.parametrize("name, size", [("triviaqa", 9960), ("nq_open", 3610), ("squad_v2", 11873),
-                                        ("hotpotqa", 7405), ("arc_challenge_closed", None)])
+                                        ("hotpotqa", 7405), ("arc_challenge_closed", None),
+                                        ("arc_easy_closed", None)])
 def test_a_corpus_numbers_its_questions_uniquely_and_the_same_on_every_reading(name, size):
     rows, _ = corpora.read(name)
     ids = [r.id for r in rows]

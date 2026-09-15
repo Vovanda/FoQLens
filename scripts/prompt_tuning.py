@@ -13,6 +13,7 @@ the verdict hangs on the setup. Claude reads the answers before a setup is froze
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from foqlens import corpora
@@ -52,7 +53,9 @@ def main(argv: list[str] | None = None) -> Path:
     judge = ModelJudge.build(bench.model, bench.tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH)
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
-    summary = {"model": name, "seed": args.seed, "level": level_label(LEVEL), "corpora": {}}
+    # A corpus tuned later joins the corpora tuned before: their tuning ids are what the frozen corpus left out.
+    earlier = json.loads((out / "summary.json").read_text(encoding="utf-8"))["corpora"] if (out / "summary.json").exists() else {}
+    summary = {"model": name, "seed": args.seed, "level": level_label(LEVEL), "corpora": dict(earlier)}
 
     with GpuMonitor() as gpu:
         progress = Progress(sum(len(SETUPS[c]) for c in args.corpora), "setup")

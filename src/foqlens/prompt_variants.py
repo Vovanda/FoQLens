@@ -116,16 +116,19 @@ PASSAGE_SETUPS = (
     Variant("passage-2a", SHORT_PASSAGE, shots=2, shot_set=0),
     Variant("passage-2b", SHORT_PASSAGE, shots=2, shot_set=1),
 )
+# ARC-Easy is asked like ARC-Challenge: the same school science, and the worked solutions fit both.
+ARC_SETUPS = (
+    Variant("solve-0", SOLVE, written=True),
+    Variant("solve-brief", SOLVE_BRIEF, written=True),
+    Variant("solve-2a", SOLVE, shots=2, shot_set=0, written=True),
+    Variant("solve-2b", SOLVE, shots=2, shot_set=1, written=True),
+)
 SETUPS = {
     "triviaqa": SHORT_SETUPS,
     "nq_open": SHORT_SETUPS,
     "squad_v2": PASSAGE_SETUPS,
-    "arc_challenge_closed": (
-        Variant("solve-0", SOLVE, written=True),
-        Variant("solve-brief", SOLVE_BRIEF, written=True),
-        Variant("solve-2a", SOLVE, shots=2, shot_set=0, written=True),
-        Variant("solve-2b", SOLVE, shots=2, shot_set=1, written=True),
-    ),
+    "arc_challenge_closed": ARC_SETUPS,
+    "arc_easy_closed": ARC_SETUPS,
     # No worked justifications exist for HotpotQA, so its setups differ in wording rather than in examples.
     "hotpotqa": (
         Variant("justify", JUSTIFY, written=True),

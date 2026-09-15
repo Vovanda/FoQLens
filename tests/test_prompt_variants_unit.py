@@ -23,7 +23,7 @@ def test_every_corpus_has_setups_and_every_setup_a_unique_name():
         assert len({s.name for s in setups}) == len(setups)
 
 
-@pytest.mark.parametrize("corpus", ["arc_challenge_closed", "hotpotqa"])
+@pytest.mark.parametrize("corpus", ["arc_challenge_closed", "arc_easy_closed", "hotpotqa"])
 def test_the_corpora_that_reason_write_their_answer_out(corpus):
     """Volodya 14.09: ARC writes its solution, HotpotQA justifies its answer from the two passages."""
     for setup in SETUPS[corpus]:

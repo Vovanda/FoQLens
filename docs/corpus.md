@@ -40,7 +40,9 @@ on, nothing to reorder, a continuous scale. Code: `src/foqlens/extractive.py`.
 **The corpus is selected, then frozen.** The full model first answers every question of the full
 datasets, and a question stays if the answer is right. The corpus is then a file of question numbers -
 kept and excluded, each with its reason - with the dataset revisions pinned. Every later run reads that
-file; how it was assembled is recorded, not re-derived.
+file; how it was assembled is recorded, not re-derived. The set grows by new files: a new dataset is
+selected the same way and frozen in a file of its own, and a frozen file is never changed, so a run stays
+comparable with the runs made before it.
 
 **Questions the model did not know go back in, marked.** The set the coarsened models answer is 90%
 questions the full model knew and 10% questions it got wrong, drawn at random. The 90% is where the
@@ -54,7 +56,7 @@ things in different regimes, and until now every corpus was of one kind:
 | Regime | Corpus | Why this one | What the zones should do |
 | --- | --- | --- | --- |
 | the answer is in the passage | SQuAD v2 | the standard reading set; half its questions have no answer in the passage, and saying so is part of reading | little - the knowledge came in with the prompt |
-| the answer is only in the weights | TriviaQA, NQ-open, ARC-Challenge without its options | facts and school science; for ARC the reference is the text of the right option, and the questions that point at their options ("which of the following") are left out - 206 of 1165 | decide - this is the regime the idea is about |
+| the answer is only in the weights | TriviaQA, NQ-open, ARC-Challenge and ARC-Easy without their options | facts and school science; for ARC the reference is the text of the right option, and the questions that point at their options ("which of the following") are left out - 206 of 1165 in ARC-Challenge, 360 of 2376 in ARC-Easy | decide - this is the regime the idea is about |
 | two passages and a step between them | HotpotQA | the answer is assembled from two paragraphs among eight that do not hold it | matter, and matter less than in the second |
 
 ARC-Challenge and ReClor with a letter to pick stay only in the calibration table below, as
@@ -71,21 +73,21 @@ follow requests - it writes no ARC solution and no HotpotQA justification - and 
 reference it could not tell a right answer from a wrong one. The -it checkpoint is pinned by revision;
 the base stays for what needs no instructions.
 
-**Stage 1.** The model answered every question of the five datasets but the 1% spent on choosing the
-prompt: 33,421 answers. Each decoding step is one CUDA graph, 5-6 times faster than the loop; the whole
-run took 92 minutes.
+**Stage 1.** The model answered every question of the six datasets but the 1% spent on choosing the
+prompt: 35,387 answers. Each decoding step is one CUDA graph, 5-6 times faster than the loop; the first
+five datasets took 92 minutes, ARC-Easy, added on 2026-09-15 in a run of its own, three and a half.
 
 **Three judges.** Exact match and F1 against the reference; the model itself, with a Yes/No verdict
 against the reference; Claude, reading the answers. Claude's verdict decides. Claude read in four turns,
 from the least settled to the most:
 
-1. where exact match and the judge disagree - 4,667 answers;
-2. where both say no, but not surely - 2,056;
-3. where both surely say no - SQuAD, ARC and HotpotQA in full, TriviaQA and NQ-open on a sample, where
-   the model knows under 2% and the rest stays unread;
-4. where both say yes - 12,122.
+1. where exact match and the judge disagree - 5,961 answers;
+2. where both say no, but not surely - 2,214;
+3. where both surely say no - SQuAD, both ARCs and HotpotQA in full, TriviaQA and NQ-open on a sample,
+   where the model knows under 2% and the rest stays unread;
+4. where both say yes - 12,465.
 
-21,242 answers read in all.
+23,196 answers read in all.
 
 **What came up.**
 
@@ -114,11 +116,13 @@ from the least settled to the most:
 
 **Where it stands.**
 
-- *The corpus is frozen* (`corpus/e2b-it/`). The model knows 17,214 questions - TriviaQA 4,111,
-  NQ-open 812, SQuAD v2 6,123 (552 of them the right answer that the passage holds none), ARC 520,
-  HotpotQA 5,648 - and 1,913 questions it did not know are marked, a tenth of the stage 2 set.
-- *The new judge against Claude's verdicts*, on the 21,242 answers read: agreement 0.888 → 0.930; false
-  noes 1,672 → 501, false yeses 711 → 980. On ARC it is worse than the old one; that is open.
+- *The corpus is frozen* (`corpus/e2b-it/`). The model knows 18,576 questions - TriviaQA 4,111,
+  NQ-open 812, SQuAD v2 6,123 (552 of them the right answer that the passage holds none),
+  ARC-Challenge 520, ARC-Easy 1,362, HotpotQA 5,648 - and 2,064 questions it did not know are marked,
+  a tenth of the stage 2 set.
+- *The new judge against Claude's verdicts*, on the 21,242 answers read before ARC-Easy: agreement
+  0.888 → 0.930; false noes 1,672 → 501, false yeses 711 → 980. On ARC-Challenge it is worse than the
+  old one, and on ARC-Easy it is not measured yet; both are open.
 - *A synthetic check* (`runs/reference/judge-synthetic/e2b-it/`): 250 right answers and three
   degradations of each, graded by Claude beforehand. Accepted: right 250 of 250, incomplete 72%,
   partial 24%, wrong but plausible 4%, plainly wrong 0 of 250. The middle grades are named rarely and

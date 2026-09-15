@@ -29,7 +29,7 @@ In order of work; items 3 and 4 run in parallel. Every hypothesis is untested.
    the depth it is read to; a decoding step is one CUDA graph over a static cache. A kernel that reads
    only the bits it needs is written and tested, not yet wired into decoding.
 2. **A corpus of what the model knows** - done, 2026-09-13 → 2026-09-15. Selected by the model's own answers in three regimes
-   and frozen: 17,214 questions E2B-it knows and 1,913 it does not, marked ([corpus.md](corpus.md)).
+   and frozen: 18,576 questions E2B-it knows and 2,064 it does not, marked ([corpus.md](corpus.md)).
 3. **Uniform quantization on the corpus** - now, since 2026-09-15. The answers at D8, D6, D4 and D2, judged by the model at
    source quality ([invariants.md](invariants.md)): the share of the full model's knowledge each level
    keeps. It is the baseline the filter is compared with.

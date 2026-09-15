@@ -209,7 +209,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
           <tbody>
             <tr><td class="num">1</td><td><b>The bench</b> - its design and optimization: one stored copy of the weights read at 2 / 4 / 6 / 8 bits, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
-            <tr><td class="num">2</td><td><b>A corpus of what the model knows</b> - selected by its own answers in three regimes and frozen: 17,214 questions E2B-it knows</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
+            <tr><td class="num">2</td><td><b>A corpus of what the model knows</b> - selected by its own answers in three regimes and frozen: 18,576 questions E2B-it knows</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
             <tr><td class="num">3</td><td><b>Uniform quantization on the corpus</b> - the answers at D8, D6, D4 and D2, and the share of the full model's knowledge each keeps</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
             <tr><td class="num">4</td><td><b>The filter</b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
             <tr><td class="num">5</td><td><b>The address</b> - topics separate in the model, the mask is concentrated, zones of related topics overlap</td><td><span class="tag tag--wait">waits</span></td></tr>
@@ -221,13 +221,13 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       </div>
 
       <h3>The corpus</h3>
-      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself grading it as an exam, and Claude. The corpus is frozen: 17,214 questions E2B-it knows, and 1,913 it does not, marked.</p>
+      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself grading it as an exam, and Claude. The corpus is frozen: 18,576 questions E2B-it knows, and 2,064 it does not, marked.</p>
       <div class="scroller">
         <table>
           <thead><tr><th>Regime</th><th>Where the answer is</th><th>What the zones should do</th></tr></thead>
           <tbody>
             <tr><td>Reading</td><td>in the passage - SQuAD v2</td><td>little: the knowledge came in with the prompt</td></tr>
-            <tr><td>Knowledge</td><td>only in the weights - TriviaQA, NQ-open, ARC-Challenge without its options</td><td>decide - the regime the idea is about</td></tr>
+            <tr><td>Knowledge</td><td>only in the weights - TriviaQA, NQ-open, ARC-Challenge and ARC-Easy without their options</td><td>decide - the regime the idea is about</td></tr>
             <tr><td>Two steps</td><td>split across two passages - HotpotQA</td><td>matter, and less than in the second</td></tr>
           </tbody>
         </table>

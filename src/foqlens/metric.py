@@ -28,7 +28,7 @@ Invariants:
   inequality holds (tests), and sqrt(2 (1 - corr)) for blocks whose profile varies.
 - Invariant: scaling or shifting one block's profile does not move it, as on the weight map.
 - Invariant: a neighbour table is symmetric and a block is never its own neighbour, for either construction.
-- Invariant: mutual_nicdm_table leaves as many components as the union graph on the same distance has.
+- Invariant: mutual_nicdm_table is connected: whatever the k-nearest lists leave apart is joined by nearest pairs.
 - Invariant: with activity 1 everywhere a ResistiveMetric is the shortest path of its base table, for either conductance.
 - Invariant: a harmonic edge conducts between the smaller activity of its ends and twice that.
 - Invariant: a jump edge conducts 1 where its ends are equally active and less the larger the jump.
@@ -142,10 +142,13 @@ def mutual_nicdm_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch
     grows. On d' only mutual pairs are linked - a hub can no longer collect the lists of hundreds. The
     components that leaves are joined along the minimum spanning tree of the union graph on d', one edge
     per join, shortest first (Dalmia & Sia 2021) - repairing on the raw d would hang them on the hubs
-    again (Flexer & Stevens 2018). Edge lengths are d'.
+    again (Flexer & Stevens 2018). What even the union on d' leaves apart (E001's masks: 32 pieces) is
+    joined by Boruvka rounds - every component takes its nearest pair outside it on d' - until one
+    component is left. Edge lengths are d'.
     """
     n = metric.n_blocks
-    heads, tails, lengths = _directed(*nearest(metric, k, scale=nicdm_scale(metric, k)))
+    scale = nicdm_scale(metric, k)
+    heads, tails, lengths = _directed(*nearest(metric, k, scale=scale))
     h, t, w = heads.cpu().numpy(), tails.cpu().numpy(), lengths.cpu().numpy()
     mutual = np.isin(h * n + t, t * n + h)
     _, parts = connected_components(coo_matrix((np.ones(mutual.sum()), (h[mutual], t[mutual])), shape=(n, n)), directed=False)
@@ -168,12 +171,41 @@ def mutual_nicdm_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch
             joins.append(e)
     ja, jb = tree.row[joins], tree.col[joins]
     jw = tree.data[joins] - EPS
-    ea = np.concatenate([h[mutual], ja, jb])
-    eb = np.concatenate([t[mutual], jb, ja])
-    ew = np.concatenate([w[mutual], jw, jw])
+    ba, bb, bw = _join_apart(metric, scale, np.concatenate([h[mutual], ja]), np.concatenate([t[mutual], jb]))
+    ea = np.concatenate([h[mutual], ja, jb, ba, bb])
+    eb = np.concatenate([t[mutual], jb, ja, bb, ba])
+    ew = np.concatenate([w[mutual], jw, jw, bw, bw])
     device = lengths.device
     as_tensor = lambda x, dtype: torch.as_tensor(x, dtype=dtype, device=device)  # noqa: E731
     return _padded(as_tensor(ea, torch.long), as_tensor(eb, torch.long), as_tensor(ew, torch.float32), n)
+
+
+def _join_apart(metric: BlockMetric, scale: torch.Tensor, heads: np.ndarray, tails: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Edges that join a graph's components (Boruvka): every component but the largest takes its nearest outside pair on d'."""
+    n = metric.n_blocks
+    device = scale.device
+    ea, eb, ew = [], [], []
+    while True:
+        graph = coo_matrix((np.ones(len(heads) + len(ea)), (np.concatenate([heads, ea]).astype(np.int64),
+                                                             np.concatenate([tails, eb]).astype(np.int64))), shape=(n, n))
+        n_parts, parts = connected_components(graph, directed=False)
+        if n_parts == 1:
+            return np.asarray(ea, dtype=np.int64), np.asarray(eb, dtype=np.int64), np.asarray(ew, dtype=np.float64)
+        largest = np.bincount(parts).argmax()
+        labels = torch.as_tensor(parts, device=device)
+        best: dict[int, tuple[float, int, int]] = {}
+        for rows in torch.as_tensor(np.flatnonzero(parts != largest), device=device).split(ROW_CHUNK):
+            d = metric.distances(rows) / torch.sqrt(scale[rows, None] * scale[None]).clamp_min(EPS)
+            d[labels[rows][:, None] == labels[None]] = torch.inf  # only pairs outside a block's own component
+            value, target = d.min(dim=1)
+            for r, v, t_ in zip(rows.tolist(), value.tolist(), target.tolist()):
+                part = int(parts[r])
+                if v < best.get(part, (np.inf, -1, -1))[0]:
+                    best[part] = (v, r, t_)
+        for v, r, t_ in best.values():
+            ea.append(r)
+            eb.append(t_)
+            ew.append(v)
 
 
 def graph_report(table: torch.Tensor | np.ndarray, indices: torch.Tensor | np.ndarray | None = None) -> dict:

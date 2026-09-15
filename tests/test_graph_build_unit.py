@@ -46,6 +46,18 @@ def test_the_block_at_the_mean_profile_is_a_hub_of_the_union_and_not_of_the_mutu
     assert int((mutual[hub] != PAD).sum()) <= 8 + 2  # its own mutual pairs and at most a join or two
 
 
+def test_a_cluster_no_list_reaches_is_joined_by_its_nearest_pair():
+    rng = np.random.default_rng(40)  # not the seed of hub_masks: its first draw is the shared factor itself
+    masks = hub_masks(questions=400, seed=4)  # 400 questions: sample correlations near 0 stay under the 0.36 of the rest
+    island = rng.standard_normal((masks.shape[0], 1))
+    masks = np.concatenate([masks, island + 0.05 * rng.standard_normal((masks.shape[0], 6))], axis=1)  # 6 blocks alike
+    metric = CoactivationMetric(masks)
+    union = graph_report(neighbour_table(metric, k=4)[0])
+    table, _ = mutual_nicdm_table(metric, k=4)
+    assert union["components"] > 1  # the k-nearest lists alone leave the island apart
+    assert graph_report(table)["components"] == 1
+
+
 def test_the_report_counts_degrees_components_and_the_k_occurrence():
     table = torch.tensor([[1, PAD], [0, 2], [1, PAD], [PAD, PAD]])  # 0 - 1 - 2, and 3 alone
     report = graph_report(table, indices=np.array([[1], [0], [1], [1]]))

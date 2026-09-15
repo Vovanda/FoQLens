@@ -40,9 +40,11 @@ TRAIN_POOL = 2000
 # the examples that happened to be drawn. TriviaQA short-0 EM 0.38 (best 0.40); NQ-open short-0 - the
 # two draws of 2 examples differ by 6 points; SQuAD passage-0 EM 0.49 like the rest; ARC solve-0 -
 # Claude's reading of 16 pairs, 10 right against 8-9 for solve-brief; HotpotQA justify EM 0.49, where
-# justify-terse leaves out its answer line.
+# justify-terse leaves out its answer line. ARC-Easy solve-brief (2026-09-15): the four setups judged
+# right 0.84-0.90 on 50 questions, a tie; of the two without examples solve-0 ran out of tokens before
+# its answer line on 12%, solve-brief never did.
 FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passage-0",
-                 "arc_challenge_closed": "solve-0", "hotpotqa": "justify"}
+                 "arc_challenge_closed": "solve-0", "arc_easy_closed": "solve-brief", "hotpotqa": "justify"}
 # static: the static cache with every step a CUDA graph (foqlens.graph_decode); dynamic: the reference loop.
 DECODERS = {"static": STATIC, "dynamic": DYNAMIC}
 
@@ -99,14 +101,17 @@ def main(argv: list[str] | None = None) -> Path:
             rounds_done += 1
             print(progress.step(f"round {k}"), flush=True)
 
+    target = out / f"summary-{args.level}.json"
+    # A corpus answered later joins the corpora answered before: their counts stay in the summary.
+    earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "seed": args.seed, "setups": args.setups, "decoder": args.decoder,
+        "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder,
+        "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "rounds_this_run": rounds_done,
-        "answered": {c: len(written_ids(p)) for c, p in paths.items()},
-        "questions": {c: len(r) for c, r in rows.items()},
+        "answered": {**earlier.get("answered", {}), **{c: len(written_ids(p)) for c, p in paths.items()}},
+        "questions": {**earlier.get("questions", {}), **{c: len(r) for c, r in rows.items()}},
         "gpu": gpu.summary(), "pacer": bench.throttle.stats(),
     }
-    target = out / f"summary-{args.level}.json"
     write_json(target, summary)
     print(f"written {target}", flush=True)
     return target

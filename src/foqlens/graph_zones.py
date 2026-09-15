@@ -53,7 +53,7 @@ def _neighbour_mean(field: np.ndarray, table: np.ndarray) -> np.ndarray:
     return summed / (1 + real.sum(axis=1))
 
 
-def _graph(table: np.ndarray) -> csr_matrix:
+def block_graph(table: np.ndarray) -> csr_matrix:
     heads = np.repeat(np.arange(len(table)), table.shape[1])
     tails = table.ravel()
     keep = tails != PAD
@@ -85,7 +85,7 @@ def find_graph_zones(field: np.ndarray, metric: BlockMetric, table: np.ndarray, 
     tops = np.flatnonzero((smooth >= around) & (smooth > np.quantile(smooth, peak_quantile)))
     tops = tops[np.argsort(-smooth[tops], kind="stable")]
     base = np.median(smooth)
-    graph = _graph(table)
+    graph = block_graph(table)
     claimed = np.zeros(len(smooth), dtype=bool)
     centers, radii = [], []
     for top in tops:

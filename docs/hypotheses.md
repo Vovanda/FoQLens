@@ -24,7 +24,7 @@ The list is a starting point: the hypotheses tested next are stated after the ex
 | H3.4 | The place: own zones beat the same figure carried elsewhere on the map, at the same cost | E014 addendum (after the run); E015's preregistration deleted with the corpus | part of H3 | **not tested** | E014 |
 | H4 | **Main.** A draft read mostly at base precision, then refined with sharper zones, ends better than the same model at native precision - where there are iterations: an agent or a model's reasoning. Full text below | author, 2026-09-12; restated by the author 2026-09-13; a single-pass part of the earlier text fixed in E010's preregistration | main | **not tested** | - |
 | H5 | **Horizon.** A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment. Full text below | author, 2026-09-12; restated by the author 2026-09-13 | horizon | **not tested** | - |
-| H6 | **Additional.** How good asking for a shorter answer and coarsening the weights each are at representing knowledge in compressed form, and below which step coarsening slides into nonsense. Full text below | author, 2026-09-13, from the author's article | additional | **not tested** | - |
+| H6 | **Additional.** How good asking for a shorter answer and coarsening the weights each are at representing knowledge in compressed form, and below which step coarsening slides into nonsense. Full text below | author, 2026-09-13, from the author's article | additional | **not tested** | E016 |
 
 Engineering results that test no hypothesis (for example E006, read depths from one sliced copy) carry no hypothesis id.
 

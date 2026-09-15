@@ -29,6 +29,7 @@ Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `do
 | [E013](E013-regulator-map/_index.md) | The map of the regulator: which settings cost the fewest errors | 2026-09-12 | H3 | reset |
 | [E014](E014-moved-zones/_index.md) | The zones carried elsewhere: the honest control at the same cost | - | H3, H3.4 | reset |
 | E015 | Three topic pairs the bench has not used | 2026-09-13 | H3, H3.4, H4 | deleted |
+| [E016](E016-uniform-quantization/_index.md) | Uniform quantization on the corpus: the share of knowledge each level keeps | 2026-09-15 | H6 | fixed |
 
 ## Numbers in older texts
 

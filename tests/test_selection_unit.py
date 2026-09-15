@@ -4,8 +4,9 @@ from dataclasses import replace
 
 import pytest
 
-from foqlens.io import answers_path, append_answers, read_answers, written_ids
-from foqlens.selection import Answer, FrozenCorpus, Reason, Verdict, split_reasoning, strip_markup, verdict
+from foqlens.io import answers_path, append_answers, append_verdicts, read_answers, read_verdicts, written_ids
+from foqlens.selection import (Answer, ClaudeVerdict, FrozenCorpus, Reading, Reason, Turn, Verdict, split_reasoning,
+                               strip_markup, turn, verdict)
 
 ANSWER = Answer(corpus="triviaqa", id="tc_1", revision="0f7faf33", model="google/gemma-4-E2B-it@3e22461f",
                 level="bf16", prompt="short-0shot", reply="Paris", answer="Paris", reasoning=None,
@@ -80,6 +81,55 @@ def test_a_restart_appends_and_knows_what_is_written(tmp_path):
     append_answers(path, [replace(ANSWER, id="2"), replace(ANSWER, id="3")])
     assert written_ids(path) == {"1", "2", "3"}
     assert [a.id for a in read_answers(path)] == ["1", "2", "3"]
+
+
+def test_a_reply_without_an_answer_and_an_answer_the_passage_lacks_are_unknown_unread():
+    """ARC: a solution cut at the token limit; SQuAD v2: a span given where the passage has no answer."""
+    assert verdict(replace(ANSWER, answer=None, judge_with_reference=0.99)) == (Verdict.UNKNOWN, Reason.NO_ANSWER)
+    spanned = replace(ANSWER, answer="Secondary education", exact_match=0.0, judge_with_reference=0.99)
+    assert verdict(spanned, answerable=False) == (Verdict.UNKNOWN, Reason.UNANSWERABLE)
+    abstained = replace(ANSWER, answer="unanswerable", exact_match=1.0)
+    assert verdict(abstained, answerable=False) == (Verdict.KNOWN, Reason.JUDGES_AGREE)
+    assert turn(spanned, answerable=False) is None and turn(abstained, answerable=False) == Turn.AGREED_YES
+
+
+@pytest.mark.parametrize("em, f1, judge, expected", [
+    (0.0, 0.0, 0.99, Turn.DISAGREE),
+    (1.0, 1.0, 0.01, Turn.DISAGREE),
+    (0.0, 0.8, 0.01, Turn.DOUBTFUL_NO),   # "Gary Johnson" against "Gary Earl Johnson"
+    (0.0, 0.0, 0.2, Turn.DOUBTFUL_NO),    # the judge is not sure of its No
+    (0.0, 0.0, 0.01, Turn.SURE_NO),
+    (1.0, 1.0, 0.99, Turn.AGREED_YES),
+])
+def test_an_answer_waits_in_the_turn_its_judges_leave_it_in(em, f1, judge, expected):
+    assert turn(replace(ANSWER, exact_match=em, f1=f1, judge_with_reference=judge)) == expected
+
+
+def test_every_answer_either_waits_in_one_turn_or_is_decided_unread():
+    for em, judge, reply, answer, answerable in [(1.0, 0.99, "Paris", "Paris", True), (0.0, 0.2, "x", "x", True),
+                                                 (0.0, 0.99, "I don't know", "I don't know", True),
+                                                 (0.0, 0.5, "", None, True), (0.0, 0.99, "x", "x", False)]:
+        a = replace(ANSWER, exact_match=em, judge_with_reference=judge, reply=reply, answer=answer)
+        waits = turn(a, answerable) is not None
+        decided = verdict(a, answerable=answerable)[1] in (Reason.NO_ANSWER, Reason.UNANSWERABLE, Reason.REFUSED)
+        assert waits != decided
+
+
+@pytest.mark.parametrize("reading, known", [(Reading.RIGHT, Verdict.KNOWN), (Reading.OTHER_WORDS, Verdict.KNOWN),
+                                            (Reading.WRONG, Verdict.UNKNOWN), (Reading.NO_ANSWER, Verdict.UNKNOWN)])
+def test_claude_knows_two_ways_of_knowing_and_two_of_not(reading, known):
+    assert ClaudeVerdict("triviaqa", "tc_1", "bf16", reading, "2026-09-15").verdict == known
+
+
+def test_claude_verdicts_survive_their_round_trip_and_a_second_reading_wins(tmp_path):
+    path = answers_path(tmp_path, "bf16", "triviaqa")
+    first = ClaudeVerdict("triviaqa", "tc_1", "bf16", Reading.WRONG, "2026-09-15", "too general")
+    append_verdicts(path, [first, replace(first, id="tc_2", reading=Reading.RIGHT, note="")])
+    append_verdicts(path, [replace(first, reading=Reading.OTHER_WORDS)])
+    read = read_verdicts(path)
+    assert read["tc_1"] == replace(first, reading=Reading.OTHER_WORDS)
+    assert read["tc_2"].reading is Reading.RIGHT
+    assert ClaudeVerdict.from_json(first.to_json()) == first
 
 
 def test_the_frozen_corpus_survives_its_round_trip():

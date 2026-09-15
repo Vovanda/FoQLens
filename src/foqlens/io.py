@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from foqlens.evaluate import Question, mc_prompt
-from foqlens.selection import Answer
+from foqlens.selection import Answer, ClaudeVerdict
 
 
 def read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
@@ -45,3 +45,15 @@ def read_answers(path: Path) -> list[Answer]:
 def written_ids(path: Path) -> set[str]:
     """The questions already answered in this file: a restart skips them."""
     return {a.id for a in read_answers(path)}
+
+
+def append_verdicts(path: Path, verdicts: list[ClaudeVerdict]) -> None:
+    """Claude's readings, laid out like the answers they read: verdicts/<level>/<corpus>.jsonl."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.writelines(json.dumps(v.to_json(), ensure_ascii=False) + "\n" for v in verdicts)
+
+
+def read_verdicts(path: Path) -> dict[str, ClaudeVerdict]:
+    """By question; a question read again keeps its last reading."""
+    return {v.id: v for v in (ClaudeVerdict.from_json(row) for row in read_jsonl(path))} if path.exists() else {}

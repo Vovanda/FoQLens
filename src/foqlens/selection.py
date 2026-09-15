@@ -7,23 +7,28 @@ with, the raw reply and the answer taken from it, and the scores of the two auto
 
 Three judges decide whether the model knows a question (docs/corpus.md): exact match and F1, the
 model itself asked Yes or No against the reference (foqlens.judging), and Claude, who reads the
-answers. Claude's verdict decides wherever it is given; without it a refusal is a question the model
-does not know, and otherwise the two automatic judges decide only where they agree, the rest staying
-open for Claude.
+answers. Claude's verdict decides wherever it is given; without it a reply with no answer, an answer
+to a question the passage does not answer, and a refusal are questions the model does not know, and
+otherwise the two automatic judges decide only where they agree, the rest staying open for Claude.
+
+Claude reads in turns (Volodya 15.09): first where the judges disagree, then the noes the judges are
+not sure of, then the sure noes, and the agreed yeses last - every answer the rule does not decide
+without reading. A reading is one of four: right, right in other words, wrong, no answer.
 
 The selection ends in a FrozenCorpus: the numbers kept and excluded, each with its reason, the
 revisions, the prompts, and the questions spent on choosing the prompt. Every later run reads that
 file; how it was assembled is recorded, not re-derived.
 
 Invariant: a verdict never depends on the order of answers or on which level wrote an answer other than its own line.
-Invariant: an Answer survives a round trip through its JSON line unchanged.
+Invariant: an Answer and a ClaudeVerdict survive a round trip through their JSON lines unchanged.
+Invariant: every answer either waits in exactly one turn or is decided by the rule without reading, never both.
 """
 
 from __future__ import annotations
 
 import re
 from dataclasses import asdict, dataclass, field
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 import numpy as np
 
@@ -34,6 +39,9 @@ TUNING_FLOOR = 50
 # The model judge's probability of Yes above which it says the answer is right. Its verdicts on E2B-it
 # sit at 0 and 1 (tests/test_it_gpu.py), so the threshold is the middle rather than a tuned value.
 JUDGE_YES = 0.5
+# Below this P(Yes) the judge is sure of its No: 55% of TriviaQA's answers and 77% of NQ-open's sit
+# under it, and only 1.5-6.6% of any corpus between it and JUDGE_YES (stage 1, 2026-09-15).
+JUDGE_SURE_NO = 0.05
 # Where a reply writes its reasoning first, the answer follows "Answer:" on a line of its own, whatever
 # markdown the model wraps around it.
 MARKUP = "*_#`"
@@ -49,9 +57,32 @@ class Verdict(StrEnum):
 
 class Reason(StrEnum):
     CLAUDE = "claude"            # Claude read the answer
+    NO_ANSWER = "no_answer"      # the reply gives no answer: a solution that never reached its answer line
+    UNANSWERABLE = "unanswerable"  # the passage has no answer (SQuAD v2) and the model gave one anyway
     REFUSED = "refused"          # the model said it does not know
     JUDGES_AGREE = "judges_agree"
     JUDGES_DISAGREE = "judges_disagree"
+
+
+class Reading(StrEnum):
+    """What Claude reads in an answer: two ways of knowing it, two of not."""
+
+    RIGHT = "right"
+    OTHER_WORDS = "other_words"  # right, but not in the reference's words
+    WRONG = "wrong"
+    NO_ANSWER = "no_answer"      # an evasion, a refusal the heuristic missed, a category instead of the thing
+
+
+KNOWING = frozenset({Reading.RIGHT, Reading.OTHER_WORDS})
+
+
+class Turn(IntEnum):
+    """The order Claude reads in: where the automatic judges settle least, first."""
+
+    DISAGREE = 1     # exact match and the model judge say different things
+    DOUBTFUL_NO = 2  # both say No, but the answer shares words with the reference or the judge is not sure
+    SURE_NO = 3
+    AGREED_YES = 4
 
 
 # A refusal is not an answer, whatever the judges say of it: shown the reference, the model judge said
@@ -120,17 +151,69 @@ def split_reasoning(reply: str) -> tuple[str | None, str | None]:
     return reply.strip() or None, None
 
 
-def verdict(answer: Answer, claude: Verdict | None = None) -> tuple[Verdict, Reason]:
+def decided_unread(answer: Answer, answerable: bool = True) -> Reason | None:
+    """Why the model does not know this question with nothing to read, or None if it waits for a reading.
+
+    Against no reference the exact match is 1 only for the reply that says the passage has no answer.
+    """
+    if not answer.answer:
+        return Reason.NO_ANSWER
+    if not answerable and answer.exact_match != 1.0:
+        return Reason.UNANSWERABLE
+    if is_refusal(answer.reply):
+        return Reason.REFUSED
+    return None
+
+
+def verdict(answer: Answer, claude: Verdict | None = None, answerable: bool = True) -> tuple[Verdict, Reason]:
     """Whether the model knows this question, and which judge said so."""
     if claude is not None:
         return claude, Reason.CLAUDE
-    if is_refusal(answer.reply):
-        return Verdict.UNKNOWN, Reason.REFUSED
+    unread = decided_unread(answer, answerable)
+    if unread is not None:
+        return Verdict.UNKNOWN, unread
     match = answer.exact_match == 1.0
     judged = answer.judge_with_reference > JUDGE_YES
     if match == judged:
         return (Verdict.KNOWN if match else Verdict.UNKNOWN), Reason.JUDGES_AGREE
     return Verdict.OPEN, Reason.JUDGES_DISAGREE
+
+
+def turn(answer: Answer, answerable: bool = True) -> Turn | None:
+    """The turn this answer waits in for Claude's reading, or None where the rule decides it unread."""
+    if decided_unread(answer, answerable) is not None:
+        return None
+    match = answer.exact_match == 1.0
+    if match != (answer.judge_with_reference > JUDGE_YES):
+        return Turn.DISAGREE
+    if match:
+        return Turn.AGREED_YES
+    if answer.f1 > 0 or answer.judge_with_reference >= JUDGE_SURE_NO:
+        return Turn.DOUBTFUL_NO
+    return Turn.SURE_NO
+
+
+@dataclass(frozen=True)
+class ClaudeVerdict:
+    """Claude's reading of one answer: a line of verdicts/<level>/<corpus>.jsonl."""
+
+    corpus: str
+    id: str
+    level: str      # the level of the answer it reads
+    reading: Reading
+    date: str       # the day it was read, ISO
+    note: str = ""  # why, where the reading is not obvious
+
+    @property
+    def verdict(self) -> Verdict:
+        return Verdict.KNOWN if self.reading in KNOWING else Verdict.UNKNOWN
+
+    def to_json(self) -> dict:
+        return {**asdict(self), "reading": str(self.reading)}
+
+    @classmethod
+    def from_json(cls, row: dict) -> ClaudeVerdict:
+        return cls(**{**row, "reading": Reading(row["reading"])})
 
 
 @dataclass(frozen=True)

@@ -4,7 +4,7 @@
 
 FoQLens is a model whose precision regulator reads the weights through a quantization filter that sharpens the query's expert zones; MoE is a special case of it. This repository is the R&D bench inside FoQLens that tests the idea: weight precision is allocated by the meaning of the query, expert zones emerge instead of being set by a router. The problem statement and the plan are in `docs/`, the main preregistration in `prereg/`, and every experiment in `experiments/E0NN-slug/` - its preregistration `PREREG.md`, a card (`_index.md`, YAML front matter for Hugo: dates, commits, hypotheses, status, verdict) and `results.md` - with its raw summaries in `runs/E0NN-slug/`. A new experiment is opened with the project skill `new-experiment` (`.claude/skills/new-experiment/`) and takes the next id - ids are never reused; hypotheses are tracked in `docs/hypotheses.md`.
 
-Everything in the repository is written in English: docs, code comments, test messages, commit messages.
+Everything in the repository is written in English: docs, code comments, test messages, commit messages. Documents are also kept in Russian beside the English ones, `name.ru.md` next to `name.md`, changed in the same commit, so that they are read and reviewed without a translation (Volodya 2026-09-16); English stays the project's language, except the preregistration, whose Russian original is binding.
 
 ## Bench discipline (do not break)
 

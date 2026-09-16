@@ -1,0 +1,44 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "run": "2026-09-16T16-43-38",
+  "commit": "b0d5d7c",
+  "level": "bf16",
+  "corpus": "nq_open",
+  "answers": "runs\\E016-uniform-quantization\\e2b-it\\answers\\bf16\\nq_open.jsonl",
+  "rows": [
+    58,
+    212,
+    746,
+    750
+  ],
+  "ids": [
+    "258",
+    "932",
+    "3280",
+    "3301"
+  ],
+  "attention": "split",
+  "frozen": "corpus\\e2b-it",
+  "judged": 4,
+  "gpu": {
+    "samples": 8,
+    "started": "2026-09-16T16:43",
+    "wall_s": 8.5135338306427,
+    "utilization_mean": 87.5,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 11309.0,
+    "temperature_mean_c": 56.875,
+    "temperature_peak_c": 58.0,
+    "power_mean_w": 212.81125,
+    "power_peak_w": 244.89,
+    "memory_allocated_peak_mib": 9362.0927734375
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 54.0,
+    "thermal_pause_s": 0.0
+  }
+}

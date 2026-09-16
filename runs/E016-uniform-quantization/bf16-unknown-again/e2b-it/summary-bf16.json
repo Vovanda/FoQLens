@@ -1,0 +1,57 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "level": "bf16",
+  "seed": 0,
+  "decoder": "static",
+  "attention": "split",
+  "prefill_tokens": 16384,
+  "setups": {
+    "triviaqa": "short-0",
+    "nq_open": "short-0",
+    "squad_v2": "passage-0",
+    "arc_challenge_closed": "solve-0",
+    "arc_easy_closed": "solve-brief",
+    "hotpotqa": "justify"
+  },
+  "tuning": null,
+  "frozen": "corpus\\e2b-it",
+  "rounds_this_run": 20,
+  "written_to": "answers",
+  "answered": {
+    "triviaqa": 457,
+    "nq_open": 90,
+    "squad_v2": 680,
+    "arc_challenge_closed": 58,
+    "arc_easy_closed": 151,
+    "hotpotqa": 628
+  },
+  "questions": {
+    "triviaqa": 457,
+    "nq_open": 90,
+    "squad_v2": 680,
+    "arc_challenge_closed": 58,
+    "arc_easy_closed": 151,
+    "hotpotqa": 628
+  },
+  "gpu": {
+    "samples": 1070,
+    "started": "2026-09-16T18:47",
+    "wall_s": 1156.9424045085907,
+    "utilization_mean": 78.39906542056075,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 19312.0,
+    "temperature_mean_c": 59.44953271028037,
+    "temperature_peak_c": 66.0,
+    "power_mean_w": 255.33612149532712,
+    "power_peak_w": 399.91,
+    "memory_allocated_peak_mib": 16726.19091796875
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 61.0,
+    "thermal_pause_s": 0.0
+  }
+}

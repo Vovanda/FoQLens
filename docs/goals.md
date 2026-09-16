@@ -4,7 +4,7 @@ The goals of FoQLens and the roadmap of the bench. Details, measurements and rea
 
 ## Main goal
 
-**A precision regulator: the precision of the weights set by the meaning of the query - a coarse reading gives the structure of things, a sharp one the details - and adapted to the machine and to the value of the query.** It sets how finely the model works right now - not an optimizer on top of the system but its constant state, made up of three inputs: the difficulty of the task, the resources of the machine (load, heat, memory) and the value of the query. The idea and its background are in the author's article [«Квантование - всё, что вам нужно»](https://sawking.tech/blog/kvantovaniie-vsio-chto-vam-nuzhno).
+**A precision regulator: the precision of the weights set by the meaning of the query - a coarse reading gives the structure of things, a sharp one the details - and adapted to the machine and to the value of the query.** It sets how finely the model works right now - its constant state, made up of three inputs: the difficulty of the task, the resources of the machine (load, heat, memory) and the value of the query. The idea and its background are in the author's article [«Квантование - всё, что вам нужно»](https://sawking.tech/blog/kvantovaniie-vsio-chto-vam-nuzhno).
 
 Mixture of Experts is a special case of it: experts are zones with hard edges fixed at training, the rest not computed, a router choosing which. The regulator makes the same thing continuous - the zones emerge from the query, their edges fall off smoothly, and how sharp they are follows the context and the machine. The rest of the weights is read coarsely or, at a ZERO base, not loaded at all - the topology of MoE, with the zones chosen by the query. One set of weights then serves every device and every load, lean where little is needed and at full precision where the query needs it.
 
@@ -25,17 +25,18 @@ The input from the machine (a governor that lowers precision under load or heat)
 In order of work; items 3 and 4 ran in parallel. Each hypothesis is tested at its step.
 
 1. **The bench: its design and optimization** - done, 2026-09-11 → 2026-09-14, and optimized as it goes. One stored copy of the
-   weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), each block able to store only
-   the depth it is read to; a decoding step is one CUDA graph over a static cache. A kernel that reads
-   only the bits it needs is written and tested, not yet wired into decoding.
+   weights read at 2 / 4 / 6 / 8 bits - since 2026-09-17 a k-quant base with residual slices over it
+   ([E017](../experiments/E017-uniform-quantization-floor/results.md)); a decoding step is one CUDA graph over a
+   static cache. A kernel that reads only the bits it needs is written for the former slice format, not yet wired
+   into decoding.
 2. **A corpus of what the model knows** - done, 2026-09-13 → 2026-09-15. Selected by the model's own answers in three regimes
-   and frozen: 18,576 questions E2B-it knows and 16,811 it does not; 2,064 of those, drawn at random, are in
-   the set, marked ([corpus.md](corpus.md)).
-3. **Uniform quantization on the corpus** - done, 2026-09-15 → 2026-09-16. The answers at D8, D6, D4 and D2, judged by the
+   and frozen: 20,640 questions - 18,576 E2B-it knows and 2,064 it does not ([corpus.md](corpus.md)).
+3. **Uniform quantization on the corpus** - done, 2026-09-15 → 2026-09-17. The answers at D8, D6, D4 and D2, judged by the
    model at source quality ([invariants.md](invariants.md)): D8 keeps 98.8% of the full model's knowledge,
-   D6 96.6%, D4 85.7%, D2 is garbage ([E016 results](../experiments/E016-uniform-quantization/results.md)).
-   It is the baseline the filter is compared with. On the questions the full model does not know, D4 answers
-   where bf16 refuses - on HotpotQA refusals fall from 12.1% to 4.6% and accepted answers rise from 13.4% to
+   D6 96.8%, D4 91.0%, D2 51.4% ([E017 results](../experiments/E017-uniform-quantization-floor/results.md)).
+   It is the baseline the filter is compared with, from D2. The first measurement, on naive rounding, left D2
+   incoherent ([E016](../experiments/E016-uniform-quantization/results.md)). On the questions the full model does not
+   know, D4 answers where bf16 refuses (E016) - on HotpotQA refusals fall from 12.1% to 4.6% and accepted answers rise from 13.4% to
    25.2%: the premise of [H4](hypotheses.md), a guess can be refined and a refusal cannot, came up on data not
    built to show it.
 4. **The filter: how the zones are built** - now, since 2026-09-15. Grounded variants of the mask and

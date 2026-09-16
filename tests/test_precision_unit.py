@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from foqlens.precision import Controller, MixedPrecisionLinear
+from foqlens.precision import Controller, MixedPrecisionLinear, samples
 from foqlens.quant import N_SLICES, NF4_BLOCKSIZE, SLICE_GROUP, Int8Weight, Level, Nf4Weight, SlicedWeight
 
 pytestmark = pytest.mark.gpu
@@ -232,6 +232,22 @@ def test_per_sample_layouts_reject_a_wrong_batch():
     mixed.set_levels(np.array([[0, 2, 0, 2], [2, 0, 2, 0]], dtype=np.uint8))
     with pytest.raises(ValueError):
         mixed(make_input(batch=3))
+
+
+def test_a_part_of_the_batch_reads_its_own_samples_layouts():
+    linear = make_linear(out_features=200)
+    model = nn.Sequential(MixedPrecisionLinear(linear, block_rows=64))
+    x = make_input(batch=4)
+    layouts = np.array([[0, 0, 0, 0], [2, 0, 2, 0], [1, 2, 0, 2], [0, 1, 1, 0]], dtype=np.uint8)
+    part = slice(1, 3)
+    model[0].set_levels(layouts[part])
+    alone = model(x[part])
+    model[0].set_levels(layouts)
+    with samples(model, part):
+        assert torch.equal(model(x[part]), alone)
+        with pytest.raises(ValueError):
+            model(x)
+    assert model(x).shape[0] == 4
 
 
 def test_last_block_may_be_partial():

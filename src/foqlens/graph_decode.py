@@ -38,7 +38,8 @@ Invariant: memory does not grow from batch to batch - every capture runs on one 
 Invariant: the prefill runs on the prefill kernels of the decoder's attention plan and every step, eager or
 captured, on its decode kernels (foqlens.attention; tests/test_padded_batch_gpu.py).
 Invariant (approximate, bf16): a prefill in chunks of rows opens every row as one pass does, up to bf16's batch
-noise, and peaks no higher (tests/test_padded_batch_gpu.py).
+noise, and peaks no higher (tests/test_padded_batch_gpu.py); under per-sample layouts every chunk reads its own
+samples' layouts (tests/test_graph_decode_gpu.py, the mixed-samples cases).
 """
 
 from __future__ import annotations
@@ -52,6 +53,7 @@ from transformers import Cache, StaticLayer
 
 from foqlens.attention import MATH_ONLY, AttentionPlan
 from foqlens.generation import STOP_CHECK_EVERY, ends_after, mask_positions
+from foqlens.precision import samples
 
 FULL, SLIDING = "full_attention", "sliding_attention"
 # Prompt tokens, padding included, that one prefill pass holds. The math prefill (#14) of a batch filled to
@@ -125,8 +127,9 @@ class StaticRun:
             part = slice(start, start + rows)
             # one chunk reads straight into the run's cache; several read into their own and are copied in
             cache = self.cache if rows >= batch else Cache(layers=[StaticLayer(length) for _ in range(layers)])
-            out = model(input_ids=input_ids[part], attention_mask={k: m[part] for k, m in masks.items()},
-                        position_ids=positions[part], past_key_values=cache, use_cache=True, logits_to_keep=1)
+            with samples(model, part):  # per-sample layouts are the whole batch's; a chunk reads its own rows of them
+                out = model(input_ids=input_ids[part], attention_mask={k: m[part] for k, m in masks.items()},
+                            position_ids=positions[part], past_key_values=cache, use_cache=True, logits_to_keep=1)
             logits.append(out.logits[:, -1])
             if cache is not self.cache:
                 self._copy_rows(cache, part, batch)

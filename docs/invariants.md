@@ -32,7 +32,9 @@ and of the phenomenon: the model, the masks, the layouts.
 - **The judge of every model is the model at its source quality** (bf16): one measure against which
   quantized models are compared with each other and with models that carry a quantization filter on
   different bases. Whatever layout is under test, the same model judges. Tested: the judge's verdicts
-  are the same under a D4 layout as at bf16 (`tests/test_it_gpu.py`).
+  are the same under a D4 layout as at bf16, and garbage as D2 writes it is graded Garbage and never
+  accepted (`tests/test_it_gpu.py`). The judge is held to labelled answers at each level it reads
+  ([corpus](corpus.md)); a base whose answers it has not been held to is labelled before its verdicts count.
 
   Why this measure:
 

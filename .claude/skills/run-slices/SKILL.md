@@ -1,49 +1,49 @@
 ---
 name: run-slices
-description: Ask a run's files a question - answers, verdicts, the frozen corpus - with one DuckDB query over the jsonl where it lies (foqlens.runs). Use before counting anything about a run; never loop over the files in Python.
+description: Ask a run's files a question - answers, the judge's runs and verdicts, Claude's readings, the frozen corpus - with one DuckDB query over the jsonl where it lies (foqlens.runs). Use before counting anything about a run; never loop over the files in Python.
 ---
 
 # run-slices
 
 The files are the source of truth and nothing is copied into a database: DuckDB reads
-`answers/<level>/<corpus>.jsonl` and `verdicts/<level>/<corpus>.jsonl` on the spot (`docs/data.md`,
-`src/foqlens/runs.py`). A slice is one query; a Python loop over the lines is how field names get
-guessed wrong and floats get compared for equality.
+`answers/<level>/<corpus>.jsonl`, the judge's runs `judge/<level>/<corpus>/<run>.jsonl` and
+`verdicts/<level>/<corpus>.jsonl` on the spot (`docs/data.md`, `src/foqlens/runs.py`). A slice is one
+query; a Python loop over the lines is how field names get guessed wrong and floats get compared for equality.
 
 ## The entry point
 
 ```python
 from pathlib import Path
 from foqlens.runs import RunFiles
-from foqlens.selection import JUDGE_YES, KNOWING
 
 run = RunFiles(answers=Path("runs/E016-uniform-quantization/e2b-it/answers"),
-               readings=None, frozen=Path("corpus/e2b-it"))   # readings and frozen are optional
-run.query("select level, count(*) from answers group by level")
+               judged=Path("runs/E016-uniform-quantization/e2b-it/judge"),
+               readings=None, frozen=Path("corpus/e2b-it"))   # judged, readings and frozen are optional
+run.query("select level, count(*) from verdicts group by level")
 run.agreement_with_readings("bf16")   # per corpus: exact match and judge against Claude's readings
 ```
 
-A second run joins as another view on the same connection:
-
-```python
-run.con.execute("create view other as select * from read_json_auto("
-                "'../FoQLens-e016-math-judge/answers/*/*.jsonl', union_by_name=true)")
-```
+The views: `answers` (the answers files), `judged` (every line of every judge run, with `run`), `verdicts`
+(the latest run per level, corpus and question), `readings`, `frozen`. Every answers-like view has
+`accepted`: the verdict whichever judge wrote the line, null where no judge read it.
 
 ## What a row holds
 
-`corpus, id, revision, model, level, prompt, reply, answer, reasoning, exact_match, f1,
-judge_with_reference, judge_without_reference, tokens, stopped, judge_grades`
+`corpus, id, revision, model, level, prompt, reply, answer, reasoning, exact_match, f1, tokens, stopped,
+judge_kind, judge_accepted, judge_reply` - and on lines of the one-token judge (before 2026-09-16)
+`judge_with_reference, judge_without_reference, judge_grades` instead of the three `judge_*` verdict fields.
 
-Three traps, each one already paid for:
+Four traps, each one already paid for:
 
-- **`reply` is what the model wrote**; `answer` is what was extracted from it. Counting "empty answers"
-  on `answer` reports every row as empty.
-- **`judge_*` are probabilities, not verdicts.** Compare decisions - `judge_with_reference > JUDGE_YES` -
-  never the floats themselves: two kernels agree on the verdict and differ in the seventh digit, so raw
-  equality reported 99.7% "flips" where the decisions moved on 0.25%.
-- **`judge_grades` is a list** of the grade probabilities; `stopped` false means the answer ran into the
-  token cap.
+- **`reply` is what the model wrote**; `answer` is what was extracted from it. An ARC or HotpotQA reply
+  without its answer line has an empty `answer` - D2 has it on every such question.
+- **Count verdicts with `accepted`**, never with the fields of one judge: old and new lines read together
+  only through it.
+- **The one-token judge's `judge_*` are probabilities.** Where you must read them, compare decisions -
+  `judge_with_reference > JUDGE_YES` - never the floats: two kernels agree on the verdict and differ in the
+  seventh digit.
+- **`judge_kind = 'N/A'`** is a reply the parser could not read, not a No; a later run usually has it.
+  `stopped` false means the answer ran into the token cap.
 
 ## Recipes
 
@@ -56,14 +56,28 @@ select level, count(*) n, round(avg((not stopped)::int), 3) not_stopped,
 from answers group by level order by level
 ```
 
-Two judge passes over the same answers - how many verdicts actually moved:
+The judge's verdicts on a level, kept questions only, and what is still unread:
 
 ```sql
-select a.level, count(*) n,
-       sum(((a.judge_with_reference > ?) <> (m.judge_with_reference > ?))::int) flips_with_ref,
-       sum(((a.judge_without_reference > ?) <> (m.judge_without_reference > ?))::int) flips_no_ref,
-       round(max(abs(a.judge_with_reference - m.judge_with_reference)), 4) max_gap
-from answers a join other m using (corpus, id, level) group by a.level order by a.level
+select v.level, count(*) n, round(avg(v.accepted::int), 4) accepted,
+       sum((v.judge_kind = 'N/A')::int) not_read, sum((v.judge_kind = 'Garbage')::int) garbage
+from verdicts v join frozen f using (corpus, id) where f.part = 'kept'
+group by v.level order by v.level
+```
+
+Two judges over the same answers - how many decisions moved:
+
+```sql
+select v.level, count(*) n, sum((v.accepted <> a.accepted)::int) moved
+from verdicts v join answers a using (corpus, id, level) group by v.level order by v.level
+```
+
+The lines of an answers file an earlier run left N/A, for `rejudge_answers.py --rows`:
+
+```sql
+with lines as (select id, row_number() over () as line from read_json_auto(?))
+select string_agg(line::varchar, ',' order by line) picked_rows   -- `rows` is a reserved word
+from lines join verdicts v using (id) where v.level = ? and v.corpus = ? and v.judge_kind = 'N/A'
 ```
 
 The collapse signature of issue #14 - whole batches answering with one and the same text:
@@ -72,14 +86,6 @@ The collapse signature of issue #14 - whole batches answering with one and the s
 select level, max(n) largest_group, arg_max(len, n) len_of_that_reply
 from (select level, reply, count(*) n, length(reply) len from answers group by level, reply)
 group by level order by largest_group desc
-```
-
-A level against the frozen corpus, kept questions only:
-
-```sql
-select a.level, f.part, count(*) n, round(avg((a.judge_with_reference > ?)::int), 4) judged_yes
-from answers a join frozen f using (corpus, id) where f.part = 'kept'
-group by a.level, f.part order by a.level
 ```
 
 ## Rules

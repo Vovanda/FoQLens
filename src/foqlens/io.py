@@ -31,6 +31,27 @@ def answers_path(root: Path, level: str, corpus: str) -> Path:
     return root / level / f"{corpus}.jsonl"
 
 
+def judge_run_path(root: Path, level: str, corpus: str, run: str) -> Path:
+    """judge/<level>/<corpus>/<run>.jsonl: one pass of the judge over one answers file; a later pass is a new run."""
+    return root / level / corpus / f"{run}.jsonl"
+
+
+def judge_run_summary_path(root: Path, level: str, corpus: str, run: str) -> Path:
+    return root / level / corpus / f"{run}.summary.json"
+
+
+def parse_rows(spec: str) -> list[int]:
+    """Line numbers of a file, counted from 1: "1-500,812,901-950" -> 1..500, 812, 901..950, in order, each once."""
+    rows: list[int] = []
+    for part in spec.split(","):
+        first, dash, last = part.strip().partition("-")
+        start, stop = int(first), int(last if dash else first)
+        if start < 1 or stop < start:
+            raise ValueError(f"a row range counts from 1 upwards: {part!r}")
+        rows.extend(range(start, stop + 1))
+    return list(dict.fromkeys(rows))
+
+
 def append_answers(path: Path, answers: list[Answer]) -> None:
     """A batch goes to the file as soon as it is written, so a stopped run loses at most the batch in flight."""
     path.parent.mkdir(parents=True, exist_ok=True)

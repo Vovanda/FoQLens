@@ -15,7 +15,7 @@ not shown to it: it is Garbage without a question asked.
 Invariant: the judge never sees who wrote an answer - its question holds the question, the correct answers
 and the answer, and nothing else.
 Invariant: an answer of whitespace alone is Garbage and not accepted, and costs no generation.
-Invariant: a reply without the two closing lines is N/A and not accepted.
+Invariant: a reply without the two closing lines is N/A and not accepted; one the limit cut is asked once more with a larger one.
 Invariant: the judge reads at bf16 whatever layout is under test, and leaves the model at bf16.
 Invariant: one verdict per answer, in the answers' order, whatever order the batches run in.
 """
@@ -24,8 +24,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-
-import numpy as np
 
 from foqlens.extractive import NO_ANSWER
 from foqlens.generation import END_OF_TURN, Decoder, generate_replies
@@ -64,6 +62,10 @@ CLOSING = ("Reason as you need, then end your reply with exactly these two lines
 # The judge's replies on 247 labelled answers ran 9-161 tokens (median 33); the limit leaves room and
 # bounds a batch, which costs its longest reply.
 JUDGE_TOKENS = 200
+# A reply cut by that limit is asked once more with this one: on E016's bf16 answers 63 of 20,640 were cut before
+# their closing lines, mostly ARC and SQuAD where the judge works the answer through (2026-09-16). Few, so a
+# second batch of them costs seconds, where a larger limit for all would slow every batch to its longest reply.
+JUDGE_RETRY_TOKENS = 1024
 # Replies decoded at once: 64 / 128 / 256 judged a level of 20,640 in 25 / 22 / 22 minutes (2026-09-16).
 JUDGE_BATCH = 128
 KIND = re.compile(r"\*\*Kind:\*\*\s*(\w+)")
@@ -127,21 +129,32 @@ class ModelJudge:
     decoder: Decoder = STATIC
     batch_size: int = JUDGE_BATCH
     max_new_tokens: int = JUDGE_TOKENS
+    retry_tokens: int = JUDGE_RETRY_TOKENS
 
     def verdicts(self, questions: list[str], answers: list[str | None], references: list[list[str]]) -> list[Verdict]:
-        """One verdict per answer, in order. Empty answers are Garbage unasked; the rest are asked shortest prompt first."""
+        """One verdict per answer, in order. Empty answers are Garbage unasked; the rest are asked shortest prompt
+        first, and a reply the limit cut before its closing lines is asked once more with the retry limit."""
         out: list[Verdict | None] = [Verdict(GARBAGE, False, "") if is_empty(a) else None for a in answers]
-        asked = [i for i, v in enumerate(out) if v is None]
-        prompts = [judge_prompt(questions[i], answers[i], references[i], self.fmt) for i in asked]
-        order = np.argsort([len(p) for p in prompts], kind="stable")
+        prompts = {i: judge_prompt(q, a, r, self.fmt)
+                   for i, (q, a, r, v) in enumerate(zip(questions, answers, references, out, strict=True)) if v is None}
         self.ctl.set_all(Level.BF16)
+        cut = self._ask(prompts, list(prompts), self.max_new_tokens, out)
+        self._ask(prompts, cut, self.retry_tokens, out)
+        return out
+
+    def _ask(self, prompts: dict[int, str], asked: list[int], max_new_tokens: int, out: list[Verdict | None]) -> list[int]:
+        """The verdicts of the answers `asked`, written into `out`; returns those whose reply the limit cut unread."""
+        order = sorted(asked, key=lambda i: len(prompts[i]))
+        cut = []
         for start in range(0, len(order), self.batch_size):
             chunk = order[start:start + self.batch_size]
-            replies = generate_replies(self.model, self.tokenizer, [prompts[j] for j in chunk], self.max_new_tokens,
+            replies = generate_replies(self.model, self.tokenizer, [prompts[i] for i in chunk], max_new_tokens,
                                        END_OF_TURN, self.decoder)
-            for j, reply in zip(chunk, replies, strict=True):
-                out[asked[j]] = read_verdict(reply.text)
-        return out
+            for i, reply in zip(chunk, replies, strict=True):
+                out[i] = read_verdict(reply.text)
+                if out[i].kind == NOT_READ and not reply.stopped:
+                    cut.append(i)
+        return cut
 
 
 class NotJudged:

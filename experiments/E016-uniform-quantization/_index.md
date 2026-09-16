@@ -8,7 +8,7 @@ params:
   fixed: "cab0c69"
   run: "2026-09-16 - answers 0e08906, the reasoning judge 5b54c9e, bf16 on the unknown share again 5b54c9e"
   results: "5a0c108"
-  verdict: "D8 keeps 98.8%, D6 96.6%, D4 85.7% - losing the facts in the weights first (19.8% against 5.6% with the passage) to wrong answers, not garbage; naive D2 is garbage (99.5%); on the unknown share D4 answers where bf16 refuses and is accepted 6.3 points more"
+  verdict: "D8 keeps 98.8%, D6 96.6%, D4 85.7% - losing the facts in the weights first (19.8% against 5.6% with the passage) to wrong answers (Garbage under 1%); naive D2 is garbage (99.5%); on the unknown share D4 answers where bf16 refuses and is accepted 6.3 points more"
 ---
 
 # E016 - Uniform quantization on the corpus
@@ -23,6 +23,9 @@ areas and the fact-by-fact count stay with H6.
 
 The curve it measures is also the base every test of the quantization filter is compared with: uniform
 quantization at the same memory is what a deployment would otherwise do.
+
+UPD 2026-09-17: the base is now [E017](../E017-uniform-quantization-floor/_index.md) - the same ladder on the bench's
+k-quant copy, where D2 keeps 51.4% and D4 91.0%.
 
 The runs: the answers of every level in `runs/E016-uniform-quantization/e2b-it/answers/`, the verdicts of the
 reasoning judge in `.../e2b-it/judge/` (one run per pass over a file, see [the data](../../docs/data.md)), and

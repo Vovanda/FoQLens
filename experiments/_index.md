@@ -30,6 +30,7 @@ Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `do
 | [E014](E014-moved-zones/_index.md) | The zones carried elsewhere: the honest control at the same cost | - | H3, H3.4 | reset |
 | E015 | Three topic pairs the bench has not used | 2026-09-13 | H3, H3.4, H4 | deleted |
 | [E016](E016-uniform-quantization/_index.md) | Uniform quantization on the corpus: the share of knowledge each level keeps | 2026-09-15 | H6 | fixed |
+| [E017](E017-uniform-quantization-floor/_index.md) | Uniform quantization with a working base precision D2: the k-quant ladder D8-D2, the baseline of the filter | 2026-09-17 | - | done |
 
 ## Numbers in older texts
 

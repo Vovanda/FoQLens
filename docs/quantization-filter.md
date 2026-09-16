@@ -20,7 +20,7 @@ The metaphor of the mechanism - a multi-lens chosen for the query - is in [visua
 
 | Symbol | What it is | E2B |
 | --- | --- | --- |
-| `ℓ_0 < ℓ_1 < … < ℓ_m` | the ladder: the levels a block can be read at, set by the model and its storage; `ℓ_0` = ZERO, nothing read | 0, 2, 4, 6, 8, 16 bits (ZERO, D2, D4, D6, D8, bf16) |
+| `ℓ_0 < ℓ_1 < … < ℓ_m` | the ladder: the levels a block can be read at, set by the model and its storage; `ℓ_0` = ZERO, nothing read | 0, 2, 4, 6, 8 bits (ZERO, D2, D4, D6, D8) |
 | `w_b` | block `b`: its number of weights | |
 | `d(a, b)` | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), hole 1) | today: Euclidean distance on a 2D PCA layout of the co-activation distance `sqrt(2(1 - corr))` ([weight_map.py](../src/foqlens/weight_map.py)) |
 | `c_i`, `r_i` | the query's expert zones: centers and base radii ([where they come from](#where-the-zones-come-from)) | |
@@ -55,25 +55,28 @@ The metaphor of the mechanism - a multi-lens chosen for the query - is in [visua
 
 | Base | g | Ceiling (2) | Profile (3) | Beyond the zone |
 | --- | --- | --- | --- | --- |
-| D4 (`γ = 2`) | 1 | `κ = 5`, bf16 | `bf16:0.33 D8:0.67 D6:1` | D4 |
+| D4 (`γ = 2`) | 1 | `κ = 4`, D8 | `D8:0.5 D6:1` | D4 |
 | D4 | 0.5 | `κ = 3`, D6 | `D6:1` | D4 |
-| D2 (`γ = 1`) | 1 | `κ = 5`, bf16 | `bf16:0.25 D8:0.5 D6:0.75 D4:1` | D2 |
-| ZERO (`γ = 0`) | 1 | `κ = 5`, bf16 | `bf16:0.25 D8:0.5 D6:0.75 D4:1 D2:1.5` | ZERO |
+| D2 (`γ = 1`) | 1 | `κ = 4`, D8 | `D8:0.33 D6:0.67 D4:1` | D2 |
+| ZERO (`γ = 0`) | 1 | `κ = 4`, D8 | `D8:0.33 D6:0.67 D4:1 D2:1.5` | ZERO |
 | ZERO | 0.5 | `κ = 2`, D4 | `D4:1 D2:1.5` | ZERO |
 | any | 0 | `κ = γ` | none | the base everywhere |
 
-**What the names mean.** `D` is depth, counted in slices of the one stored copy, and the number is
-the bits it comes to: the first slice quantizes the weight to 2 bits, the second quantizes what the
-first left with a step four times finer, and so on, so reading the first k slices gives a 2k-bit
-weight (`foqlens.quant.SlicedWeight`, 4 slices on E2B). They are not different quantizers - they are
-how deep the same copy is read.
+**What the names mean.** `D` is depth, counted in 2-bit planes of the one stored copy, and the number
+is the bits it comes to. The copy is a k-quant base after llama.cpp - Q2_K, one plane, or Q4_K, two
+planes for the sensitive module classes - with residual slices over it, each quantizing what the planes
+before it left with a step four times finer (`foqlens.kquant.KSlicedWeight`, E017). They are not
+different quantizers - they are how deep the same copy is read. A module on a Q4_K base reads the same
+at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 
-`bf16` is the top rung, not a yardstick outside the ladder: it is the weight as stored, read without
-slices at all. There is no `D16` because eight slices would come to the same 16 bits the stored
-weight already occupies, while costing an unpacking the stored weight does not need. What is not on
-the ladder and could be - D10 and D12, the fifth and sixth slice - has not been measured.
+`D8` is the top rung. The model holds no bf16 weights: bf16 is the precision of the source model, the
+reference the judge and the retention are measured against. A rung above D8 would take four more slices,
+about 16.6 bits per weight - more than the bf16 weight itself.
 
-No rung is fixed in the rules: every level follows from the ladder and the controls. What E2B needs is configuration of a run, not a rule: uniform D2 by round-to-nearest, without calibration, breaks E2B ([E006](../experiments/E006-read-depths/_index.md)), and calibrating the first slice within this storage was tried and dropped ([reading notes](reading-notes.md)), so D2 serves only as a base to test against and as the ring pushed past a zone edge.
+No rung is fixed in the rules: every level follows from the ladder and the controls. On E2B naive
+round-to-nearest at two bits breaks the model ([E016](../experiments/E016-uniform-quantization/results.md)); the
+k-quant copy keeps 51.4% of bf16's knowledge at D2 ([E017](../experiments/E017-uniform-quantization-floor/results.md)),
+so D2 serves as a base precision and as the ring pushed past a zone edge.
 
 ## Where the zones come from
 
@@ -105,7 +108,7 @@ The norms after each sub-block rescale the rows left - as the MoE block of Gemma
 Each **expert zone** of the query is read above the base ([problem statement](problem-statement.md)): the zones are the peaks of the query's mask on the weight map, their number and base radii come from the query itself.
 
 - **focus_area** sets the size of all zones at once (rule 1): 0 no zones, 1 one zone over the whole map; 0.5 the zones as found.
-- **focus_strength** sets how far the centers rise above the base (rule 2), counted in rungs of the ladder above it: 0 the zone is the base, 1 the top rung. The scale follows the base: at a D4 base it runs D4 … bf16, at ZERO base 0 … bf16.
+- **focus_strength** sets how far the centers rise above the base (rule 2), counted in rungs of the ladder above it: 0 the zone is the base, 1 the top rung. The scale follows the base: at a D4 base it runs D4 … D8, at ZERO base 0 … D8.
 
 Memory is not set in advance: it is the result of the base, the size and the strength of the zones (rule 7).
 

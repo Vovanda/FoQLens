@@ -1,8 +1,10 @@
 # FoQLens
 
-Hi, I'm Vladimir Savkin. I hold master's degrees in mathematical software and in fundamental computer science, and I work as a systems architect - distributed systems, lately with formal verification. FoQLens is my research, and it is a hobby: I am not a professional scientist. That is why the bench keeps me honest - every prediction is committed before the run that tests it. More about me: [CV](https://sawking.tech/cv).
+Hi, I'm Vladimir Savkin. I studied mathematics and programming and hold a master's degree in fundamental computer science and information technology, and I work as a systems architect - distributed systems, lately with formal verification. FoQLens is my research, and it is a hobby: I am not a professional scientist. That is why the bench keeps me honest - every prediction is committed before the run that tests it. More about me: [CV](https://sawking.tech/cv).
 
-**Can a language model spend its precision where the question is, instead of everywhere?**
+**Does a language model need a fixed precision for every question?**
+
+FoQLens raises the precision of the weights only where the question needs it.
 
 **[vovanda.github.io/FoQLens](https://vovanda.github.io/FoQLens/)** - the idea, with the controls of the
 regulator to move: base precision, the size and strength of the zones, how overlaps combine, and what
@@ -56,14 +58,14 @@ The steps, numbered as in the [preregistration](prereg/), are ordered so each on
 
 | Step | Question | Kills the idea if |
 | --- | --- | --- |
-| 0 | Do topics separate in the model's representations at all? | they don't (then the model is too weak, not the idea) |
+| 0 | Do topics separate in the model's representations at all? | they don't (then the model is too weak) |
 | 1 | Are per-block masks similar within a topic and different between topics? Are they concentrated? | masks look the same for every query |
 | 2 | Do related topics (biology-chemistry) share more of their zones than unrelated ones (biology-math)? | no overlap structure |
 | 2+ | Geometry: are masks additive, is there a junction zone, does ablating it break mixed questions only? | - (refining, not load-bearing) |
 | 3 | How much of what the model knows do the query's zones keep, against uniform quantization at the same memory? The other topic's zones and generic importance test the address | the zones keep no more than uniform quantization at the same memory |
 | 7 | In an agent chain of a draft and refinements, does the zone model end better than the same model at native precision and than uniform quantization at the same memory? (the main hypothesis, once the model exists) | - |
 
-All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"), not numbers. The full reasoning is in [`docs/`](docs/).
+All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"). The full reasoning is in [`docs/`](docs/).
 
 ## Status
 
@@ -71,32 +73,35 @@ All predictions were [preregistered](prereg/) in git before each run, as directi
 
 **The corpus of what the model knows is built and frozen:** the full model answered every question of six
 datasets in its own words, with no options anywhere, and a question stays if the answer is right; three
-regimes in it - the answer in a passage, only in the weights, across two passages and a step. It knows
-18,576 questions and does not know 16,811; 2,064 of those, drawn at random, are in the set, marked
+regimes in it - the answer in a passage, only in the weights, across two passages and a step. The corpus has
+20,640 questions: 18,576 the model knows and 2,064 it does not
 ([docs/corpus.md](docs/corpus.md)).
 
 **How the model holds its knowledge under uniform quantization is measured:** D8 keeps 98.8% of what the full
-model knows, D6 96.6%, D4 85.7%, D2 is garbage. Knowledge goes from the weights first: with the answer in the
-passage D4 loses 5.6%, with the answer only in the weights 19.8%. This is the baseline for every test of the
-filter ([E016](experiments/E016-uniform-quantization/results.md)).
+model knows, D6 96.8%, D4 91.0%, D2 51.4%. Knowledge goes from the weights first: with the answer in the
+passage D4 loses 2.5%, with the answer only in the weights 13.0%. This is the baseline for every test of the
+filter ([E017](experiments/E017-uniform-quantization-floor/results.md)). On the first measurement naive rounding made
+D2 incoherent ([E016](experiments/E016-uniform-quantization/results.md)); with the quantization method changed to
+k-quant base precision D2 keeps half of the knowledge, and the filter is tested from D2.
 
 **The premise of the main hypothesis came up on its own.** On the questions the full model does not know, the
-coarser model answers where the precise one refuses: on HotpotQA bf16 says the passages hold no answer in 12.1%
-of them, D4 in 4.6%, and the accepted answers rise from 13.4% to 25.2%. Coarsening adds no knowledge - it removes
-the caution, and the guess is sometimes right. That is what [H4](docs/hypotheses.md) stands on: a draft guess can
+coarser model answers where the precise one refuses: in E016 on HotpotQA bf16 says the passages hold no answer in
+12.1% of them, D4 in 4.6%, and the accepted answers rise from 13.4% to 25.2%. Coarsening removes the caution and adds
+no knowledge, and the guess is sometimes right. That is what [H4](docs/hypotheses.md) stands on: a draft guess can
 be refined, "I don't know" cannot. It came up on data not built to show it; a class of tasks that shows it on
 purpose is an experiment of its own.
 
-**Next, the filter:** a mask that is asked about the answer instead of the text, and the zones built from it.
+**Next, the filter:** a mask that is asked about the model's answer, and the zones built from it.
 
 **The question all of it serves:** does the regulator work - the structure where a coarse reading is enough, the
 details where sharpness is needed, a gain over iterations. Saving memory is a secondary goal, plan B: even without
 a gain in quality the mechanism saves memory at the same usability.
 
-**Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits (residual slices after
-MoBiQuant), with no separate bf16 copy, and each block able to store only the depth it is read to. The slices
-are still unpacked before the multiplication; a kernel that reads only the bits it needs is written and
-tested, and not yet wired into decoding.
+**Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base (Q2_K, Q4_K for the
+sensitive classes) with 2-bit residual slices over it, after MoBiQuant with departures
+([E017](experiments/E017-uniform-quantization-floor/results.md)). The top rung is D8. The copy is still unpacked before
+the multiplication; a CUDA kernel that reads only the bits it needs is written for the former slice format and not
+yet wired into decoding.
 
 ## Reproduce
 
@@ -117,7 +122,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 ## Layout
 
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
-- [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones as an outcome, not an input.
+- [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones come out of it.
 - [`docs/quantization-filter.md`](docs/quantization-filter.md) - the quantization filter and its zones: how precision is laid out over the weights.
 - [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.
@@ -131,7 +136,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/data.md`](docs/data.md) - how the runs are stored and read: JSON Lines files, and DuckDB over them.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:
-  - `model`, `quant`, `precision` - loading, quantizers and residual slices, the per-block precision controller;
+  - `model`, `quant`, `kquant`, `precision` - loading, quantizers, the k-quant copy with residual slices, the per-block precision controller; `gguf_weights` - a published GGUF's weights for comparison;
   - `scoring`, `pipeline` - mask sources (a new score is a new `MaskSource`);
   - `evaluate`, `quality` - quality metrics (a new metric is a new `QualityMetric`) and evaluation;
   - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - from masks to layouts: zone sources, fields and level rules as replaceable parts;

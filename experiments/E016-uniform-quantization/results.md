@@ -8,6 +8,9 @@ over the same questions, 10,000 bootstrap resamples.
 This curve is the baseline every test of the quantization filter is compared with: uniform quantization at
 the same memory is what a deployment would otherwise do.
 
+UPD 2026-09-17: the baseline is now [E017](../E017-uniform-quantization-floor/results.md) - the same ladder on the
+bench's k-quant copy, where D2 keeps 51.4% and D4 91.0%.
+
 ## How much knowledge each level keeps
 
 Retention is the share the judge accepts at a level over the share it accepts at bf16, on the kept questions.
@@ -27,7 +30,7 @@ Retention is the share the judge accepts at a level over the share it accepts at
   5.6%; with the answer only in the weights, the four closed-book corpora pooled, 19.8%; the difference is
   14.3 points [12.9, 15.6]. HotpotQA, two passages and a step, loses 17.4%. The facts go first: TriviaQA and
   NQ-open lose 22-24%.
-- **What D4 loses turns into wrong answers, not garbage.** Correct falls from 86.9% to 74.4% of the answers,
+- **What D4 loses turns into wrong answers.** Correct falls from 86.9% to 74.4% of the answers,
   Wrong rises from 1.9% to 13.0%, Garbage stays under 1%. The model still answers - it names something else.
 - **D2 is nonsense.** 99.5% of its answers are Garbage: random symbols and repeated fragments. It ends a reply
   on its own in 13.9% of the answers against 99.6-99.9% at the other levels and otherwise runs to the limit of

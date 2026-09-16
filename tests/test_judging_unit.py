@@ -63,6 +63,9 @@ def test_the_question_can_carry_nothing_about_who_answered():
     ("Empty.\n**Kind:** Garbage\n**Accepted:** No", "Garbage", False),
     # the reasoning may quote the format: the last lines count
     ("I must end with **Kind:** Garbage|...\nIt names the city.\n**Kind:** Nearly\n**Accepted:** yes", "Nearly", True),
+    # the kind decides, not the judge's own Accepted line
+    ("Close.\n**Kind:** Partial\n**Accepted:** Yes", "Partial", False),
+    ("Right in other words.\n**Kind:** Nearly\n**Accepted:** No", "Nearly", True),
     ("It is right.", NOT_READ, False),
     ("**Kind:** Excellent\n**Accepted:** Yes", NOT_READ, False),
     ("**Kind:** Correct", NOT_READ, False),

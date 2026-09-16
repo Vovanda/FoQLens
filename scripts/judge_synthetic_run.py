@@ -1,27 +1,24 @@
-"""The committed judge on 250 plainly right answers and three degradations of each, graded by Claude beforehand."""
+"""The present judge on 250 plainly right answers and three degradations of each, graded by Claude beforehand."""
 import json
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 import numpy as np
-import torch
 
 sys.stdout.reconfigure(encoding="utf-8")
 from foqlens import corpora
 from foqlens import model as fm
-from foqlens.evaluate import letter_logprobs_batch
+from foqlens.attention import SPLIT
+from foqlens.graph_decode import StaticDecoder
 from foqlens.io import answers_path, read_answers
-from foqlens.judging import GRADES, ModelJudge, judge_prompt
+from foqlens.judging import GRADES, NOT_READ, ModelJudge
 from foqlens.precision import install
-from foqlens.quant import Level
-from foqlens.selection import JUDGE_YES
 
 S = Path(sys.argv[1])
 R = Path("runs/reference/stage1/e2b-it")
 LETTER = {"C": "Correct", "N": "Nearly", "P": "Partial", "R": "Related", "W": "Wrong"}
-ORDER = [word for word, _ in GRADES]
-BATCH = 16
+ORDER = [word for word, _ in GRADES] + [NOT_READ]
 
 sample = json.loads((S / "sample.json").read_text(encoding="utf-8"))
 degraded = json.loads((S / "degraded.json").read_text(encoding="utf-8"))
@@ -38,35 +35,25 @@ for c, ids in sample.items():
 model, tokenizer = fm.load(fm.E2B_IT, attn_implementation="sdpa")
 ctl = install(model)
 fmt = fm.prompt_format(fm.E2B_IT, tokenizer)
-judge = ModelJudge.build(model, tokenizer, ctl, fmt, batch_size=BATCH)
-word_ids = [tokenizer(" " + w, add_special_tokens=False).input_ids[0] for w in ORDER]
+judge = ModelJudge(model, tokenizer, ctl, fmt, StaticDecoder(attention=SPLIT))
+verdicts = judge.verdicts([q for _, _, q, *_ in items], [a for *_, a, _ in items], [r for _, _, _, r, _, _ in items])
 
-with torch.no_grad():
-    p_yes = judge.p_yes([q for _, _, q, *_ in items], [a for *_, a, _ in items], [r for _, _, _, r, _, _ in items])
-    ctl.set_all(Level.BF16)
-    # The reason: the word after the verdict the judge gave, one decoding step on the same prompt.
-    prompts = [judge_prompt(q, a, r, fmt) + (" Yes," if p > JUDGE_YES else " No,")
-               for (_, _, q, r, a, _), p in zip(items, p_yes)]
-    reason = np.concatenate([np.exp(letter_logprobs_batch(model, tokenizer, prompts[s:s + BATCH], word_ids))
-                             for s in range(0, len(prompts), BATCH)])
-
-said = [ORDER[k] for k in reason.argmax(axis=1)]
 table = defaultdict(Counter)
 accepted = defaultdict(list)
-for (c, i, q, r, a, g), p, w in zip(items, p_yes, said):
-    table[g][w] += 1
-    accepted[g].append(p > JUDGE_YES)
-print(f"{len(items)} answers. Rows: Claude's grade; columns: the judge's reason word; last: share the judge accepts")
+for (c, i, q, r, a, g), v in zip(items, verdicts):
+    table[g][v.kind] += 1
+    accepted[g].append(v.accepted)
+print(f"{len(items)} answers. Rows: Claude's grade; columns: the judge's kind of answer; last: share the judge accepts")
 print(f"{'':9} " + " ".join(f"{w:>8}" for w in ORDER) + "   accepted")
 for g in ORDER:
     if accepted[g]:
         print(f"{g:9} " + " ".join(f"{table[g][w]:8}" for w in ORDER) + f"   {np.mean(accepted[g]):.2f}  (n={len(accepted[g])})")
 by_corpus = defaultdict(lambda: defaultdict(list))
-for (c, *_, g), p in zip(items, p_yes):
-    by_corpus[c][g].append(p > JUDGE_YES)
+for (c, *_, g), v in zip(items, verdicts):
+    by_corpus[c][g].append(v.accepted)
 print("\naccepted by corpus: " + " | ".join(ORDER))
 for c, gs in by_corpus.items():
     print(f"  {c:22} " + " ".join(f"{np.mean(gs[g]):5.2f}" if gs[g] else "    -" for g in ORDER))
 (S / "verdicts.json").write_text(json.dumps(
-    [{"corpus": c, "id": i, "answer": a, "claude": g, "p_yes": float(p), "judge": w}
-     for (c, i, q, r, a, g), p, w in zip(items, p_yes, said)], indent=0, ensure_ascii=False), encoding="utf-8")
+    [{"corpus": c, "id": i, "answer": a, "claude": g, "judge": v.kind, "accepted": v.accepted, "reply": v.reply}
+     for (c, i, q, r, a, g), v in zip(items, verdicts)], indent=0, ensure_ascii=False), encoding="utf-8")

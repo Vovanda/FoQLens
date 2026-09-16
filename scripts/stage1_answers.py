@@ -20,7 +20,7 @@ from pathlib import Path
 
 from foqlens import corpora
 from foqlens import model as fm
-from foqlens.answering import JUDGE_BATCH, Asking, level_label
+from foqlens.answering import Asking, level_label
 from foqlens.attention import PLANS, SPLIT
 from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
@@ -85,7 +85,7 @@ def main(argv: list[str] | None = None) -> Path:
     # A quantized level is baked into the weights - one unpacking, the step and the memory of bf16 - and
     # so cannot judge: its answers wait in unjudged/ for the bf16 judge of scripts/rejudge_answers.py.
     if level is Level.BF16:
-        judge = ModelJudge.build(bench.model, tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH, kernels=plan.judge)
+        judge = ModelJudge(bench.model, tokenizer, bench.ctl, fmt, StaticDecoder(attention=plan, prefill_tokens=args.prefill_tokens))
         root = "answers"
     else:
         bench.ctl.bake(level)

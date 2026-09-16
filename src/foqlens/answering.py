@@ -1,4 +1,4 @@
-"""Answering a batch of questions in one setup: what the model writes, the answer taken from it, both automatic judges.
+"""Answering a batch of questions in one setup: what the model writes, the answer taken from it, the automatic judges.
 
 One step shared by every run that collects answers - choosing the prompt, stage 1, stage 2 - so that
 an answer line means the same thing whichever run wrote it. Answers written earlier are read again by
@@ -17,13 +17,13 @@ from foqlens.corpora import Row
 from foqlens.extractive import exact_match, token_f1
 from foqlens.generation import DYNAMIC, Decoder, generate_replies
 from foqlens.gpu_share import FULL, Pacer
+from foqlens.judging import Verdict
 from foqlens.prompt_variants import Variant
 from foqlens.prompting import PromptFormat
 from foqlens.quality import token_batches
 from foqlens.quant import Level
 from foqlens.selection import Answer
 
-JUDGE_BATCH = 64  # the judge is one forward pass per prompt; a larger batch fills the card better than the default 16
 BATCH = 128  # a decoding step costs the same at any batch here: E2B-it answered 3.7 / 7.3 / 14.8 questions a second at 32 / 64 / 128
 # Padded prompt tokens a batch may hold. At 65k (128 prompts of HotpotQA passages) the prefill ran out of
 # the card with 16.2 GiB allocated: the double-wide MLP asked 1.5 GiB for one activation (2026-09-14).
@@ -64,29 +64,31 @@ class Asking:
             written = generate_replies(model, tokenizer, self.prompts(fmt, rows), self.setup.max_new_tokens, self.setup.stop,
                                        decoder)
         parts = [self.setup.extract(w.text) for w in written]
-        judged = judge_answers(judge, rows, [a for _, a in parts], pacer)
-        return [Answer(self.corpus, r.id, self.revision, self.model, level_label(self.level), self.setup.name,
-                       w.text, a, reasoning, exact_match(a, list(r.answers)), token_f1(a, list(r.answers)),
-                       yes, no_ref, w.tokens, w.stopped, grades)
-                for r, w, (reasoning, a), (yes, no_ref, grades) in zip(rows, written, parts, judged, strict=True)]
+        verdicts = judge_answers(judge, rows, [a for _, a in parts], pacer)
+        return [with_verdict(Answer(corpus=self.corpus, id=r.id, revision=self.revision, model=self.model,
+                                    level=level_label(self.level), prompt=self.setup.name, reply=w.text, answer=a,
+                                    reasoning=reasoning, exact_match=exact_match(a, list(r.answers)),
+                                    f1=token_f1(a, list(r.answers)), tokens=w.tokens, stopped=w.stopped), v)
+                for r, w, (reasoning, a), v in zip(rows, written, parts, verdicts, strict=True)]
 
 
-def judge_answers(judge, rows: list[Row], answers: list[str | None],
-                  pacer: Pacer = FULL) -> list[tuple[float, float, tuple[float, ...]]]:
-    """Each answer's P(Yes) with the references and without, and the kinds of answer after the first verdict."""
-    questions, references = [r.question for r in rows], [list(r.answers) for r in rows]
+def judge_answers(judge, rows: list[Row], answers: list[str | None], pacer: Pacer = FULL) -> list[Verdict | None]:
+    """The judge's verdict on each answer against its question's references; None where the judge cannot judge."""
     with pacer.batch():
-        with_ref = judge.p_yes(questions, answers, references)
-        without_ref = judge.p_yes(questions, answers, None)
-        grades = judge.grades(questions, answers, references, with_ref)
-    return [(float(yes), float(no_ref), tuple(float(g) for g in kinds))
-            for yes, no_ref, kinds in zip(with_ref, without_ref, grades, strict=True)]
+        return judge.verdicts([r.question for r in rows], answers, [list(r.answers) for r in rows])
+
+
+def with_verdict(answer: Answer, verdict: Verdict | None) -> Answer:
+    """The answer carrying this verdict and no other: the one-token judge's fields are cleared."""
+    if verdict is None:
+        return replace(answer, judge_kind=None, judge_accepted=None, judge_reply=None)
+    return replace(answer, judge_kind=verdict.kind, judge_accepted=verdict.accepted, judge_reply=verdict.reply,
+                   judge_with_reference=float("nan"), judge_without_reference=float("nan"), judge_grades=())
 
 
 def rejudge(judge, answers: list[Answer], rows: list[Row], pacer: Pacer = FULL) -> list[Answer]:
     """Answers written earlier, read again by the present judge; `rows` are their questions, in the same order."""
     if [a.id for a in answers] != [r.id for r in rows]:
         raise ValueError("each answer is rejudged against its own question")
-    judged = judge_answers(judge, rows, [a.answer for a in answers], pacer)
-    return [replace(a, judge_with_reference=yes, judge_without_reference=no_ref, judge_grades=grades)
-            for a, (yes, no_ref, grades) in zip(answers, judged, strict=True)]
+    verdicts = judge_answers(judge, rows, [a.answer for a in answers], pacer)
+    return [with_verdict(a, v) for a, v in zip(answers, verdicts, strict=True)]

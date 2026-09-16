@@ -1,5 +1,6 @@
 """One batch answered in one setup: written at its level, judged at bf16, one answer line per question in order."""
 
+import math
 from dataclasses import replace
 
 import pytest
@@ -8,6 +9,7 @@ from foqlens import answering
 from foqlens.answering import Asking, level_label, rejudge
 from foqlens.corpora import Row
 from foqlens.generation import Reply
+from foqlens.judging import NotJudged, Verdict
 from foqlens.prompt_variants import SETUPS, setup_named
 from foqlens.prompting import PLAIN
 from foqlens.quant import Level
@@ -27,16 +29,9 @@ class Judge:
     def __init__(self, log):
         self.log = log
 
-    def p_yes(self, questions, answers, references):
-        self.log.append(("judge", references is not None))
-        return [0.9 if a == "Paris" else 0.2 for a in answers]
-
-    def grades(self, questions, answers, references, p_yes):
-        self.log.append(("grades", list(p_yes)))
-        return [KINDS] * len(answers)
-
-
-KINDS = (0.6, 0.2, 0.1, 0.05, 0.05)
+    def verdicts(self, questions, answers, references):
+        self.log.append(("judge", list(answers), references))
+        return [Verdict("Correct", True, "right") if a == "Paris" else Verdict("Wrong", False, "wrong") for a in answers]
 
 
 @pytest.fixture
@@ -52,24 +47,35 @@ def run(monkeypatch):
     return log
 
 
-def test_a_batch_is_written_at_its_level_then_judged_with_the_reference_and_without(run):
+def test_a_batch_is_written_at_its_level_then_judged_against_the_references(run):
     asking = Asking("arc_challenge_closed", "rev", "m@1", Level.D4, setup_named("arc_challenge_closed", "solve-0"))
     answers = asking.answer(None, None, Controller(run), PLAIN, Judge(run), ROWS)
-    assert run == [("level", Level.D4), ("generate", 2, asking.setup.max_new_tokens), ("judge", True), ("judge", False),
-                   ("grades", [0.9, 0.2])]  # the kinds follow the verdicts shown the reference
-    assert [a.id for a in answers] == ["1", "2"] and answers[0].judge_grades == KINDS
+    assert run == [("level", Level.D4), ("generate", 2, asking.setup.max_new_tokens),
+                   ("judge", ["Paris", "Marlowe"], [["Paris"], ["William Shakespeare", "Shakespeare"]])]
+    assert [a.id for a in answers] == ["1", "2"]
+    assert (answers[0].judge_kind, answers[0].judge_accepted, answers[0].judge_reply) == ("Correct", True, "right")
     assert answers[1].reasoning == "It was Marlowe." and answers[1].answer == "Marlowe"
-    assert (answers[1].exact_match, answers[1].judge_with_reference, answers[1].stopped) == (0.0, 0.2, False)
+    assert (answers[1].exact_match, answers[1].accepted, answers[1].stopped) == (0.0, False, False)
     assert (answers[0].exact_match, answers[0].f1, answers[0].level, answers[0].prompt) == (1.0, 1.0, "d4", "solve-0")
 
 
-def test_rejudging_changes_only_the_judges_fields(run):
+def test_a_model_that_cannot_judge_writes_its_answers_without_a_verdict(run):
+    asking = Asking("triviaqa", "rev", "m@1", Level.D2, setup_named("triviaqa", "short-0"))
+    answers = asking.answer(None, None, Controller(run), PLAIN, NotJudged(), ROWS)
+    assert all(a.judge_kind is None and a.judge_accepted is None and a.judge_reply is None for a in answers)
+
+
+def test_rejudging_changes_only_the_judges_fields_and_drops_the_one_token_judges(run):
     asking = Asking("arc_challenge_closed", "rev", "m@1", Level.BF16, setup_named("arc_challenge_closed", "solve-0"))
-    earlier = [replace(a, judge_with_reference=0.5, judge_without_reference=0.5, judge_grades=())
+    earlier = [replace(a, judge_kind=None, judge_accepted=None, judge_reply=None, judge_with_reference=0.5,
+                       judge_without_reference=0.5, judge_grades=(0.2,) * 5)
                for a in asking.answer(None, None, Controller(run), PLAIN, Judge(run), ROWS)]
     again = rejudge(Judge(run), earlier, ROWS)
-    assert [(a.judge_with_reference, a.judge_grades) for a in again] == [(0.9, KINDS), (0.2, KINDS)]
-    assert [replace(a, judge_with_reference=0.5, judge_without_reference=0.5, judge_grades=()) for a in again] == earlier
+    assert [(a.judge_kind, a.judge_accepted) for a in again] == [("Correct", True), ("Wrong", False)]
+    assert all(math.isnan(a.judge_with_reference) and a.judge_grades == () for a in again)
+    unchanged = [replace(a, judge_kind=None, judge_accepted=None, judge_reply=None, judge_with_reference=0.5,
+                         judge_without_reference=0.5, judge_grades=(0.2,) * 5) for a in again]
+    assert unchanged == earlier
     with pytest.raises(ValueError):
         rejudge(Judge(run), earlier, ROWS[::-1])
 

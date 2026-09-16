@@ -13,8 +13,9 @@ from foqlens.prompting import ASSISTANT, USER
 from foqlens.selection import Answer, split_reasoning, tuning_sample
 
 TRAIN = [Row(f"t{i}", f"train question {i}?", (f"answer {i}",)) for i in range(20)]
-ANSWER = Answer("triviaqa", "1", "rev", "m", "bf16", "short-0", "Paris", "Paris", None,
-                1.0, 1.0, 0.99, 0.9, 2, True)
+ANSWER = Answer(corpus="triviaqa", id="1", revision="rev", model="m", level="bf16", prompt="short-0", reply="Paris",
+                answer="Paris", reasoning=None, exact_match=1.0, f1=1.0, tokens=2, stopped=True,
+                judge_kind="Correct", judge_accepted=True, judge_reply="**Kind:** Correct\n**Accepted:** Yes")
 
 
 def test_every_corpus_has_setups_and_every_setup_a_unique_name():
@@ -89,7 +90,7 @@ def test_a_refusal_is_told_from_an_answer(text, refused):
 
 
 def test_a_setup_summary_counts_what_the_judges_said():
-    rows = [ANSWER, replace(ANSWER, id="2", exact_match=0.0, f1=0.5, judge_with_reference=0.1,
+    rows = [ANSWER, replace(ANSWER, id="2", exact_match=0.0, f1=0.5, judge_kind="Wrong", judge_accepted=False,
                             reply="I do not know", stopped=False, tokens=6)]
     s = setup_summary(rows)
     assert (s["exact_match"], s["f1"], s["judged_right"], s["refusals"], s["stopped"], s["tokens"]) == \
@@ -98,5 +99,5 @@ def test_a_setup_summary_counts_what_the_judges_said():
 
 def test_agreement_is_the_share_of_questions_every_setup_judges_alike():
     rows = [ANSWER, replace(ANSWER, prompt="bare"),
-            replace(ANSWER, id="2"), replace(ANSWER, id="2", prompt="bare", judge_with_reference=0.1)]
+            replace(ANSWER, id="2"), replace(ANSWER, id="2", prompt="bare", judge_kind="Wrong", judge_accepted=False)]
     assert agreement(rows) == 0.5

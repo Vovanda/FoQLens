@@ -130,15 +130,17 @@ from the least settled to the most:
   grade is not, and the ladder works as a reserve.
 
 **The judge after stage 1 (2026-09-16).** The one-token judge above could not tell an answer from
-garbage. On E016's D2 answers - empty, random symbols, repeated fragments - it said Yes to 61% of the
-empty ones, and on 124 labelled answers it accepted 45-85% of the garbage under every prompt tried,
-grading most of it Correct. The judge that replaced it:
+garbage. On the D2 answers of [E016](../experiments/E016-uniform-quantization/_index.md) - empty, random
+symbols, repeated fragments - it said Yes to 61% of the empty ones, and on 124 labelled answers it
+accepted 45-85% of the garbage under every prompt tried, grading most of it Correct. The judge that
+replaced it:
 
 - reasons as it needs and ends its reply with two lines, `**Kind:**` and `**Accepted:**`; only those two
   are read, and a reply without them is N/A and is not accepted. Its own markdown held it best: it let 4%
   of wrong answers through, against 18% when asked for JSON;
 - grades from the general to the particular: Garbage (not readable text), Noise (readable, but not an
-  answer to this question), Wrong, Related, Partial, Nearly, Correct; an answer counts from Nearly;
+  answer to this question), Wrong, Related, Partial, Nearly, Correct; an answer counts from Nearly, and
+  the kind decides - the judge's own Accepted line contradicted its kind on 0.9% of E016's verdicts;
 - sees the answer between `---` fences: unfenced, an empty answer was followed by the instructions, and
   the judge took them for the answer;
 - is not asked about an answer of whitespace alone: that is Garbage;
@@ -146,9 +148,25 @@ grading most of it Correct. The judge that replaced it:
   63 of E016's 20,640 bf16 answers, mostly ARC and SQuAD, where it works the answer through.
 
 On 123 answers labelled blind and held out from choosing the prompt: garbage accepted 1 of 48, wrong 3 of
-24, right 43 of 51. By level on all 247 labelled answers: bf16 right 52 of 64 and wrong 3 of 20; D4 right
-43 of 50 and wrong 1 of 32; D2 garbage 2 of 79. D8 and D6 are being labelled. A level of 20,640 answers
-takes 22 minutes. Every pass of the judge over a file is a run of its own ([data](data.md)).
+24, right 41 of 51. By level, on 480 answers labelled blind:
+
+| Level | Right accepted | Wrong accepted | Garbage accepted |
+| --- | --- | --- | --- |
+| bf16 | 50 of 64 | 3 of 20 | - |
+| D8 | 64 of 80 | 6 of 22 | - |
+| D6 | 48 of 67 | 6 of 34 | 0 of 1 |
+| D4 | 42 of 50 | 1 of 32 | 0 of 2 |
+| D2 | - | - | 2 of 92 |
+
+The wrong answers of D8 and D6 were drawn where the answer shares no words with the reference, where
+wrong answers gather, so their share overstates the level's. The judge's weakness is a neighbouring
+thing named instead of the one asked - "Northridge" for Los Angeles, "Ryerson University" asked where.
+On the discordant questions of E016, those whose verdict at a level differs from bf16's, Claude's reading
+agrees with the judge's direction on 83 of 100 at D4, 77 at D6 and 63 at D8: at D8 a third of the discord
+is the judge grading near-identical answers differently, in both directions.
+
+A level of 20,640 answers takes 22 minutes. Every pass of the judge over a file is a run of its own
+([data](data.md)).
 
 ## Candidates, measured
 

@@ -3,12 +3,12 @@ title: "E016 - Uniform quantization on the corpus"
 date: 2026-09-15
 weight: 16
 hypotheses: [H6]
-statuses: [fixed]
+statuses: [done]
 params:
   fixed: "cab0c69"
   run: "2026-09-16 - answers 0e08906, the reasoning judge 5b54c9e, bf16 on the unknown share again 5b54c9e"
-  results: ""
-  verdict: ""
+  results: "e082414"
+  verdict: "D8 keeps 98.8%, D6 96.6%, D4 85.7% - losing the facts in the weights first (19.8% against 5.6% with the passage) to wrong answers, not garbage; naive D2 is garbage (99.5%); on the unknown share D4 answers where bf16 refuses and is accepted 6.3 points more"
 ---
 
 # E016 - Uniform quantization on the corpus
@@ -27,4 +27,4 @@ quantization at the same memory is what a deployment would otherwise do.
 The runs: the answers of every level in `runs/E016-uniform-quantization/e2b-it/answers/`, the verdicts of the
 reasoning judge in `.../e2b-it/judge/` (one run per pass over a file, see [the data](../../docs/data.md)), and
 bf16 answering the unknown share again in `.../bf16-unknown-again/`. The judge that reads them is described in
-[the corpus](../../docs/corpus.md). Results are not written yet.
+[the corpus](../../docs/corpus.md). Results: [results.md](results.md).

@@ -14,6 +14,8 @@ Invariants (each one has a test):
 - Invariant: the rows of a block depend only on that block's level.
 - Invariant: with per-sample layouts, sample b is bit-exact with sample b of the same batch run
   under layout b for every sample - a per-sample layout changes nothing but the selection.
+- Invariant: inside `samples(model, part)` the samples `part` of the batch read their own layouts,
+  bit-exact with the same inputs under those layouts set alone.
 - Invariant: forward never reads levels from the GPU.
 - Invariant: a packed copy exists only for a level some layout has used - a bench that only
   reads bf16 and ZERO holds no int8 or nf4 copy.
@@ -28,7 +30,8 @@ Invariants (each one has a test):
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
+from contextlib import contextmanager
 
 import numpy as np
 import torch
@@ -77,6 +80,7 @@ class MixedPrecisionLinear(nn.Module):
         self._packed: dict[type, Int8Weight | Nf4Weight | SlicedWeight] = {}
         self.readable: frozenset[Level] = frozenset(Level)
         self._caps = np.full(self.n_blocks, N_SLICES, dtype=np.uint8)  # slices every block stores
+        self._samples = slice(None)  # the samples of a per-sample layout the next forwards read
         self.set_levels(Level.BF16)
 
     @property
@@ -208,15 +212,23 @@ class MixedPrecisionLinear(nn.Module):
         out = x.new_zeros(*x.shape[:-1], self.out_features)
         return out if self.bias is None else out + self.bias
 
+    def read_samples(self, part: slice) -> None:
+        """Per-sample layouts serve only the samples `part` of the batch until set back to slice(None)."""
+        self._samples = part
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self._rows is None:
             return self.output_at(self._used[0], x)
-        if self._levels.ndim == 2 and x.shape[0] != self._levels.shape[0]:
-            raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {self._levels.shape[0]}")
+        rows = self._rows
+        if self._levels.ndim == 2:
+            read = range(*self._samples.indices(self._levels.shape[0]))
+            if x.shape[0] != len(read):
+                raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {len(read)}")
+            rows = rows[self._samples]
         outputs = self._outputs_at(self._used, x)
         out = outputs[self._used[0]]
         for level in self._used[1:]:
-            out = torch.where(self._rows == int(level), outputs[level], out)
+            out = torch.where(rows == int(level), outputs[level], out)
         return out
 
     def _outputs_at(self, levels: tuple[Level, ...], x: torch.Tensor) -> dict[Level, torch.Tensor]:
@@ -326,6 +338,20 @@ class Controller:
             total_weights += m.in_features * m.out_features
         result = total_bits / total_weights
         return float(result) if np.ndim(result) == 0 else result
+
+
+@contextmanager
+def samples(model: nn.Module, part: slice) -> Iterator[None]:
+    """The model's per-sample layouts serve only the samples `part` of the batch: a pass over some rows of it,
+    as a prefill in chunks of rows. A model without controlled modules is left as it is."""
+    modules = [m for m in model.modules() if isinstance(m, MixedPrecisionLinear)]
+    for module in modules:
+        module.read_samples(part)
+    try:
+        yield
+    finally:
+        for module in modules:
+            module.read_samples(slice(None))
 
 
 def _resolve(parent: nn.Module, dotted: str) -> tuple[nn.Module, str] | None:

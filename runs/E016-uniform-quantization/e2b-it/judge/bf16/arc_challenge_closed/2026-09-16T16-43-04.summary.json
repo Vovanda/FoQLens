@@ -1,0 +1,54 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "run": "2026-09-16T16-43-04",
+  "commit": "b0d5d7c",
+  "level": "bf16",
+  "corpus": "arc_challenge_closed",
+  "answers": "runs\\E016-uniform-quantization\\e2b-it\\answers\\bf16\\arc_challenge_closed.jsonl",
+  "rows": [
+    13,
+    136,
+    150,
+    158,
+    195,
+    242,
+    314,
+    398,
+    403
+  ],
+  "ids": [
+    "Mercury_400407",
+    "NCEOGA_2013_5_19",
+    "Mercury_7150728",
+    "Mercury_409114",
+    "Mercury_7212328",
+    "NYSEDREGENTS_2013_4_21",
+    "Mercury_7018270",
+    "AKDE&ED_2008_8_34",
+    "Mercury_7236740"
+  ],
+  "attention": "split",
+  "frozen": "corpus\\e2b-it",
+  "judged": 9,
+  "gpu": {
+    "samples": 11,
+    "started": "2026-09-16T16:43",
+    "wall_s": 10.908340215682983,
+    "utilization_mean": 73.36363636363636,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 11090.0,
+    "temperature_mean_c": 55.0,
+    "temperature_peak_c": 59.0,
+    "power_mean_w": 205.52090909090913,
+    "power_peak_w": 262.44,
+    "memory_allocated_peak_mib": 9522.35009765625
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 53.0,
+    "thermal_pause_s": 0.0
+  }
+}

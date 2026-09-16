@@ -1,0 +1,46 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "run": "2026-09-16T16-45-34",
+  "commit": "b0d5d7c",
+  "level": "d6",
+  "corpus": "arc_easy_closed",
+  "answers": "runs\\E016-uniform-quantization\\e2b-it\\answers\\d6\\arc_easy_closed.jsonl",
+  "rows": [
+    209,
+    439,
+    994,
+    1390,
+    1433
+  ],
+  "ids": [
+    "MDSA_2010_5_19",
+    "NYSEDREGENTS_2013_8_13",
+    "Mercury_7216983",
+    "NYSEDREGENTS_2010_8_34",
+    "ACTAAP_2008_7_7"
+  ],
+  "attention": "split",
+  "frozen": "corpus\\e2b-it",
+  "judged": 5,
+  "gpu": {
+    "samples": 8,
+    "started": "2026-09-16T16:45",
+    "wall_s": 8.453007459640503,
+    "utilization_mean": 87.5,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 11275.0,
+    "temperature_mean_c": 57.875,
+    "temperature_peak_c": 59.0,
+    "power_mean_w": 219.6325,
+    "power_peak_w": 245.99,
+    "memory_allocated_peak_mib": 9414.89306640625
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 55.0,
+    "thermal_pause_s": 0.0
+  }
+}

@@ -3,7 +3,7 @@
 The tuning share is a seeded random draw of each corpus (selection.tuning_sample); those questions are
 spent on the choice and marked in the frozen corpus. Every answer goes to
 <out>/<model>/answers/bf16/<corpus>.jsonl as a selection.Answer line; a restart skips what is written.
-The summary holds, per corpus and setup, the two automatic judges, refusals and length, and how much
+The summary holds, per corpus and setup, exact match, F1 and the model judge, refusals and length, and how much
 the verdict hangs on the setup. Claude reads the answers before a setup is frozen.
 
     uv run python scripts/prompt_tuning.py
@@ -18,9 +18,11 @@ from pathlib import Path
 
 from foqlens import corpora
 from foqlens import model as fm
-from foqlens.answering import JUDGE_BATCH, Asking, level_label
+from foqlens.answering import Asking, level_label
+from foqlens.attention import SPLIT
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
+from foqlens.graph_decode import StaticDecoder
 from foqlens.io import answers_path, append_answers, read_answers, write_json
 from foqlens.judging import ModelJudge
 from foqlens.pipeline import Bench
@@ -50,7 +52,7 @@ def main(argv: list[str] | None = None) -> Path:
     model_id = MODELS[args.model]
     bench = Bench.load(model_id, gpu_share=args.gpu_share)
     fmt = fm.prompt_format(model_id, bench.tokenizer)
-    judge = ModelJudge.build(bench.model, bench.tokenizer, bench.ctl, fmt, batch_size=JUDGE_BATCH)
+    judge = ModelJudge(bench.model, bench.tokenizer, bench.ctl, fmt, StaticDecoder(attention=SPLIT))
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
     # A corpus tuned later joins the corpora tuned before: their tuning ids are what the frozen corpus left out.

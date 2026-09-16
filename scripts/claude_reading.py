@@ -23,7 +23,7 @@ from foqlens import corpora
 from foqlens.io import answers_path, append_verdicts, read_answers, read_verdicts, write_json
 from foqlens.prompt_variants import SETUPS
 from foqlens.reading_sheet import DEFAULTS, Sheet, parse_marks, render
-from foqlens.selection import JUDGE_YES, ClaudeVerdict, Turn, Verdict, turn, two_way_choice, verdict
+from foqlens.selection import ClaudeVerdict, Turn, Verdict, turn, two_way_choice, verdict
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -93,7 +93,7 @@ def passed(args: argparse.Namespace) -> None:
                 (known if answerable else abstained).append(a.id)
             if claude:
                 agree["exact_match"] += (a.exact_match == 1.0) == (v == Verdict.KNOWN)
-                agree["judge"] += (a.judge_with_reference > JUDGE_YES) == (v == Verdict.KNOWN)
+                agree["judge"] += a.accepted == (v == Verdict.KNOWN)
             elif (t := turn(a, answerable)) is not None:
                 waiting[t.name] += 1
         two_way = [i for i in known if two_way_choice(rows[i].question, rows[i].answers)]

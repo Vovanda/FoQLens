@@ -4,7 +4,7 @@ Two uses in stage 2. The bf16 arm: stage 1's bf16 answers, judged again because 
 stage 1 (41c12ab) - the kept questions are known at bf16 by construction and the static decoder is nearly
 invariant to the composition of a batch, so no reply is generated again. The quantized levels: a level
 is baked into the weights and cannot judge itself (scripts/stage1_answers.py), so its answers wait in
-unjudged/ and are judged here. Either way the verdicts and the kinds of answer are taken anew and written
+unjudged/ and are judged here. Either way the verdict - the kind of answer and whether it is accepted - is taken anew and written
 to <out>/<model>/answers/<level>/<corpus>.jsonl; a restart skips what is written.
 
     uv run python scripts/rejudge_answers.py --answers runs/reference/stage1/e2b-it/answers --level bf16 \\
@@ -20,10 +20,11 @@ from pathlib import Path
 
 from foqlens import corpora
 from foqlens import model as fm
-from foqlens.answering import JUDGE_BATCH, rejudge
+from foqlens.answering import rejudge
 from foqlens.attention import PLANS, SPLIT
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
+from foqlens.graph_decode import StaticDecoder
 from foqlens.io import answers_path, append_answers, read_answers, read_frozen, write_json, written_ids
 from foqlens.judging import ModelJudge
 from foqlens.pipeline import Bench
@@ -45,7 +46,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--gpu-share", type=float, default=default_share())
     parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name,
-                        help="sdpa kernels per phase (foqlens.attention); the judge runs on the plan's judge kernels")
+                        help="sdpa kernels per phase (foqlens.attention): the judge's prefill and its decoding steps")
     return parser.parse_args(argv)
 
 
@@ -53,8 +54,8 @@ def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
     model_id = MODELS[args.model]
     bench = Bench.load(model_id, gpu_share=args.gpu_share)
-    judge = ModelJudge.build(bench.model, bench.tokenizer, bench.ctl, fm.prompt_format(model_id, bench.tokenizer),
-                             batch_size=JUDGE_BATCH, kernels=PLANS[args.attention].judge)
+    judge = ModelJudge(bench.model, bench.tokenizer, bench.ctl, fm.prompt_format(model_id, bench.tokenizer),
+                       StaticDecoder(attention=PLANS[args.attention]))
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
 

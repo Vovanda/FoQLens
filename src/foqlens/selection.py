@@ -42,6 +42,8 @@ JUDGE_YES = 0.5
 # Below this P(Yes) the judge is sure of its No: 55% of TriviaQA's answers and 77% of NQ-open's sit
 # under it, and only 1.5-6.6% of any corpus between it and JUDGE_YES (stage 1, 2026-09-15).
 JUDGE_SURE_NO = 0.05
+# The kinds of a refused answer the judge is not sure of: close to right, unlike Wrong, Noise and Garbage.
+DOUBTFUL_KINDS = frozenset({"Related", "Partial"})
 # Where a reply writes its reasoning first, the answer follows "Answer:" on a line of its own, whatever
 # markdown the model wraps around it.
 MARKUP = "*_#`"
@@ -136,13 +138,25 @@ class Answer:
     reasoning: str | None  # the solution or justification before the answer, where one was asked for
     exact_match: float
     f1: float
-    judge_with_reference: float     # the model judge's P(Yes) shown the reference
-    judge_without_reference: float  # and not shown it
     tokens: int
     stopped: bool        # it ended on its own rather than at the token limit
-    # The judge's probabilities of the kinds of answer (judging.GRADES, best first) after the verdict it gave
-    # with the reference; empty on the lines written before it gave them (stage 1, 2026-09-15).
+    # The model judge's verdict (foqlens.judging): the kind of answer, whether it is accepted, its whole reply.
+    # None where no judge has read the answer yet, and on the lines of the one-token judge before 2026-09-16.
+    judge_kind: str | None = None
+    judge_accepted: bool | None = None
+    judge_reply: str | None = None
+    # The one-token judge, until 2026-09-16: its P(Yes) shown the reference and not shown it, and its
+    # probabilities of the kinds of answer then (best first). Kept so that the lines it wrote still read.
+    judge_with_reference: float = float("nan")
+    judge_without_reference: float = float("nan")
     judge_grades: tuple[float, ...] = ()
+
+    @property
+    def accepted(self) -> bool:
+        """Whether the model judge accepts the answer, whichever judge wrote the line."""
+        if self.judge_accepted is not None:
+            return self.judge_accepted
+        return self.judge_with_reference > JUDGE_YES
 
     def to_json(self) -> dict:
         return asdict(self)
@@ -201,7 +215,7 @@ def verdict(answer: Answer, claude: Verdict | None = None, answerable: bool = Tr
     if unread is not None:
         return Verdict.UNKNOWN, unread
     match = answer.exact_match == 1.0
-    judged = answer.judge_with_reference > JUDGE_YES
+    judged = answer.accepted
     if match == judged:
         return (Verdict.KNOWN if match else Verdict.UNKNOWN), Reason.JUDGES_AGREE
     return Verdict.OPEN, Reason.JUDGES_DISAGREE
@@ -212,13 +226,20 @@ def turn(answer: Answer, answerable: bool = True) -> Turn | None:
     if decided_unread(answer, answerable) is not None:
         return None
     match = answer.exact_match == 1.0
-    if match != (answer.judge_with_reference > JUDGE_YES):
+    if match != answer.accepted:
         return Turn.DISAGREE
     if match:
         return Turn.AGREED_YES
-    if answer.f1 > 0 or answer.judge_with_reference >= JUDGE_SURE_NO:
+    if answer.f1 > 0 or doubtful_refusal(answer):
         return Turn.DOUBTFUL_NO
     return Turn.SURE_NO
+
+
+def doubtful_refusal(answer: Answer) -> bool:
+    """A refused answer the judge is not sure of: close to right by its kind, or by P(Yes) on the one-token judge's lines."""
+    if answer.judge_accepted is not None:
+        return answer.judge_kind in DOUBTFUL_KINDS
+    return answer.judge_with_reference >= JUDGE_SURE_NO
 
 
 @dataclass(frozen=True)

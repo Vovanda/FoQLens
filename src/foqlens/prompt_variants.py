@@ -31,7 +31,7 @@ from foqlens.corpora import Row
 from foqlens.extractive import NO_ANSWER, first_line, qa_question
 from foqlens.generation import END_OF_TURN, FIRST_LINE, StopRule
 from foqlens.prompting import ASSISTANT, USER, Message
-from foqlens.selection import JUDGE_YES, Answer, is_refusal, split_reasoning, strip_markup
+from foqlens.selection import Answer, is_refusal, split_reasoning, strip_markup
 
 SHORT = "Answer with the answer alone - a few words, not a sentence."
 SHORT_PASSAGE = ("Answer from the passage with the answer alone - a few words, not a sentence. "
@@ -169,8 +169,7 @@ def setup_summary(answers: list[Answer]) -> dict:
         "questions": len(answers),
         "exact_match": float(np.mean([a.exact_match for a in answers])),
         "f1": float(np.mean([a.f1 for a in answers])),
-        "judged_right": float(np.mean([a.judge_with_reference > JUDGE_YES for a in answers])),
-        "judged_right_without_reference": float(np.mean([a.judge_without_reference > JUDGE_YES for a in answers])),
+        "judged_right": float(np.mean([a.accepted for a in answers])),
         "refusals": float(np.mean([is_refusal(a.reply) for a in answers])),
         "stopped": float(np.mean([a.stopped for a in answers])),
         "tokens": float(np.mean([a.tokens for a in answers])),
@@ -181,5 +180,5 @@ def agreement(answers: list[Answer]) -> float:
     """The share of questions every setup judges the same way - how little the verdict hangs on the setup."""
     verdicts = defaultdict(set)
     for a in answers:
-        verdicts[a.id].add(a.judge_with_reference > JUDGE_YES)
+        verdicts[a.id].add(a.accepted)
     return float(np.mean([len(v) == 1 for v in verdicts.values()]))

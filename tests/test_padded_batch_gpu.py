@@ -6,8 +6,8 @@ same token, 令 at D8 and <h2> at bf16, whatever its question (issue #14). On th
 padded row writes the first token it writes alone, up to bf16's batch noise.
 
 The attention plans are held to the same batch (foqlens.attention, issue #15): the split plan - prefill on
-math, decode steps and the judge on the memory-efficient kernel - opens every row as math does, keeps the
-padded rows apart, and the judge gives the verdicts it gives on math.
+math, decode steps on the memory-efficient kernel - opens every row as math does, keeps the padded rows apart,
+and the judge, which writes its reply on the same two phases, gives the verdicts it gives on math.
 """
 
 from pathlib import Path
@@ -18,7 +18,7 @@ import torch
 
 from foqlens import corpora
 from foqlens import model as fm
-from foqlens.answering import JUDGE_BATCH, Asking
+from foqlens.answering import Asking
 from foqlens.attention import MATH_ONLY, SPLIT
 from foqlens.generation import generate_replies
 from foqlens.graph_decode import STATIC, StaticDecoder
@@ -27,7 +27,6 @@ from foqlens.judging import ModelJudge
 from foqlens.prompt_variants import SETUPS, examples_for, setup_named
 from foqlens.quant import Level
 from foqlens.schedule import Schedule
-from foqlens.selection import JUDGE_YES
 
 pytestmark = pytest.mark.gpu
 
@@ -38,8 +37,8 @@ ROUND, SEED = 4, 0  # the round and seed of stage1_answers whose ARC-Challenge b
 # the other way; the math kernel moved 0 of these 28 rows, the collapsed kernel moved all 28 (2026-09-15).
 NOISE_ROWS = 2
 DECODE_TOKENS = 16  # a collapsed batch shows by then: its padded rows go on from one state, word for word
-# Verdicts allowed to flip between the judge's kernels: 46 of 20,471 flipped on E016's bf16 answers
-# (0.22%), all near ties - none is expected among 29.
+# Verdicts allowed to flip between the kernels: a reply is greedy text, and bf16's near ties move a word of its
+# reasoning, rarely its verdict - the one-token judge flipped 46 of 20,471 (0.22%) - so none is expected among 29.
 JUDGE_FLIPS = 1
 
 
@@ -109,8 +108,8 @@ def test_the_judge_gives_on_the_split_plan_the_verdicts_it_gives_on_math(e2b_it_
     questions, references = [r.question for r in batch], [list(r.answers) for r in batch]
     verdicts = {}
     for plan in (MATH_ONLY, SPLIT):
-        judge = ModelJudge.build(model, tokenizer, ctl, fmt, batch_size=JUDGE_BATCH, kernels=plan.judge)
-        verdicts[plan.name] = judge.p_yes(questions, answers, references) > JUDGE_YES
+        judge = ModelJudge(model, tokenizer, ctl, fmt, StaticDecoder(attention=plan))
+        verdicts[plan.name] = np.array([v.accepted for v in judge.verdicts(questions, answers, references)])
     assert 0 < verdicts["math"].sum() < len(batch)
     assert np.sum(verdicts["math"] != verdicts["split"]) <= JUDGE_FLIPS
 

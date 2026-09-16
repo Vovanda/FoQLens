@@ -117,6 +117,25 @@ def test_an_answer_waits_in_the_turn_its_judges_leave_it_in(em, f1, judge, expec
     assert turn(replace(ANSWER, exact_match=em, f1=f1, judge_with_reference=judge)) == expected
 
 
+@pytest.mark.parametrize("em, f1, kind, accepted, expected", [
+    (0.0, 0.0, "Nearly", True, Turn.DISAGREE),
+    (1.0, 1.0, "Wrong", False, Turn.DISAGREE),
+    (0.0, 0.0, "Partial", False, Turn.DOUBTFUL_NO),   # close to right by its kind
+    (0.0, 0.0, "Garbage", False, Turn.SURE_NO),
+    (1.0, 1.0, "Correct", True, Turn.AGREED_YES),
+])
+def test_a_reasoning_judges_line_waits_by_its_verdict_and_kind(em, f1, kind, accepted, expected):
+    line = replace(ANSWER, exact_match=em, f1=f1, judge_kind=kind, judge_accepted=accepted, judge_with_reference=float("nan"))
+    assert line.accepted is accepted and turn(line) == expected
+
+
+def test_the_verdict_of_the_reasoning_judge_survives_the_round_trip_and_outweighs_the_one_token_judge(tmp_path):
+    judged = replace(ANSWER, judge_kind="Garbage", judge_accepted=False, judge_reply="**Kind:** Garbage\n**Accepted:** No")
+    path = answers_path(tmp_path, "d2", "triviaqa")
+    append_answers(path, [judged])
+    assert read_answers(path) == [judged] and not judged.accepted and ANSWER.accepted
+
+
 def test_every_answer_either_waits_in_one_turn_or_is_decided_unread():
     for em, judge, reply, answer, answerable in [(1.0, 0.99, "Paris", "Paris", True), (0.0, 0.2, "x", "x", True),
                                                  (0.0, 0.99, "I don't know", "I don't know", True),

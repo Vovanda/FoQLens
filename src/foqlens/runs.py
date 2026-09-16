@@ -26,8 +26,12 @@ class RunFiles:
 
     def __init__(self, answers: Path, readings: Path | None = None, frozen: Path | None = None):
         self.con = duckdb.connect()
-        self.con.execute(f"create view answers as select * from "
-                         f"read_json_auto('{answers.as_posix()}/*/*.jsonl', union_by_name=true)")
+        lines = f"read_json_auto('{answers.as_posix()}/*/*.jsonl', union_by_name=true)"
+        columns = {row[0] for row in self.con.execute(f"describe select * from {lines}").fetchall()}
+        # `accepted`: the judge's verdict whichever judge wrote the line (selection.Answer.accepted)
+        one_token = f"judge_with_reference > {JUDGE_YES}"
+        accepted = f"coalesce(judge_accepted, {one_token})" if "judge_accepted" in columns else one_token
+        self.con.execute(f"create view answers as select *, {accepted} as accepted from {lines}")
         if readings is not None:
             self.con.execute(f"create view readings as select * from "
                              f"read_json_auto('{readings.as_posix()}/*/*.jsonl', union_by_name=true)")
@@ -51,7 +55,7 @@ class RunFiles:
         rows = self.query(f"""
             select a.corpus, count(*) n_read,
                    avg(((a.exact_match = 1) = (r.reading in ({known})))::int) exact_match,
-                   avg(((a.judge_with_reference > ?) = (r.reading in ({known})))::int) judge
+                   avg((a.accepted = (r.reading in ({known})))::int) judge
             from answers a join readings r using (corpus, id, level)
-            where a.level = ? group by a.corpus order by a.corpus""", [JUDGE_YES, level])
+            where a.level = ? group by a.corpus order by a.corpus""", [level])
         return {r["corpus"]: {"read": r["n_read"], "exact_match": r["exact_match"], "judge": r["judge"]} for r in rows}

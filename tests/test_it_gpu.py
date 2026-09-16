@@ -1,13 +1,13 @@
 """Gemma 4 E2B-it, the model the corpus is selected on: its chat prompts through the batched loop, and it as a judge."""
 
-import numpy as np
 import pytest
 
 from foqlens import model as fm
+from foqlens.attention import SPLIT
 from foqlens.extractive import first_line, qa_prompt
 from foqlens.generation import END_OF_TURN, FIRST_LINE, answer_texts, end_ids, generate_answers
-from foqlens.evaluate import letter_logprobs_batch
-from foqlens.judging import GRADES, ModelJudge, judge_prompt
+from foqlens.graph_decode import StaticDecoder
+from foqlens.judging import GARBAGE, ModelJudge
 from foqlens.quant import Level
 
 pytestmark = pytest.mark.gpu
@@ -43,42 +43,36 @@ def test_the_loop_writes_what_generate_writes_on_the_same_chat_batch(chat):
     assert [t.strip() for t in generate_answers(model, tokenizer, prompts, TOKENS, FIRST_LINE)] == [first_line(t) for t in full]
 
 
-@pytest.mark.parametrize("with_references", [True, False])
-def test_right_answers_get_yes_and_wrong_ones_no(chat, with_references):
-    model, tokenizer, ctl, fmt, _ = chat
-    judge = ModelJudge.build(model, tokenizer, ctl, fmt)
-    refs = REFERENCES if with_references else None
-    right, wrong = judge.p_yes(QUESTIONS, RIGHT, refs), judge.p_yes(QUESTIONS, WRONG, refs)
-    print(f"references={with_references}: right {np.round(right, 3)}, wrong {np.round(wrong, 3)}")
-    assert (wrong < 0.5).all() and (right > wrong).all()
-    # A right answer worded as its reference is a plain Yes; a paraphrase ("100 degrees" against "100 °C")
-    # may be a near tie - such answers go to Claude, the third judge.
-    literal = np.array([a.lower() in {r.lower() for r in refs} for a, refs in zip(RIGHT, REFERENCES)])
-    assert (right[literal] > 0.5).all()
+# Garbage as D2 wrote it (E016): symbols and repeated fragments with no answer in them.
+GARBAGE_ANSWERS = ["... | ** | ** ** **", r"$\text{** $\text{** $\text{", "(17. 17.** | ** **("]
 
 
-def test_the_kind_of_answer_is_the_word_after_the_verdict_given_as_the_synthetic_check_read_it(chat):
-    """41c12ab's check read the kind after "Answer: Yes," or "Answer: No," on the same prompt: the judge does the same."""
+def judge_of(model, tokenizer, ctl, fmt):
+    return ModelJudge(model, tokenizer, ctl, fmt, StaticDecoder(attention=SPLIT))
+
+
+def test_right_answers_are_accepted_and_wrong_ones_are_not(chat):
     model, tokenizer, ctl, fmt, _ = chat
-    judge = ModelJudge.build(model, tokenizer, ctl, fmt)
-    answers, refs = RIGHT + WRONG, REFERENCES + REFERENCES
-    p_yes = judge.p_yes(QUESTIONS * 2, answers, refs)
-    grades = judge.grades(QUESTIONS * 2, answers, refs, p_yes)
-    words = [tokenizer(f" {w}", add_special_tokens=False).input_ids[0] for w, _ in GRADES]
-    prompts = [judge_prompt(q, a, r, fmt) + (" Yes," if p > 0.5 else " No,")
-               for q, a, r, p in zip(QUESTIONS * 2, answers, refs, p_yes)]
-    # The same log-probabilities; the judge takes exp in float64.
-    assert np.array_equal(grades, np.exp(letter_logprobs_batch(model, tokenizer, prompts, words).astype(np.float64)))
-    said = [GRADES[k][0] for k in grades.argmax(axis=1)]
-    print(dict(zip(answers, said)))
-    literal = [a.lower() in {r.lower() for r in rs} for a, rs in zip(RIGHT, REFERENCES)]
-    assert all(s == "Correct" for s, lit in zip(said[:len(RIGHT)], literal) if lit)
-    assert all(s in ("Related", "Wrong") for s in said[len(RIGHT):])
+    judge = judge_of(model, tokenizer, ctl, fmt)
+    right, wrong = judge.verdicts(QUESTIONS, RIGHT, REFERENCES), judge.verdicts(QUESTIONS, WRONG, REFERENCES)
+    print([v.kind for v in right], [v.kind for v in wrong])
+    assert not any(v.accepted for v in wrong)
+    # A right answer worded as its reference is plainly accepted; a paraphrase ("100 degrees" against "100 °C")
+    # may be graded down - such answers go to Claude, the third judge.
+    literal = [a.lower() in {r.lower() for r in refs} for a, refs in zip(RIGHT, REFERENCES)]
+    assert all(v.accepted for v, lit in zip(right, literal) if lit)
+
+
+def test_garbage_is_called_garbage_and_never_accepted(chat):
+    model, tokenizer, ctl, fmt, _ = chat
+    got = judge_of(model, tokenizer, ctl, fmt).verdicts(QUESTIONS[:3], GARBAGE_ANSWERS, REFERENCES[:3])
+    print([(v.kind, v.reply[-80:]) for v in got])
+    assert not any(v.accepted for v in got) and all(v.kind == GARBAGE for v in got)
 
 
 def test_the_judge_reads_at_bf16_whatever_layout_was_set(chat):
     model, tokenizer, ctl, fmt, _ = chat
-    judge = ModelJudge.build(model, tokenizer, ctl, fmt)
-    at_bf16 = judge.p_yes(QUESTIONS, RIGHT, REFERENCES)
+    judge = judge_of(model, tokenizer, ctl, fmt)
+    at_bf16 = judge.verdicts(QUESTIONS, RIGHT, REFERENCES)
     ctl.set_all(Level.D4)
-    assert np.array_equal(judge.p_yes(QUESTIONS, RIGHT, REFERENCES), at_bf16)
+    assert judge.verdicts(QUESTIONS, RIGHT, REFERENCES) == at_bf16

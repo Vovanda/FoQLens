@@ -118,8 +118,8 @@ from the least settled to the most:
 
 - *The corpus is frozen* (`corpus/e2b-it/`). The model knows 18,576 questions - TriviaQA 4,111,
   NQ-open 812, SQuAD v2 6,123 (552 of them the right answer that the passage holds none),
-  ARC-Challenge 520, ARC-Easy 1,362, HotpotQA 5,648 - and 2,064 questions it did not know are marked,
-  a tenth of the stage 2 set.
+  ARC-Challenge 520, ARC-Easy 1,362, HotpotQA 5,648 - and does not know 16,811; 2,064 of them, drawn at
+  random, are in the stage 2 set, marked, a tenth of it.
 - *The new judge against Claude's verdicts*, on the 21,242 answers read before ARC-Easy: agreement
   0.888 → 0.930; false noes 1,672 → 501, false yeses 711 → 980. On ARC-Challenge it is worse than the
   old one, and on ARC-Easy it is not measured yet; both are open.

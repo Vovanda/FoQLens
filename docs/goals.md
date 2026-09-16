@@ -22,18 +22,23 @@ The input from the machine (a governor that lowers precision under load or heat)
 
 ## Roadmap
 
-In order of work; items 3 and 4 run in parallel. Every hypothesis is untested.
+In order of work; items 3 and 4 ran in parallel. Each hypothesis is tested at its step.
 
 1. **The bench: its design and optimization** - done, 2026-09-11 → 2026-09-14, and optimized as it goes. One stored copy of the
    weights read at 2 / 4 / 6 / 8 bits (residual slices after MoBiQuant), each block able to store only
    the depth it is read to; a decoding step is one CUDA graph over a static cache. A kernel that reads
    only the bits it needs is written and tested, not yet wired into decoding.
 2. **A corpus of what the model knows** - done, 2026-09-13 → 2026-09-15. Selected by the model's own answers in three regimes
-   and frozen: 18,576 questions E2B-it knows and 2,064 it does not, marked ([corpus.md](corpus.md)).
-3. **Uniform quantization on the corpus** - now, since 2026-09-15. The answers at D8, D6, D4 and D2, judged by the model at
-   source quality ([invariants.md](invariants.md)): the share of the full model's knowledge each level
-   keeps. It is the baseline the filter is compared with.
-4. **The filter: how the zones are built** - now, since 2026-09-15, in parallel with 3. Grounded variants of the mask and
+   and frozen: 18,576 questions E2B-it knows and 16,811 it does not; 2,064 of those, drawn at random, are in
+   the set, marked ([corpus.md](corpus.md)).
+3. **Uniform quantization on the corpus** - done, 2026-09-15 → 2026-09-16. The answers at D8, D6, D4 and D2, judged by the
+   model at source quality ([invariants.md](invariants.md)): D8 keeps 98.8% of the full model's knowledge,
+   D6 96.6%, D4 85.7%, D2 is garbage ([E016 results](../experiments/E016-uniform-quantization/results.md)).
+   It is the baseline the filter is compared with. On the questions the full model does not know, D4 answers
+   where bf16 refuses - on HotpotQA refusals fall from 12.1% to 4.6% and accepted answers rise from 13.4% to
+   25.2%: the premise of [H4](hypotheses.md), a guess can be refined and a refusal cannot, came up on data not
+   built to show it.
+4. **The filter: how the zones are built** - now, since 2026-09-15. Grounded variants of the mask and
    of the zones built from it, read from the papers before any is coded.
 5. **The address** - waits for the filter. Topics separate in the model, the mask is concentrated, zones
    of related topics overlap.

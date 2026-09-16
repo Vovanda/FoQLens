@@ -54,6 +54,7 @@ LEVELS = ("bf16", "d8", "d6", "d4", "d2")
 CHUNK = 1024  # answers judged between two writes: a stopped run loses at most these
 RUN_NAME = "%Y-%m-%dT%H-%M-%S"  # a run is named by when it started; names sort as the runs went
 WATCH_POLL_SECONDS = 5  # a request waits at most this long; the loaded judge costs nothing while it looks
+FROZEN_PARTS = ("kept", "unknown_share")  # what stage 2 asks of a frozen file (selection.FrozenCorpus.asked)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -68,6 +69,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="lines of the one file given (one level, one corpus), from 1: 1-500,812")
     parser.add_argument("--run", default=None, help="the run's name, by default its start time; the same name resumes it")
     parser.add_argument("--frozen", type=Path, required=True, help="folder of frozen corpus files")
+    parser.add_argument("--parts", nargs="+", choices=FROZEN_PARTS, default=list(FROZEN_PARTS),
+                        help="which parts of the frozen files are judged")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--gpu-share", type=float, default=default_share())
     parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name,
@@ -95,7 +98,7 @@ class Judging:
             frozen = read_frozen(self.args.frozen / f"{corpus}.json")
             rows, source = corpora.read(corpus)
             frozen.check(self.name, source.revision, frozen.prompt)
-            self.corpora[corpus] = ({r.id: r for r in rows}, frozen.asked())
+            self.corpora[corpus] = ({r.id: r for r in rows}, [i for part in self.args.parts for i in getattr(frozen, part)])
         return self.corpora[corpus]
 
     def run(self, level: str, corpus: str, rows: list[int] | None, run: str | None) -> Path:

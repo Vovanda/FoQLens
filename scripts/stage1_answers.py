@@ -52,6 +52,7 @@ FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passa
 DECODERS = {"static": lambda plan, prefill: StaticDecoder(attention=plan, prefill_tokens=prefill),
             "dynamic": lambda plan, prefill: DYNAMIC}
 UNJUDGED = "unjudged"  # where a baked level's answers wait for the bf16 judge
+FROZEN_PARTS = ("kept", "unknown_share")  # what stage 2 asks of a frozen file (selection.FrozenCorpus.asked)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -63,6 +64,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     asked = parser.add_mutually_exclusive_group()
     asked.add_argument("--tuning", type=Path, default=None, help="summary.json of prompt_tuning.py: its questions are left out")
     asked.add_argument("--frozen", type=Path, default=None, help="folder of frozen corpus files: only what they ask")
+    parser.add_argument("--parts", nargs="+", choices=FROZEN_PARTS, default=list(FROZEN_PARTS),
+                        help="with --frozen: which parts of the frozen files are asked")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--rounds", type=int, default=None, help="stop after this many rounds, for a smoke check")
     parser.add_argument("--out", type=Path, default=Path("runs/reference/stage1"))
@@ -100,7 +103,7 @@ def main(argv: list[str] | None = None) -> Path:
         if args.frozen:
             frozen = read_frozen(args.frozen / f"{corpus}.json")
             frozen.check(name, source.revision, args.setups[corpus])
-            asked = set(frozen.asked())
+            asked = {i for part in args.parts for i in getattr(frozen, part)}
             rows[corpus] = {r.id: r for r in corpus_rows if r.id in asked}
             if len(rows[corpus]) != len(asked):
                 raise ValueError(f"{corpus}: {len(asked) - len(rows[corpus])} frozen questions are not in the corpus")

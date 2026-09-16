@@ -106,12 +106,16 @@ class Verdict:
 
 
 def read_verdict(reply: str) -> Verdict:
-    """The two closing lines of a reply; the last of each counts, since the reasoning may quote the format."""
+    """The two closing lines of a reply; the last of each counts, since the reasoning may quote the format.
+
+    Whether the answer is accepted follows from its kind, as the rule says: the judge's own Accepted line
+    contradicted its kind on 0.9% of E016's verdicts, 658 of them "Partial, Yes" (2026-09-16).
+    """
     kinds, accepted = KIND.findall(reply), ACCEPTED_LINE.findall(reply)
     known = {word for word, _ in GRADES}
     if not kinds or not accepted or kinds[-1] not in known:
         return Verdict(NOT_READ, False, reply)
-    return Verdict(kinds[-1], accepted[-1].lower() == "yes", reply)
+    return Verdict(kinds[-1], kinds[-1] in ACCEPTED, reply)
 
 
 def is_empty(answer: str | None) -> bool:

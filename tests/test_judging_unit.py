@@ -108,5 +108,22 @@ def test_an_empty_answer_is_garbage_without_being_asked(monkeypatch):
     assert len(asked) == 1
 
 
+def test_a_reply_the_limit_cut_is_asked_once_more_with_the_retry_limit(monkeypatch):
+    calls = []
+
+    def replies(model, tok, prompts, max_new_tokens, stop, decoder):
+        calls.append((len(prompts), max_new_tokens))
+        if max_new_tokens == 10:  # the first pass: the long one is cut at the limit, the short one stops unread
+            return [Reply("I work it through", 10, False) if "long" in p else Reply("No closing lines.", 3, True)
+                    for p in prompts]
+        return [Reply("Worked through.\n**Kind:** Correct\n**Accepted:** Yes", 40, True) for _ in prompts]
+
+    monkeypatch.setattr(judging, "generate_replies", replies)
+    got = ModelJudge(None, None, Controller(), max_new_tokens=10, retry_tokens=100).verdicts(
+        ["a long question", "short"], ["a1", "a2"], [["r"], ["r"]])
+    assert calls == [(2, 10), (1, 100)]
+    assert (got[0].kind, got[0].accepted) == ("Correct", True) and got[1].kind == NOT_READ
+
+
 def test_a_model_that_cannot_judge_leaves_its_answers_unjudged():
     assert NotJudged().verdicts(["q1", "q2"], ["a1", "a2"], [["r"], ["r"]]) == [None, None]

@@ -1,0 +1,36 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "level": "d2",
+  "attention": "split",
+  "frozen": "corpus\\e2b-it",
+  "answers": "runs\\E016-uniform-quantization\\e2b-it\\unjudged",
+  "judged": {
+    "triviaqa": 4568,
+    "nq_open": 902,
+    "squad_v2": 6803,
+    "arc_challenge_closed": 578,
+    "arc_easy_closed": 1513,
+    "hotpotqa": 6276
+  },
+  "gpu": {
+    "samples": 910,
+    "started": "2026-09-16T05:33",
+    "wall_s": 983.0383720397949,
+    "utilization_mean": 85.33296703296703,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 21919.0,
+    "temperature_mean_c": 67.57912087912088,
+    "temperature_peak_c": 70.0,
+    "power_mean_w": 357.80078021978017,
+    "power_peak_w": 399.69,
+    "memory_allocated_peak_mib": 12411.1494140625
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 61.0,
+    "thermal_pause_s": 0.0
+  }
+}

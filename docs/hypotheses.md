@@ -6,7 +6,7 @@ title: Hypotheses
 
 The claims FoQLens tests, each with the experiments that test it. The text of every hypothesis and its predictions lives in the preregistration ([PREREGISTRATION.ru.md](../prereg/PREREGISTRATION.ru.md), English: [PREREGISTRATION.md](../prereg/PREREGISTRATION.md)) and in the addenda of the experiments; this page only gives them ids (assigned 2026-09-12) and tracks their status.
 
-**Every hypothesis is untested.** The first corpus chosen was rejected: the letter did not tell whether the model knew the answer or guessed it ([corpus.md](corpus.md)). A step in the table below is numbered as in the preregistration; the roadmap is in [goals.md](goals.md).
+Each hypothesis is tested at its step of the roadmap ([goals.md](goals.md)); the steps done so far built the bench, the corpus and the baseline of uniform quantization. A step in the table below is numbered as in the preregistration; the roadmap is in [goals.md](goals.md).
 
 The list is a starting point: the hypotheses tested next are stated after the exploration ([invariants.md](invariants.md)) and preregistered before their runs.
 
@@ -22,7 +22,7 @@ The list is a starting point: the hypotheses tested next are stated after the ex
 | H3.2 | The shape: own expert zones beat random zones of the same count and size | E008 S1, E009 M1, E010 L1 | part of H3 | **dropped 2026-09-13** with the random arm; the shape question is H3.4 | E008, E009, E010 |
 | H3.3 | Static importance: generic block importance beats random blocks at the same memory | E005 B1 | context for H3; its control is random blocks, not a baseline | **not tested** | E005 |
 | H3.4 | The place: own zones beat the same figure carried elsewhere on the map, at the same cost | E014 addendum (after the run); E015's preregistration deleted with the corpus | part of H3 | **not tested** | E014 |
-| H4 | **Main.** A draft read mostly at base precision, then refined with sharper zones, ends better than the same model at native precision - where there are iterations: an agent or a model's reasoning. Full text below | author, 2026-09-12; restated by the author 2026-09-13; a single-pass part of the earlier text fixed in E010's preregistration | main | **not tested** | - |
+| H4 | **Main.** A draft read mostly at base precision, then refined with sharper zones, ends better than the same model at native precision - where there are iterations: an agent or a model's reasoning. Full text below | author, 2026-09-12; restated by the author 2026-09-13; a single-pass part of the earlier text fixed in E010's preregistration | main | **not tested**; its premise - the coarse model answers where the precise one refuses - came up in E016 | E016 |
 | H5 | **Horizon.** A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment. Full text below | author, 2026-09-12; restated by the author 2026-09-13 | horizon | **not tested** | - |
 | H6 | **Additional.** How good asking for a shorter answer and coarsening the weights each are at representing knowledge in compressed form, and below which step coarsening slides into nonsense. Full text below | author, 2026-09-13, from the author's article | additional | **not tested** | E016 |
 

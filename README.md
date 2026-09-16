@@ -67,15 +67,27 @@ All predictions were [preregistered](prereg/) in git before each run, as directi
 
 ## Status
 
-**Every hypothesis is untested.** The first corpus chosen - four MMLU subjects with a letter to pick - was
-rejected: the letter does not tell whether the model knows the answer or guesses it
-([corpus.md](docs/corpus.md)).
+**The bench and the data are ready; the hypotheses are tested from the next step on.**
 
-**The corpus of what the model knows is built and frozen:** the full model answered every question of five
+**The corpus of what the model knows is built and frozen:** the full model answered every question of six
 datasets in its own words, with no options anywhere, and a question stays if the answer is right; three
-regimes in it - the answer in a passage, only in the weights, split across two passages - so that the claim
-can fail ([docs/corpus.md](docs/corpus.md)). Next come uniform quantization levels on it as the baseline,
-then a mask that is asked about the answer instead of the text. Then the hypotheses, from the first.
+regimes in it - the answer in a passage, only in the weights, across two passages and a step. It knows
+18,576 questions and does not know 16,811; 2,064 of those, drawn at random, are in the set, marked
+([docs/corpus.md](docs/corpus.md)).
+
+**How the model holds its knowledge under uniform quantization is measured:** D8 keeps 98.8% of what the full
+model knows, D6 96.6%, D4 85.7%, D2 is garbage. Knowledge goes from the weights first: with the answer in the
+passage D4 loses 5.6%, with the answer only in the weights 19.8%. This is the baseline for every test of the
+filter ([E016](experiments/E016-uniform-quantization/results.md)).
+
+**The premise of the main hypothesis came up on its own.** On the questions the full model does not know, the
+coarser model answers where the precise one refuses: on HotpotQA bf16 says the passages hold no answer in 12.1%
+of them, D4 in 4.6%, and the accepted answers rise from 13.4% to 25.2%. Coarsening adds no knowledge - it removes
+the caution, and the guess is sometimes right. That is what [H4](docs/hypotheses.md) stands on: a draft guess can
+be refined, "I don't know" cannot. It came up on data not built to show it; a class of tasks that shows it on
+purpose is an experiment of its own.
+
+**Next, the filter:** a mask that is asked about the answer instead of the text, and the zones built from it.
 
 **The question all of it serves:** does the regulator work - the structure where a coarse reading is enough, the
 details where sharpness is needed, a gain over iterations. Saving memory is a secondary goal, plan B: even without

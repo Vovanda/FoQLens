@@ -10,6 +10,13 @@ source of truth. A run only appends to them, and the lines stand in the order th
 There is no database in the repository - only a query engine that reads the files where they lie and
 keeps nothing.
 
+**The judge's runs.** A verdict is not written over the answer it reads. Every pass of the judge over one
+answers file is a run of its own, `judge/<level>/<corpus>/<run>.jsonl`, named by when it started, with its
+summary beside it: the commit of the code, the file it read, the lines picked and the questions judged.
+A later run asks again only what it is given - the N/A of an earlier run, say - and the earlier run stays.
+The verdict on a question is the latest run's that read it: the view `verdicts`, over the view `judged`
+of every run.
+
 **Why not a database.**
 
 - A run that crashes appends where it stopped and skips the answers already written; it needs no

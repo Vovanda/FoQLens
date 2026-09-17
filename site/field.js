@@ -99,10 +99,9 @@ const SHOWN = 4;   // every SHOWN-th block is drawn: the field reads as points, 
    block keeps the same sign for the life of the page. */
 const GLYPHS = ["♥︎", "♡︎", "❤︎", "❥︎", "❦︎", "❧︎", "✿︎", "❀︎", "✾︎", "❁︎", "♠︎", "♣︎", "♦︎", "☺︎", "☻︎", "☼︎", "☀︎", "☁︎", "☂︎", "☃︎", "❄︎", "✹︎", "✺︎", "✻︎", "★︎", "☆︎", "✦︎", "✧︎", "✩︎", "✪︎", "✫︎", "✬︎", "✭︎", "✮︎", "✯︎", "✰︎", "✶︎", "✷︎", "✸︎", "⁂︎", "✳︎", "✴︎", "♪︎", "♫︎", "♬︎", "♩︎", "☕︎", "✈︎", "⚓︎", "⌛︎", "⚡︎", "☘︎", "✂︎", "✎︎", "✉︎", "✆︎", "☯︎", "☮︎", "✔︎", "✚︎", "✜︎", "✠︎", "⚙︎", "⌘︎", "⍟︎", "⧗︎", "❖︎", "❋︎", "❈︎", "▲︎", "▼︎", "◀︎", "▶︎", "◆︎", "◇︎", "○︎", "●︎", "□︎", "■︎", "◈︎", "◉︎", "△︎", "▽︎"];
 const GLYPH_SCALE = 2.6;   // a character is drawn larger than the square it replaces
-const BASE_RADIUS = 0.09;   // a new lens covers this share of the map before focus_area scales it
-// Zones of a query come out with different radii (docs/quantization-filter.md); a placed lens takes the next of these.
+const RADIUS_PER_AREA = 0.18;   // rule 1 on the map: at focus_area 0.5 a new lens covers 0.09 of it
+// Lenses of different sizes read better than one size repeated; a placed lens takes the next of these.
 const LENS_RADII = [1, 0.62, 1.35, 0.8, 1.1, 0.5];
-const HALO_STOP = 1.5;      // at a ZERO floor the lowest rung is pushed past the edge (docs/quantization-filter.md)
 const PICK_SLACK = 1.25;    // clicking this much past a lens edge still grabs it
 /* The zones the page opens with, as shares of the canvas. The hero is square from 760px (site.css) and
    taller than wide below it, so the name sits lower in a phone's field and the zones follow it down;
@@ -191,14 +190,11 @@ function layout() {
   const strength = Number(controls.strength.value);
   const top = LADDER.length - 1;
   const ceiling = floorIndex + Math.floor(strength * (top - floorIndex));   // rule 2
-  const radius = BASE_RADIUS * area / (1 - area);                           // rule 1
-  // rule 3: even stops from the ceiling down to the first rung above the floor; a ZERO floor
-  // pushes the lowest rung past the edge as the ring that softens the step into emptiness.
+  const radius = RADIUS_PER_AREA * area;                                    // rule 1
+  // rule 3: even stops from the ceiling down to the first rung above the floor, the last at the edge
   const rings = [];
-  const halo = floorIndex === 0 && ceiling > 1;
-  const inner = halo ? ceiling - 1 : ceiling - floorIndex;
+  const inner = ceiling - floorIndex;
   for (let i = 0; i < inner; i++) rings.push({ level: ceiling - i, stop: (i + 1) / inner });
-  if (halo) rings.push({ level: 1, stop: HALO_STOP });
   const last = rings.length ? rings[rings.length - 1].stop : 1;
   return { floorIndex, ceiling, radius, rings, last, sum: controls.combine.value === "sum" };
 }

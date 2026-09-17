@@ -46,7 +46,7 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([quantization-filter.md](quantization-filter.md)).*
 
-Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
+Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones in the distance between blocks → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
 The weights are stored once, as residual slices read to a depth (step 5), so a zone costs only the depth it reads.
 
@@ -248,12 +248,12 @@ Background subtraction is worth keeping in the plan as a prepared next step: it 
 
 **One baseline, and it is uniform quantization at the same number of bits.** That is what a deployment would otherwise do, and it is the only comparison whose outcome changes a decision.
 
-**A random mask is not a baseline here.** It was written into this plan as mandatory, and it is dropped, 2026-09-13, for two reasons measured on the bench rather than argued:
+**A random mask is not a baseline here.** It was written into this plan as mandatory, and it is dropped, 2026-09-13, for two reasons:
 
-- **It does not cost the same.** Zones of the same count and radii around random blocks overlap less, so they store and read more - 5.72 bits against 4.28 at focus area 0.5. A control that spends a third more and answers worse says nothing about the address.
+- **It need not cost the same.** Zones around random blocks overlap less than the query's own, so at the same count and size they can store and read more. A control that spends more and answers worse says nothing about the address.
 - **Beating it proves nothing anyone needs.** Nobody ships a model quantized by random mask. Being better than deliberate damage is not a result; being better than uniform quantization at the same cost is.
 
-Where a control for shape is genuinely needed, it is the query's own zones carried elsewhere on the map as a rigid figure, landed where they cover the same weight - same count, same radii, same distances, same cost (`foqlens.zones.moved_zones`). That isolates *where the zones point* without changing what they cost.
+Where a control for shape is genuinely needed, it is the query's own zones carried elsewhere in the network, landed where they cover the same weight - same count, same cost. That isolates *where the zones point* without changing what they cost.
 
 ## The boundary of solo work
 

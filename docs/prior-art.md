@@ -48,7 +48,7 @@ The difference from FoQLens: a weight is computed or skipped; there is no step b
 
 ## Emergent modularity - do zones exist in dense models
 
-- **MoEfication** (Zhang et al., ACL Findings 2022, arXiv 2110.01786). Feed-forward neurons split into experts, one of the ways by clustering the co-activation graph, and 10-30% of them routed. The closest to the weight map of FoQLens; the groups are fixed partitions inside a layer, a router is added, and the rest is skipped.
+- **MoEfication** (Zhang et al., ACL Findings 2022, arXiv 2110.01786). Feed-forward neurons split into experts, one of the ways by clustering the co-activation graph, and 10-30% of them routed. The closest to the co-activation distance, one of the FoQLens variants for the distance between blocks; the groups are fixed partitions inside a layer, a router is added, and the rest is skipped.
 - **Emergent Modularity in Pre-trained Transformers** (Zhang et al., ACL 2023, arXiv 2305.18390). Neurons specialize and group into functional experts during pretraining.
 - **EMoE** (Qiu et al., NAACL 2024, arXiv 2310.10908). A dense model turned into an MoE along these emergent groups, with no added parameters.
 - **LLaMA-MoE** (Zhu et al., 2024, arXiv 2406.16554). The feed-forward layer partitioned into experts, then continued pretraining with a trained router.

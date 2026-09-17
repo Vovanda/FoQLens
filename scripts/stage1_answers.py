@@ -8,29 +8,38 @@ The questions spent on choosing the prompt (--tuning, the summary of scripts/pro
 Stage 2 reads only the frozen corpus (--frozen): the kept questions and the unknown share of each file.
 
     uv run python scripts/stage1_answers.py --tuning runs/reference/prompt-tuning/e2b-it/summary.json
-    uv run python scripts/stage1_answers.py --level d4 --frozen corpus/e2b-it --out runs/E016-uniform-quantization
+    uv run python scripts/stage1_answers.py --level d4 --frozen corpus/e2b-it --out runs/E017-uniform-quantization-floor/ladder
     uv run python scripts/stage1_answers.py --rounds 1 --out /tmp/stage1   # smoke check: one round
+    uv run python scripts/stage1_answers.py --level d2 --gguf <file.gguf> --frozen corpus/e2b-it --parts kept --out <dir>
+    uv run python scripts/stage1_answers.py --level d2 --frozen corpus/e2b-it --parts kept \\
+        --corpora arc_challenge_closed arc_easy_closed hotpotqa --written-tokens 1024 \\
+        --cut-of runs/E017-uniform-quantization-floor/ladder/e2b-it/unjudged/d2 --out runs/E017-uniform-quantization-floor/reask-1024
+
+A cut reply asked again at a raised cap is an observation, not a level's measure: the other levels answered at the
+frozen cap.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from foqlens import corpora
 from foqlens import model as fm
-from foqlens.answering import Asking, level_label
+from foqlens.answering import Asking, cut_ids, level_label
 from foqlens.attention import PLANS, SPLIT
 from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
 from foqlens.gpu_share import default_share
-from foqlens.io import answers_path, append_answers, read_frozen, write_json, written_ids
+from foqlens.io import answers_path, append_answers, read_answers, read_frozen, write_json, written_ids
+from foqlens.gguf_weights import GgufWeights
 from foqlens.judging import ModelJudge, NotJudged
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
-from foqlens.prompt_variants import SETUPS, examples_for, needs_train, setup_named
+from foqlens.prompt_variants import SETUPS, WRITTEN_TOKENS, examples_for, needs_train, setup_named
 from foqlens.quant import Level
 from foqlens.schedule import Schedule
 
@@ -60,12 +69,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b-it")
     parser.add_argument("--corpora", nargs="+", default=list(SETUPS), choices=list(SETUPS))
     parser.add_argument("--level", choices=list(LEVELS), default="bf16")
+    parser.add_argument("--gguf", type=Path, default=None,
+                        help="a published .gguf file to read a quantized level from instead of the bench's copy, for comparison")
     parser.add_argument("--setups", type=json.loads, default=FROZEN_SETUPS, help="JSON {corpus: setup name}")
     asked = parser.add_mutually_exclusive_group()
     asked.add_argument("--tuning", type=Path, default=None, help="summary.json of prompt_tuning.py: its questions are left out")
     asked.add_argument("--frozen", type=Path, default=None, help="folder of frozen corpus files: only what they ask")
     parser.add_argument("--parts", nargs="+", choices=FROZEN_PARTS, default=list(FROZEN_PARTS),
                         help="with --frozen: which parts of the frozen files are asked")
+    parser.add_argument("--cut-of", type=Path, default=None,
+                        help="a folder of answers files: only the questions whose answer there ran into the token cap are asked")
+    parser.add_argument("--written-tokens", type=int, default=WRITTEN_TOKENS,
+                        help="the cap of a written reply; raised with --cut-of to see whether a cut reply reaches its answer")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--rounds", type=int, default=None, help="stop after this many rounds, for a smoke check")
     parser.add_argument("--out", type=Path, default=Path("runs/reference/stage1"))
@@ -91,7 +106,10 @@ def main(argv: list[str] | None = None) -> Path:
         judge = ModelJudge(bench.model, tokenizer, bench.ctl, fmt, StaticDecoder(attention=plan, prefill_tokens=args.prefill_tokens))
         root = "answers"
     else:
-        bench.ctl.bake(level)
+        if args.gguf is None:
+            bench.ctl.bake(level)
+        else:
+            bench.ctl.bake_from(GgufWeights(args.gguf), level)
         judge, root = NotJudged(), UNJUDGED
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
@@ -110,7 +128,10 @@ def main(argv: list[str] | None = None) -> Path:
         else:
             left_out = set(spent.get(corpus, {}).get("tuning_ids", []))
             rows[corpus] = {r.id: r for r in corpus_rows if r.id not in left_out}
-        setup = setup_named(corpus, args.setups[corpus])
+        if args.cut_of:
+            cut = cut_ids(read_answers(args.cut_of / f"{corpus}.jsonl"))
+            rows[corpus] = {i: r for i, r in rows[corpus].items() if i in cut}
+        setup = replace(setup_named(corpus, args.setups[corpus]), written_tokens=args.written_tokens)
         train = corpora.read_train(corpus, TRAIN_POOL) if needs_train(setup) else []
         askings[corpus] = Asking(corpus, source.revision, name, level, setup, examples_for(corpus, setup, train, args.seed))
         paths[corpus] = answers_path(out / root, args.level, corpus)
@@ -136,9 +157,10 @@ def main(argv: list[str] | None = None) -> Path:
     # A corpus answered later joins the corpora answered before: their counts stay in the summary.
     earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
+        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
+        "cut_of": str(args.cut_of) if args.cut_of else None, "written_tokens": args.written_tokens,
         "rounds_this_run": rounds_done, "written_to": root,
         "answered": {**earlier.get("answered", {}), **{c: len(written_ids(p)) for c, p in paths.items()}},
         "questions": {**earlier.get("questions", {}), **{c: len(r) for c, r in rows.items()}},

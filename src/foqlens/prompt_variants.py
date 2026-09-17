@@ -75,6 +75,7 @@ class Variant:
     shots: int = 0
     shot_set: int = 0        # which draw of examples: two sets of the same size measure stability
     written: bool = False    # the reply reasons first and ends with "Answer: ..."
+    written_tokens: int = WRITTEN_TOKENS  # the cap of a written reply; raised only to ask again the replies it cut
 
     @property
     def stop(self) -> StopRule:
@@ -82,7 +83,7 @@ class Variant:
 
     @property
     def max_new_tokens(self) -> int:
-        return WRITTEN_TOKENS if self.written else SHORT_TOKENS
+        return self.written_tokens if self.written else SHORT_TOKENS
 
     def ask(self, context: str | None, question: str) -> str:
         text = qa_question(context, question)

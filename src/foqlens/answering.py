@@ -86,6 +86,11 @@ def with_verdict(answer: Answer, verdict: Verdict | None) -> Answer:
                    judge_with_reference=float("nan"), judge_without_reference=float("nan"), judge_grades=())
 
 
+def cut_ids(answers: list[Answer]) -> set[str]:
+    """The questions whose answer ran into the token cap instead of ending on its own."""
+    return {a.id for a in answers if not a.stopped}
+
+
 def rejudge(judge, answers: list[Answer], rows: list[Row], pacer: Pacer = FULL) -> list[Answer]:
     """Answers written earlier, read again by the present judge; `rows` are their questions, in the same order."""
     if [a.id for a in answers] != [r.id for r in rows]:

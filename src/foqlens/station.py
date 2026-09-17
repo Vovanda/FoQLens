@@ -73,9 +73,10 @@ def entry(record: dict, run: str, date: str) -> Entry | None:
     )
 
 
-def session_record(gpu: dict, outcomes: dict[str, int]) -> dict:
-    """The record a session of the GPU tests leaves for the log: its monitor and how it ended."""
-    return {"run": "GPU tests", "gpu": gpu, "note": ", ".join(f"{n} {k}" for k, n in outcomes.items() if n)}
+def session_record(gpu: dict, outcomes: dict[str, int], files: list[str]) -> dict:
+    """The record a session of the GPU tests leaves for the log: which test files ran, its monitor and how it ended."""
+    return {"run": f"GPU tests: {', '.join(sorted(files))}", "gpu": gpu,
+            "note": ", ".join(f"{n} {k}" for k, n in outcomes.items() if n)}
 
 
 def duration(seconds: float, estimated: bool) -> str:

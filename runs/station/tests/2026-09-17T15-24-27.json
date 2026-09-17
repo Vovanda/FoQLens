@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_resident_gpu",
+  "gpu": {
+    "samples": 50,
+    "started": "2026-09-17T15:23",
+    "wall_s": 68.87768840789795,
+    "utilization_mean": 23.08,
+    "utilization_median": 7.5,
+    "memory_reserved_peak_mib": 13950.0,
+    "temperature_mean_c": 50.08,
+    "temperature_peak_c": 56.0,
+    "power_mean_w": 157.9148,
+    "power_peak_w": 279.58,
+    "memory_allocated_peak_mib": 12539.00390625
+  },
+  "note": "2 passed"
+}

@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_padded_batch_gpu",
+  "gpu": {
+    "samples": 44,
+    "started": "2026-09-17T15:26",
+    "wall_s": 52.739598512649536,
+    "utilization_mean": 35.18181818181818,
+    "utilization_median": 10.0,
+    "memory_reserved_peak_mib": 14292.0,
+    "temperature_mean_c": 52.15909090909091,
+    "temperature_peak_c": 61.0,
+    "power_mean_w": 185.94227272727278,
+    "power_peak_w": 361.79,
+    "memory_allocated_peak_mib": 9025.17724609375
+  },
+  "note": "6 passed"
+}

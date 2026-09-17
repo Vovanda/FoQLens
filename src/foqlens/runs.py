@@ -8,6 +8,8 @@ rest of the bench asks for a slice and knows no SQL.
 Invariant: a slice reads the files as they are when it is asked - the views hold no copy of the rows.
 Invariant: `verdicts` holds one line per question, from the latest run of the judge that read it; the runs
 before it stay in `judged`.
+Invariant: every kind the judge gives falls into one grade group or is N/A, so a level's grade shares and its
+unread share sum to 1 on a part of the frozen corpus.
 Invariant: the agreement of the exact match and of the judge with Claude's readings of stage 1 equals
 passed-bf16.json, which stage 1's selection wrote (tests/test_runs_unit.py).
 """
@@ -18,6 +20,8 @@ from pathlib import Path
 
 import duckdb
 
+from foqlens.corpora import CORPORA
+from foqlens.judging import GRADE_GROUPS, NOT_READ
 from foqlens.selection import JUDGE_YES, KNOWING
 
 # The frozen corpus files hold every id of a corpus in a few lists; DuckDB's default object limit is 16 MiB.
@@ -61,6 +65,25 @@ class RunFiles:
         relation = self.con.execute(sql, params or [])
         columns = [d[0] for d in relation.description]
         return [dict(zip(columns, row)) for row in relation.fetchall()]
+
+    def grades(self, part: str) -> dict[str, dict[str, float]]:
+        """Per level, on one part of the frozen corpus: how many questions, and the share of each grade group
+        (judging.GRADE_GROUPS) and of replies the judge left unread."""
+        return {r.pop("level"): r for r in self._grades(part, "v.level")}
+
+    def grades_by_regime(self, part: str) -> dict[tuple[str, str], dict[str, float]]:
+        """As grades, per level and regime of the corpus (corpora.Corpus.regime)."""
+        return {(r.pop("level"), r.pop("regime")): r for r in self._grades(part, "v.level, c.regime")}
+
+    def _grades(self, part: str, keys: str) -> list[dict]:
+        shares = ", ".join(f"avg((v.judge_kind in ({', '.join(repr(k) for k in sorted(kinds))}))::int) {group}"
+                           for group, kinds in GRADE_GROUPS.items())
+        regimes = " union all ".join(f"select '{name}' corpus, '{corpus.regime}' regime" for name, corpus in CORPORA.items())
+        return self.query(f"""
+            with c as ({regimes})
+            select {keys}, count(*) n, {shares}, avg((v.judge_kind = '{NOT_READ}')::int) not_read
+            from verdicts v join frozen f using (corpus, id) join c using (corpus)
+            where f.part = ? group by {keys} order by {keys}""", [part])
 
     def agreement_with_readings(self, level: str) -> dict[str, dict[str, float]]:
         """Per corpus: how many answers Claude read, and how often the exact match and the judge agree with the reading."""

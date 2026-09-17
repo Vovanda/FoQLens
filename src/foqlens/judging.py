@@ -48,6 +48,10 @@ GRADES = (("Garbage", "not readable text: empty, random symbols or repeated frag
           ("Nearly", "almost right"), ("Correct", "right"))
 ACCEPTED = frozenset({"Nearly", "Correct"})  # the answer counts from "Nearly": the model knows the question (Volodya 2026-09-15)
 GARBAGE, NOT_READ = "Garbage", "N/A"  # N/A: the reply has no closing lines the parser understands
+# How a level's answers are reported (Volodya 2026-09-17): excellent is accepted; Partial is good - an incomplete
+# answer, not a bad one; wrong ones are bad; the rest is no answer at all.
+GRADE_GROUPS = {"excellent": ACCEPTED, "good": frozenset({"Partial"}), "bad": frozenset({"Wrong", "Related"}),
+                "incoherent": frozenset({"Noise", GARBAGE})}
 # The answer stands between two fence lines. Unfenced, an empty answer was followed by the instructions, and
 # the judge took them for the answer (E016, 2026-09-16).
 ANSWER_FENCE = "---"

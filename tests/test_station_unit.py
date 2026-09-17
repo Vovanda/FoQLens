@@ -61,7 +61,8 @@ def test_splice_replaces_only_what_stands_between_the_markers():
         splice("# no markers", "table")
 
 
-def test_a_test_session_leaves_its_monitor_and_its_outcome():
-    record = session_record(PHASE, {"passed": 61, "failed": 0, "error": 1})
-    assert record == {"run": "GPU tests", "gpu": PHASE, "note": "61 passed, 1 error"}
-    assert entry(record, "2026-09-14T21-05-00", "").run == "GPU tests"
+def test_a_test_session_leaves_its_files_its_monitor_and_its_outcome():
+    record = session_record(PHASE, {"passed": 61, "failed": 0, "error": 1}, ["test_stand_gpu", "test_bake_gpu"])
+    run = "GPU tests: test_bake_gpu, test_stand_gpu"
+    assert record == {"run": run, "gpu": PHASE, "note": "61 passed, 1 error"}
+    assert entry(record, "2026-09-14T21-05-00", "").run == run

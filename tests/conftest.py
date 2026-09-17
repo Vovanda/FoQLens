@@ -15,9 +15,10 @@ OUTCOMES = ("passed", "failed", "error")
 GPU_TEST_FILE = "_gpu.py"
 
 
-def ran_gpu_tests(terminalreporter) -> bool:
-    return any(r.nodeid.split("::")[0].endswith(GPU_TEST_FILE)
-               for k in OUTCOMES for r in terminalreporter.stats.get(k, []))
+def gpu_test_files(terminalreporter) -> list[str]:
+    """The GPU test files the session ran, by name without the directory and suffix."""
+    return sorted({Path(r.nodeid.split("::")[0]).stem for k in OUTCOMES for r in terminalreporter.stats.get(k, [])
+                   if r.nodeid.split("::")[0].endswith(GPU_TEST_FILE)})
 
 
 def pytest_sessionstart(session):
@@ -37,12 +38,13 @@ def pytest_terminal_summary(terminalreporter, config):
         terminalreporter.write_line(
             f"GPU during the tests: peak {s['temperature_peak_c']:.0f} C (mean {s['temperature_mean_c']:.0f}), "
             f"peak {s['power_peak_w']:.0f} W, utilization {s['utilization_mean']:.0f}% mean, {s['samples']} samples")
-    if s["samples"] and ran_gpu_tests(terminalreporter):
+    files = gpu_test_files(terminalreporter)
+    if s["samples"] and files:
         from foqlens.io import write_json
         from foqlens.station import session_record
 
         outcomes = {k: len(terminalreporter.stats.get(k, [])) for k in OUTCOMES}
-        write_json(STATION_TESTS / f"{datetime.now():%Y-%m-%dT%H-%M-%S}.json", session_record(s, outcomes))
+        write_json(STATION_TESTS / f"{datetime.now():%Y-%m-%dT%H-%M-%S}.json", session_record(s, outcomes, files))
 
 
 def pytest_collection_modifyitems(config, items):

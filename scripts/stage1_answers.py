@@ -8,12 +8,12 @@ The questions spent on choosing the prompt (--tuning, the summary of scripts/pro
 Stage 2 reads only the frozen corpus (--frozen): the kept questions and the unknown share of each file.
 
     uv run python scripts/stage1_answers.py --tuning runs/reference/prompt-tuning/e2b-it/summary.json
-    uv run python scripts/stage1_answers.py --level d4 --frozen corpus/e2b-it --out runs/E017-uniform-quantization-floor/ladder
+    uv run python scripts/stage1_answers.py --level d4 --frozen corpus/e2b-it --out runs/E002-base-precision-d2/ladder
     uv run python scripts/stage1_answers.py --rounds 1 --out /tmp/stage1   # smoke check: one round
     uv run python scripts/stage1_answers.py --level d2 --gguf <file.gguf> --frozen corpus/e2b-it --parts kept --out <dir>
     uv run python scripts/stage1_answers.py --level d2 --frozen corpus/e2b-it --parts kept \\
         --corpora arc_challenge_closed arc_easy_closed hotpotqa --written-tokens 1024 \\
-        --cut-of runs/E017-uniform-quantization-floor/ladder/e2b-it/unjudged/d2 --out runs/E017-uniform-quantization-floor/reask-1024
+        --cut-of runs/E002-base-precision-d2/ladder/e2b-it/unjudged/d2 --out runs/E002-base-precision-d2/reask-1024
 
 A cut reply asked again at a raised cap is an observation, not a level's measure: the other levels answered at the
 frozen cap.

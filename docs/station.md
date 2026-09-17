@@ -39,25 +39,14 @@ utilization, mean and peak temperature, peak power - and the pacing through `"pa
 breaks taken. A session of the GPU tests leaves the same record in `runs/station/tests/`. A run stopped
 before it wrote its summary is entered by hand in `runs/station/`, and its note says so.
 
-`scripts/station_log.py` rebuilds the log and the peaks below from all of them, and from the summaries
-of the runs deleted with the first corpus, which it reads from the git history. A time marked ~ is an
+`scripts/station_log.py` rebuilds the log and the peaks below from all of them. A time marked ~ is an
 estimate: a summary written before the monitor kept a clock is counted by its samples, one a second.
-The runs of E001 predate the monitor and are not in the log.
 
 <!-- station-log:begin -->
 ## Log
 
 | Date | Run | Time | Utilization, mean | Temperature, mean / peak | Power, peak | Cooling breaks | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-09-12 | E004-injection/e2b | ~8 min | 54% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-12 | E005-backbone/e2b | ~14 min | 61% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-12 | E007-dilation/e2b | ~7 min | 48% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-12 | E008-zones-fixed-budget/e2b | ~20 min | 50% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-12 | E009-zones-matrix/e2b | ~1 h 34 min | 40% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-12 | E010-lens-layout-random/e2b | ~16 min | 72% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-12 | E010-lens-layout/e2b | ~25 min | 69% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-13 | E013-regulator-map/e2b | ~44 min | 71% | - / - | - | - | deleted with the first corpus in 1e89a81 |
-| 2026-09-13 | E014-moved-zones/e2b | ~4 min | 66% | - / - | - | - | deleted with the first corpus in 1e89a81 |
 | 2026-09-13 | reference/address-stability/e2b | ~6 min | 58% | - / - | - | - |  |
 | 2026-09-13 | reference/shuffle-answers-canonical/e2b | ~6 min | 56% | - / - | - | - |  |
 | 2026-09-13 | reference/shuffle-answers-fixed-address/e2b | ~4 min | 68% | - / - | - | - |  |
@@ -78,9 +67,11 @@ The runs of E001 predate the monitor and are not in the log.
 | 2026-09-14 | GPU tests | 1 min | 24% | 49 / 57 °C | 330 W | - | 1 passed |
 | 2026-09-14 | GPU tests | 16 min | 53% | 56 / 65 °C | 335 W | - | 22 passed, 1 failed |
 | 2026-09-14 | calibration of the letter-choice corpora, share 0.8, before the thermal guard | ~25 min | 100% | - / 83 °C | 403 W | - | entered by hand from nvidia-smi, the run was stopped before its summary: a smell of burnt dust; the dust was blown out, the limits were set |
-| 2026-09-15 | 2026-09-15-e016-answer-d8-collapsed | 47 min | 83% | 63 / 68 °C | 413 W | 0 | E016 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again |
-| 2026-09-15 | 2026-09-15-e016-judge-bf16-collapsed | 12 min | 84% | 67 / 71 °C | 405 W | 0 | E016 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again |
-| 2026-09-15 | 2026-09-15-e016-judge-d8-collapsed | 16 min | 84% | 67 / 70 °C | 406 W | 0 | E016 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again |
+| 2026-09-15 | 2026-09-15-e001-answer-d8-collapsed | 47 min | 83% | 63 / 68 °C | 413 W | 0 | E001 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again |
+| 2026-09-15 | 2026-09-15-e001-judge-bf16-collapsed | 12 min | 84% | 67 / 71 °C | 405 W | 0 | E001 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again |
+| 2026-09-15 | 2026-09-15-e001-judge-d8-collapsed | 16 min | 84% | 67 / 70 °C | 406 W | 0 | E001 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again |
+| 2026-09-15 | E001-uniform-quantization/e2b-it/summary-bf16 | 9 min | 70% | 60 / 67 °C | 402 W | 0 |  |
+| 2026-09-15 | E001-uniform-quantization/e2b-it/summary-d8 | 5 min | 88% | 65 / 69 °C | 399 W | 0 |  |
 | 2026-09-15 | GPU tests | 1 min | 10% | 51 / 55 °C | 229 W | - | 4 passed |
 | 2026-09-15 | GPU tests | 0 min | 0% | 51 / 51 °C | 107 W | - | 8 passed |
 | 2026-09-15 | GPU tests | 0 min | 0% | 50 / 50 °C | 107 W | - | 2 passed |
@@ -96,21 +87,56 @@ The runs of E001 predate the monitor and are not in the log.
 | 2026-09-15 | GPU tests | 1 min | 11% | 46 / 50 °C | 198 W | - | 4 passed |
 | 2026-09-15 | GPU tests | 1 min | 11% | 47 / 53 °C | 258 W | - | 4 passed, 1 failed |
 | 2026-09-15 | GPU tests | 1 min | 13% | 47 / 54 °C | 266 W | - | 5 passed |
-| 2026-09-15 | GPU tests | 0 min | 1% | 47 / 47 °C | 109 W | - | 25 passed |
 | 2026-09-15 | GPU tests | 1 min | 18% | 48 / 56 °C | 337 W | - | 1 passed |
 | 2026-09-15 | GPU tests | 1 min | 7% | 48 / 53 °C | 272 W | - | 2 passed |
-| 2026-09-15 | GPU tests | 1 min | 0% | 46 / 46 °C | 110 W | - | 324 passed |
 | 2026-09-15 | GPU tests | 1 min | 7% | 46 / 48 °C | 181 W | - | 2 passed |
-| 2026-09-15 | GPU tests | 1 min | 3% | 54 / 60 °C | 181 W | - | 328 passed |
 | 2026-09-15 | reference/prompt-tuning/e2b-it | 7 min | 13% | 45 / 56 °C | 374 W | 0 |  |
 | 2026-09-15 | reference/stage1/e2b-it/summary-bf16 | 3 min | 82% | 60 / 66 °C | 400 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/bf16-unknown-again/e2b-it/summary-bf16 | 19 min | 78% | 59 / 66 °C | 400 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-d2 | 1 h 40 min | 82% | 61 / 67 °C | 404 W | 1 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-d4 | 54 min | 82% | 64 / 69 °C | 407 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-d6 | 52 min | 83% | 64 / 68 °C | 408 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-judged-bf16 | 16 min | 84% | 67 / 70 °C | 400 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-judged-d2 | 16 min | 85% | 68 / 70 °C | 400 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-judged-d4 | 16 min | 85% | 67 / 70 °C | 401 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-judged-d6 | 16 min | 85% | 67 / 70 °C | 400 W | 0 |  |
+| 2026-09-16 | E001-uniform-quantization/e2b-it/summary-judged-d8 | 16 min | 85% | 67 / 70 °C | 400 W | 0 |  |
+| 2026-09-16 | GPU tests | 1 min | 12% | 48 / 57 °C | 325 W | - | 5 passed |
+| 2026-09-16 | GPU tests | 14 min | 50% | 58 / 69 °C | 398 W | - | 22 passed, 1 failed |
+| 2026-09-16 | GPU tests | 1 min | 9% | 51 / 56 °C | 278 W | - | 5 passed |
+| 2026-09-16 | GPU tests | 5 min | 12% | 50 / 59 °C | 280 W | - | 4 passed |
+| 2026-09-16 | GPU tests | 1 min | 21% | 49 / 58 °C | 363 W | - | 6 passed |
+| 2026-09-16 | GPU tests | 1 min | 7% | 45 / 46 °C | 124 W | - | 8 passed |
+| 2026-09-16 | GPU tests | 1 min | 8% | 46 / 46 °C | 123 W | - | 4 passed |
+| 2026-09-16 | GPU tests | 18 min | 57% | 58 / 69 °C | 399 W | - | 22 passed, 1 failed |
+| 2026-09-16 | GPU tests | 18 min | 61% | 59 / 69 °C | 399 W | - | 23 passed |
+| 2026-09-16 | GPU tests | 1 min | 15% | 55 / 63 °C | 375 W | - | 6 passed |
+| 2026-09-16 | GPU tests | 1 min | 21% | 47 / 52 °C | 275 W | - | 3 passed |
+| 2026-09-16 | GPU tests | 1 min | 36% | 50 / 61 °C | 375 W | - | 6 passed |
+| 2026-09-16 | GPU tests | 19 min | 58% | 59 / 69 °C | 400 W | - | 23 passed |
+| 2026-09-17 | E002-base-precision-d2/gguf-q4_k_m/e2b-it/summary-d2 | 50 min | 83% | 63 / 68 °C | 404 W | 0 |  |
+| 2026-09-17 | E002-base-precision-d2/gguf-ud-q2_k_xl/e2b-it/summary-d2 | 1 h 07 min | 78% | 61 / 67 °C | 403 W | 1 |  |
+| 2026-09-17 | E002-base-precision-d2/ladder/e2b-it/summary-d2 | 12 min | 80% | 60 / 66 °C | 401 W | 0 |  |
+| 2026-09-17 | E002-base-precision-d2/ladder/e2b-it/summary-d4 | 54 min | 82% | 63 / 68 °C | 404 W | 0 |  |
+| 2026-09-17 | E002-base-precision-d2/ladder/e2b-it/summary-d6 | 55 min | 83% | 63 / 68 °C | 407 W | 0 |  |
+| 2026-09-17 | E002-base-precision-d2/ladder/e2b-it/summary-d8 | 55 min | 83% | 63 / 68 °C | 403 W | 0 |  |
+| 2026-09-17 | GPU tests: test_bake_gpu | 1 min | 29% | 49 / 56 °C | 340 W | - | 1 passed |
+| 2026-09-17 | GPU tests: test_graph_decode_gpu | 20 min | 56% | 59 / 69 °C | 399 W | - | 23 passed |
+| 2026-09-17 | GPU tests: test_it_gpu | 1 min | 28% | 51 / 57 °C | 279 W | - | 4 passed |
+| 2026-09-17 | GPU tests: test_kquant_ladder_gpu | 15 min | 93% | 65 / 69 °C | 398 W | - | 4 passed |
+| 2026-09-17 | GPU tests: test_kquant_ladder_gpu | 15 min | 94% | 65 / 70 °C | 400 W | - | 4 passed |
+| 2026-09-17 | GPU tests: test_kquant_ladder_gpu | 15 min | 93% | 65 / 70 °C | 399 W | - | 4 passed |
+| 2026-09-17 | GPU tests: test_padded_batch_gpu | 1 min | 35% | 52 / 61 °C | 362 W | - | 6 passed |
+| 2026-09-17 | GPU tests: test_resident_gpu | 1 min | 23% | 50 / 56 °C | 280 W | - | 2 passed |
+| 2026-09-17 | GPU tests: test_stand_gpu | 1 min | 29% | 51 / 57 °C | 277 W | - | 8 passed, 1 failed |
+| 2026-09-17 | GPU tests: test_stand_gpu | 1 min | 23% | 56 / 61 °C | 271 W | - | 9 passed |
 
 ## Peaks
 
 | | Value | When |
 | --- | --- | --- |
 | Temperature | 83 °C | 2026-09-14, calibration of the letter-choice corpora, share 0.8, before the thermal guard |
-| Power | 413 W | 2026-09-15, 2026-09-15-e016-answer-d8-collapsed |
-| Longest run | ~1 h 34 min | 2026-09-12, E009-zones-matrix/e2b |
-| GPU time in total | ~7 h 30 min | 55 entries |
+| Power | 413 W | 2026-09-15, 2026-09-15-e001-answer-d8-collapsed |
+| Longest run | 1 h 40 min | 2026-09-16, E001-uniform-quantization/e2b-it/summary-d2 |
+| GPU time in total | ~16 h 21 min | 83 entries |
 <!-- station-log:end -->

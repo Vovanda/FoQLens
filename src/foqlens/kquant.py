@@ -250,7 +250,7 @@ class KSlicedWeight(_SliceReader):
 
 
 # The classes whose weights the floor keeps on a Q4_K base: raised one at a time over a 2-bit floor none brings the
-# knowledge back, together they do (E017, exploration-module-classes: EM 0.048 -> 0.413, 2% of the weights in k and
+# knowledge back, together they do (E002, exploration-module-classes: EM 0.048 -> 0.413, 2% of the weights in k and
 # the per-layer modules); unsloth's UD-Q2_K_XL raises the same classes.
 SENSITIVE_CLASSES = ("self_attn.k_proj", "self_attn.v_proj", "self_attn.o_proj", "mlp.down_proj",
                      "per_layer_input_gate", "per_layer_projection")

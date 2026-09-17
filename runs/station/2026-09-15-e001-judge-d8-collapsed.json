@@ -1,0 +1,36 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "level": "d8",
+  "frozen": "corpus\\e2b-it",
+  "answers": "runs\\E001-uniform-quantization\\e2b-it\\unjudged",
+  "judged": {
+    "triviaqa": 4568,
+    "nq_open": 902,
+    "squad_v2": 6803,
+    "arc_challenge_closed": 578,
+    "arc_easy_closed": 1513,
+    "hotpotqa": 6276
+  },
+  "gpu": {
+    "samples": 874,
+    "started": "2026-09-15T22:19",
+    "wall_s": 943.367193698883,
+    "utilization_mean": 84.27574370709382,
+    "utilization_median": 98.0,
+    "memory_reserved_peak_mib": 22990.0,
+    "temperature_mean_c": 66.53890160183066,
+    "temperature_peak_c": 70.0,
+    "power_mean_w": 357.42525171624715,
+    "power_peak_w": 406.24,
+    "memory_allocated_peak_mib": 12387.146484375
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 60.0,
+    "thermal_pause_s": 0.0
+  },
+  "note": "E001 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again"
+}

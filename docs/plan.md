@@ -44,7 +44,7 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 ## Step 3. Precision follows the meaning
 
-Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([quantization-filter.md](quantization-filter.md)); the fixed-budget layouts of E008 and E009 are legacy.*
+Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([quantization-filter.md](quantization-filter.md)).*
 
 Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones on the weight map → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
@@ -64,7 +64,7 @@ A side effect in favor of the statement: with a continuous learnable mask **zone
 
 ## Step 5. Residuals instead of copies
 
-An engineering optimization, not a test of the hypothesis. *Done 2026-09-11 ([E006](../experiments/E006-read-depths/_index.md)): 4 slices of 2 bits after MoBiQuant, read at 2 / 4 / 6 / 8 bits.*
+An engineering optimization, not a test of the hypothesis. *Done 2026-09-11: 4 slices of 2 bits after MoBiQuant, read at 2 / 4 / 6 / 8 bits.*
 
 A 2-bit base plus residual levels (the difference between the real weight and what the base layer gave). 2/4/6 bits from one data set, without three copies and without repacking. Sharpening stops costing separate memory.
 

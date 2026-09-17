@@ -9,7 +9,7 @@ model's own form (foqlens.prompting).
 
 A reply read in one token could not tell an answer from garbage: it accepted 45-85% of D2's empty and
 random-symbol answers whatever the instructions, and called most of them Correct. Given room to reason,
-it calls them Garbage (47 of 48 on held-out answers, E016, 2026-09-16). An answer of whitespace alone is
+it calls them Garbage (47 of 48 on held-out answers, E001, 2026-09-16). An answer of whitespace alone is
 not shown to it: it is Garbage without a question asked.
 
 Invariant: the judge never sees who wrote an answer - its question holds the question, the correct answers
@@ -53,7 +53,7 @@ GARBAGE, NOT_READ = "Garbage", "N/A"  # N/A: the reply has no closing lines the 
 GRADE_GROUPS = {"excellent": ACCEPTED, "good": frozenset({"Partial"}), "bad": frozenset({"Wrong", "Related"}),
                 "incoherent": frozenset({"Noise", GARBAGE})}
 # The answer stands between two fence lines. Unfenced, an empty answer was followed by the instructions, and
-# the judge took them for the answer (E016, 2026-09-16).
+# the judge took them for the answer (E001, 2026-09-16).
 ANSWER_FENCE = "---"
 # The reply is free and only its end is fixed. Said "one to three sentences" or opened as JSON, the judge
 # held back its reasoning; in its own markdown it let 4% of wrong answers through against 18% in JSON (2026-09-16).
@@ -66,7 +66,7 @@ CLOSING = ("Reason as you need, then end your reply with exactly these two lines
 # The judge's replies on 247 labelled answers ran 9-161 tokens (median 33); the limit leaves room and
 # bounds a batch, which costs its longest reply.
 JUDGE_TOKENS = 200
-# A reply cut by that limit is asked once more with this one: on E016's bf16 answers 63 of 20,640 were cut before
+# A reply cut by that limit is asked once more with this one: on E001's bf16 answers 63 of 20,640 were cut before
 # their closing lines, mostly ARC and SQuAD where the judge works the answer through (2026-09-16). Few, so a
 # second batch of them costs seconds, where a larger limit for all would slow every batch to its longest reply.
 JUDGE_RETRY_TOKENS = 1024
@@ -113,7 +113,7 @@ def read_verdict(reply: str) -> Verdict:
     """The two closing lines of a reply; the last of each counts, since the reasoning may quote the format.
 
     Whether the answer is accepted follows from its kind, as the rule says: the judge's own Accepted line
-    contradicted its kind on 0.9% of E016's verdicts, 658 of them "Partial, Yes" (2026-09-16).
+    contradicted its kind on 0.9% of E001's verdicts, 658 of them "Partial, Yes" (2026-09-16).
     """
     kinds, accepted = KIND.findall(reply), ACCEPTED_LINE.findall(reply)
     known = {word for word, _ in GRADES}

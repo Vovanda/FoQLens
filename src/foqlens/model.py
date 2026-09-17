@@ -72,7 +72,7 @@ def load(
     # numbers (letter log-probabilities 0.19 -> 0.09 apart between a batch and one by one).
     torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
     # The memory-efficient sdpa kernel collapses every padded row of some left-padded batches into one and
-    # the same state, whatever its prompt: E016 at D8 opened whole batches with 令, stage 1 at bf16 with
+    # the same state, whatever its prompt: E001 at D8 opened whole batches with 令, stage 1 at bf16 with
     # <h2> (issue #14, 2026-09-15). This build of torch has no flash kernel and cuDNN refuses Gemma 4's
     # head_dim of 256 and 512, so sdpa falls back to math.
     torch.backends.cuda.enable_mem_efficient_sdp(False)

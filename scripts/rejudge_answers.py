@@ -16,12 +16,12 @@ With --watch the model stays loaded and waits: a request is a JSON file dropped 
 {"level": "bf16", "corpus": "arc_challenge_closed", "rows": "12,305-310"} (rows optional), judged as its own
 run and moved to done/ with the run's summary path, or to failed/ with the error.
 
-    uv run python scripts/rejudge_answers.py --answers runs/E016-uniform-quantization/e2b-it/unjudged \\
-        --levels d8 d6 d4 d2 --frozen corpus/e2b-it --out runs/E016-uniform-quantization
-    uv run python scripts/rejudge_answers.py --answers runs/E016-uniform-quantization/e2b-it/answers --levels bf16 \\
-        --corpora arc_challenge_closed --rows 12,305-310 --frozen corpus/e2b-it --out runs/E016-uniform-quantization
-    uv run python scripts/rejudge_answers.py --answers runs/E016-uniform-quantization/e2b-it/answers \\
-        --watch .claude/judge-requests --frozen corpus/e2b-it --out runs/E016-uniform-quantization
+    uv run python scripts/rejudge_answers.py --answers runs/E001-uniform-quantization/e2b-it/unjudged \\
+        --levels d8 d6 d4 d2 --frozen corpus/e2b-it --out runs/E001-uniform-quantization
+    uv run python scripts/rejudge_answers.py --answers runs/E001-uniform-quantization/e2b-it/answers --levels bf16 \\
+        --corpora arc_challenge_closed --rows 12,305-310 --frozen corpus/e2b-it --out runs/E001-uniform-quantization
+    uv run python scripts/rejudge_answers.py --answers runs/E001-uniform-quantization/e2b-it/answers \\
+        --watch .claude/judge-requests --frozen corpus/e2b-it --out runs/E001-uniform-quantization
 """
 
 from __future__ import annotations

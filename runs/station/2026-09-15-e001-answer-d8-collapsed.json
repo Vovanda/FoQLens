@@ -1,0 +1,56 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "level": "d8",
+  "seed": 0,
+  "decoder": "static",
+  "setups": {
+    "triviaqa": "short-0",
+    "nq_open": "short-0",
+    "squad_v2": "passage-0",
+    "arc_challenge_closed": "solve-0",
+    "arc_easy_closed": "solve-brief",
+    "hotpotqa": "justify"
+  },
+  "tuning": null,
+  "frozen": "corpus\\e2b-it",
+  "rounds_this_run": 20,
+  "written_to": "unjudged",
+  "answered": {
+    "triviaqa": 4568,
+    "nq_open": 902,
+    "squad_v2": 6803,
+    "arc_challenge_closed": 578,
+    "arc_easy_closed": 1513,
+    "hotpotqa": 6276
+  },
+  "questions": {
+    "triviaqa": 4568,
+    "nq_open": 902,
+    "squad_v2": 6803,
+    "arc_challenge_closed": 578,
+    "arc_easy_closed": 1513,
+    "hotpotqa": 6276
+  },
+  "gpu": {
+    "samples": 2610,
+    "started": "2026-09-15T19:10",
+    "wall_s": 2815.1021065711975,
+    "utilization_mean": 82.65095785440613,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 18375.0,
+    "temperature_mean_c": 63.355172413793106,
+    "temperature_peak_c": 68.0,
+    "power_mean_w": 294.32588888888887,
+    "power_peak_w": 412.87,
+    "memory_allocated_peak_mib": 13787.60107421875
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 64.0,
+    "thermal_pause_s": 0.0
+  },
+  "note": "E001 before issue #14: the memory-efficient sdpa kernel collapsed whole batches; answers moved out of the repo, run again"
+}

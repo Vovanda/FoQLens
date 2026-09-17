@@ -46,7 +46,7 @@ bench asks for a slice and knows no SQL.
 
 - The slices of stage 1 equal what its selection wrote, `passed-bf16.json` - the agreement of the exact
   match and of the judge with Claude's readings, per corpus (`tests/test_runs_unit.py`).
-- All of E016 - the knowledge kept per level and corpus, the judges' agreement, topics, fragility, the
+- All of E001 - the knowledge kept per level and corpus, the judges' agreement, topics, fragility, the
   language of the answer - is counted in seconds.
 - The slice "lost answers next to bf16's" showed Chinese characters, and the order of the lines showed
   that whole batches broke. That is how a fault of the bench was found

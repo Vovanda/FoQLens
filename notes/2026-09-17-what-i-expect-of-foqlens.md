@@ -2,7 +2,7 @@
 
 2026-09-17. Volodya.
 
-The goal is to surpass E2B bf16. An example on a corpus of 40,000 questions: bf16 knows half of them and does not know the other half. The rows bf16-D2 follow from the measured shares of excellent answers - Correct and Nearly by the judge (D8-D4 from E016, D2 from E017), the FoQLens rows are my expectations.
+The goal is to surpass E2B bf16. An example on a corpus of 40,000 questions: bf16 knows half of them and does not know the other half. The rows bf16-D2 follow from the measured shares of excellent answers - Correct and Nearly by the judge (D8-D4 from E001, D2 from E002), the FoQLens rows are my expectations.
 
 | Model | Known | Unknown | Answers of 40,000 | Share |
 | --- | --- | --- | --- | --- |

@@ -332,7 +332,7 @@ def graded_zone_layout(
     floor: Level = Level.D4, combine: str = "sum", halo: bool = False,
     stops: tuple[tuple[Level, float], ...] | None = None,
 ) -> ZoneLayout:
-    """The layout of E010 (E010 PREREG, docs/quantization-filter.md): a floor everywhere, zones graded up to a ceiling.
+    """The graded zone layout (docs/quantization-filter.md): a floor everywhere, zones graded up to a ceiling.
 
     The ceiling is focus_strength of the way from the floor to the top of the ladder; the profile is
     even by default, with the lowest rung pushed past the edge when `halo` is on. There is no budget:
@@ -348,7 +348,7 @@ def graded_zone_layout(
 class ShuffledLevels:
     """The levels of another policy, shuffled over the blocks: the same memory with no mask at all.
 
-    The control of E010 PREREG and of the preregistration's second baseline: it holds the layout's
+    A control of the preregistration: it holds the layout's
     mean bits and its mix of levels exactly, and only forgets where they belong. Blocks differ in how
     many weights they hold, so the shuffle stays inside groups of equal weight - otherwise the control
     would quietly spend a little more or less memory than the layout it controls.

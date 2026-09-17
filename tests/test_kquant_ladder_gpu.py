@@ -1,6 +1,6 @@
-"""The bench's copy answers as the committed k-quant ladder of E017 did, at every read depth.
+"""The bench's copy answers as the committed k-quant ladder of E002 did, at every read depth.
 
-E017's ladder was answered with each level baked into the weights. Here the controller reads the same k-quant copy
+E002's ladder was answered with each level baked into the weights. Here the controller reads the same k-quant copy
 by blocks (set_all), the path the filter's zones take, on 17 known questions of each of the six corpora, and the
 replies are held against the committed answers of those questions.
 
@@ -27,9 +27,9 @@ from foqlens.quant import Level
 pytestmark = pytest.mark.gpu
 
 FROZEN = Path("corpus/e2b-it")
-LADDER = Path("runs/E017-uniform-quantization-floor/ladder/e2b-it")
+LADDER = Path("runs/E002-base-precision-d2/ladder/e2b-it")
 PER_CORPUS = 17  # six corpora: 102 questions
-# Only a short answer can be held word for word: bf16 against itself in other batches (E016, bf16-unknown-again)
+# Only a short answer can be held word for word: bf16 against itself in other batches (E001, bf16-unknown-again)
 # keeps 0.95 of TriviaQA, 0.98 of SQuAD, 0.89 of NQ-open, but 0.02 of ARC-Challenge's 488-token solutions.
 SHORT_CORPORA = ("triviaqa", "squad_v2", "nq_open")
 # bf16's own share on these three is 0.96; the copy read by blocks kept 0.94-1.00 at every level (2026-09-17)

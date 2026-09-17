@@ -1,9 +1,7 @@
 """Rebuilds the log and the peaks of docs/station.md from every run summary under runs/.
 
 A summary without a date of its own - written before GpuMonitor kept a clock - is dated by the
-commit that added it, or by the file's time when it was never committed. The runs of the first
-corpus were deleted with it (DELETED_WITH_THE_CORPUS); their results carry no verdict, but the hours
-the card spent on them are the station's all the same, so their summaries are read from the history.
+commit that added it, or by the file's time when it was never committed.
 
     uv run python scripts/station_log.py
 """
@@ -18,8 +16,6 @@ from pathlib import Path, PurePosixPath
 
 from foqlens.station import Entry, entry, render, splice
 
-# 1e89a81, 2026-09-13: "delete the runs and results of the corpus that could not carry a verdict"
-DELETED_WITH_THE_CORPUS = "1e89a81"
 SUMMARY = "summary*.json"
 
 
@@ -56,22 +52,9 @@ def on_disk(runs: Path) -> list[Entry]:
     return out
 
 
-def deleted(runs: Path) -> list[Entry]:
-    before = f"{DELETED_WITH_THE_CORPUS}^"
-    out = []
-    for name in git("ls-tree", "-r", "--name-only", before, "--", runs.as_posix()).split():
-        path = PurePosixPath(name)
-        if not path.match(SUMMARY) or Path(name).exists():  # a run kept on disk is read there
-            continue
-        record = json.loads(git("show", f"{before}:{name}"))
-        record.setdefault("note", f"deleted with the first corpus in {DELETED_WITH_THE_CORPUS}")
-        out.append(entry(record, run_name(path, PurePosixPath(runs.as_posix())), added_on(name, before)))
-    return out
-
-
 def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
-    entries = [e for e in deleted(args.runs) + on_disk(args.runs) if e is not None]
+    entries = [e for e in on_disk(args.runs) if e is not None]
     args.doc.write_text(splice(args.doc.read_text(encoding="utf-8"), render(entries)), encoding="utf-8")
     print(f"{len(entries)} entries -> {args.doc}")
     return args.doc

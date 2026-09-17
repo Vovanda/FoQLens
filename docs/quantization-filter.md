@@ -4,7 +4,7 @@ title: The quantization filter and its zones
 
 # The quantization filter and its zones
 
-How the quantization filter lays precision over the weights. This page is the single source of truth for the mechanism: experiments cite it by commit (E010 and on), other documents link here instead of retelling it.
+How the quantization filter lays precision over the weights. This page is the single source of truth for the mechanism: experiments cite it by commit, other documents link here instead of retelling it.
 
 The mechanism is **FoQZones** - focusable quantization zones. A zone is a region of the weights that
 the regulator reads at a higher precision than the rest; it is focusable in two senses, its size and
@@ -65,7 +65,7 @@ The metaphor of the mechanism - a multi-lens chosen for the query - is in [visua
 **What the names mean.** `D` is depth, counted in 2-bit planes of the one stored copy, and the number
 is the bits it comes to. The copy is a k-quant base after llama.cpp - Q2_K, one plane, or Q4_K, two
 planes for the sensitive module classes - with residual slices over it, each quantizing what the planes
-before it left with a step four times finer (`foqlens.kquant.KSlicedWeight`, E017). They are not
+before it left with a step four times finer (`foqlens.kquant.KSlicedWeight`, E002). They are not
 different quantizers - they are how deep the same copy is read. A module on a Q4_K base reads the same
 at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 
@@ -74,8 +74,8 @@ reference the judge and the retention are measured against. A rung above D8 woul
 about 16.6 bits per weight - more than the bf16 weight itself.
 
 No rung is fixed in the rules: every level follows from the ladder and the controls. On E2B naive
-round-to-nearest at two bits breaks the model ([E016](../experiments/E016-uniform-quantization/results.md)); the
-k-quant copy keeps 51.4% of bf16's knowledge at D2 ([E017](../experiments/E017-uniform-quantization-floor/results.md)),
+round-to-nearest at two bits breaks the model ([E001](../experiments/E001-uniform-quantization/results.md)); the
+k-quant copy keeps 51.4% of bf16's knowledge at D2 ([E002](../experiments/E002-base-precision-d2/results.md)),
 so D2 serves as a base precision and as the ring pushed past a zone edge.
 
 ## Where the zones come from
@@ -147,8 +147,8 @@ At the same base, focus_area and focus_strength:
 
 | Earlier | Now |
 | --- | --- |
-| precision_share (E009 PREREG-2) - the share of a preset budget | focus_strength - how far the zone centers rise above the base; there is no preset budget |
-| focus_area (E009 PREREG-2) | focus_area - the same word, now the size of the zones |
+| precision_share - the share of a preset budget | focus_strength - how far the zone centers rise above the base; there is no preset budget |
+| focus_area (earlier) | focus_area - the same word, now the size of the zones |
 | coarse level / uniform background; frosted (D4) or opaque (ZERO) glass | the floor: any rung of the ladder |
-| glass (E010 PREREG - the control) | floor - the same control, the word the runs and the scripts already use; glass stays its metaphor |
+| glass | floor - the same control, the word the runs and the scripts already use; glass stays its metaphor |
 | - | the site shows it as **base precision**: what the network is read at before any zone. Not *baseline*, which in this bench means the control to beat - uniform quantization at the same memory |

@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from foqlens.corpora import CORPORA, PASSAGE, TWO_PASSAGES, WEIGHTS
+from foqlens.judging import GRADE_GROUPS, GRADES, NOT_READ
 from foqlens.runs import RunFiles
 
 STAGE1 = Path("runs/reference/stage1/e2b-it")
@@ -64,3 +66,36 @@ def test_the_frozen_corpus_reads_as_one_row_per_question():
     source = json.loads(Path("corpus/e2b-it/triviaqa.json").read_text(encoding="utf-8"))
     assert counts == {"kept": len(source["kept"]), "unknown_share": len(source["unknown_share"]),
                       "tuning": len(source["tuning"])}
+
+
+def judged_run(root: Path, corpus: str, kinds: list[str]) -> None:
+    """Answers left unread, an earlier judge run calling everything Garbage, a later one giving `kinds`; one more
+    question sits in the unknown share and is never judged."""
+    def verdict(i: str, kind: str) -> dict:
+        return {"corpus": corpus, "id": i, "level": "d2", "judge_kind": kind, "judge_accepted": kind in ("Correct", "Nearly")}
+    write_jsonl(root / f"answers/d2/{corpus}.jsonl", [verdict(str(i), "N/A") for i in range(len(kinds) + 1)])
+    write_jsonl(root / f"judge/d2/{corpus}/2026-01-01T00-00-00.jsonl", [verdict(str(i), "Garbage") for i in range(len(kinds))])
+    write_jsonl(root / f"judge/d2/{corpus}/2026-01-02T00-00-00.jsonl", [verdict(str(i), k) for i, k in enumerate(kinds)])
+    (root / "frozen").mkdir(exist_ok=True)
+    (root / f"frozen/{corpus}.json").write_text(json.dumps(
+        {"corpus": corpus, "kept": [str(i) for i in range(len(kinds))], "unknown_share": [str(len(kinds))], "tuning": []}))
+
+
+def test_grades_are_shares_of_the_grade_groups_on_one_part_from_the_latest_judge_run(tmp_path):
+    judged_run(tmp_path, "triviaqa", ["Correct", "Nearly", "Partial", "Wrong", "Related", "Noise", "Garbage", "N/A"])
+    runs = RunFiles(tmp_path / "answers", frozen=tmp_path / "frozen", judged=tmp_path / "judge")
+    assert runs.grades("kept") == {"d2": {"n": 8, "excellent": 2 / 8, "good": 1 / 8, "bad": 2 / 8,
+                                          "incoherent": 2 / 8, "not_read": 1 / 8}}
+    judged_kinds = {k for kinds in GRADE_GROUPS.values() for k in kinds} | {NOT_READ}
+    assert judged_kinds == {kind for kind, _ in GRADES} | {NOT_READ}
+
+
+def test_grades_by_regime_split_the_level_by_where_the_answer_comes_from(tmp_path):
+    judged_run(tmp_path, "triviaqa", ["Correct", "Wrong"])
+    judged_run(tmp_path, "squad_v2", ["Correct", "Correct", "Partial", "Garbage"])
+    judged_run(tmp_path, "hotpotqa", ["Nearly"])
+    runs = RunFiles(tmp_path / "answers", frozen=tmp_path / "frozen", judged=tmp_path / "judge")
+    got = runs.grades_by_regime("kept")
+    assert {key: (row["n"], row["excellent"]) for key, row in got.items()} == {
+        ("d2", WEIGHTS): (2, 0.5), ("d2", PASSAGE): (4, 0.5), ("d2", TWO_PASSAGES): (1, 1.0)}
+    assert {name for name, corpus in CORPORA.items() if corpus.passage} == {"squad_v2", "hotpotqa"}

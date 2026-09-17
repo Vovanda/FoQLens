@@ -102,13 +102,22 @@ def arc_closed_rows(records: Iterable[dict]) -> list[Row]:
     return rows
 
 
+# Where the answer comes from: recalled from the weights, read from one given passage, or joined from two passages.
+WEIGHTS, PASSAGE, TWO_PASSAGES = "weights", "passage", "two_passages"
+
+
 @dataclass(frozen=True)
 class Corpus:
     source: Source
     columns: tuple[str, ...]
     build: Callable[[list[dict]], list[Row]]
-    passage: bool = False  # the answer is read from a given passage rather than recalled from the weights
+    regime: str = WEIGHTS
     train: str | None = None  # the train split in the same repository and revision: examples for a prompt come from here
+
+    @property
+    def passage(self) -> bool:
+        """The answer is read from given passages rather than recalled from the weights."""
+        return self.regime != WEIGHTS
 
     def train_source(self) -> Source:
         if self.train is None:
@@ -137,11 +146,11 @@ CORPORA = {
     "squad_v2": Corpus(
         Source("rajpurkar/squad_v2", "squad_v2/validation-00000-of-00001.parquet",
                "3ffb306f725f7d2ce8394bc1873b24868140c412"),
-        ("id", "question", "context", "answers"), squad_rows, passage=True, train="squad_v2/train-00000-of-00001.parquet"),
+        ("id", "question", "context", "answers"), squad_rows, regime=PASSAGE, train="squad_v2/train-00000-of-00001.parquet"),
     "hotpotqa": Corpus(
         Source("hotpotqa/hotpot_qa", "distractor/validation-00000-of-00001.parquet",
                "1908d6afbbead072334abe2965f91bd2709910ab"),
-        ("id", "question", "answer", "context"), hotpot_rows, passage=True),
+        ("id", "question", "answer", "context"), hotpot_rows, regime=TWO_PASSAGES),
 }
 
 

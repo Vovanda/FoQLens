@@ -25,21 +25,28 @@ Invariants (each one has a test):
   exactly as before, and a read deeper than its cap is refused when set.
 - Invariant: a baked level is bit-exact with reading the same depth from the sliced copy; afterwards
   the module holds that weight alone and reads that level alone - bf16 is refused when set.
+- Invariant: a weight baked from another source (bake_weight) is read as given at its level, bit-exact
+  with F.linear on that weight; setting the level again does not slice it.
 """
 
 from __future__ import annotations
 
 import math
 from collections.abc import Iterable, Iterator
+from collections.abc import Callable
 from contextlib import contextmanager
+from dataclasses import dataclass
+from functools import partial
+from typing import Protocol
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
 
+from foqlens.kquant import KQuantLadder
 from foqlens.model import text_layers
-from foqlens.quant import N_SLICES, SLICE_BITS, CappedSlicedWeight, Int8Weight, Level, Nf4Weight, SlicedWeight
+from foqlens.quant import N_SLICES, SLICE_BITS, CappedSlicedWeight, Int8Weight, Level, Nf4Weight, SlicedWeight, _SliceReader
 
 # Linear modules inside a decoder layer. KV-shared layers have no k/v_proj - those are skipped.
 CONTROLLED = (
@@ -63,11 +70,25 @@ STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: SlicedWeight for
 SLICES_BY_CODE = np.array([lv.slices if lv.slices or lv is Level.ZERO else N_SLICES for lv in Level], dtype=np.uint8)
 
 
+class SliceCopy(Protocol):
+    """How a module's sliced copy is built: the module's name and bf16 weight in, a copy read at every depth out."""
+
+    def quantize(self, name: str, weight: torch.Tensor) -> _SliceReader: ...
+
+
+class WeightSource(Protocol):
+    """Where a baked level takes its weight from: the module's name and bf16 weight in, the weight read at `level` out."""
+
+    def read(self, name: str, weight: torch.Tensor, level: Level) -> torch.Tensor: ...
+
+
 class MixedPrecisionLinear(nn.Module):
     """An nn.Linear whose every block of output rows is read at its own precision."""
 
-    def __init__(self, linear: nn.Linear, block_rows: int = DEFAULT_BLOCK_ROWS):
+    def __init__(self, linear: nn.Linear, block_rows: int = DEFAULT_BLOCK_ROWS,
+                 slices: Callable[[torch.Tensor], _SliceReader] = SlicedWeight.quantize):
         super().__init__()
+        self._slices = slices  # builds the sliced copy every read depth shares, from the bf16 weight
         self.in_features = linear.in_features
         self.out_features = linear.out_features
         self.block_rows = block_rows
@@ -97,7 +118,7 @@ class MixedPrecisionLinear(nn.Module):
         """Quantize the weight into the level's storage on its first use; bf16, ZERO and a baked level need no copy."""
         kind = STORAGE.get(level)
         if kind is not None and kind not in self._packed and level is not self._native:
-            self._packed[kind] = kind.quantize(self.weight.data)
+            self._packed[kind] = (self._slices if kind is SlicedWeight else kind.quantize)(self.weight.data)
 
     def set_levels(self, levels: Level | int | np.ndarray, codes: torch.Tensor | None = None) -> None:
         """One level for all blocks, a level per block, or a level per block per sample of the batch.
@@ -157,17 +178,29 @@ class MixedPrecisionLinear(nn.Module):
         A uniform level then unpacks once instead of on every call. Afterwards the module reads that
         level alone; the bf16 weight is gone, so asking for bf16 is refused rather than answered wrongly.
         """
-        if not level.slices:
-            raise ValueError(f"only a read depth is baked, not {level.name}")
-        if self._native is not Level.BF16 or self.weight is None:
-            raise ValueError("a level is baked once, from the bf16 weight")
+        self._check_bakeable(level)
         self._materialize(level)
-        baked = self._packed[SlicedWeight].dequantize(self.weight.dtype, level.slices)
-        self.weight = nn.Parameter(baked, requires_grad=False)
+        self.bake_weight(self._packed[SlicedWeight].dequantize(self.weight.dtype, level.slices), level)
+
+    def bake_weight(self, weight: torch.Tensor, level: Level) -> None:
+        """As bake, with the weight read to `level` given by another source of weights (WeightSource).
+
+        The module then reads `weight` as it is whenever `level` is set - it is never sliced again.
+        """
+        self._check_bakeable(level)
+        if weight.shape != self.weight.shape:
+            raise ValueError(f"a weight of shape {tuple(weight.shape)} for {tuple(self.weight.shape)}")
+        self.weight = nn.Parameter(weight.to(self.weight.device, self.weight.dtype), requires_grad=False)
         self._packed = {}
         self._native = level
         self.readable = frozenset({level})
         self.set_levels(level)
+
+    def _check_bakeable(self, level: Level) -> None:
+        if not level.slices:
+            raise ValueError(f"only a read depth is baked, not {level.name}")
+        if self._native is not Level.BF16 or self.weight is None:
+            raise ValueError("a level is baked once, from the bf16 weight")
 
     def set_caps(self, caps: np.ndarray) -> None:
         """Store every block only to its depth cap (slices, 0 ... N_SLICES); the deeper slices leave the GPU.
@@ -303,6 +336,12 @@ class Controller:
             module.bake(level)
         torch.cuda.empty_cache()
 
+    def bake_from(self, source: WeightSource, level: Level) -> None:
+        """Every module reads `level` from the weight `source` gives for it, in place of its own sliced copy."""
+        for name, module in self.modules.items():
+            module.bake_weight(source.read(name, module.weight.data, level), level)
+        torch.cuda.empty_cache()
+
     def set_caps(self, caps: np.ndarray) -> None:
         """Depth caps over all blocks in module order (see MixedPrecisionLinear.set_caps); the cache returns the freed memory."""
         caps = np.asarray(caps, dtype=np.uint8)
@@ -365,8 +404,23 @@ def _resolve(parent: nn.Module, dotted: str) -> tuple[nn.Module, str] | None:
 
 
 @torch.no_grad()
-def install(model: nn.Module, block_rows: int = DEFAULT_BLOCK_ROWS) -> Controller:
-    """Replace the text decoder's linear modules with controlled ones. Everything starts in bf16."""
+@dataclass(frozen=True)
+class ResidualSlices:
+    """quant.SlicedWeight for every module: the copy depth caps are cut from (CappedSlicedWeight has no k-quant form yet)."""
+
+    def quantize(self, name: str, weight: torch.Tensor) -> SlicedWeight:
+        return SlicedWeight.quantize(weight)
+
+
+# The bench's one copy (E017): a k-quant base with residual slices, the sensitive classes on Q4_K.
+BENCH_COPY = KQuantLadder()
+
+
+def install(model: nn.Module, block_rows: int = DEFAULT_BLOCK_ROWS, copy: SliceCopy = BENCH_COPY) -> Controller:
+    """Replace the text decoder's linear modules with controlled ones. Everything starts in bf16.
+
+    `copy` builds each module's sliced copy by its name; the bench's own is the k-quant ladder.
+    """
     modules: dict[str, MixedPrecisionLinear] = {}
     for i, layer in enumerate(text_layers(model)):
         for dotted in CONTROLLED:
@@ -374,7 +428,8 @@ def install(model: nn.Module, block_rows: int = DEFAULT_BLOCK_ROWS) -> Controlle
             if found is None:
                 continue
             parent, leaf = found
-            mixed = MixedPrecisionLinear(getattr(parent, leaf), block_rows)
+            name = f"layers.{i}.{dotted}"
+            mixed = MixedPrecisionLinear(getattr(parent, leaf), block_rows, partial(copy.quantize, name))
             setattr(parent, leaf, mixed)
-            modules[f"layers.{i}.{dotted}"] = mixed
+            modules[name] = mixed
     return Controller(modules)

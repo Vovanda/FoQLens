@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from foqlens import model as fm
-from foqlens.precision import install
+from foqlens.precision import ResidualSlices, install
 from foqlens.quant import Level
 
 pytestmark = pytest.mark.gpu
@@ -47,7 +47,7 @@ def test_dropping_bf16_frees_its_bytes_and_keeps_the_logits():
 def test_caps_at_d4_free_half_of_the_sliced_copy_and_keep_the_d4_logits():
     model, tokenizer = fm.load(fm.E2B)
     try:
-        ctl = install(model)
+        ctl = install(model, copy=ResidualSlices())  # caps are cut from quant.SlicedWeight only
         ctl.set_all(Level.D4)
         ref = fm.logits(model, tokenizer, TEXT)
         ctl.drop_bf16()

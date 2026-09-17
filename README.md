@@ -30,7 +30,7 @@ A question about biology and a question about a proof do not need *more or less*
 ## The idea
 
 1. Score every block of weights (64 output rows) by how much it matters for the query - from the model's own activations and gradients, no trained router.
-2. Place the blocks on a **weight map**, where blocks that light up together lie close. The query's mask has peaks on this map: its **expert zones**.
+2. Grow the query's **expert zones** from the peaks of that score, along a distance between blocks. Which score, which distance and how the zones grow are strategies still to be tested ([docs/zone-strategies.md](docs/zone-strategies.md)).
 3. Read the whole network at a **base precision** and read each expert zone more precisely: sharpest at its center, falling off toward its edge.
 
 Three controls, each doing one thing:

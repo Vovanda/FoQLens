@@ -7,7 +7,7 @@ import pytest
 from foqlens.corpora import CORPORA, Row
 from foqlens.generation import END_OF_TURN, FIRST_LINE
 from foqlens.prompt_variants import (
-    SETUPS, SHORT, WORKED, Variant, agreement, examples_for, is_refusal, setup_summary,
+    SETUPS, SHORT, SHORT_TOKENS, WORKED, WRITTEN_TOKENS, Variant, agreement, examples_for, is_refusal, setup_summary,
 )
 from foqlens.prompting import ASSISTANT, USER
 from foqlens.selection import Answer, split_reasoning, tuning_sample
@@ -29,6 +29,13 @@ def test_the_corpora_that_reason_write_their_answer_out(corpus):
     """Volodya 14.09: ARC writes its solution, HotpotQA justifies its answer from the two passages."""
     for setup in SETUPS[corpus]:
         assert setup.written and setup.stop is END_OF_TURN and "Answer:" in setup.instruction
+
+
+def test_a_raised_cap_lengthens_a_written_reply_and_leaves_a_short_one_as_it_was():
+    written, short = Variant("w", "solve", written=True), Variant("s", SHORT)
+    assert written.max_new_tokens == WRITTEN_TOKENS and short.max_new_tokens == SHORT_TOKENS
+    assert replace(written, written_tokens=1024).max_new_tokens == 1024
+    assert replace(short, written_tokens=1024).max_new_tokens == SHORT_TOKENS
 
 
 def test_a_short_setup_takes_the_first_line_and_a_written_one_the_last_answer_line():

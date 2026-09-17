@@ -7,6 +7,9 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from functools import partial
+
+from foqlens.kquant import KQuantLadder
 from foqlens.precision import Controller, MixedPrecisionLinear, samples
 from foqlens.quant import N_SLICES, NF4_BLOCKSIZE, SLICE_GROUP, Int8Weight, Level, Nf4Weight, SlicedWeight
 
@@ -142,6 +145,26 @@ def test_a_baked_level_reads_as_the_sliced_depth_and_refuses_bf16(level):
         mixed.bake(level)
 
 
+def test_a_weight_baked_from_another_source_is_read_as_given_and_never_sliced_again():
+    linear = make_linear(out_features=200)
+    given = linear.weight.data.flip(0).clone()  # any weight other than the module's own
+    x = make_input()
+    ctl = Controller({"layers.0.a": MixedPrecisionLinear(linear, block_rows=64)})
+
+    class Given:
+        def read(self, name, weight, level):
+            return given
+
+    ctl.bake_from(Given(), Level.D2)
+    mixed = ctl.modules["layers.0.a"]
+    expected = F.linear(x, given)
+    assert torch.equal(mixed(x), expected) and mixed.storages == ()
+    ctl.set_all(Level.D2)  # what Asking.answer does before every batch
+    assert torch.equal(mixed(x), expected) and mixed.storages == ()
+    with pytest.raises(ValueError):
+        mixed.bake_weight(given[:10], Level.D2)
+
+
 def test_only_a_read_depth_is_baked():
     with pytest.raises(ValueError):
         MixedPrecisionLinear(make_linear(), block_rows=64).bake(Level.NF4)
@@ -201,6 +224,22 @@ def test_int8_error_is_within_half_a_step():
     q = Int8Weight.quantize(weight)
     err = (q.dequantize(torch.float32) - weight.float()).abs()
     assert torch.all(err <= q.scale / 2 + 1e-6)
+
+
+@pytest.mark.parametrize("name", ["layers.0.self_attn.q_proj", "layers.0.mlp.down_proj"])
+def test_a_k_quant_copy_is_read_by_blocks_each_at_its_own_depth(name):
+    linear = make_linear(out_features=200)
+    ladder = KQuantLadder()
+    copy = ladder.quantize(name, linear.weight.data)
+    mixed = MixedPrecisionLinear(linear, block_rows=64, slices=partial(ladder.quantize, name))
+    depths = [Level.D2, Level.D4, Level.D6, Level.D8]
+    mixed.set_levels(np.array([int(lv) for lv in depths], dtype=np.uint8))
+    x = make_input()
+    out = mixed(x)
+    for block, level in enumerate(depths):
+        rows = slice(64 * block, min(64 * (block + 1), 200))
+        expected = F.linear(x, copy.dequantize(x.dtype, level.slices))
+        assert torch.equal(out[..., rows], expected[..., rows]), level
 
 
 def test_switching_one_block_changes_only_its_rows():

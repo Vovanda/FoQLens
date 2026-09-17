@@ -80,12 +80,12 @@ regimes in it - the answer in a passage, only in the weights, across two passage
 **How the model holds its knowledge under uniform quantization is measured:** D8 keeps 98.8% of what the full
 model knows, D6 96.8%, D4 91.0%, D2 51.4%. Knowledge goes from the weights first: with the answer in the
 passage D4 loses 2.5%, with the answer only in the weights 13.0%. This is the baseline for every test of the
-filter ([E017](experiments/E017-uniform-quantization-floor/results.md)). On the first measurement naive rounding made
-D2 incoherent ([E016](experiments/E016-uniform-quantization/results.md)); with the quantization method changed to
+filter ([E002](experiments/E002-base-precision-d2/results.md)). On the first measurement naive rounding made
+D2 incoherent ([E001](experiments/E001-uniform-quantization/results.md)); with the quantization method changed to
 k-quant base precision D2 keeps half of the knowledge, and the filter is tested from D2.
 
 **The premise of the main hypothesis came up on its own.** On the questions the full model does not know, the
-coarser model answers where the precise one refuses: in E016 on HotpotQA bf16 says the passages hold no answer in
+coarser model answers where the precise one refuses: in E001 on HotpotQA bf16 says the passages hold no answer in
 12.1% of them, D4 in 4.6%, and the accepted answers rise from 13.4% to 25.2%. Coarsening removes the caution and adds
 no knowledge, and the guess is sometimes right. That is what [H4](docs/hypotheses.md) stands on: a draft guess can
 be refined, "I don't know" cannot. It came up on data not built to show it; a class of tasks that shows it on
@@ -99,7 +99,7 @@ a gain in quality the mechanism saves memory at the same usability.
 
 **Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base (Q2_K, Q4_K for the
 sensitive classes) with 2-bit residual slices over it, after MoBiQuant with departures
-([E017](experiments/E017-uniform-quantization-floor/results.md)). The top rung is D8. The copy is still unpacked before
+([E002](experiments/E002-base-precision-d2/results.md)). The top rung is D8. The copy is still unpacked before
 the multiplication; a CUDA kernel that reads only the bits it needs is written for the former slice format and not
 yet wired into decoding.
 

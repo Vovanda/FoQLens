@@ -26,17 +26,17 @@ In order of work; items 3 and 4 ran in parallel. Each hypothesis is tested at it
 
 1. **The bench: its design and optimization** - done, 2026-09-11 → 2026-09-14, and optimized as it goes. One stored copy of the
    weights read at 2 / 4 / 6 / 8 bits - since 2026-09-17 a k-quant base with residual slices over it
-   ([E017](../experiments/E017-uniform-quantization-floor/results.md)); a decoding step is one CUDA graph over a
+   ([E002](../experiments/E002-base-precision-d2/results.md)); a decoding step is one CUDA graph over a
    static cache. A kernel that reads only the bits it needs is written for the former slice format, not yet wired
    into decoding.
 2. **A corpus of what the model knows** - done, 2026-09-13 → 2026-09-15. Selected by the model's own answers in three regimes
    and frozen: 20,640 questions - 18,576 E2B-it knows and 2,064 it does not ([corpus.md](corpus.md)).
 3. **Uniform quantization on the corpus** - done, 2026-09-15 → 2026-09-17. The answers at D8, D6, D4 and D2, judged by the
    model at source quality ([invariants.md](invariants.md)): D8 keeps 98.8% of the full model's knowledge,
-   D6 96.8%, D4 91.0%, D2 51.4% ([E017 results](../experiments/E017-uniform-quantization-floor/results.md)).
+   D6 96.8%, D4 91.0%, D2 51.4% ([E002 results](../experiments/E002-base-precision-d2/results.md)).
    It is the baseline the filter is compared with, from D2. The first measurement, on naive rounding, left D2
-   incoherent ([E016](../experiments/E016-uniform-quantization/results.md)). On the questions the full model does not
-   know, D4 answers where bf16 refuses (E016) - on HotpotQA refusals fall from 12.1% to 4.6% and accepted answers rise from 13.4% to
+   incoherent ([E001](../experiments/E001-uniform-quantization/results.md)). On the questions the full model does not
+   know, D4 answers where bf16 refuses (E001) - on HotpotQA refusals fall from 12.1% to 4.6% and accepted answers rise from 13.4% to
    25.2%: the premise of [H4](hypotheses.md), a guess can be refined and a refusal cannot, came up on data not
    built to show it.
 4. **The filter: how the zones are built** - now, since 2026-09-15. Grounded variants of the mask and

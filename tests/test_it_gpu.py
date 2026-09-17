@@ -43,7 +43,7 @@ def test_the_loop_writes_what_generate_writes_on_the_same_chat_batch(chat):
     assert [t.strip() for t in generate_answers(model, tokenizer, prompts, TOKENS, FIRST_LINE)] == [first_line(t) for t in full]
 
 
-# Garbage as D2 wrote it (E016): symbols and repeated fragments with no answer in them.
+# Garbage as D2 wrote it (E001): symbols and repeated fragments with no answer in them.
 GARBAGE_ANSWERS = ["... | ** | ** ** **", r"$\text{** $\text{** $\text{", "(17. 17.** | ** **("]
 
 

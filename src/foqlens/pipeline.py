@@ -1,6 +1,6 @@
 """The bench as a unit: a loaded model with the precision controller and the sources of its masks.
 
-Shared by the step 3 scripts so that loading and mask computation exist once. A mask source is
+Shared by the run scripts so that loading and mask computation exist once. A mask source is
 anything with a name, a batch size and a score_batch (MaskSource): Bench.masks does not know which
 scorer is behind it, so a new score is a new source class. The bench runs at a share of the GPU
 (gpu_share.py): that share of the VRAM, and rest after every batch.
@@ -29,7 +29,7 @@ MASK_SOURCES = ("pooled", "gradient")  # the names of Bench.sources, in order
 # Mask passes are batched by tokens (quality.token_batches): a batch holds at most as many padded tokens as
 # *_BATCH of the run's longest prompts, and at most MAX_BATCH_FACTOR times as many prompts. Measured on E2B
 # (RTX 3090 Ti, 2026-09-12): 8 of the longest prompts are the gradient batch known to fit the 0.8 GPU share
-# (E009, 16.6 GiB reserved), 16 of them reserve 22 GiB. The gradient pass is bound by kernel launches - 16
+# (16.6 GiB reserved), 16 of them reserve 22 GiB. The gradient pass is bound by kernel launches - 16
 # short prompts take the time of 8 - so short prompts gain from larger batches at the same memory.
 # Masks are not batch-invariant in bf16: runs that compare masks keep one batching.
 GRADIENT_BATCH = 8
@@ -48,7 +48,7 @@ class MaskSource(Protocol):
 
 @dataclass(frozen=True)
 class PooledMask:
-    """The naive score (E001 PREREG, mode B): block output norms averaged over the query's tokens."""
+    """The naive score: block output norms averaged over the query's tokens."""
 
     scorer: BlockScorer
     batch_size: int
@@ -60,7 +60,7 @@ class PooledMask:
 
 @dataclass(frozen=True)
 class GradientMask:
-    """Gradient x activation of the query's own language-model loss (E002)."""
+    """Gradient x activation of the query's own language-model loss."""
 
     scorer: GradientScorer
     batch_size: int

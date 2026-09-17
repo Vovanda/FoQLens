@@ -4,52 +4,16 @@ title: Experiments
 
 # Experiments
 
-One folder per experiment, `E0NN-slug`: its preregistration `PREREG.md` (a later refinement is `PREREG-2.md`; E001 also holds `THRESHOLDS.md`, E014 a post-run `ADDENDUM.md`), its card (`_index.md`: dates, commits, hypotheses, status, verdict), and `results.md` once it has run. The main preregistration stays in [`prereg/`](../prereg/); the hypotheses are in [docs/hypotheses.md](../docs/hypotheses.md).
+One folder per experiment, `E0NN-slug`: its preregistration `PREREG.md`, its card `_index.md` and its `results.md`;
+the raw runs are in `runs/E0NN-slug/`. The main preregistration is in [`prereg/`](../prereg/), the hypotheses in
+[docs/hypotheses.md](../docs/hypotheses.md).
 
-**Verdicts before 2026-09-13 are withdrawn:** they rested on questions the model did not know. This came out at the start of checking the corpus - whether the model understands its questions: under every order of the options it answered 31% of them right, 3% in mathematics; the rest was guessing. Every hypothesis is untested. Details: [corpus.md](../docs/corpus.md).
+The first runs went on four MMLU subjects answered with an option letter, and nobody checked whether the model knew
+the questions: it mostly guessed, and those runs are deleted. What that taught is in [corpus.md](../docs/corpus.md).
 
-Deleted with the corpus: every run outside `runs/reference/`, the result texts of E004, E005, E007-E011, E013 and E014, and the never-run E002, E003, E012 and E015. The preregistrations and the code are kept.
-
-Status: `planned` - prereg in progress; `fixed` - prereg committed, not run; `done`; `exploratory` - run without a preregistration, so it can point a direction but not settle one; `legacy` - run, but on an approach since replaced; `not-run` - fixed and never run on its own; `withdrawn` - run, but its verdict does not stand; `reset` - run on the question set of the reset, nothing is claimed from it; `deleted` - prepared on that set and deleted with it, kept in git history.
+Status: `planned` - preregistration in progress; `fixed` - preregistration committed, not run; `done`.
 
 | Id | Experiment | Fixed | Hypotheses | Status |
 | --- | --- | --- | --- | --- |
-| [E001](E001-run1-exploration/_index.md) | Run 1: separation, masks, overlap, geometry, confirmation | 2026-09-11 | H0, H1, H2, H2+ | reset |
-| E002 | Gradient x activation as the block score | 2026-09-11 | H1 | deleted |
-| E003 | Step 3 as an aperture sweep | 2026-09-11 | H3 | deleted |
-| [E004](E004-injection/_index.md) | Mask injection: topic A's mask on topic B's questions | 2026-09-11 | H3.1 | reset |
-| [E005](E005-backbone/_index.md) | Backbone + topic fill | 2026-09-11 | H3.1, H3.3 | reset |
-| [E006](E006-read-depths/_index.md) | Read depths from one sliced copy, resident bench | - | - | done |
-| [E007](E007-dilation/_index.md) | Dilation of the topic fill | 2026-09-11 | H3.1 | reset |
-| [E008](E008-zones-fixed-budget/_index.md) | Expert zones at a fixed 5-bit budget | 2026-09-11 | H3.1, H3.2 | legacy, reset |
-| [E009](E009-zones-matrix/_index.md) | Expert zones over precision share x focus area | 2026-09-11 | H3.1, H3.2 | legacy, reset |
-| [E010](E010-lens-layout/_index.md) | Lens layout: a floor over the network, zones lifted over it ([docs/quantization-filter.md](../docs/quantization-filter.md)) | 2026-09-12 | H3, H3.1, H3.2 | reset |
-| [E011](E011-depth-caps/_index.md) | Depth caps: what storage costs when many queries share one copy | 2026-09-12 | - | reset |
-| E012 | The edges of the address: a scan behind an empty floor | 2026-09-12 | H3.1, H3.2 | deleted |
-| [E013](E013-regulator-map/_index.md) | The map of the regulator: which settings cost the fewest errors | 2026-09-12 | H3 | reset |
-| [E014](E014-moved-zones/_index.md) | The zones carried elsewhere: the honest control at the same cost | - | H3, H3.4 | reset |
-| E015 | Three topic pairs the bench has not used | 2026-09-13 | H3, H3.4, H4 | deleted |
-| [E016](E016-uniform-quantization/_index.md) | Uniform quantization on the corpus: the share of knowledge each level keeps | 2026-09-15 | H6 | fixed |
-| [E017](E017-uniform-quantization-floor/_index.md) | Uniform quantization with a working base precision D2: the k-quant ladder D8-D2, the baseline of the filter | 2026-09-17 | - | done |
-
-## Numbers in older texts
-
-Until 2026-09-14 the preregistration files were numbered across the bench; their texts still cite
-each other that way.
-
-| Old name | Now |
-| --- | --- |
-| ADDENDUM-01 | [E001 PREREG](E001-run1-exploration/PREREG.md) |
-| ADDENDUM-04 | [E004 PREREG](E004-injection/PREREG.md) |
-| ADDENDUM-05 | [E005 PREREG](E005-backbone/PREREG.md) |
-| ADDENDUM-06 | [E007 PREREG](E007-dilation/PREREG.md) |
-| ADDENDUM-07 | [E008 PREREG](E008-zones-fixed-budget/PREREG.md) |
-| ADDENDUM-08 | [E008 PREREG-2](E008-zones-fixed-budget/PREREG-2.md) |
-| ADDENDUM-09 | [E009 PREREG](E009-zones-matrix/PREREG.md) |
-| ADDENDUM-10 | [E009 PREREG-2](E009-zones-matrix/PREREG-2.md) |
-| ADDENDUM-11 | [E010 PREREG](E010-lens-layout/PREREG.md) |
-| ADDENDUM-12 | [E011 PREREG](E011-depth-caps/PREREG.md) |
-| ADDENDUM-14 | [E013 PREREG](E013-regulator-map/PREREG.md) |
-| ADDENDUM-15 | [E014 ADDENDUM](E014-moved-zones/ADDENDUM.md) |
-| THRESHOLDS-01 | [E001 THRESHOLDS](E001-run1-exploration/THRESHOLDS.md) |
-| ADDENDUM-02, -03, -13, -16 | deleted with E002, E003, E012 and E015 |
+| [E001](E001-uniform-quantization/_index.md) | Uniform quantization on the corpus: the share of knowledge each level keeps | 2026-09-15 | H6 | done |
+| [E002](E002-base-precision-d2/_index.md) | Uniform quantization with a working base precision D2: the k-quant ladder D8-D2, the baseline of the filter | 2026-09-17 | - | done |

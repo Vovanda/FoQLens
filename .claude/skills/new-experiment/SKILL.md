@@ -10,12 +10,10 @@ Order of commits, never merged: preregistration → run code → runs → result
 
 ## 1. The id
 
-The next id is the highest ever used plus one - ids are **never reused**, deleted ones included
-(E002, E003, E012, E015 were deleted and stay taken). Take the maximum over both:
+The next id is the highest id in `experiments/` plus one:
 
 ```bash
-ls experiments | grep -o '^E[0-9]\{3\}'
-grep -o '^| \[\?E[0-9]\{3\}' experiments/_index.md | grep -o 'E[0-9]\{3\}'
+ls experiments | grep -o '^E[0-9]\{3\}' | sort | tail -1
 ```
 
 ## 2. The name

@@ -56,8 +56,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <ul>
           <li><a href="#prereg" data-id="prereg">Preregistration (English)</a></li>
           <li><a href="#prereg-ru" data-id="prereg-ru">Пререгистрация (original)</a></li>
-          <li><a href="#e010-prereg" data-id="e010-prereg">E010 - the lens layout</a></li>
-          <li><a href="#e013-prereg" data-id="e013-prereg">E013 - the map of the regulator</a></li>
+        </ul>
+        <h2>Experiments</h2>
+        <ul>
+          <li><a href="#e001-results" data-id="e001-results">E001 - uniform quantization on the corpus</a></li>
+          <li><a href="#e002-results" data-id="e002-results">E002 - uniform quantization with a working base precision D2</a></li>
         </ul>
       </div></div>
   </aside>
@@ -111,13 +114,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <ul>
         <li><a href="#prereg">Preregistration (English)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/prereg/PREREGISTRATION.md">prereg/PREREGISTRATION.md</a></span></li>
         <li><a href="#prereg-ru">Пререгистрация (original)</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/prereg/PREREGISTRATION.ru.md">prereg/PREREGISTRATION.ru.md</a></span></li>
-        <li><a href="#e010-prereg">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/PREREG.md">experiments/E010-lens-layout/PREREG.md</a></span></li>
-        <li><a href="#e013-prereg">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/PREREG.md">experiments/E013-regulator-map/PREREG.md</a></span></li>
       </ul>
       <h3>Experiments</h3>
       <ul>
-        <li><a href="#e016-results">E016 - uniform quantization on the corpus</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E016-uniform-quantization/results.md">experiments/E016-uniform-quantization/results.md</a></span></li>
-        <li><a href="#e017-results">E017 - uniform quantization with a working base precision D2</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E017-uniform-quantization-floor/results.md">experiments/E017-uniform-quantization-floor/results.md</a></span></li>
+        <li><a href="#e001-results">E001 - uniform quantization on the corpus</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E001-uniform-quantization/results.md">experiments/E001-uniform-quantization/results.md</a></span></li>
+        <li><a href="#e002-results">E002 - uniform quantization with a working base precision D2</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E002-base-precision-d2/results.md">experiments/E002-base-precision-d2/results.md</a></span></li>
       </ul>
     </main>
 
@@ -161,18 +162,16 @@ const SHELF = [
   { group: "Preregistration", docs: [
     ["prereg", "prereg/PREREGISTRATION.md", "Preregistration (English)"],
     ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
-    ["e010-prereg", "experiments/E010-lens-layout/PREREG.md", "E010 - the lens layout"],
-    ["e013-prereg", "experiments/E013-regulator-map/PREREG.md", "E013 - the map of the regulator"],
   ]},
   { group: "Experiments", docs: [
-    ["e016-results", "experiments/E016-uniform-quantization/results.md", "E016 - uniform quantization on the corpus"],
-    ["e017-results", "experiments/E017-uniform-quantization-floor/results.md", "E017 - uniform quantization with a working base precision D2"],
+    ["e001-results", "experiments/E001-uniform-quantization/results.md", "E001 - uniform quantization on the corpus"],
+    ["e002-results", "experiments/E002-base-precision-d2/results.md", "E002 - uniform quantization with a working base precision D2"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
 const DEFAULT_DOC = "filter";
 // Anchors that are already out in the world, from before the documents were renamed.
-const ALIASES = { lens: "filter", "addendum-11": "e010-prereg", "addendum-14": "e013-prereg" };
+const ALIASES = { lens: "filter" };
 
 /* ==== MENU ==== */
 const menu = document.getElementById("menu");

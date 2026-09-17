@@ -412,7 +412,7 @@ class ResidualSlices:
         return SlicedWeight.quantize(weight)
 
 
-# The bench's one copy (E017): a k-quant base with residual slices, the sensitive classes on Q4_K.
+# The bench's one copy (E002): a k-quant base with residual slices, the sensitive classes on Q4_K.
 BENCH_COPY = KQuantLadder()
 
 

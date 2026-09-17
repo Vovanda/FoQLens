@@ -57,7 +57,7 @@ from foqlens.precision import samples
 
 FULL, SLIDING = "full_attention", "sliding_attention"
 # Prompt tokens, padding included, that one prefill pass holds. The math prefill (#14) of a batch filled to
-# answering.BATCH_TOKENS (32k) passed the 21.6 GiB a run at share 0.9 may hold, on HotpotQA's passages (E016 at
+# answering.BATCH_TOKENS (32k) passed the 21.6 GiB a run at share 0.9 may hold, on HotpotQA's passages (E001 at
 # D6, 2026-09-16: 876 MiB asked with 20.67 GiB allocated); the rows past it are prefilled in chunks into one cache,
 # and the decode batch stays whole.
 PREFILL_TOKENS = 16384
@@ -222,7 +222,7 @@ class StaticDecoder:
             except torch.OutOfMemoryError:
                 # The share cap counts reserved memory, and the math prefill asks for one large score matrix:
                 # fragments earlier batches left in the cache blocked 744 MiB with 2.47 GiB reserved and free
-                # (E016 at D6, 2026-09-16). Handing them back and asking once more costs nothing when it succeeds.
+                # (E001 at D6, 2026-09-16). Handing them back and asking once more costs nothing when it succeeds.
                 torch.cuda.empty_cache()
                 run = StaticRun(model, input_ids, attention_mask, max_new_tokens, stop, self.prefill_tokens)
         step = GraphedStep(run) if self.graph else run.advance

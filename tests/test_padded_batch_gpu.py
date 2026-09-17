@@ -1,6 +1,6 @@
 """A padded row reads what it reads alone: the batch that collapsed under the memory-efficient sdpa kernel.
 
-ARC-Challenge, round 4 of E016's schedule (seed 0): 29 prompts in one left-padded batch. Under the
+ARC-Challenge, round 4 of E001's schedule (seed 0): 29 prompts in one left-padded batch. Under the
 memory-efficient kernel every one of its 28 padded rows ended on the same logits and opened with the
 same token, 令 at D8 and <h2> at bf16, whatever its question (issue #14). On the math kernel each
 padded row writes the first token it writes alone, up to bf16's batch noise.

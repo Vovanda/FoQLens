@@ -550,7 +550,7 @@ new MutationObserver(render).observe(document.documentElement, { attributeFilter
 matchMedia("(prefers-color-scheme: light)").addEventListener("change", render);
 
 /* ==== DATA ==== */
-// The weight map of run E009: 14 708 blocks as uint16 pairs, x and y over the unit square.
+// The weight map: 14 708 blocks as uint16 pairs, x and y over the unit square.
 fetch("site/weight-map.bin")
   .then((r) => r.arrayBuffer())
   .then((buf) => {

@@ -130,7 +130,7 @@ from the least settled to the most:
   grade is not, and the ladder works as a reserve.
 
 **The judge after stage 1 (2026-09-16).** The one-token judge above could not tell an answer from
-garbage. On the D2 answers of [E016](../experiments/E016-uniform-quantization/_index.md) - empty, random
+garbage. On the D2 answers of [E001](../experiments/E001-uniform-quantization/_index.md) - empty, random
 symbols, repeated fragments - it said Yes to 61% of the empty ones, and on 124 labelled answers it
 accepted 45-85% of the garbage under every prompt tried, grading most of it Correct. The judge that
 replaced it:
@@ -140,12 +140,12 @@ replaced it:
   of wrong answers through, against 18% when asked for JSON;
 - grades from the general to the particular: Garbage (not readable text), Noise (readable, but not an
   answer to this question), Wrong, Related, Partial, Nearly, Correct; an answer counts from Nearly, and
-  the kind decides - the judge's own Accepted line contradicted its kind on 0.9% of E016's verdicts;
+  the kind decides - the judge's own Accepted line contradicted its kind on 0.9% of E001's verdicts;
 - sees the answer between `---` fences: unfenced, an empty answer was followed by the instructions, and
   the judge took them for the answer;
 - is not asked about an answer of whitespace alone: that is Garbage;
 - asks once more, with 1,024 tokens instead of 200, a reply the limit cut before its closing lines -
-  63 of E016's 20,640 bf16 answers, mostly ARC and SQuAD, where it works the answer through.
+  63 of E001's 20,640 bf16 answers, mostly ARC and SQuAD, where it works the answer through.
 
 On 123 answers labelled blind and held out from choosing the prompt: garbage accepted 1 of 48, wrong 3 of
 24, right 41 of 51. By level, on 480 answers labelled blind:
@@ -161,7 +161,7 @@ On 123 answers labelled blind and held out from choosing the prompt: garbage acc
 The wrong answers of D8 and D6 were drawn where the answer shares no words with the reference, where
 wrong answers gather, so their share overstates the level's. The judge's weakness is a neighbouring
 thing named instead of the one asked - "Northridge" for Los Angeles, "Ryerson University" asked where.
-On the discordant questions of E016, those whose verdict at a level differs from bf16's, Claude's reading
+On the discordant questions of E001, those whose verdict at a level differs from bf16's, Claude's reading
 agrees with the judge's direction on 83 of 100 at D4, 77 at D6 and 63 at D8: at D8 a third of the discord
 is the judge grading near-identical answers differently, in both directions.
 

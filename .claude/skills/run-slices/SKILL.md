@@ -16,8 +16,8 @@ query; a Python loop over the lines is how field names get guessed wrong and flo
 from pathlib import Path
 from foqlens.runs import RunFiles
 
-run = RunFiles(answers=Path("runs/E016-uniform-quantization/e2b-it/answers"),
-               judged=Path("runs/E016-uniform-quantization/e2b-it/judge"),
+run = RunFiles(answers=Path("runs/E001-uniform-quantization/e2b-it/answers"),
+               judged=Path("runs/E001-uniform-quantization/e2b-it/judge"),
                readings=None, frozen=Path("corpus/e2b-it"))   # judged, readings and frozen are optional
 run.query("select level, count(*) from verdicts group by level")
 run.agreement_with_readings("bf16")   # per corpus: exact match and judge against Claude's readings

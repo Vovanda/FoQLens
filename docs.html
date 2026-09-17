@@ -114,6 +114,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <li><a href="#e010-prereg">E010 - the lens layout</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E010-lens-layout/PREREG.md">experiments/E010-lens-layout/PREREG.md</a></span></li>
         <li><a href="#e013-prereg">E013 - the map of the regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E013-regulator-map/PREREG.md">experiments/E013-regulator-map/PREREG.md</a></span></li>
       </ul>
+      <h3>Experiments</h3>
+      <ul>
+        <li><a href="#e016-results">E016 - uniform quantization on the corpus</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E016-uniform-quantization/results.md">experiments/E016-uniform-quantization/results.md</a></span></li>
+        <li><a href="#e017-results">E017 - uniform quantization with a working base precision D2</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E017-uniform-quantization-floor/results.md">experiments/E017-uniform-quantization-floor/results.md</a></span></li>
+      </ul>
     </main>
 
     <footer>
@@ -158,6 +163,10 @@ const SHELF = [
     ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
     ["e010-prereg", "experiments/E010-lens-layout/PREREG.md", "E010 - the lens layout"],
     ["e013-prereg", "experiments/E013-regulator-map/PREREG.md", "E013 - the map of the regulator"],
+  ]},
+  { group: "Experiments", docs: [
+    ["e016-results", "experiments/E016-uniform-quantization/results.md", "E016 - uniform quantization on the corpus"],
+    ["e017-results", "experiments/E017-uniform-quantization-floor/results.md", "E017 - uniform quantization with a working base precision D2"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));

@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=45">
-<link rel="stylesheet" href="site/front.css?v=45">
+<link rel="stylesheet" href="site/site.css?v=46">
+<link rel="stylesheet" href="site/front.css?v=46">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
@@ -73,7 +73,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <div class="panel" role="group" aria-label="The regulator">
         <label class="control">
           <span>Base precision <b class="num" id="floorOut">D2 · 2 bits</b></span>
-          <input type="range" id="floor" min="0" max="5" step="1" value="1" aria-describedby="floorOut">
+          <input type="range" id="floor" min="0" max="4" step="1" value="1" aria-describedby="floorOut">
         </label>
         <label class="control">
           <span>Focus area <b class="num" id="areaOut">0.50</b></span>
@@ -173,7 +173,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 5 <b>combine</b>   L(b) = min(1, Σ L_i)  or  max L_i
 6 <b>level</b>     ρ* = s_last · (1 − L(b))    the ring that ρ* falls into; outside every zone: G
 7 <b>memory</b>    bits = Σ w_b · bits(b) / Σ w_b</pre>
-      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy of residual slices is read at 2, 4, 6 or 8 bits, and the stored weight itself is the rung above them - so the ladder is ZERO, D2, D4, D6, D8, bf16, and the regulator runs over all six.</p>
+      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy - a k-quant base with residual slices over it - is read at 2, 4, 6 or 8 bits, and the model holds no other weights - so the ladder is ZERO, D2, D4, D6, D8, and the regulator runs over all five.</p>
     </div>
   </section>
 
@@ -208,20 +208,20 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <table>
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
           <tbody>
-            <tr><td class="num">1</td><td><b>The bench</b> - its design and optimization: one stored copy of the weights read at 2 / 4 / 6 / 8 bits, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
-            <tr><td class="num">2</td><td><b>A corpus of what the model knows</b> - selected by its own answers in three regimes and frozen: 18,576 questions E2B-it knows</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
-            <tr><td class="num">3</td><td><b>Uniform quantization on the corpus</b> - the answers at D8, D6, D4 and D2 on the k-quant copy: D8 keeps 98.8% of the full model's knowledge, D6 96.8%, D4 91.0%, D2 51.4%, so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4</td><td><span class="tag tag--done">done</span><span class="when">2026-09-15 → 09-17</span></td></tr>
-            <tr><td class="num">4</td><td><b>The filter</b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
-            <tr><td class="num">5</td><td><b>The address</b> - topics separate in the model, the mask is concentrated, zones of related topics overlap</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">6</td><td><b>Precision follows meaning</b> - how much of what the model knows the zones keep, against uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">7</td><td><b>The regulator answers to the machine</b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">8</td><td><b>Agents on the FoQLens model</b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">1</td><td><b><a href="docs.html#filter">The bench</a></b> - its design and optimization: one stored copy of the weights, a k-quant base with residual slices, read at D2 / D4 / D6 / D8, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
+            <tr><td class="num">2</td><td><b><a href="docs.html#corpus">A corpus of what the model knows</a></b> - selected by its own answers in three regimes and frozen: 20,640 questions, 18,576 E2B-it knows and 2,064 it does not</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
+            <tr><td class="num">3</td><td><b><a href="docs.html#e017-results">Uniform quantization on the corpus</a></b> - the answers at D8, D6, D4 and D2 on the k-quant copy: D8 keeps 98.8% of the full model's knowledge, D6 96.8%, D4 91.0%, D2 51.4%, so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4 (<a href="docs.html#e016-results">E016</a>)</td><td><span class="tag tag--done">done</span><span class="when">2026-09-15 → 09-17</span></td></tr>
+            <tr><td class="num">4</td><td><b><a href="docs.html#filter">The filter</a></b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
+            <tr><td class="num">5</td><td><b><a href="docs.html#hypotheses">The address</a></b> - topics separate in the model, the mask is concentrated, zones of related topics overlap</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">6</td><td><b><a href="docs.html#hypotheses">Precision follows meaning</a></b> - how much of what the model knows the zones keep, against uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">7</td><td><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">8</td><td><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
           </tbody>
         </table>
       </div>
 
       <h3>The corpus</h3>
-      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself grading it as an exam, and Claude. The corpus is frozen: 18,576 questions E2B-it knows and 16,811 it does not; 2,064 of those, drawn at random, are in the set, marked.</p>
+      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself grading it as an exam, and Claude. The corpus is frozen: 20,640 questions - 18,576 E2B-it knows and 2,064 it does not.</p>
       <div class="scroller">
         <table>
           <thead><tr><th>Regime</th><th>Where the answer is</th><th>What the zones should do</th></tr></thead>
@@ -248,9 +248,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 </div>
 </div>
 
-<script src="site/panel.js?v=45"></script>
-<script src="site/sections.js?v=45"></script>
-<script src="site/field.js?v=45"></script>
+<script src="site/panel.js?v=46"></script>
+<script src="site/sections.js?v=46"></script>
+<script src="site/field.js?v=46"></script>
 <script>
 /* Transitions come back only once the panel and the sheet stand where storage says - two frames
    later, so the browser has laid the page out and painted it at rest. This lives in the page, next

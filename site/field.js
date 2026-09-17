@@ -7,8 +7,7 @@ const LADDER = [
   { name: "D2",   bits: 2,  sat: 0.26, light: 0.44, size: 0.26 },
   { name: "D4",   bits: 4,  sat: 0.40, light: 0.48, size: 0.38 },
   { name: "D6",   bits: 6,  sat: 0.56, light: 0.52, size: 0.52 },
-  { name: "D8",   bits: 8,  sat: 0.74, light: 0.55, size: 0.56 },
-  { name: "bf16", bits: 16, sat: 0.92, light: 0.58, size: 0.60 },   // the weight as stored: a rung too
+  { name: "D8",   bits: 8,  sat: 0.74, light: 0.55, size: 0.56 },   // the top rung: the model holds no bf16
 ];
 /* Size grows with the rung but flattens at the top: a sign is read at a glance, and past D6 a larger
    one only crowds its neighbours - the field turns into a blot instead of showing the rung. The top
@@ -62,7 +61,6 @@ const GLASS_VEILS = {
     "rgba(12, 18, 34, 0.16)",   // D4: blocks are shapes again, edges soft
     "rgba(11, 17, 32, 0.10)",   // D6: nearly sharp already
     "rgba(11, 17, 32, 0.05)",   // D8: eight bits, a breath of glass left
-    "rgba(0, 0, 0, 0)",         // bf16: the weight as stored, no glass at all
   ],
   light: [
     "rgba(246, 249, 255, 0.94)",
@@ -70,16 +68,15 @@ const GLASS_VEILS = {
     "rgba(240, 245, 255, 0.22)",
     "rgba(240, 245, 255, 0.13)",
     "rgba(240, 245, 255, 0.06)",
-    "rgba(255, 255, 255, 0)",
   ],
 };
-const GLASS_SPREAD = [0, 5.0, 1.7, 0.7, 0.3, 0];
+const GLASS_SPREAD = [0, 5.0, 1.7, 0.7, 0.3];
 // the sheet the map is drawn on: near white with a touch of blue by day, deep navy by night
 const FIELD_GROUND = { dark: "#0b1120", light: "#f7faff" };
 // a rung is lighter than the ground in the dark and darker than it in the light, or it disappears
 const RUNG_LIGHT_BY_THEME = {
-  dark: [0, 0.44, 0.48, 0.52, 0.55, 0.58],
-  light: [0, 0.62, 0.55, 0.47, 0.40, 0.33],
+  dark: [0, 0.44, 0.48, 0.52, 0.55],
+  light: [0, 0.62, 0.55, 0.47, 0.40],
 };
 
 /* Which palette is on: the reader's own choice when there is one, the device's otherwise. */
@@ -107,6 +104,14 @@ const BASE_RADIUS = 0.09;   // a new lens covers this share of the map before fo
 const LENS_RADII = [1, 0.62, 1.35, 0.8, 1.1, 0.5];
 const HALO_STOP = 1.5;      // at a ZERO floor the lowest rung is pushed past the edge (docs/quantization-filter.md)
 const PICK_SLACK = 1.25;    // clicking this much past a lens edge still grabs it
+/* The zones the page opens with, as shares of the canvas. The hero is square from 760px (site.css) and
+   taller than wide below it, so the name sits lower in a phone's field and the zones follow it down;
+   on a phone the three run together into one patch behind the name. */
+const SQUARE_HERO = "(min-width: 760px)";
+const FIRST_ZONES = {
+  square: { at: [[0.33, 0.45], [0.67, 0.45], [0.50, 0.61]], scale: 2.0 },
+  tall: { at: [[0.33, 0.55], [0.67, 0.55], [0.50, 0.71]], scale: 2.0 },
+};
 const DPR_CAP = 1.5;        // how fine the canvas is drawn, against how much a frame costs
 
 /* ==== STATE ==== */
@@ -121,6 +126,8 @@ const stored = (() => {
   try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}") }; }
   catch { return { ...DEFAULTS }; }
 })();
+// a base precision stored before the ladder lost bf16 (2026-09-17) would point past its top rung
+stored.floor = String(Math.min(Number(stored.floor), LADDER.length - 1));
 const controls = {};
 for (const name of Object.keys(DEFAULTS)) {
   const node = el(name);
@@ -179,7 +186,7 @@ function pointerMap(e) {
 
 /* ==== THE RULES OF docs/quantization-filter.md ==== */
 function layout() {
-  const floorIndex = Number(controls.floor.value);          // 0 = ZERO … 5 = bf16, the whole ladder
+  const floorIndex = Number(controls.floor.value);          // 0 = ZERO … 4 = D8, the whole ladder
   const area = Number(controls.area.value);
   const strength = Number(controls.strength.value);
   const top = LADDER.length - 1;
@@ -592,9 +599,10 @@ fetch("site/weight-map.bin")
       const [x, y] = toMap(view.w * fx, view.h * fy);
       return { x, y, scale };
     };
-    // a triangle under the name: two zones below, one above between them, equal radii, so the
+    // a triangle behind the name: two zones above, one below between them, equal radii, so the
     // overlaps are visible as overlaps rather than as one shapeless patch
-    lenses.push(under(0.39, 0.74, 1.0), under(0.61, 0.74, 1.0), under(0.50, 0.55, 1.0));
+    const first = matchMedia(SQUARE_HERO).matches ? FIRST_ZONES.square : FIRST_ZONES.tall;
+    lenses.push(...first.at.map(([fx, fy]) => under(fx, fy, first.scale)));
     render();
   })
   .catch(() => { el("bitsOut").textContent = "no data"; });

@@ -14,7 +14,7 @@ from foqlens.activity import (
     valid_tokens,
 )
 from foqlens.graph_zones import GraphZones
-from foqlens.layouts import ProjectedStrength
+from foqlens.layouts import ProjectedStrength, strength_scale
 from foqlens.precision import MixedPrecisionLinear
 from foqlens.projection import Projection
 
@@ -90,9 +90,26 @@ def test_a_larger_ridge_never_gives_a_larger_map():
         Projection.fit(signals, scores, -1.0)
 
 
+def pointing_projection() -> Projection:
+    """Head 0 points at block 3, head 1 at block 7; fitted on calibration where block scores are exactly that."""
+    rng = np.random.default_rng(3)
+    signals = rng.uniform(0, 4, size=(40, 2))
+    scores = np.zeros((40, 10))
+    scores[:, 3], scores[:, 7] = signals[:, 0], signals[:, 1]
+    return Projection.fit(signals, scores, alpha=0.0)
+
+
 def test_a_zone_is_as_strong_as_the_heads_that_point_at_its_center():
-    weights = np.zeros((2, 10))
-    weights[0, 3], weights[1, 7] = 1.0, 1.0  # head 0 points at block 3, head 1 at block 7
-    strength = ProjectedStrength(signals=np.array([[0.5, 4.0]]), weights=weights, scale=2.0)
+    strength = ProjectedStrength(signals=np.array([[0.5, 4.0]]), projection=pointing_projection(), scale=2.0)
     zones_ = GraphZones(centers=np.array([3, 7, 1]), radii=np.ones(3))
-    assert strength.strengths(0, zones_).tolist() == [0.25, 1.0, 0.0]  # 0.5 / 2, 4 / 2 clipped, nobody
+    # 0.5 / 2, 4 / 2 clipped, a block no head points at - the fitted map is centred and still reads them exactly
+    assert np.allclose(strength.strengths(0, zones_), [0.25, 1.0, 0.0], atol=1e-9)
+
+
+def test_a_negative_signal_is_clipped_before_the_projection_and_the_scale_is_a_quantile():
+    projection = pointing_projection()
+    strength = ProjectedStrength(signals=np.array([[-3.0, 1.0]]), projection=projection, scale=2.0)
+    assert np.allclose(strength.strengths(0, GraphZones(centers=np.array([3]), radii=np.ones(1))), [0.0], atol=1e-9)
+    signals = np.array([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0], [100.0, 0.0]])
+    z = strength_scale(projection, signals, [np.array([3])] * 4, quantile=0.5)
+    assert z == pytest.approx(2.5)  # the median of 1, 2, 3, 100: one outlier does not set the scale

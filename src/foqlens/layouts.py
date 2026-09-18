@@ -25,6 +25,7 @@ import numpy as np
 from foqlens import graph_zones, zones
 from foqlens import budget as bg
 from foqlens.metric import Surface
+from foqlens.projection import Projection
 from foqlens.quant import Level
 
 
@@ -420,22 +421,37 @@ class EqualStrength:
         return np.ones(len(zones_.centers))
 
 
+# The share of calibration zone centers whose projected score stays below the strength scale Z: the top 1% saturate
+# at full strength instead of one outlier pressing every other zone down, as a normalisation by the maximum would (#19).
+STRENGTH_QUANTILE = 0.99
+
+
 @dataclass(frozen=True)
 class ProjectedStrength:
-    """A zone's strength from the heads (owner, 2026-09-16, #19): s_i = clip(A P[:, c_i] / Z, 0, 1).
+    """A zone's strength from the heads (#19): s_i = clip(sigma(A)[c_i] / Z, 0, 1).
 
-    signals [questions, units] are the heads' energies against their background, `weights` the
-    projection of #18 onto the blocks (projection.Projection.weights), `scale` Z fixed on calibration so
-    strengths compare across questions.
+    signals [questions, units] are the heads' energies (source 3 of #18), clipped at 0; sigma is the fitted
+    projection of #18 onto every block (projection.Projection.apply, centred as it was fitted), read at the
+    zone's center; `scale` Z is fixed on calibration (strength_scale) so strengths compare across questions.
     """
 
     signals: np.ndarray
-    weights: np.ndarray  # [units, n_blocks]
+    projection: Projection
     scale: float
 
     def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
-        raw = np.asarray(self.signals[index], dtype=float) @ np.asarray(self.weights)[:, zones_.centers]
-        return np.clip(raw / self.scale, 0.0, 1.0)
+        a = np.clip(np.asarray(self.signals[index : index + 1], dtype=float), 0.0, None)
+        sigma = self.projection.apply(a)[0].cpu().numpy()
+        return np.clip(sigma[zones_.centers] / self.scale, 0.0, 1.0)
+
+
+def strength_scale(projection: Projection, signals: np.ndarray, centers: list[np.ndarray],
+                   quantile: float = STRENGTH_QUANTILE) -> float:
+    """Z: the `quantile` of the projected scores at the zone centers of calibration questions (signals [q, units],
+    centers[q] their zones' centers)."""
+    sigma = projection.apply(np.clip(np.asarray(signals, dtype=float), 0.0, None)).cpu().numpy()
+    at_centers = np.concatenate([sigma[q, c] for q, c in enumerate(centers) if len(c)])
+    return float(np.quantile(at_centers, quantile))
 
 
 @dataclass(frozen=True)

@@ -110,14 +110,15 @@ Requirements: an NVIDIA GPU with 16 GB+ of memory, [uv](https://docs.astral.sh/u
 ```sh
 git clone https://github.com/Vovanda/FoQLens.git
 cd FoQLens
-uv sync                                         # torch (CUDA 12.8), transformers, bitsandbytes
-uv run python scripts/download_models.py        # Gemma 4 E2B at its pinned revision, ~10 GB
-uv run pytest                                   # unit + bench health tests on the GPU
+uv sync                                              # torch (CUDA 12.8), transformers, bitsandbytes
+uv run python scripts/download_models.py e2b e2b-it   # Gemma 4 E2B and E2B-it at their pinned revisions, ~20 GB
+uv run python scripts/cut_model.py e2b-it            # the bench's model: E2B-it as .refocustensors, ~9.3 GB
+uv run pytest                                        # unit + bench health tests on the GPU
 ```
 
 A run takes 0.8 of the GPU by default - that share of the VRAM, and rest between batches - so the card stays usable; `--gpu-share 1` or `FOQLENS_GPU_SHARE=1` gives the full speed.
 
-Model weights are not stored in the repository. `scripts/download_models.py` fetches them from Hugging Face (Apache 2.0, no token needed) at the commits pinned in `foqlens.model.REVISIONS`, and `foqlens.model.load()` reads exactly those commits. Add `e4b` to the download for the confirmation model (~16 GB).
+Model weights are not stored in the repository. `scripts/download_models.py` fetches them from Hugging Face (Apache 2.0, no token needed) at the commits pinned in `foqlens.model.REVISIONS`, and `foqlens.model.load()` reads exactly those commits. `scripts/cut_model.py` cuts a downloaded model into its [.refocustensors](docs/refocustensors.md) folder outside the repository, and the bench runs from that folder. Add `e4b` to the download for the confirmation model (~16 GB).
 
 ## Layout
 
@@ -136,7 +137,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/data.md`](docs/data.md) - how the runs are stored and read: JSON Lines files, and DuckDB over them.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:
-  - `model`, `quant`, `kquant`, `refinements`, `precision` - loading, quantizers, the k-quant copy with refinements (`refinements`), the per-block precision controller; `gguf_weights` - a published GGUF's weights for comparison;
+  - `model`, `quant`, `kquant`, `refinements`, `precision` - loading, quantizers, the k-quant copy with refinements (`refinements`), the per-block precision controller; `refocustensors`, `safetensors_io`, `tail_cost` - the model file, its reading and writing tensor by tensor, the cost of its exact tail; `gguf_weights` - a published GGUF's weights for comparison;
   - `scoring`, `pipeline` - mask sources (a new score is a new `MaskSource`);
   - `evaluate`, `quality` - quality metrics (a new metric is a new `QualityMetric`) and evaluation;
   - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - from masks to layouts: zone sources, fields and level rules as replaceable parts;

@@ -21,7 +21,8 @@ space is a new class behind BlockMetric.
   active and the quiet.
 
 Everything is torch on the metric's device, computed in chunks of rows; nothing reads a tensor value on
-the host except the loop of ResistiveMetric.distances, which runs outside any forward pass.
+the host except the loop of ResistiveMetric.distances - once every RELAX_CHECK_EVERY relaxations - which runs outside
+any forward pass.
 
 Invariants:
 - Invariant: CoactivationMetric distances are Euclidean: symmetric, zero on the diagonal, the triangle
@@ -49,10 +50,14 @@ EPS = 1e-12
 PAD = -1  # a missing neighbour in a padded table
 MAD_TO_SIGMA = 1.4826  # a normal distribution's standard deviation per median absolute deviation (Black et al. 1998)
 ROW_CHUNK = 1024  # rows of distances built at once: 1024 x 14 708 in float32 is 60 MB
+# Relaxations of the shortest paths between two looks at whether they settled: a look reads the device, so it waits for
+# every relaxation queued; after the paths settle at most this many run for nothing (as generation.STOP_CHECK_EVERY).
+RELAX_CHECK_EVERY = 16
 
 
 class BlockMetric(Protocol):
     n_blocks: int
+    device: torch.device  # where its distances are computed
 
     def distances(self, sources: torch.Tensor) -> torch.Tensor:
         """Distances from the blocks `sources` [k] to every block: [k, n_blocks]."""
@@ -80,6 +85,7 @@ class CoactivationMetric:
         self.profiles = unit_profiles(masks, device)
         self.n_blocks = self.profiles.shape[0]
         self._sq = (self.profiles * self.profiles).sum(dim=1)  # 1, or 0 for a constant block
+        self.device = self.profiles.device
 
     def distances(self, sources: torch.Tensor) -> torch.Tensor:
         sources = torch.as_tensor(sources, device=self.profiles.device)
@@ -100,7 +106,7 @@ def nearest(metric: BlockMetric, k: int, scale: torch.Tensor | None = None) -> t
     With `scale` [n_blocks] the distance is rescaled first, d(a, b) / sqrt(scale_a scale_b) (NICDM).
     """
     n = metric.n_blocks
-    device = metric.distances(torch.tensor([0])).device
+    device = metric.device
     indices, distances = [], []
     for rows in torch.arange(n, device=device).split(ROW_CHUNK):
         d = metric.distances(rows)
@@ -363,18 +369,24 @@ class ResistiveMetric:
     def __init__(self, table: torch.Tensor, lengths: torch.Tensor, conductance: Conductance):
         self.table = table
         self.n_blocks = table.shape[0]
+        self.device = table.device
         c = conductance.edges(table).to(lengths.device, torch.float32)
         self.edges = torch.where(c > 0, lengths / c.clamp_min(EPS), torch.full_like(lengths, torch.inf))
 
     def distances(self, sources: torch.Tensor) -> torch.Tensor:
-        """Bellman-Ford by rows: relax every block from its neighbours until nothing shortens."""
+        """Bellman-Ford by rows: relax every block from its neighbours until nothing shortens.
+
+        Whether anything shortened is read on the host once every RELAX_CHECK_EVERY relaxations: a relaxation after the
+        paths have settled changes nothing, so the distances are those of a look after every step.
+        """
         sources = torch.as_tensor(sources, device=self.table.device)
         d = torch.full((len(sources), self.n_blocks), torch.inf, device=self.table.device)
         d[torch.arange(len(sources), device=d.device), sources] = 0.0
         via = self.table.clamp_min(0)
-        for _ in range(self.n_blocks):
-            relaxed = torch.minimum(d, (d[:, via] + self.edges[None]).amin(dim=2))
-            if torch.equal(relaxed, d):
+        for _ in range(0, self.n_blocks, RELAX_CHECK_EVERY):
+            before = d
+            for _ in range(RELAX_CHECK_EVERY):
+                d = torch.minimum(d, (d[:, via] + self.edges[None]).amin(dim=2))
+            if torch.equal(d, before):
                 break
-            d = relaxed
         return d

@@ -169,3 +169,31 @@ def test_at_a_border_of_activity_the_jump_medium_stops_the_wave_and_a_smooth_ris
     smooth = ResistiveMetric(table, lengths, JumpConductance(rise, scale=1.0)).distances(torch.tensor([0]))[0]
     assert torch.allclose(across[:5], torch.arange(5, dtype=torch.float32))
     assert across[5] > 1e6 and smooth[9] < 30
+
+
+def test_looking_every_few_relaxations_gives_the_distances_of_looking_after_every_one():
+    from foqlens.metric import HarmonicConductance, ResistiveMetric, neighbour_table
+
+    rng = np.random.default_rng(7)
+    points = rng.uniform(0, 10, size=(200, 2))
+
+    class Plane:
+        n_blocks = len(points)
+        device = torch.device("cpu")
+
+        def distances(self, sources):
+            p = torch.as_tensor(points, dtype=torch.float32)
+            return torch.cdist(p[torch.as_tensor(sources)], p)
+
+    table, lengths = neighbour_table(Plane(), k=4)
+    metric = ResistiveMetric(table, lengths, HarmonicConductance(torch.as_tensor(rng.uniform(0.2, 2, 200), dtype=torch.float32)))
+    sources = torch.tensor([0, 17, 199])
+    # the reference: a look after every relaxation, until nothing shortens
+    d = torch.full((3, 200), torch.inf)
+    d[torch.arange(3), sources] = 0.0
+    while True:
+        relaxed = torch.minimum(d, (d[:, table.clamp_min(0)] + metric.edges[None]).amin(dim=2))
+        if torch.equal(relaxed, d):
+            break
+        d = relaxed
+    assert torch.equal(metric.distances(sources), d)

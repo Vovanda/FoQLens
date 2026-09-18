@@ -17,6 +17,7 @@ class PlaneMetric:
     def __init__(self, coords: np.ndarray):
         self.coords = torch.as_tensor(coords, dtype=torch.float32)
         self.n_blocks = len(coords)
+        self.device = self.coords.device
 
     def distances(self, sources: torch.Tensor) -> torch.Tensor:
         return torch.cdist(self.coords[torch.as_tensor(sources)], self.coords)

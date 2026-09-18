@@ -53,6 +53,8 @@ Timed from the host, a small kernel measures its launch instead: 0.12 ms for eit
 
 The tensor cores read D2 faster than the CUDA cores at every token count and D8 from 16 tokens on, 3 times faster at 32. At one token they are 1.2 times slower than bf16 at D2 and 2.2 times at D8: the three refinements of D8 add 0.044 ms of reading and decoding to the base.
 
+The bench multiplies on tensor cores because the corpus runs decode batches of up to 32 rows. There the CUDA cores decode every weight again for each 8 tokens a warp carries and multiply one product at a time, so their time grows with the tokens; one mma does 2048 multiply-adds and a thread block decodes the weight once for 32 tokens. At 1-8 tokens the two kernels are level: reading and decoding the weights, the same work in both, takes the time.
+
 A decoding step of E2B-it, one CUDA graph, ms (`scripts/decode_step_speed.py`; the mixed layout draws D2 ... D8 per block):
 
 | Reading | Batch 1 | Batch 8 | Batch 32 |

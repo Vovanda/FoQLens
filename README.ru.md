@@ -146,7 +146,7 @@ uv run pytest                                        # юнит-тесты + т�
   - `model`, `quant`, `kquant`, `refinements`, `precision` - загрузка, квантизаторы, копия k-quant с уточнениями (`refinements`), поблочный контроллер точности; `refocustensors`, `safetensors_io`, `tail_cost` - файл модели, его чтение и запись по одному тензору, стоимость хвоста exact; `gguf_weights` - веса опубликованного GGUF для сверки;
   - `scoring`, `pipeline` - источники масок (новая оценка - новый `MaskSource`);
   - `evaluate`, `quality` - метрики качества (новая метрика - новая `QualityMetric`) и оценка;
-  - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - от масок к раскладкам: источники зон, поля и правила уровней как заменяемые части;
+  - `budget`, `layouts`, `zones`, `graph_zones`, `metric`, `coupling`, `activity`, `projection`, `strategies`, `regulator`, `neighbours` - от масок к раскладкам: граф блоков и его метрики, источники зон, охват и правила уровней как заменяемые части, и регулятор, который сверяет раскладку с тем, что читает ядро;
   - `gpu_share`, `gpu_monitor` - доля GPU, которую берёт прогон, и её загрузка.
 - [`scripts/`](scripts/) - скачивание модели и по скрипту на прогон; они только соединяют части стенда.
 - [`tests/`](tests/) - юнит-тесты и тесты здоровья стенда.

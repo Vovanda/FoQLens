@@ -1,29 +1,30 @@
 """Expert zones on the block graph, and how far they reach (issues #4, #19).
 
 The surface the zones live on is a graph (owner, 2026-09-16): every block linked to its nearest blocks
-in a metric (metric.neighbour_table). zones.find_zones finds zones on a raster of the 2D weight map; here
-the same procedure runs on the graph, so the space is an input and no picture is drawn:
+in a metric (metric.neighbour_table), or to the blocks its signal flows to (coupling). The space is an input and
+no picture is drawn:
 
 - a peak is a block whose smoothed mask is at least that of every neighbour and above PEAK_QUANTILE;
 - its hill is the connected region of the graph standing above half its height, and a weaker top inside
   a stronger hill is not a zone;
-- the base radius is a share of weight mass, not the area of a blob: the smallest radius at which the
-  blocks around the peak hold as much weight as the hill (#4).
+- a zone's own radius is the smallest radius at which the blocks around the peak hold as much weight as its
+  hill - the width of the peak at half height, found from the query (#4).
 
 A zone is a center and a radius, and its figure is every block within the radius by the distances of
 the layout's metric - the geodesic along the graph (metric.geodesic), or its resistive form - so the
 figure is arbitrary and follows the graph, not a ball cut across the space. A zone lifts the blocks it
 reaches by rule 4 of docs/quantization-filter.md, from 1 at its center to 0 at its reach times the last
 stop. How far it reaches is replaceable (Reach): FrontReach sends every zone a share f of the width of the
-network, R = f D (rule 1, #19).
+network, R = f D (rule 1, #19); ProportionalReach splits the same share by the zones' own radii.
 
 Invariants:
 - Invariant: one zone per hill - a weaker top inside a stronger zone's hill is not a zone.
 - Invariant: the blocks within a zone's radius hold at least its hill's weight, and no smaller radius does.
 - Invariant: a lift is 1 at a zone's center and 0 at and beyond its reach times the last stop; a reach of 0
   lifts the center alone (rule 1: f = 0 is the center only).
-- Invariant: the reach at f = 1 lifts every block - the whole network, as precision_lift.
+- Invariant: the reach at f = 1 lifts every block - the whole network.
 - Invariant: lifts do not decrease as f grows.
+- Invariant: ProportionalReach keeps the zones' mean reach at f D and their ratio to one another.
 """
 
 from __future__ import annotations

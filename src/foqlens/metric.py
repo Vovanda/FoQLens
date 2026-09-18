@@ -6,8 +6,8 @@ at how far every block is from a zone's center - so a metric is anything that an
 space is a new class behind BlockMetric.
 
 - CoactivationMetric (M1): d(a, b) = sqrt(2 (1 - corr(a, b))) between the blocks' mask profiles over
-  calibration questions - the distance weight_map.coactivation_map cuts down to two principal axes,
-  here in full. Profiles are standardized per block and scaled to unit length, so the distance is the
+  calibration questions, over the full profile - the first bench cut it to two principal axes, a 2D map.
+  Profiles are standardized per block and scaled to unit length, so the distance is the
   Euclidean distance between them.
 - neighbour_table: the k nearest blocks of every block in a metric, made symmetric by union - the graph
   the peaks and hills of a mask are found on (graph_zones.find_graph_zones) and the paths run along.
@@ -27,7 +27,7 @@ any forward pass.
 Invariants:
 - Invariant: CoactivationMetric distances are Euclidean: symmetric, zero on the diagonal, the triangle
   inequality holds (tests), and sqrt(2 (1 - corr)) for blocks whose profile varies.
-- Invariant: scaling or shifting one block's profile does not move it, as on the weight map.
+- Invariant: scaling or shifting one block's profile does not move it.
 - Invariant: a neighbour table is symmetric and a block is never its own neighbour, for either construction.
 - Invariant: mutual_nicdm_table is connected: whatever the k-nearest lists leave apart is joined by nearest pairs.
 - Invariant: with activity 1 everywhere a ResistiveMetric is the shortest path of its base table, for either conductance.

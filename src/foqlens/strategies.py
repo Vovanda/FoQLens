@@ -55,6 +55,8 @@ MEDIA = {"harmonic": HarmonicConductance, "jump": JumpConductance}  # M4, M4b (#
 STILL = "still"
 ZONES = ("query", "topic")  # the question's own mask, or its topic's mean without it
 COMBINE = ("sum", "max")  # rule 5
+# How far a zone reaches: f D for every zone (rule 1), or f D split by the zones' own widths (a candidate)
+REACHES = {"network": gz.FrontReach, "proportional": gz.ProportionalReach}
 NEIGHBOURS = 16  # blocks every block is linked to: the k of #4's measurements on E001's masks
 
 
@@ -121,11 +123,12 @@ def zone_source(zones: str, scores: np.ndarray, surface: Surface, weights: np.nd
 
 def zone_layout(name: str, zones: str, scores: np.ndarray, space: Space, surface: Surface, weights: np.ndarray,
                 knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS, strength: ZoneStrength = EqualStrength(),
+                reach: str = "network",
                 domains: tuple[str, ...] | None = None) -> GraphZoneLayout:
-    """Zones on the block graph with every part picked by name; the reach is R = f D along the space's graph."""
-    return GraphZoneLayout(name, zone_source(zones, scores, surface, weights, domains),
-                           gz.FrontReach(knobs.focus_area, space.width), surface, knobs.floor, knobs.focus_strength,
-                           strength, knobs.combine, ladder)
+    """Zones on the block graph with every part picked by name; the reach along the space's graph by `reach`."""
+    reaching = _pick(REACHES, reach, "reach")(knobs.focus_area, space.width)
+    return GraphZoneLayout(name, zone_source(zones, scores, surface, weights, domains), reaching, surface, knobs.floor,
+                           knobs.focus_strength, strength, knobs.combine, ladder)
 
 
 def per_block_layout(name: str, scores: np.ndarray, knobs: Knobs,
@@ -158,32 +161,35 @@ class Inputs:
         return self.scores - self.background
 
 
-def _per_block(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+def _per_block(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     return per_block_layout("per-block", inputs.fields, knobs, ladder)
 
 
-def _static(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+def _static(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     space = Space.build(inputs.calibration, graph, k)
-    return zone_layout("static", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder)
+    return zone_layout("static", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
+                       reach=reach)
 
 
-def _topic(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+def _topic(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     space = Space.build(inputs.calibration, graph, k)
     return zone_layout("topic", "topic", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
-                       domains=inputs.domains)
+                       domains=inputs.domains, reach=reach)
 
 
-def _medium(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+def _medium(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     space = Space.build(inputs.calibration, graph, k)
     surface = space.surface("harmonic", activity=inputs.scores, background=inputs.background)
-    return zone_layout("medium", "query", inputs.fields, space, surface, inputs.block_weights, knobs, ladder)
+    return zone_layout("medium", "query", inputs.fields, space, surface, inputs.block_weights, knobs, ladder,
+                       reach=reach)
 
 
-def _signal_path(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+def _signal_path(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     if inputs.model_weights is None or inputs.n_heads is None:
         raise ValueError("the signal's path needs the model's weights and its number of heads")
     space = Space.signal_path(inputs.model_weights, inputs.n_heads, k)
-    return zone_layout("signal-path", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder)
+    return zone_layout("signal-path", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
+                       reach=reach)
 
 
 # In the order they are checked: the simplest to build and to verify first (per block, no zones - the control).
@@ -192,6 +198,6 @@ MECHANISMS = {"per-block": _per_block, "static": _static, "topic": _topic, "medi
 
 
 def mechanism_layout(mechanism: str, inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS,
-                     graph: str = "mutual-nicdm", k: int = NEIGHBOURS):
+                     graph: str = "mutual-nicdm", k: int = NEIGHBOURS, reach: str = "network"):
     """The layout policy of a mechanism of the filter, by its name, over the questions of `inputs`."""
-    return _pick(MECHANISMS, mechanism, "mechanism")(inputs, knobs, ladder, graph, k)
+    return _pick(MECHANISMS, mechanism, "mechanism")(inputs, knobs, ladder, graph, k, reach)

@@ -38,7 +38,7 @@ from foqlens.pipeline import Bench, GRADIENT_BATCH, POOLED_BATCH
 from foqlens.prompt_variants import SETUPS, TRAIN_POOL, examples_for, needs_train, setup_named
 from foqlens.quant import Level
 from foqlens.regulator import Regulator
-from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, Inputs, Knobs, mechanism_layout
+from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, Knobs, mechanism_layout
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 FLOORS = {lv.name.lower(): lv for lv in (Level.ZERO, Level.D2, Level.D4, Level.D6)}
@@ -62,6 +62,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--focus-area", type=float, required=True, help="f: the share of the network a zone reaches")
     parser.add_argument("--focus-strength", type=float, default=1.0, help="g: how far a zone rises of the way to D8")
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
+    parser.add_argument("--reach", choices=sorted(REACHES), default="network",
+                        help="f D for every zone (rule 1), or f D split by the zones' own widths")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--out", type=Path, default=Path("runs/strategies"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
@@ -106,8 +108,8 @@ def main(argv: list[str] | None = None) -> Path:
                     model_weights={n: m.weight for n, m in ctl.modules.items()},
                     n_heads=bench.model.config.get_text_config(decoder=True).num_attention_heads)
     knobs = Knobs(FLOORS[args.floor], args.focus_area, args.focus_strength, args.combine)
-    label = f"{args.mechanism}-{args.source}-{args.floor}-f{args.focus_area:g}-g{args.focus_strength:g}"
-    policy = mechanism_layout(args.mechanism, inputs, knobs, graph=args.graph, k=args.k)
+    label = f"{args.mechanism}-{args.source}-{args.reach}-{args.floor}-f{args.focus_area:g}-g{args.focus_strength:g}"
+    policy = mechanism_layout(args.mechanism, inputs, knobs, graph=args.graph, k=args.k, reach=args.reach)
     regulator = Regulator(policy, ctl)
     reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)
 
@@ -129,7 +131,7 @@ def main(argv: list[str] | None = None) -> Path:
     write_json(target, {
         "model": name, "base": args.base, "mechanism": args.mechanism, "source": args.source, "graph": args.graph,
         "k": args.k, "floor": args.floor, "focus_area": args.focus_area, "focus_strength": args.focus_strength,
-        "combine": args.combine, "seed": args.seed, "questions": {c: [r.id for cc, r in laid if cc == c] for c in askings},
+        "combine": args.combine, "reach": args.reach, "seed": args.seed, "questions": {c: [r.id for cc, r in laid if cc == c] for c in askings},
         "calibration": len(calibration),
         "bytes": {"per_question_mean": float(regulator.cost.read_bytes(codes).mean()),
                   "per_step_mean": float(np.mean([regulator.cost.step_bytes(c) for c in reading.laid])),

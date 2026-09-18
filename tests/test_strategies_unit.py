@@ -109,3 +109,16 @@ def test_every_mechanism_is_made_by_its_name_and_keeps_the_ends_of_f():
         assert whole.max() == int(Level.D8), mechanism
     with pytest.raises(ValueError, match="per-block"):
         mechanism_layout("router", inputs, Knobs(Level.D2, 0.5, 1.0))
+
+
+def test_the_reach_is_picked_by_name_and_the_proportional_one_spends_the_mean_of_the_network_share():
+    scores, _ = calibration()
+    fields = scores - scores.mean(axis=0)
+    space = Space.build(scores, k=6)
+    questions = np.arange(len(fields))
+    for reach in ("network", "proportional"):
+        layout = zone_layout("z", "query", fields, space, space.surface(), np.ones(BLOCKS), Knobs(Level.D2, 0.2, 1.0),
+                             DEPTHS, reach=reach)
+        assert layout.levels(questions).max() == int(Level.D8), reach
+    with pytest.raises(ValueError, match="proportional"):
+        zone_layout("z", "query", fields, space, space.surface(), np.ones(BLOCKS), Knobs(Level.D2, 0.2, 1.0), reach="gas")

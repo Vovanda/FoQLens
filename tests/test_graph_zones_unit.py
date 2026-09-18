@@ -201,3 +201,15 @@ def test_the_per_block_control_spends_the_same_share_of_blocks_on_any_question()
 def test_the_ladder_the_rungs_map_onto_is_the_one_of_quant():
     codes = zones.levels_from_rungs(np.ones((1, 3)), [Level.BF16], Level.ZERO, ladder=LADDER[1:])
     assert codes.tolist() == [int(LADDER[-1])] * 3
+
+
+def test_the_proportional_reach_keeps_the_mean_at_f_d_and_each_zone_s_own_width():
+    two = bz.GraphZones(centers=np.array([0, 1]), radii=np.array([1.0, 3.0]))
+    radii = bz.ProportionalReach(0.2, 10.0).radii(two)
+    assert radii.mean() == pytest.approx(0.2 * 10.0) and radii[1] / radii[0] == pytest.approx(3.0)
+    one = bz.GraphZones(centers=np.array([0]), radii=np.array([4.0]))
+    assert bz.ProportionalReach(0.2, 10.0).radii(one).tolist() == bz.FrontReach(0.2, 10.0).radii(one).tolist()
+    flat = bz.GraphZones(centers=np.array([0, 1]), radii=np.zeros(2))
+    assert bz.ProportionalReach(0.2, 10.0).radii(flat).tolist() == [2.0, 2.0]
+    assert np.all(np.isinf(bz.ProportionalReach(1.0, 10.0).radii(two)))
+    assert np.all(bz.ProportionalReach(0.0, 10.0).radii(two) == 0)

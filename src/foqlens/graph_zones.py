@@ -121,6 +121,31 @@ class FrontReach:
         return np.full(len(zones.radii), reach)
 
 
+@dataclass(frozen=True)
+class ProportionalReach:
+    """The same share f of the network, split between a question's zones by their own width: R_i = f D r_i / mean(r).
+
+    r_i is a zone's own radius, found from the query - the radius around its center that holds its hill above half
+    height (find_graph_zones). The zones' mean reach is f D, so f keeps its meaning; a narrow peak reaches less than a
+    spread one. One zone, or zones of one width, reach f D exactly - FrontReach. Derivation: the session note
+    knobs-from-the-query.md (a change of rule 1 for the owner to decide; this class stands beside FrontReach).
+    """
+
+    focus_area: float
+    width: float
+
+    def __post_init__(self) -> None:
+        check_focus_area(self.focus_area)
+
+    def radii(self, zones: GraphZones) -> np.ndarray:
+        if self.focus_area == 1.0:
+            return np.full(len(zones.radii), np.inf)
+        own = np.asarray(zones.radii, dtype=float)
+        mean = own.mean() if len(own) else 0.0
+        share = own / mean if mean > 0 else np.ones_like(own)  # hills of one block each: no width to split by
+        return self.focus_area * self.width * share
+
+
 def zone_lifts(zones: GraphZones, radii: np.ndarray, metric: BlockMetric, last_stop: float = 1.0) -> np.ndarray:
     """Every zone's lift of every block by rule 4: max(0, 1 - d / (R s_last)), [n_zones, n_blocks]."""
     if len(zones.centers) == 0:

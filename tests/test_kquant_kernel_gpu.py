@@ -9,7 +9,7 @@ import torch
 from torch import nn
 
 from foqlens.kernels.kquant import CUDA_CORES, TENSOR_CORES, TILE_ROWS, kquant_matmul, kquant_matmul_fp32
-from foqlens.kquant import Q2_K, Q4_K
+from foqlens.kquant import Q2_K, Q3_K, Q4_K, Q6_K, QK_K, from_gguf_blocks
 from foqlens.quant import MAX_DEPTH, Level
 from foqlens import precision
 from foqlens.precision import MixedPrecisionLinear, samples
@@ -246,3 +246,53 @@ def test_a_copy_of_another_kind_and_a_baked_level_are_never_read_by_the_kernel()
     mixed_bf16 = kquant_module()
     mixed_bf16.set_levels(np.array([Level.BF16, Level.D4, Level.D4, Level.D4], dtype=np.uint8))
     assert mixed_bf16._depths is None
+
+
+# ==== A published file's bases: Q3_K and Q6_K (#29) ====
+# A copy over bartowski's Q2_K holds 70 modules on Q3_K and 17 on Q6_K. Random bytes are a valid block of either but for
+# d, so the blocks are random codes and scales with a finite d of a trained layer's size.
+FOREIGN = [Q3_K, Q6_K]
+BLOCK_BYTES = {Q3_K.name: 110, Q6_K.name: 210}  # sizeof(block_q3_K), sizeof(block_q6_K)
+D_SCALE = 1e-3
+
+
+def foreign_copy(fmt, seed=0) -> KRefinedWeight:
+    """The stack over random blocks of `fmt`, refining a source within half a block step of the base."""
+    generator = torch.Generator().manual_seed(seed)
+    blocks = torch.randint(0, 256, (OUT, IN // QK_K, BLOCK_BYTES[fmt.name]), dtype=torch.uint8, generator=generator)
+    d = (torch.rand(OUT, IN // QK_K, generator=generator) * D_SCALE).half()
+    blocks[..., -2:] = d.view(torch.uint8).view(OUT, IN // QK_K, 2)
+    base = from_gguf_blocks(blocks, fmt)
+    noise = (torch.rand(base.codes.shape, generator=generator) - 0.5) * base.steps().abs()
+    source = (base.dequantize() + noise).reshape(OUT, IN)
+    return KRefinedWeight.over(blocks.to(DEVICE), fmt, source.to(DEVICE))
+
+
+@pytest.mark.parametrize("fmt", FOREIGN, ids=lambda f: f.name)
+def test_a_published_base_reads_as_the_torch_path_at_every_depth(fmt):
+    copy, x = foreign_copy(fmt), make_tokens()
+    for depth in range(fmt.base_depth, MAX_DEPTH + 1):
+        got = read(copy, x, blocks([depth] * 4), "tensor-cores")
+        assert close(got, reference(copy, x, depth), "tensor-cores"), depth
+
+
+@pytest.mark.parametrize("fmt", FOREIGN, ids=lambda f: f.name)
+def test_a_published_base_reads_a_mixed_layout_and_zero_reads_nothing(fmt):
+    copy, x = foreign_copy(fmt, seed=1), make_tokens()
+    layout = [MAX_DEPTH, 0, fmt.base_depth, MAX_DEPTH]
+    got = read(copy, x, blocks(layout), "tensor-cores")
+    for block, depth in enumerate(layout):
+        rows = slice(block * TILE_ROWS, min((block + 1) * TILE_ROWS, OUT))
+        if depth == 0:
+            assert torch.equal(got[:, rows], torch.zeros_like(got[:, rows]))
+        else:
+            assert close(got[:, rows], reference(copy, x, depth)[:, rows], "tensor-cores"), block
+
+
+@pytest.mark.parametrize("fmt", FOREIGN, ids=lambda f: f.name)
+def test_every_token_reads_its_own_layout_over_a_published_base(fmt):
+    copy, x = foreign_copy(fmt, seed=2), make_tokens()
+    layouts = torch.randint(0, MAX_DEPTH + 1, (TOKENS, -(-OUT // TILE_ROWS)), device=DEVICE, dtype=torch.uint8)
+    got = read(copy, x, layouts, "tensor-cores")
+    for token in range(TOKENS):
+        assert torch.equal(got[token], read(copy, x[token:token + 1], layouts[token], "tensor-cores")[0]), token

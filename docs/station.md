@@ -5,7 +5,7 @@ title: The station
 # The station
 
 The one machine every run of the bench has been made on, the limits it runs under, and a log of what the
-runs cost it.
+runs cost it. How fast the bench runs on it, and how that changed, is in [performance](performance.md).
 
 ## Hardware
 

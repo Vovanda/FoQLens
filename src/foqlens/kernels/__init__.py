@@ -81,9 +81,11 @@ def _argument(value) -> ctypes.c_void_p:
 _argument.keep = []
 
 
-def launch(function: ctypes.c_void_p, grid: tuple[int, int, int], block: tuple[int, int, int], *args) -> None:
-    """Launch a kernel on the current stream with tensors and ints as arguments."""
+def launch(function: ctypes.c_void_p, grid: tuple[int, int, int], block: tuple[int, int, int], *args,
+           shared_bytes: int = 0) -> None:
+    """Launch a kernel on the current stream with tensors and ints as arguments and `shared_bytes` of dynamic shared
+    memory."""
     _argument.keep = []
     packed = (ctypes.c_void_p * len(args))(*[_argument(a) for a in args])
     stream = ctypes.c_void_p(torch.cuda.current_stream().cuda_stream)
-    _check("cuLaunchKernel", _driver().cuLaunchKernel(function, *grid, *block, 0, stream, packed, None))
+    _check("cuLaunchKernel", _driver().cuLaunchKernel(function, *grid, *block, shared_bytes, stream, packed, None))

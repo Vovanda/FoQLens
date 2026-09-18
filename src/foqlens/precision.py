@@ -78,8 +78,9 @@ STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: RefinedWeight fo
 DEPTH_BY_CODE = np.array([lv.depth if lv.depth or lv is Level.ZERO else MAX_DEPTH for lv in Level], dtype=np.uint8)
 DEEPEST = max((lv for lv in Level if lv.depth), key=lambda lv: lv.depth)  # the deepest read depth, D8
 # A layout of depths and ZERO over a k-quant copy is read by the kernel, straight from the copy's bytes, up to this many
-# tokens: unpacking costs ~4 ms a 12288x1536 module whatever the tokens, the kernel ~0.2 ms and 0.0125 ms a token past 16
-# (2026-09-18), so a longer input - a prefill - unpacks once for a GEMM. Off, every read unpacks.
+# tokens: unpacking costs ~3.8 ms a 12288x1536 module whatever the tokens, the kernel 0.10 ms at D8 up to 8 tokens and
+# 1.0 ms at 256 (2026-09-18, scripts/kernel_speed.py), so a longer input - a prefill - unpacks once for a GEMM. Off,
+# every read unpacks.
 KERNEL = True
 KERNEL_MAX_TOKENS = 256
 

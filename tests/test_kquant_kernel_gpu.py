@@ -1,6 +1,6 @@
-"""The k-quant kernel (kernels/kquant_matmul.cu) against the torch path: every depth, mixed layouts, a layout per token."""
+"""The k-quant kernels (kernels/kquant_matmul.cu, kquant_mma.cu) against the torch path: every depth, mixed layouts, a
+layout per token."""
 
-import time
 from functools import partial
 
 import numpy as np
@@ -8,7 +8,7 @@ import pytest
 import torch
 from torch import nn
 
-from foqlens.kernels.kquant import TILE_ROWS, kquant_matmul, kquant_matmul_fp32
+from foqlens.kernels.kquant import CUDA_CORES, TENSOR_CORES, TILE_ROWS, kquant_matmul, kquant_matmul_fp32
 from foqlens.kquant import Q2_K, Q4_K
 from foqlens.quant import MAX_DEPTH, Level
 from foqlens import precision
@@ -19,12 +19,18 @@ pytestmark = pytest.mark.gpu
 
 DEVICE = "cuda"
 OUT, IN, TOKENS = 3 * TILE_ROWS + 5, 1536, 11  # a partial block of rows and a partial tile of tokens
-# The kernel builds the torch path's bf16 weights bit for bit and sums them times the inputs in fp32: against the same
-# products summed in fp64 it is off by at most 1.6e-7 of the largest output (measured 2026-09-18).
-TOLERANCE = 1e-6
+# Both kernels build the torch path's bf16 weights bit for bit and sum them times the inputs in fp32. Against the same
+# products summed in fp64 the CUDA cores are off by at most 1.6e-7 of the largest output; the tensor cores by 2.9e-6,
+# since an mma adds its products with truncation (Fasi et al. 2021, "Numerical behavior of NVIDIA tensor cores") -
+# still a thousandth of the bf16 step the module rounds its output to (measured 2026-09-18).
+TOLERANCE = {"cuda-cores": 1e-6, "tensor-cores": 1e-5}
 # A module rounds its output to bf16: the kernel and unpacking may land a sum on neighbouring bf16 values.
 BF16_ULP = 2**-7
 LARGE_OUT, LARGE_IN = 12288, 1536  # E2B's widest module, for the timing
+
+
+KERNELS = {"cuda-cores": CUDA_CORES, "tensor-cores": TENSOR_CORES}
+by_kernel = pytest.mark.parametrize("kernel", list(KERNELS))  # a kernel's name: TOLERANCE and KERNELS are keyed by it
 
 
 def make_copy(fmt, out=OUT, inp=IN, seed=0) -> KRefinedWeight:
@@ -48,66 +54,121 @@ def blocks(depths: list[int], out=OUT) -> torch.Tensor:
     return torch.tensor(depths, dtype=torch.uint8, device=DEVICE)[: -(-out // TILE_ROWS)]
 
 
-def close(got: torch.Tensor, expected: torch.Tensor) -> bool:
+def close(got: torch.Tensor, expected: torch.Tensor, kernel: str = "cuda-cores") -> bool:
     scale = expected.abs().max().clamp_min(1e-12)
-    return bool(((got - expected).abs().max() / scale) <= TOLERANCE)
+    return bool(((got - expected).abs().max() / scale) <= TOLERANCE[kernel])
 
 
+def read(copy: KRefinedWeight, x: torch.Tensor, depth: torch.Tensor, kernel: str) -> torch.Tensor:
+    return kquant_matmul_fp32(copy, x, depth, KERNELS[kernel])
+
+
+@by_kernel
 @pytest.mark.parametrize("fmt", [Q2_K, Q4_K])
 @pytest.mark.parametrize("depth", range(1, MAX_DEPTH + 1))
-def test_a_uniform_depth_reads_as_the_torch_path(fmt, depth):
+def test_a_uniform_depth_reads_as_the_torch_path(fmt, depth, kernel):
     copy, x = make_copy(fmt), make_tokens()
-    got = kquant_matmul_fp32(copy, x, blocks([depth] * 4))
-    assert close(got, reference(copy, x, depth))
+    got = read(copy, x, blocks([depth] * 4), kernel)
+    assert close(got, reference(copy, x, depth), kernel)
     bf16 = kquant_matmul(copy, x, blocks([depth] * 4))
     assert bf16.dtype == torch.bfloat16 and bf16.shape == (TOKENS, OUT)
 
 
+# Input widths of E2B's modules and one super-block: the tensor cores split the input over 1, 6 and 8 warps.
+WIDTHS = [256, 1536, 2048, 12288]
+
+
+@by_kernel
 @pytest.mark.parametrize("fmt", [Q2_K, Q4_K])
-def test_every_block_is_read_at_its_own_depth_and_zero_reads_nothing(fmt):
+@pytest.mark.parametrize("width", WIDTHS)
+def test_every_input_width_reads_as_the_torch_path(fmt, width, kernel):
+    copy, x = make_copy(fmt, inp=width), make_tokens(inp=width)
+    assert close(read(copy, x, blocks([MAX_DEPTH, 1, 3, 2]), kernel)[:, :TILE_ROWS],
+                 reference(copy, x, MAX_DEPTH)[:, :TILE_ROWS], kernel)
+
+
+@by_kernel
+@pytest.mark.parametrize("fmt", [Q2_K, Q4_K])
+def test_every_block_is_read_at_its_own_depth_and_zero_reads_nothing(fmt, kernel):
     copy, x = make_copy(fmt), make_tokens()
     layout = [4, 0, 1, 3]
-    got = kquant_matmul_fp32(copy, x, blocks(layout))
+    got = read(copy, x, blocks(layout), kernel)
     for block, depth in enumerate(layout):
         rows = slice(block * TILE_ROWS, min((block + 1) * TILE_ROWS, OUT))
         if depth == 0:
             assert torch.equal(got[:, rows], torch.zeros_like(got[:, rows]))
         else:
-            assert close(got[:, rows], reference(copy, x, depth)[:, rows]), block
+            assert close(got[:, rows], reference(copy, x, depth)[:, rows], kernel), block
 
 
+@by_kernel
 @pytest.mark.parametrize("fmt", [Q2_K, Q4_K])
-def test_every_token_reads_its_own_layout(fmt):
+def test_every_token_reads_its_own_layout(fmt, kernel):
     copy, x = make_copy(fmt), make_tokens()
     layouts = torch.randint(0, MAX_DEPTH + 1, (TOKENS, -(-OUT // TILE_ROWS)), device=DEVICE, dtype=torch.uint8)
-    got = kquant_matmul_fp32(copy, x, layouts)
+    got = read(copy, x, layouts, kernel)
     for token in range(TOKENS):
-        alone = kquant_matmul_fp32(copy, x[token:token + 1], layouts[token])
+        alone = read(copy, x[token:token + 1], layouts[token], kernel)
         assert torch.equal(got[token], alone[0]), token
 
 
-def test_a_copy_cut_short_is_never_read_deeper_than_it_holds():
+MANY_TOKENS = 70  # past two thread blocks of tokens on tensor cores, a partial one at the end
+
+
+@by_kernel
+@pytest.mark.parametrize("fmt", [Q2_K, Q4_K])
+def test_many_tokens_each_at_its_own_layout_read_as_the_torch_path(fmt, kernel):
+    copy, x = make_copy(fmt), make_tokens(MANY_TOKENS)
+    n_blocks = -(-OUT // TILE_ROWS)
+    layouts = torch.randint(0, MAX_DEPTH + 1, (MANY_TOKENS, n_blocks), device=DEVICE, dtype=torch.uint8)
+    got = read(copy, x, layouts, kernel)
+    at = {depth: reference(copy, x, depth) for depth in range(1, MAX_DEPTH + 1)}
+    expected = torch.zeros_like(got)
+    for token in range(MANY_TOKENS):
+        for block in range(n_blocks):
+            depth = int(layouts[token, block])
+            if depth:
+                rows = slice(block * TILE_ROWS, min((block + 1) * TILE_ROWS, OUT))
+                expected[token, rows] = at[depth][token, rows]
+    assert close(got, expected, kernel)
+    unread = layouts.repeat_interleave(TILE_ROWS, dim=1)[:, :OUT] == 0
+    assert torch.equal(got[unread], torch.zeros_like(got[unread]))
+
+
+@by_kernel
+def test_a_copy_cut_short_is_never_read_deeper_than_it_holds(kernel):
     full = make_copy(Q2_K)
     short = KRefinedWeight(fmt=full.fmt, blocks=full.blocks, refinements=full.refinements[:1].clone(), shape=full.shape)
     x = make_tokens()
-    assert torch.equal(kquant_matmul_fp32(short, x, blocks([4] * 4)), kquant_matmul_fp32(full, x, blocks([2] * 4)))
+    assert torch.equal(read(short, x, blocks([4] * 4), kernel), read(full, x, blocks([2] * 4), kernel))
 
 
 def seconds(call, repeats: int = 20) -> float:
-    for _ in range(3):
-        call()
+    """Seconds a call on the device, `repeats` calls replayed as one CUDA graph: a decoding step replays a graph, and
+    timed from the host a small kernel measures its launch instead (0.12 ms for either kernel at any depth)."""
+    stream = torch.cuda.Stream()
+    stream.wait_stream(torch.cuda.current_stream())
+    with torch.cuda.stream(stream):
+        for _ in range(3):
+            call()
+    torch.cuda.current_stream().wait_stream(stream)
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        for _ in range(repeats):
+            call()
+    start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+    start.record()
+    graph.replay()
+    end.record()
     torch.cuda.synchronize()
-    start = time.perf_counter()
-    for _ in range(repeats):
-        call()
-    torch.cuda.synchronize()
-    return (time.perf_counter() - start) / repeats
+    graph.reset()
+    return start.elapsed_time(end) / 1e3 / repeats
 
 
-# The kernel is bound by its arithmetic, not by the bytes it reads: D2 and D8 take about the same time (0.20 and 0.21
-# ms for 8 tokens, 2026-09-18), so a shallower read must merely not be slower, within the noise of a shared card.
+# A shallower read decodes fewer refinements: on tensor cores D2 took 0.060 ms against 0.103 at D8 for 8 tokens
+# (2026-09-18), so a shallower read must not be slower, within the noise of a shared card.
 TIME_NOISE = 1.15
-# Unpacking a 12288x1536 module to D8 for a GEMM took 3.9 ms, the kernel 0.21: it must stay well below.
+# Unpacking a 12288x1536 module to D8 for a GEMM took 3.8 ms, the kernel 0.10: it must stay well below.
 KERNEL_SHARE_OF_UNPACKING = 0.25
 
 

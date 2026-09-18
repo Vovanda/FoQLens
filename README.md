@@ -98,9 +98,9 @@ details where sharpness is needed, a gain over iterations. Saving memory is a se
 a gain in quality the mechanism saves memory at the same usability.
 
 **Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base (Q2_K, Q4_K for the
-sensitive classes) with 2-bit residual slices over it, after MoBiQuant with departures
+sensitive classes) with 2-bit refinements over it, after MoBiQuant with departures
 ([E002](experiments/E002-base-precision-d2/results.md)). The top rung is D8. The copy is still unpacked before
-the multiplication; a CUDA kernel that reads only the bits it needs is written for the former slice format and not
+the multiplication; a CUDA kernel that reads only the bits it needs is written for the former copy format and not
 yet wired into decoding.
 
 ## Reproduce
@@ -136,7 +136,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/data.md`](docs/data.md) - how the runs are stored and read: JSON Lines files, and DuckDB over them.
 - [`prereg/`](prereg/) - the main preregistration; the addenda of each experiment sit in its folder.
 - [`src/foqlens/`](src/foqlens/) - the bench:
-  - `model`, `quant`, `kquant`, `precision` - loading, quantizers, the k-quant copy with residual slices, the per-block precision controller; `gguf_weights` - a published GGUF's weights for comparison;
+  - `model`, `quant`, `kquant`, `refinements`, `precision` - loading, quantizers, the k-quant copy with refinements (`refinements`), the per-block precision controller; `gguf_weights` - a published GGUF's weights for comparison;
   - `scoring`, `pipeline` - mask sources (a new score is a new `MaskSource`);
   - `evaluate`, `quality` - quality metrics (a new metric is a new `QualityMetric`) and evaluation;
   - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - from masks to layouts: zone sources, fields and level rules as replaceable parts;

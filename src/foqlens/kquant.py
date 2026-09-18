@@ -1,42 +1,29 @@
-"""A k-quant base after llama.cpp with residual slices over it: one copy read at its base and deeper.
+"""k-quants after llama.cpp: Q2_K and Q4_K, the base of the bench's copy (refinements.py).
 
-The base is Q2_K or Q4_K as llama.cpp quantizes them without an importance matrix
-(`quantize_row_q2_K_ref`, `quantize_row_q4_K_ref` and `make_qkx2_quants` in ggml/src/ggml-quants.c at
-llama.cpp c6824a9): a super-block of QK_K weights split into blocks, every block an asymmetric grid - a
-scale and a min searched by weighted least squares - and the scales and mins of a super-block quantized
-themselves against one fp16 pair. Ported as vectorized tensor ops, block for block.
-
-Over the base lie residual slices as in quant.SlicedWeight: slice k quantizes what the base and the slices
-before it left, 2-bit symmetric codes with step block_step / 4**k, where block_step is the base's own
-quantized step d * scale of that block - a slice stores codes only, no scale.
-
-A base of Q2_K is one 2-bit plane, a base of Q4_K two; a read depth counts planes, and a copy cannot be
-read shallower than its base.
+Q2_K and Q4_K as llama.cpp quantizes them without an importance matrix (`quantize_row_q2_K_ref`,
+`quantize_row_q4_K_ref` and `make_qkx2_quants` in ggml/src/ggml-quants.c at llama.cpp c6824a9): a super-block
+of QK_K weights split into blocks, every block an asymmetric grid - a scale and a min searched by weighted least
+squares - and the scales and mins of a super-block quantized themselves against one fp16 pair. Ported as
+vectorized tensor ops, block for block.
 
 Invariant: the base read back equals gguf-py's dequantizer on the same blocks laid out as GGUF bytes, exactly.
 Invariant: the block search matches a loop port of llama.cpp's make_qkx2_quants: scales and mins within 1e-5
 relative (float32 sums in another order), codes identical but for a near tie - measured 0 of 18,432 for Q2_K,
 5 of 18,432 for Q4_K on heavy-tailed weights.
-Invariant: a weight whose base error is within half its block step stays within block_step / 2 / 4**k after
-k residual slices.
-Invariant: a deeper plane never changes what the shallower planes read.
 """
 
 from __future__ import annotations
 
 import functools
-from collections.abc import Iterator
 from dataclasses import dataclass
 
 import numpy as np
 import torch
 
-from foqlens.quant import N_SLICES, SLICE_BITS, _pack, _SliceReader, _unpack
+from foqlens.quant import DEPTH_BITS
 
 QK_K = 256  # weights in a super-block, as in ggml
 _FP16_BITS = 16
-_RESIDUAL_LEVELS = 2**SLICE_BITS
-_RESIDUAL_CENTER = _RESIDUAL_LEVELS // 2  # codes 0..3 read as -1.5 .. 1.5 steps, as in quant.SlicedWeight
 
 
 @dataclass(frozen=True)
@@ -54,8 +41,8 @@ class KFormat:
     rms_weighted: bool  # Q4_K weighs a weight by rms(block) + |x|, Q2_K by |x|
 
     @property
-    def planes(self) -> int:
-        return self.bits // SLICE_BITS
+    def base_depth(self) -> int:
+        return self.bits // DEPTH_BITS
 
     @property
     def bits_per_weight(self) -> float:
@@ -185,98 +172,3 @@ def _blocks(weight: torch.Tensor, fmt: KFormat) -> torch.Tensor:
     out, inp = weight.shape
     assert inp % QK_K == 0, weight.shape
     return weight.float().view(out, inp // QK_K, QK_K // fmt.block, fmt.block)
-
-
-@dataclass
-class KSlicedWeight(_SliceReader):
-    """A k-quant base and residual slices over it, up to N_SLICES planes in all.
-
-    A _SliceReader, so the precision controller reads it by blocks at several depths the way it reads quant.SlicedWeight.
-    """
-
-    base: KBase
-    residual: torch.Tensor  # uint8 [residual slices, out, in // 4] packed 2-bit codes
-    shape: tuple[int, int]
-
-    @classmethod
-    def quantize(cls, weight: torch.Tensor, fmt: KFormat, planes: int = N_SLICES) -> KSlicedWeight:
-        assert fmt.planes <= planes <= N_SLICES, (fmt, planes)
-        base = KBase.quantize(weight, fmt)
-        rest = _blocks(weight, fmt) - base.dequantize()
-        step = base.steps() / _RESIDUAL_LEVELS
-        live = step != 0
-        safe_step = torch.where(live, step, torch.ones_like(step))
-        codes = []
-        for _ in range(planes - fmt.planes):
-            code = torch.where(live, torch.floor(rest / safe_step + _RESIDUAL_CENTER).clamp_(0, _RESIDUAL_LEVELS - 1),
-                               torch.full_like(rest, _RESIDUAL_CENTER))
-            rest = rest - step * (code - _RESIDUAL_CENTER + 0.5)
-            codes.append(_pack(code.to(torch.uint8).view(weight.shape)))
-            step = step / _RESIDUAL_LEVELS
-            safe_step = safe_step / _RESIDUAL_LEVELS
-        residual = torch.stack(codes) if codes else torch.empty((0, *weight.shape[:-1], weight.shape[1] // 4), dtype=torch.uint8, device=weight.device)
-        return cls(base=base, residual=residual, shape=tuple(weight.shape))
-
-    @property
-    def planes(self) -> int:
-        return self.base.fmt.planes + self.residual.shape[0]
-
-    def read_planes(self, depth: int) -> int:
-        """The planes a read asking for `depth` planes gets: never fewer than the base, never more than stored."""
-        return min(max(depth, self.base.fmt.planes), self.planes)
-
-    def bits_per_weight(self, depth: int) -> float:
-        return self.base.fmt.bits_per_weight + SLICE_BITS * (self.read_planes(depth) - self.base.fmt.planes)
-
-    @property
-    def nbytes(self) -> int:
-        """Bytes of the stored codes, block scales and super-block pairs."""
-        parts = (self.base.codes, self.base.scales, self.base.mins, self.base.d, self.base.dmin, self.residual)
-        return sum(t.numel() * t.element_size() for t in parts)
-
-    def _sums(self, depths: list[int]) -> Iterator[torch.Tensor]:
-        """The float32 blocks read to each of the ascending `depths`: the base, then one residual slice at a time."""
-        w = self.base.dequantize()
-        step, done = self.base.steps() / _RESIDUAL_LEVELS, 0
-        for depth in depths:
-            for e in range(done, self.read_planes(depth) - self.base.fmt.planes):
-                w += step * (_unpack(self.residual[e]).view(w.shape).float() - _RESIDUAL_CENTER + 0.5)
-                step = step / _RESIDUAL_LEVELS
-                done = e + 1
-            yield w
-
-    def _weight(self, w: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
-        return w.reshape(self.shape).to(dtype)
-
-
-# The classes whose weights the floor keeps on a Q4_K base: raised one at a time over a 2-bit floor none brings the
-# knowledge back, together they do (E002, exploration-module-classes: EM 0.048 -> 0.413, 2% of the weights in k and
-# the per-layer modules); unsloth's UD-Q2_K_XL raises the same classes.
-SENSITIVE_CLASSES = ("self_attn.k_proj", "self_attn.v_proj", "self_attn.o_proj", "mlp.down_proj",
-                     "per_layer_input_gate", "per_layer_projection")
-
-
-@dataclass(frozen=True)
-class KQuantLadder:
-    """The read depths of one k-quant copy per module: the sensitive classes on a Q4_K base, the rest on Q2_K.
-
-    A WeightSource for Controller.bake_from. A level reads its planes, never fewer than the base holds: D2 of a
-    sensitive module reads its Q4_K base.
-
-    Invariant: read(name, weight, level) equals KSlicedWeight.quantize(weight, format_for(name)) read to the level's
-    planes.
-    """
-
-    sensitive: tuple[str, ...] = SENSITIVE_CLASSES
-
-    def format_for(self, name: str) -> KFormat:
-        return Q4_K if name.endswith(self.sensitive) else Q2_K
-
-    def quantize(self, name: str, weight: torch.Tensor) -> KSlicedWeight:
-        """The module's whole copy, every plane: a precision.SliceCopy, so the controller reads it by blocks."""
-        return KSlicedWeight.quantize(weight, self.format_for(name))
-
-    def read(self, name: str, weight: torch.Tensor, level) -> torch.Tensor:
-        fmt = self.format_for(name)
-        planes = max(level.slices, fmt.planes)
-        return KSlicedWeight.quantize(weight, fmt, planes=planes).dequantize(weight.dtype, planes)

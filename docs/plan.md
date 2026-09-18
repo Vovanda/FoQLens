@@ -48,7 +48,7 @@ Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout o
 
 Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones in the distance between blocks → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
-The weights are stored once, as residual slices read to a depth (step 5), so a zone costs only the depth it reads.
+The weights are stored once, as a base with refinements read to a depth (step 5), so a zone costs only the depth it reads.
 
 Measurement: quality against **memory**. The baseline is uniform quantization at the same memory (see «The baseline» below); the paired topic's zones and generic importance test the address. A random mask is not a baseline. Curve above the baseline → the scheme works.
 

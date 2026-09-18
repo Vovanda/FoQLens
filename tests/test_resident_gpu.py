@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from foqlens import model as fm
-from foqlens.precision import ResidualSlices, install
+from foqlens.precision import SymmetricCopy, install
 from foqlens.quant import Level
 
 pytestmark = pytest.mark.gpu
@@ -16,7 +16,7 @@ BF16_BYTES = 2
 # indices (0.11 MiB on E2B). Allocated bytes also carry the caching allocator's unsplit block
 # remainders - 11 MiB on E2B for the caps - which say nothing about what the bench holds.
 TOLERANCE = 0.001
-D4_SLICES = 2
+D4_DEPTH = 2
 
 
 def allocated() -> int:
@@ -44,16 +44,16 @@ def test_dropping_bf16_frees_its_bytes_and_keeps_the_logits():
         torch.cuda.empty_cache()
 
 
-def test_caps_at_d4_free_half_of_the_sliced_copy_and_keep_the_d4_logits():
+def test_caps_at_d4_free_half_of_the_refined_copy_and_keep_the_d4_logits():
     model, tokenizer = fm.load(fm.E2B)
     try:
-        ctl = install(model, copy=ResidualSlices())  # caps are cut from quant.SlicedWeight only
+        ctl = install(model, copy=SymmetricCopy())  # caps are cut from quant.RefinedWeight only
         ctl.set_all(Level.D4)
         ref = fm.logits(model, tokenizer, TEXT)
         ctl.drop_bf16()
         full = sum(m.stored_bytes() for m in ctl.modules.values())
         before = allocated()
-        ctl.set_caps(np.full(ctl.n_blocks, D4_SLICES))
+        ctl.set_caps(np.full(ctl.n_blocks, D4_DEPTH))
         after = allocated()
         assert sum(m.stored_bytes() for m in ctl.modules.values()) == full // 2
         assert abs((before - after) - full / 2) <= TOLERANCE * full / 2

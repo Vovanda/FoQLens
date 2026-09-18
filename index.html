@@ -174,7 +174,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 5 <b>combine</b>   L(b) = min(1, Σ L_i)  or  max L_i
 6 <b>level</b>     ρ* = s_last · (1 − L(b))    the ring that ρ* falls into; outside every zone: G
 7 <b>memory</b>    bits = Σ w_b · bits(b) / Σ w_b</pre>
-      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy - a k-quant base with residual slices over it - is read at 2, 4, 6 or 8 bits, and the model holds no other weights - so the ladder is ZERO, D2, D4, D6, D8, and the regulator runs over all five.</p>
+      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy - a k-quant base with refinements over it - is read at 2, 4, 6 or 8 bits, and the model holds no other weights - so the ladder is ZERO, D2, D4, D6, D8, and the regulator runs over all five.</p>
     </div>
   </section>
 
@@ -209,7 +209,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <table>
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
           <tbody>
-            <tr><td class="num">1</td><td><b><a href="docs.html#filter">The bench</a></b> - its design and optimization: one stored copy of the weights, a k-quant base with residual slices, read at D2 / D4 / D6 / D8, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
+            <tr><td class="num">1</td><td><b><a href="docs.html#filter">The bench</a></b> - its design and optimization: one stored copy of the weights, a k-quant base with refinements, read at D2 / D4 / D6 / D8, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
             <tr><td class="num">2</td><td><b><a href="docs.html#corpus">A corpus of what the model knows</a></b> - selected by its own answers in three regimes and frozen: 20,640 questions, 18,576 E2B-it knows and 2,064 it does not</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
             <tr><td class="num">3</td><td><b><a href="docs.html#e002-results">Uniform quantization on the corpus</a></b> - the answers at D8, D6, D4 and D2 on the k-quant copy: D8 keeps 98.8% of the full model's knowledge, D6 96.8%, D4 91.0%, D2 51.4%, so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4 (<a href="docs.html#e001-results">E001</a>)</td><td><span class="tag tag--done">done</span><span class="when">2026-09-15 → 09-17</span></td></tr>
             <tr><td class="num">4</td><td><b><a href="docs.html#filter">The filter</a></b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>

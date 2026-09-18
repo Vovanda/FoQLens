@@ -61,7 +61,7 @@ Wang, Kim, Han, Gudovskiy, Nakata, Okuno, Peong, Jeon, Ko, Chen, Yang. *MoBiQuan
 
 Yes - they are two axes of the same storage.
 
-- **Same slices.** The FoQLens `SlicedWeight` is already a MoBiSlice: four 2-bit slices, each the residual of the previous one, the scale refined by 4 per slice, symmetric residual codes (compare §4.1 and Appendix B with `foqlens/quant.py`). A lens layout reads the same planes their kernel fetches.
+- **Same slices.** The FoQLens `RefinedWeight` is already a MoBiSlice: four 2-bit slices, each the residual of the previous one, the scale refined by 4 per slice, symmetric residual codes (compare §4.1 and Appendix B with `foqlens/quant.py`). A lens layout reads the same planes their kernel fetches.
 - **Two axes compose.** Their router picks a depth per token; a zone picks a depth per block of output rows. Together the depth of a weight read for a token is a function of both - for example, the zone sets the ceiling of a block (focus_strength) and a token router chooses within it.
 - **In a kernel.** A tiled GEMM loops over the output rows in tiles; a depth per tile - how many planes the tile fetches - is the zone layout itself, and the FoQLens block of 64 rows fits a tile. Their token permutation (§4.3) groups the other axis. What is new for their kernel is a different tile depth per question when a batch mixes queries.
 - **What FoQLens would take as is.** Their calibration of the base slice (Appendix B, C.1) for a base at 2 bits, and their shared always-on first slice (§4.2) as the base under the zones.

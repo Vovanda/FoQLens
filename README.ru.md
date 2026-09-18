@@ -110,14 +110,15 @@ D4 теряет 2.5%, при ответе только в весах - 13.0%. Э
 ```sh
 git clone https://github.com/Vovanda/FoQLens.git
 cd FoQLens
-uv sync                                         # torch (CUDA 12.8), transformers, bitsandbytes
-uv run python scripts/download_models.py        # Gemma 4 E2B на закреплённой ревизии, ~10 ГБ
-uv run pytest                                   # юнит-тесты + тесты здоровья стенда на GPU
+uv sync                                              # torch (CUDA 12.8), transformers, bitsandbytes
+uv run python scripts/download_models.py e2b e2b-it   # Gemma 4 E2B и E2B-it на закреплённых ревизиях, ~20 ГБ
+uv run python scripts/cut_model.py e2b-it            # модель стенда: E2B-it в .refocustensors, ~9.3 ГБ
+uv run pytest                                        # юнит-тесты + тесты здоровья стенда на GPU
 ```
 
 Прогон по умолчанию занимает 0.8 GPU - эту долю VRAM и паузы между батчами, - чтобы карта оставалась пригодной; `--gpu-share 1` или `FOQLENS_GPU_SHARE=1` дают полную скорость.
 
-Веса моделей в репозитории не хранятся. `scripts/download_models.py` скачивает их с Hugging Face (Apache 2.0, токен не нужен) на коммитах, закреплённых в `foqlens.model.REVISIONS`, и `foqlens.model.load()` читает ровно эти коммиты. Добавьте `e4b` к скачиванию для модели подтверждения (~16 ГБ).
+Веса моделей в репозитории не хранятся. `scripts/download_models.py` скачивает их с Hugging Face (Apache 2.0, токен не нужен) на коммитах, закреплённых в `foqlens.model.REVISIONS`, и `foqlens.model.load()` читает ровно эти коммиты. `scripts/cut_model.py` режет скачанную модель в её папку [.refocustensors](docs/refocustensors.ru.md) вне репозитория, и стенд работает из этой папки. Добавьте `e4b` к скачиванию для модели подтверждения (~16 ГБ).
 
 ## Устройство
 
@@ -136,7 +137,7 @@ uv run pytest                                   # юнит-тесты + тест
 - [`docs/data.ru.md`](docs/data.ru.md) - как хранятся и читаются прогоны: файлы JSON Lines и DuckDB поверх них.
 - [`prereg/`](prereg/PREREGISTRATION.ru.md) - главная предрегистрация; дополнения каждого эксперимента лежат в его папке.
 - [`src/foqlens/`](src/foqlens/) - стенд:
-  - `model`, `quant`, `kquant`, `refinements`, `precision` - загрузка, квантизаторы, копия k-quant с уточнениями (`refinements`), поблочный контроллер точности; `gguf_weights` - веса опубликованного GGUF для сверки;
+  - `model`, `quant`, `kquant`, `refinements`, `precision` - загрузка, квантизаторы, копия k-quant с уточнениями (`refinements`), поблочный контроллер точности; `refocustensors`, `safetensors_io`, `tail_cost` - файл модели, его чтение и запись по одному тензору, стоимость хвоста exact; `gguf_weights` - веса опубликованного GGUF для сверки;
   - `scoring`, `pipeline` - источники масок (новая оценка - новый `MaskSource`);
   - `evaluate`, `quality` - метрики качества (новая метрика - новая `QualityMetric`) и оценка;
   - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - от масок к раскладкам: источники зон, поля и правила уровней как заменяемые части;

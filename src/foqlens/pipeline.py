@@ -164,6 +164,21 @@ class Bench:
         """The standard mask sources, named as MASK_SOURCES."""
         return [PooledMask(self.pooled, pooled_batch), GradientMask(self.gradient, gradient_batch)]
 
+    def source(self, name: str, batch_size: int, layers: set[int] | None = None) -> MaskSource:
+        """A mask source of #18 by its name; `layers` limits the forward sources to those layers - the first N of a
+        working address. The backward sources read every layer."""
+        n_heads = self.model.config.get_text_config(decoder=True).num_attention_heads
+        made = {
+            "pooled": lambda: PooledMask(self.pooled, batch_size),
+            "gradient": lambda: GradientMask(self.gradient, batch_size),
+            "gradient_magnitude": lambda: GradientMagnitudeMask(self.gradient, batch_size),
+            "neuron_activity": lambda: NeuronActivityMask(NeuronActivityScorer(self.ctl.modules, layers), batch_size),
+            "head_energy": lambda: HeadEnergyMask(HeadEnergyScorer(self.ctl.modules, n_heads, layers), batch_size),
+        }
+        if name not in made:
+            raise ValueError(f"unknown mask source {name!r}, expected one of {sorted(made)}")
+        return made[name]()
+
     def masks(self, prompts: list[str], sources: list[MaskSource]) -> dict[str, np.ndarray]:
         """Raw masks of every prompt from every source: {source name: [prompts, n_blocks]}."""
         self.ctl.set_all(Level.BF16)

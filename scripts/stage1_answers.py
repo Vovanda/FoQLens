@@ -62,6 +62,8 @@ FROZEN_SETUPS = {"triviaqa": "short-0", "nq_open": "short-0", "squad_v2": "passa
 DECODERS = {"static": lambda plan, prefill: StaticDecoder(attention=plan, prefill_tokens=prefill),
             "dynamic": lambda plan, prefill: DYNAMIC}
 UNJUDGED = "unjudged"  # where a baked level's answers wait for the bf16 judge
+BAKED, BLOCKS = "baked", "blocks"  # a quantized level baked into the weights, or read by blocks through the kernel
+READS = (BAKED, BLOCKS)
 FROZEN_PARTS = ("kept", "unknown_share")  # what stage 2 asks of a frozen file (selection.FrozenCorpus.asked)
 
 
@@ -75,6 +77,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--base", choices=sorted(PUBLISHED), default=None,
                         help="read the model cut over this published file's base (cut_model.py --base); a quantized "
                         "level is then baked from that copy")
+    parser.add_argument("--read", choices=READS, default=BAKED,
+                        help="how a quantized level is read: baked into the weights once (the step of bf16), or by "
+                        "blocks through the kernel, as a zone layout is - to time the kernel on the corpus")
     parser.add_argument("--setups", type=json.loads, default=FROZEN_SETUPS, help="JSON {corpus: setup name}")
     asked = parser.add_mutually_exclusive_group()
     asked.add_argument("--tuning", type=Path, default=None, help="summary.json of prompt_tuning.py: its questions are left out")
@@ -111,10 +116,12 @@ def main(argv: list[str] | None = None) -> Path:
         judge = ModelJudge(bench.model, tokenizer, bench.ctl, fmt, StaticDecoder(attention=plan, prefill_tokens=args.prefill_tokens))
         root = "answers"
     else:
-        if args.gguf is None:
+        if args.gguf is not None:
+            bench.ctl.bake_from(GgufWeights(args.gguf), level)
+        elif args.read == BAKED:
             bench.ctl.bake(level)
         else:
-            bench.ctl.bake_from(GgufWeights(args.gguf), level)
+            bench.ctl.set_all(level)  # read by blocks, as a zone layout is: the k-quant kernel on a decoding step
         judge, root = NotJudged(), UNJUDGED
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     out = args.out / args.model
@@ -162,7 +169,7 @@ def main(argv: list[str] | None = None) -> Path:
     # A corpus answered later joins the corpora answered before: their counts stay in the summary.
     earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "base": args.base, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
+        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "base": args.base, "read": args.read, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
         "cut_of": str(args.cut_of) if args.cut_of else None, "written_tokens": args.written_tokens,

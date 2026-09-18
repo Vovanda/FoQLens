@@ -37,7 +37,7 @@ def main(argv: list[str] | None = None) -> dict:
         n = source.numel()
         total += n
         sums[("source",)] += n * entropy_bits(ulp_order(source))
-        for depth in range(copy.base.fmt.base_depth, MAX_DEPTH + 1):
+        for depth in range(copy.fmt.base_depth, MAX_DEPTH + 1):
             prediction = copy.dequantize(torch.float32, depth).to(DTYPES[module["dtype"]])
             z = _zigzag(ulp_order(source) - ulp_order(prediction))
             under = copy.bits_per_weight(depth)

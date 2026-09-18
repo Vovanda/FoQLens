@@ -76,10 +76,10 @@ The bench (`Bench.load`) takes its model from one of three sources:
 | Source | What is read | Levels | GPU, E2B-it |
 | --- | --- | --- | --- |
 | `FILE`, the default | the source weights from the file bit for bit, every module's copy from the file | bf16, D2 ... D8 | 8.6 GiB and the copies as they are read |
-| `RESIDENT` | the copies alone; no source weight of a controlled module is loaded | D2 ... D8 | 8.3 GiB |
+| `RESIDENT` | the copies alone; no source weight of a controlled module is loaded | D2 ... D8 | 7.06 GiB, of it 1.86 the copies |
 | `CHECKPOINT` | the Hugging Face checkpoint, the copy quantized from bf16 | bf16, D2 ... D8 | 8.6 GiB and the copies |
 
-A model that was never cut is not loaded, and the error names the command that cuts it. The weights become the model's parameters without a copy: 13.5 GiB of commit at the peak of a load. The bench computes masks at bf16, so a resident bench serves runs without masks. In the resident bench 4.7 GiB are the per-layer embedding table in bf16, and the base codes are still held a byte per code.
+A model that was never cut is not loaded, and the error names the command that cuts it. The weights become the model's parameters without a copy: 13.5 GiB of commit at the peak of a load. The bench computes masks at bf16, so a resident bench serves runs without masks. In the resident bench 4.7 GiB are the per-layer embedding table in bf16; the copies hold the base as ggml blocks and the refinements packed, as the file does.
 
 The three sources give the same logits bit for bit at every depth, and `FILE` and `CHECKPOINT` also at bf16 - the logits of `from_pretrained`.
 

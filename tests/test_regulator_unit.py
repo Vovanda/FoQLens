@@ -102,6 +102,19 @@ def test_the_regulator_sets_each_question_its_own_layout_and_refuses_what_the_ke
         Regulator(Fixed(bf16), ctl).apply(np.arange(2))
 
 
+def test_q_and_k_blocks_left_at_zero_read_the_attention_level_and_nothing_else_moves():
+    ctl = controller()
+    codes = np.full(ctl.n_blocks, int(Level.ZERO), dtype=np.uint8)
+    codes[1] = int(Level.D6)  # a q_proj block a zone lifted keeps its level
+    regulator = Regulator(Fixed(codes), ctl)
+    laid = regulator.layout(np.arange(2))
+    # q_proj: blocks 0, 1; down_proj and up_proj: 2 ... 5 stay at ZERO
+    assert laid[:, 0].tolist() == [int(Level.D2)] * 2 and laid[:, 1].tolist() == [int(Level.D6)] * 2
+    assert np.all(laid[:, 2:] == int(Level.ZERO))
+    raised = Regulator(Fixed(codes), ctl, attention_level=Level.D4).layout(np.arange(1))
+    assert raised[0, 0] == int(Level.D4)
+
+
 def test_by_layer_counts_every_block_once_in_its_layer_and_kind():
     ctl = controller()
     codes = np.full(ctl.n_blocks, int(Level.D2), dtype=np.uint8)

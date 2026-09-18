@@ -471,6 +471,28 @@ class GraphZoneLayout:
 
 
 @dataclass(frozen=True)
+class AttentionLevel:
+    """Rule 6 of docs/quantization-filter.md over any policy: a q_proj or k_proj block never reads ZERO.
+
+    A zero row of q_proj or k_proj flattens attention - a distortion, not emptiness - so where a policy leaves
+    such a block at ZERO (a ZERO base outside the zones) it reads the attention level A instead. Every other
+    block, and every attention block the policy lifted, keeps the policy's level.
+    """
+
+    policy: LayoutPolicy
+    blocks: np.ndarray  # bool [n_blocks]: the blocks of q_proj and k_proj
+    level: Level  # A: the lowest non-zero rung by default (docs)
+
+    @property
+    def name(self) -> str:
+        return self.policy.name
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        codes = np.asarray(self.policy.levels(indices), dtype=np.uint8)
+        return np.where(self.blocks[None] & (codes == int(Level.ZERO)), np.uint8(int(self.level)), codes)
+
+
+@dataclass(frozen=True)
 class QuantileLevels:
     """The per-block regulator (#19) - the control the zones must beat, not a mechanism.
 

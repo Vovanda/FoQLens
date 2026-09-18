@@ -18,6 +18,7 @@ blocks at the base depth, one plane of in / 4 bytes a row per refinement above i
 Invariant: step_bytes of a batch equals read_bytes of the layout that reads every block at its deepest depth over the
 batch, and is at least the largest read_bytes of one sample.
 Invariant: by_layer counts every block once, in the layer and the module kind its name gives.
+Invariant: no q_proj or k_proj block of a layout the regulator gives reads ZERO (rule 6); no other block changes.
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from foqlens.layouts import LayoutPolicy
+from foqlens.layouts import AttentionLevel, LayoutPolicy
 from foqlens.precision import DEPTH_BY_CODE, Controller
 from foqlens.quant import LADDER, MAX_DEPTH, Level
 from foqlens.refinements import KRefinedWeight
@@ -75,6 +76,14 @@ def check(codes: np.ndarray, ladder: tuple[Level, ...]) -> None:
                          f"({[lv.name for lv in ladder]} and ZERO)")
 
 
+ATTENTION_KINDS = ("self_attn.q_proj", "self_attn.k_proj")  # a zero row flattens attention (docs, ZERO base)
+
+
+def attention_blocks(ctl: Controller) -> np.ndarray:
+    """bool [n_blocks]: the blocks of the modules that must not read ZERO - q_proj and k_proj."""
+    return np.concatenate([np.full(m.n_blocks, name.endswith(ATTENTION_KINDS)) for name, m in ctl.modules.items()])
+
+
 def _layer_and_kind(name: str) -> tuple[int, str]:
     """layers.12.mlp.up_proj -> (12, 'mlp.up_proj')."""
     _, layer, kind = name.split(".", 2)
@@ -83,20 +92,28 @@ def _layer_and_kind(name: str) -> tuple[int, str]:
 
 @dataclass
 class Regulator:
-    """A policy's layouts on one bench: levels of a batch of questions, checked, set on the controller, measured."""
+    """A policy's layouts on one bench: levels of a batch of questions, checked, set on the controller, measured.
+
+    Rule 6 holds whatever the policy: q_proj and k_proj blocks it leaves at ZERO read `attention_level`, the
+    lowest rung of the kernel's ladder unless given (layouts.AttentionLevel).
+    """
 
     policy: LayoutPolicy
     ctl: Controller
+    attention_level: Level | None = None
     ladder: tuple[Level, ...] = field(init=False)
     cost: ReadCost = field(init=False)
+    _policy: LayoutPolicy = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.ladder = kernel_ladder(self.ctl)
         self.cost = ReadCost(self.ctl)
+        level = self.ladder[0] if self.attention_level is None else self.attention_level
+        self._policy = AttentionLevel(self.policy, attention_blocks(self.ctl), level)
 
     def layout(self, indices: np.ndarray) -> np.ndarray:
         """Level codes [len(indices), n_blocks] of the questions, refused if the kernel cannot read them."""
-        codes = np.asarray(self.policy.levels(np.asarray(indices)), dtype=np.uint8)
+        codes = np.asarray(self._policy.levels(np.asarray(indices)), dtype=np.uint8)
         check(codes, self.ladder)
         return codes
 

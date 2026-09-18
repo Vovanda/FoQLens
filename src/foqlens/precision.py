@@ -7,7 +7,8 @@ per sample of the batch.
 
 Hot-path rule: levels live on the CPU as a numpy array, so forward never synchronizes with the
 GPU to find out what to compute. A mixed layout computes the output once per level in use and
-selects rows with torch.where.
+selects rows with torch.where. A layout of depths and ZERO over a k-quant copy is read by the kernel instead
+(kernels/kquant.py), every block of rows straight from the copy's bytes to its depth.
 
 Invariants (each one has a test):
 - Invariant: an all-bf16 layout is bit-exact with the original nn.Linear.
@@ -30,6 +31,8 @@ Invariants (each one has a test):
   the module holds that weight alone and reads that level alone - bf16 is refused when set.
 - Invariant: a weight baked from another source (bake_weight) is read as given at its level, bit-exact
   with F.linear on that weight; setting the level again does not quantize it again.
+- Invariant: a layout read by the kernel gives the unpacked output within a bf16 step of the largest output, and a
+  token's output does not depend on the other tokens of the batch; a baked level and bf16 never go to the kernel.
 """
 
 from __future__ import annotations
@@ -39,6 +42,7 @@ from collections.abc import Iterable, Iterator
 from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass
+import functools
 from functools import partial
 from typing import Protocol
 
@@ -47,7 +51,8 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from foqlens.refinements import KQuantLadder
+from foqlens.kernels.kquant import TILE_ROWS as KERNEL_TILE_ROWS, kquant_matmul
+from foqlens.refinements import KQuantLadder, KRefinedWeight
 from foqlens.model import text_layers
 from foqlens.quant import MAX_DEPTH, DEPTH_BITS, CappedRefinedWeight, Int8Weight, Level, Nf4Weight, RefinedWeight, _DepthReader
 
@@ -72,6 +77,17 @@ STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: RefinedWeight fo
 # The depth a level reads, by code; the levels that are not read depths count as the full copy.
 DEPTH_BY_CODE = np.array([lv.depth if lv.depth or lv is Level.ZERO else MAX_DEPTH for lv in Level], dtype=np.uint8)
 DEEPEST = max((lv for lv in Level if lv.depth), key=lambda lv: lv.depth)  # the deepest read depth, D8
+# A layout of depths and ZERO over a k-quant copy is read by the kernel, straight from the copy's bytes, up to this many
+# tokens: unpacking costs ~4 ms a 12288x1536 module whatever the tokens, the kernel ~0.2 ms and 0.0125 ms a token past 16
+# (2026-09-18), so a longer input - a prefill - unpacks once for a GEMM. Off, every read unpacks.
+KERNEL = True
+KERNEL_MAX_TOKENS = 256
+
+
+@functools.cache
+def _depth_table(device: torch.device) -> torch.Tensor:
+    """uint8 by level code: the depth the kernel reads a block to, 0 for ZERO."""
+    return torch.as_tensor(DEPTH_BY_CODE, device=device)
 
 
 class RefinedCopy(Protocol):
@@ -145,6 +161,18 @@ class MixedPrecisionLinear(nn.Module):
         for level in self._used:
             self._materialize(level)
         self._rows = None if len(self._used) == 1 else self._row_codes(arr, codes)
+        self._depths = self._block_depths(arr, codes) if self._kernel_reads() else None
+
+    def _kernel_reads(self) -> bool:
+        """Whether the layout is read by the kernel: a k-quant copy, every level a depth or ZERO, blocks of its rows."""
+        return (KERNEL and self._native is Level.BF16 and self.block_rows == KERNEL_TILE_ROWS
+                and isinstance(self._packed.get(RefinedWeight), KRefinedWeight)
+                and all(level is Level.ZERO or level.depth for level in self._used))
+
+    def _block_depths(self, arr: np.ndarray, codes: torch.Tensor | None = None) -> torch.Tensor:
+        """The depth every block is read to on the device, [n_blocks] or [batch, n_blocks]; ZERO is 0."""
+        blocks = torch.as_tensor(arr, device=self._device) if codes is None else codes
+        return _depth_table(self._device)[blocks.long()]
 
     def _row_codes(self, arr: np.ndarray, codes: torch.Tensor | None = None) -> torch.Tensor:
         """Level code per output row on the GPU: [out] or [batch, 1, out], broadcast over tokens.
@@ -268,6 +296,8 @@ class MixedPrecisionLinear(nn.Module):
         self._samples = part
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self._depths is not None and x.numel() // x.shape[-1] <= KERNEL_MAX_TOKENS:
+            return self._kernel_forward(x)
         if self._rows is None:
             return self.output_at(self._used[0], x)
         rows = self._rows
@@ -281,6 +311,18 @@ class MixedPrecisionLinear(nn.Module):
         for level in self._used[1:]:
             out = torch.where(rows == int(level), outputs[level], out)
         return out
+
+    def _kernel_forward(self, x: torch.Tensor) -> torch.Tensor:
+        """The output read by the kernel straight from the copy, every block to its depth (kernels/kquant.py)."""
+        depths = self._depths
+        if depths.ndim == 2:
+            depths = depths[self._samples]
+            if x.shape[0] != depths.shape[0]:
+                raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {depths.shape[0]}")
+            # every token of a sample reads its sample's layout
+            depths = depths[:, None, :].expand(-1, x[0, ..., 0].numel(), -1).reshape(-1, self.n_blocks)
+        out = kquant_matmul(self._packed[RefinedWeight], x, depths)
+        return out if self.bias is None else out + self.bias
 
     def _outputs_at(self, levels: tuple[Level, ...], x: torch.Tensor) -> dict[Level, torch.Tensor]:
         """output_at for every level; several read depths come from one accumulation of the refined copy."""

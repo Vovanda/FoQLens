@@ -23,6 +23,8 @@ import torch
 HERE = Path(__file__).parent
 ARCH = "sm_86"  # RTX 3090 Ti; the bench pins one card (CLAUDE.md)
 _VCVARS = Path(r"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat")
+# the compiler speaks the console's code page (Russian on this machine): an undecodable byte must not break a build
+_OUTPUT = {"encoding": "utf-8", "errors": "replace"}
 
 
 class KernelError(RuntimeError):
@@ -51,9 +53,9 @@ def compile_ptx(source: Path, arch: str = ARCH) -> Path:
     # nvcc needs a host compiler on PATH; on Windows that means the MSVC environment
     if os.name == "nt" and _VCVARS.exists():
         joined = subprocess.list2cmdline(command)
-        result = subprocess.run(f'call "{_VCVARS}" >nul && {joined}', shell=True, capture_output=True, text=True)
+        result = subprocess.run(f'call "{_VCVARS}" >nul && {joined}', shell=True, capture_output=True, text=True, **_OUTPUT)
     else:
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, capture_output=True, text=True, **_OUTPUT)
     if result.returncode != 0:
         raise KernelError(f"nvcc failed: {result.stderr.strip() or result.stdout.strip()}")
     return ptx

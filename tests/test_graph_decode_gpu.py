@@ -42,8 +42,10 @@ WRITTEN_TOKENS = 560
 # apart and the 5th percentile 0.48. A pick that differs anywhere wider is a key one path sees and the other not.
 NEAR_TIE = 0.5
 NEVER = -1  # no token id is negative: a row with this stop runs every step
-# Levels the precision layouts of the tests draw from; every layout is seeded.
+# Levels the precision layouts of the tests draw from; every layout is seeded. A layout with BF16 in it unpacks the
+# copy; one of depths only is read by the k-quant kernel (precision.KERNEL), so both paths are captured.
 MIXED_LEVELS = np.array([Level.BF16, Level.D8, Level.D4, Level.D2], dtype=np.uint8)
+KERNEL_LEVELS = np.array([Level.D8, Level.D6, Level.D4, Level.D2], dtype=np.uint8)
 SERIES = 60                # batches in a row, as a night of stage 1 decodes hundreds
 SERIES_GROWTH = 64 * 2**20  # allocated memory may move by fragments of a step, never by a batch's cache
 
@@ -77,12 +79,14 @@ def bf16(e2b_it_sdpa):
 
 
 def set_layout(ctl, layout: str, batch: int) -> None:
-    """A level for the whole model, or a seeded mixed layout - per block, or per block and sample."""
+    """A level for the whole model, or a seeded mixed layout - per block, or per block and sample; a `kernel-` layout
+    draws depths only, so the kernel reads it."""
     rng = np.random.default_rng(0)
-    if layout == "blocks":
-        ctl.set_layout(rng.choice(MIXED_LEVELS, size=ctl.n_blocks))
-    elif layout == "samples":
-        ctl.set_layout(rng.choice(MIXED_LEVELS, size=(batch, ctl.n_blocks)))
+    kind, levels = (layout[len("kernel-"):], KERNEL_LEVELS) if layout.startswith("kernel-") else (layout, MIXED_LEVELS)
+    if kind == "blocks":
+        ctl.set_layout(rng.choice(levels, size=ctl.n_blocks))
+    elif kind == "samples":
+        ctl.set_layout(rng.choice(levels, size=(batch, ctl.n_blocks)))
     else:
         ctl.set_all(Level[layout])
 
@@ -109,7 +113,8 @@ def test_the_long_prompts_reach_past_the_sliding_window(e2b_it_sdpa, batches):
 # (batch, layout, stop, tokens): the layouts on the mixed batch; the stop rules on the batch of the runs;
 # the lengths around the first step, the capture and the look every 8 steps; the odd shapes.
 CAPTURE_CASES = (
-    [("mixed", layout, END_OF_TURN, TOKENS) for layout in ("BF16", "D8", "D6", "D4", "D2", "blocks", "samples")]
+    [("mixed", layout, END_OF_TURN, TOKENS)
+     for layout in ("BF16", "D8", "D6", "D4", "D2", "blocks", "samples", "kernel-blocks", "kernel-samples")]
     + [("short128", "BF16", stop, SHORT_TOKENS) for stop in (FIRST_LINE, END_OF_TURN)]
     + [("mixed", "BF16", None, n) for n in (1, 2, 8, 9)]
     + [("one", "BF16", END_OF_TURN, TOKENS), ("unpadded", "BF16", END_OF_TURN, TOKENS)]
@@ -122,6 +127,8 @@ def test_the_graph_writes_what_the_same_step_writes_eagerly(e2b_it_sdpa, batches
     model, tokenizer, ctl = e2b_it_sdpa
     prompts = batches[batch]
     set_layout(ctl, layout, len(prompts))
+    if layout.startswith("kernel-"):
+        assert all(module._depths is not None for module in ctl.modules.values())
     ids, mask = encode(model, tokenizer, prompts)
     stop = stop_ids(model, tokenizer, stop)
     eager = StaticDecoder(graph=False).tokens(model, ids, mask, tokens, stop)

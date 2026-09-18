@@ -8,19 +8,28 @@ codes only, no scale.
 A depth counts 2-bit steps: a base of Q2_K takes depth 1, a base of Q4_K depth 2, and every refinement adds one.
 A copy cannot be read shallower than its base.
 
+Over the deepest refinement lies the exact tail (ExactTail): how many units in the last place of the source type
+(bf16, fp16, fp32) every weight still is from the prediction rounded to that type. The base, the refinements and the
+tail read back the source weight bit for bit.
+
 Invariant: a weight whose base error is within half its block step stays within block_step / 2 / 4**k after
 k refinements.
 Invariant: a deeper refinement never changes what the shallower depths read.
+Invariant: ulp_order is a bijection that keeps the order of the floats of a type, -0.0 below +0.0.
+Invariant: the exact tail restores the source weight bit for bit from the prediction it was encoded against, for every
+source type in ORDER_BITS.
+Invariant: a copy taken apart into tensors and put back (tensors, KRefinedWeight.from_tensors) reads exactly as before
+at every depth.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 
 import torch
 
-from foqlens.kquant import Q2_K, Q4_K, KBase, KFormat, _blocks
+from foqlens.kquant import Q2_K, Q4_K, KBase, KFormat, _blocks, from_gguf_blocks, gguf_blocks
 from foqlens.quant import DEPTH_BITS, MAX_DEPTH, _DepthReader, _pack, _unpack
 
 _REFINEMENT_LEVELS = 2**DEPTH_BITS
@@ -88,6 +97,141 @@ class KRefinedWeight(_DepthReader):
 
     def _weight(self, w: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
         return w.reshape(self.shape).to(dtype)
+
+    def prediction(self) -> torch.Tensor:
+        """float32 [out, in]: the weight read to the stored depth - what the exact tail is counted from."""
+        return self.dequantize(torch.float32, self.depth)
+
+    def tensors(self) -> dict[str, torch.Tensor]:
+        """The copy as named tensors: the base as ggml blocks, then every refinement."""
+        return {"base": gguf_blocks(self.base)} | {f"refinement.{k}": r for k, r in enumerate(self.refinements)}
+
+    @classmethod
+    def from_tensors(cls, fmt: KFormat, tensors: Mapping[str, torch.Tensor], shape: tuple[int, int]) -> KRefinedWeight:
+        """The copy tensors() took apart; the refinements are read in order while they last."""
+        base = from_gguf_blocks(tensors["base"], fmt)
+        stack = []
+        while f"refinement.{len(stack)}" in tensors:
+            stack.append(tensors[f"refinement.{len(stack)}"])
+        refinements = torch.stack(stack) if stack else torch.empty((0, shape[0], shape[1] // 4), dtype=torch.uint8, device=base.codes.device)
+        return cls(base=base, refinements=refinements, shape=tuple(shape))
+
+
+# ==== Exact tail ====
+# The source's own grid: a weight is an integer in the order of its type's floats, and the tail stores how far the
+# source is from the prediction in that order - units in the last place of the source type.
+
+# Weights of a row sharing one code width. Measured on E2B-it (scripts/exact_tail_cost.py): the base, refinements to D8
+# and the tail cost 20.1 bits per weight at groups of 256, 15.9 at 32, 15.05 at 16 - below the 16 of bf16.
+EXACT_GROUP = 16
+ORDER_BITS = {torch.bfloat16: 16, torch.float16: 16, torch.float32: 32}
+_ORDER_VIEW = {16: torch.int16, 32: torch.int32}
+_MAX_WIDTH = 64  # a zigzagged int64 never needs more
+# Weights packed or unpacked at once: their int64 bits at the widest fp32 distance (33 bits) stay under 0.6 GiB.
+_CHUNK_GROUPS = 2**21 // EXACT_GROUP
+
+
+def ulp_order(t: torch.Tensor) -> torch.Tensor:
+    """int64: the float's rank among the floats of its type; -0.0 is -1 and +0.0 is 0, so no two floats share a rank."""
+    bits = t.view(_ORDER_VIEW[ORDER_BITS[t.dtype]]).long()
+    magnitude = bits & ((1 << (ORDER_BITS[t.dtype] - 1)) - 1)
+    return torch.where(bits >= 0, magnitude, -1 - magnitude)
+
+
+def from_ulp_order(order: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
+    """The floats of `dtype` ulp_order ranked: its inverse."""
+    sign = 1 << (ORDER_BITS[dtype] - 1)
+    bits = torch.where(order >= 0, order, (-1 - order) - sign)
+    return bits.to(_ORDER_VIEW[ORDER_BITS[dtype]]).view(dtype)
+
+
+def _zigzag(d: torch.Tensor) -> torch.Tensor:
+    return (d << 1) ^ (d >> 63)
+
+
+def _unzigzag(z: torch.Tensor) -> torch.Tensor:
+    return (z >> 1) ^ -(z & 1)
+
+
+def _pack_width(values: torch.Tensor, width: int) -> torch.Tensor:
+    """uint8 [n, EXACT_GROUP * width / 8]: every value's `width` low bits, the first value's lowest bit first."""
+    bits = (values[..., None] >> torch.arange(width, device=values.device)) & 1
+    bytes_ = bits.reshape(values.shape[0], -1, 8) << torch.arange(8, device=values.device)
+    return bytes_.sum(-1).to(torch.uint8)
+
+
+def _unpack_width(packed: torch.Tensor, width: int) -> torch.Tensor:
+    """int64 [n, EXACT_GROUP]: what _pack_width packed."""
+    bits = (packed.long()[..., None] >> torch.arange(8, device=packed.device)) & 1
+    return (bits.reshape(packed.shape[0], EXACT_GROUP, width) << torch.arange(width, device=packed.device)).sum(-1)
+
+
+@dataclass
+class ExactTail:
+    """How far the source is from the prediction, in units in the last place of the source type.
+
+    Every group of EXACT_GROUP weights of a row is written at its own width - the bits its largest zigzagged
+    distance needs - and the groups follow row by row, so the bytes of a block of rows are one run of `data`.
+    """
+
+    widths: torch.Tensor  # uint8 [out, in // EXACT_GROUP]
+    data: torch.Tensor  # uint8 [sum(widths) * EXACT_GROUP / 8]
+    dtype: torch.dtype  # the source's
+
+    @classmethod
+    def encode(cls, source: torch.Tensor, prediction: torch.Tensor) -> ExactTail:
+        rounded = prediction.to(source.dtype)
+        z = _zigzag(ulp_order(source) - ulp_order(rounded)).view(-1, EXACT_GROUP)
+        top = z.amax(-1)
+        widths = (top[:, None] >= (1 << torch.arange(_MAX_WIDTH - 1, device=z.device))).sum(-1)
+        offsets = _group_offsets(widths)
+        data = torch.empty(int(offsets[-1]), dtype=torch.uint8, device=z.device)
+        for width, groups in _groups_by_width(widths):
+            data[_byte_index(offsets, groups, width)] = _pack_width(z[groups], width)
+        return cls(widths=widths.to(torch.uint8).view(source.shape[0], -1), data=data, dtype=source.dtype)
+
+    def decode(self, prediction: torch.Tensor) -> torch.Tensor:
+        """The source weight: the prediction rounded to the source type, moved by the stored distances."""
+        rounded = prediction.to(self.dtype)
+        widths = self.widths.reshape(-1).long()
+        offsets = _group_offsets(widths)
+        z = torch.zeros((widths.numel(), EXACT_GROUP), dtype=torch.long, device=self.data.device)
+        for width, groups in _groups_by_width(widths):
+            z[groups] = _unpack_width(self.data[_byte_index(offsets, groups, width)], width)
+        return from_ulp_order(ulp_order(rounded) + _unzigzag(z).view(rounded.shape), self.dtype)
+
+    @property
+    def bits_per_weight(self) -> float:
+        return (self.data.numel() * 8 + self.widths.numel() * 8) / (self.widths.numel() * EXACT_GROUP)
+
+    def tensors(self) -> dict[str, torch.Tensor]:
+        return {"exact.widths": self.widths, "exact": self.data}
+
+    @classmethod
+    def from_tensors(cls, tensors: Mapping[str, torch.Tensor], dtype: torch.dtype) -> ExactTail:
+        return cls(widths=tensors["exact.widths"], data=tensors["exact"], dtype=dtype)
+
+
+def _groups_by_width(widths: torch.Tensor) -> Iterator[tuple[int, torch.Tensor]]:
+    """(width, group indices) for every nonzero width, the groups in chunks of _CHUNK_GROUPS.
+
+    Once per module at write and load, never in a forward pass: the host reads the widths present.
+    """
+    for width in widths.unique().tolist():
+        if width:
+            groups = torch.nonzero(widths == width).squeeze(1)
+            yield from ((width, chunk) for chunk in groups.split(_CHUNK_GROUPS))
+
+
+def _group_offsets(widths: torch.Tensor) -> torch.Tensor:
+    """[groups + 1] int64: where every group's bytes start in `data`, and the end."""
+    sizes = widths.long() * (EXACT_GROUP // 8)
+    return torch.cat([sizes.new_zeros(1), sizes.cumsum(0)])
+
+
+def _byte_index(offsets: torch.Tensor, groups: torch.Tensor, width: int) -> torch.Tensor:
+    """[len(groups), EXACT_GROUP * width / 8]: the positions in `data` of the bytes of `groups`, all of one width."""
+    return offsets[groups][:, None] + torch.arange(EXACT_GROUP * width // 8, device=offsets.device)
 
 
 # The classes whose weights the floor keeps on a Q4_K base: raised one at a time over a 2-bit floor none brings the

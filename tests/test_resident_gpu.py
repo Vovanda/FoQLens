@@ -40,7 +40,7 @@ def test_dropping_bf16_frees_its_bytes_and_keeps_the_logits():
         with pytest.raises(ValueError):
             ctl.set_all(Level.BF16)
     finally:
-        del model
+        model = ctl = None  # the controller holds the modules: the cache returns nothing while it lives
         torch.cuda.empty_cache()
 
 
@@ -62,5 +62,5 @@ def test_caps_at_d4_free_half_of_the_refined_copy_and_keep_the_d4_logits():
         with pytest.raises(ValueError):
             ctl.set_all(Level.D6)
     finally:
-        del model
+        model = ctl = None  # the controller holds the modules: the cache returns nothing while it lives
         torch.cuda.empty_cache()

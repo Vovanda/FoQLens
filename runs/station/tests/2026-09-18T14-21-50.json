@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_refocustensors_gpu",
+  "gpu": {
+    "samples": 26,
+    "started": "2026-09-18T14:21",
+    "wall_s": 30.57731032371521,
+    "utilization_mean": 3.423076923076923,
+    "utilization_median": 0.0,
+    "memory_reserved_peak_mib": 9147.0,
+    "temperature_mean_c": 45.11538461538461,
+    "temperature_peak_c": 46.0,
+    "power_mean_w": 110.35961538461538,
+    "power_peak_w": 121.6,
+    "memory_allocated_peak_mib": 7615.99609375
+  },
+  "note": "1 failed"
+}

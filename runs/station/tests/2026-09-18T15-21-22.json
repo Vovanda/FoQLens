@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_bake_gpu",
+  "gpu": {
+    "samples": 43,
+    "started": "2026-09-18T15:20",
+    "wall_s": 47.23824071884155,
+    "utilization_mean": 34.13953488372093,
+    "utilization_median": 19.0,
+    "memory_reserved_peak_mib": 13930.0,
+    "temperature_mean_c": 50.906976744186046,
+    "temperature_peak_c": 58.0,
+    "power_mean_w": 177.06093023255812,
+    "power_peak_w": 341.75,
+    "memory_allocated_peak_mib": 12561.75390625
+  },
+  "note": "1 passed"
+}

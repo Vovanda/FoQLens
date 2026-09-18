@@ -13,6 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property, partial
+from pathlib import Path
 from typing import Protocol
 
 import numpy as np
@@ -91,10 +92,11 @@ class Bench:
 
     @classmethod
     def load(cls, model_id: str, attn_implementation: str = "sdpa", gpu_share: float = 1.0,
-             source: ModelSource = ModelSource.FILE) -> Bench:
+             source: ModelSource = ModelSource.FILE, directory: Path | None = None) -> Bench:
         """The bench on the model's cut folder (scripts/cut_model.py) - its copy read from the file, never quantized
-        again - or on the Hugging Face checkpoint, the copy then quantized from bf16 as it is first read."""
-        directory = refocustensors.model_directory(model_id)
+        again - or on the Hugging Face checkpoint, the copy then quantized from bf16 as it is first read. `directory`
+        names another cut folder of the same model, one cut over a published file's base (cut_model.py --base-gguf)."""
+        directory = directory or refocustensors.model_directory(model_id)
         if source is not ModelSource.CHECKPOINT and not (directory / refocustensors.FILE).exists():
             raise FileNotFoundError(f"no cut model in {directory}: run scripts/cut_model.py, or load the checkpoint")
         if source is ModelSource.FILE:

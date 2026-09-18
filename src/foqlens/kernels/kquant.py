@@ -20,7 +20,7 @@ from pathlib import Path
 import torch
 
 from foqlens.kernels import HERE, launch, load
-from foqlens.kquant import Q2_K, Q4_K, QK_K
+from foqlens.kquant import Q2_K, Q4_K, QK_K, KFormat
 from foqlens.refinements import KRefinedWeight
 
 TILE_ROWS = 64  # must match both sources: the block of rows a depth is set on
@@ -81,6 +81,11 @@ TENSOR_CORES = KQuantKernel(HERE / "kquant_mma.cu", {Q2_K.name: "kquant_mma_q2_k
 # 1 token 0.056 / 0.100 ms on tensor cores against 0.078 / 0.093 on CUDA cores, 32 tokens 0.101 / 0.137 against
 # 0.333 / 0.402 - the bench decodes batches of up to 32 rows.
 KERNEL = TENSOR_CORES
+
+
+def kernel_reads_format(fmt: KFormat) -> bool:
+    """Whether the bench's kernel has a variant for a base of `fmt`; a copy on another base is unpacked."""
+    return fmt.name in KERNEL.names
 
 
 def kquant_matmul(copy: KRefinedWeight, x: torch.Tensor, depth: torch.Tensor) -> torch.Tensor:

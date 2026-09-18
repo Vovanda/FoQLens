@@ -1,11 +1,13 @@
 """The bench's copy of a weight: a k-quant base with refinements over it, one copy read at its base and deeper.
 
-The base is kquant.KBase - Q2_K or Q4_K after llama.cpp. Over it lie refinements as in quant.RefinedWeight:
+The base is kquant.KBase - Q2_K or Q4_K after llama.cpp, or a published GGUF file's k-quant blocks read as they lie
+(ForeignLadder: Q2_K, Q3_K, Q4_K, Q6_K). Over it lie refinements as in quant.RefinedWeight:
 refinement k quantizes what the base and the refinements before it left, 2-bit symmetric codes with step
 block_step / 4**k, where block_step is the base's own quantized step d * scale of that block - a refinement stores
 codes only, no scale.
 
-A depth counts 2-bit steps: a base of Q2_K takes depth 1, a base of Q4_K depth 2, and every refinement adds one.
+A depth counts 2-bit steps: a base takes depth bits // 2 - Q2_K and Q3_K 1, Q4_K 2, Q6_K 3 - and every refinement
+adds one.
 A copy cannot be read shallower than its base.
 
 Over the deepest refinement lies the exact tail (ExactTail): how many units in the last place of the source type
@@ -24,7 +26,7 @@ at every depth.
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
 
 import torch
@@ -57,8 +59,13 @@ class KRefinedWeight(_DepthReader):
 
     @classmethod
     def quantize(cls, weight: torch.Tensor, fmt: KFormat, depth: int = MAX_DEPTH) -> KRefinedWeight:
+        return cls.over(gguf_blocks(KBase.quantize(weight, fmt)), fmt, weight, depth)
+
+    @classmethod
+    def over(cls, blocks: torch.Tensor, fmt: KFormat, weight: torch.Tensor, depth: int = MAX_DEPTH) -> KRefinedWeight:
+        """Refinements of `weight` over a base given as ggml blocks - ours, or a published GGUF file's as it lies."""
         assert fmt.base_depth <= depth <= MAX_DEPTH, (fmt, depth)
-        base = KBase.quantize(weight, fmt)
+        base = from_gguf_blocks(blocks, fmt)
         rest = _blocks(weight, fmt) - base.dequantize()
         step = base.steps() / _REFINEMENT_LEVELS
         live = step != 0
@@ -72,7 +79,7 @@ class KRefinedWeight(_DepthReader):
             step = step / _REFINEMENT_LEVELS
             safe_step = safe_step / _REFINEMENT_LEVELS
         refinements = torch.stack(codes) if codes else torch.empty((0, *weight.shape[:-1], weight.shape[1] // 4), dtype=torch.uint8, device=weight.device)
-        return cls(fmt=fmt, blocks=gguf_blocks(base), refinements=refinements, shape=tuple(weight.shape))
+        return cls(fmt=fmt, blocks=blocks, refinements=refinements, shape=tuple(weight.shape))
 
     @property
     def depth(self) -> int:
@@ -275,3 +282,31 @@ class KQuantLadder:
         fmt = self.format_for(name)
         depth = max(level.depth, fmt.base_depth)
         return KRefinedWeight.quantize(weight, fmt, depth=depth).dequantize(weight.dtype, depth)
+
+
+# A module's base as another quantizer left it: its format and ggml blocks [out, super-blocks, bytes], or None where it
+# has none the stack can refine - a tensor kept in float, or an IQ type with no block step.
+BaseBlocks = Callable[[str, tuple[int, int]], "tuple[KFormat, torch.Tensor] | None"]
+
+
+@dataclass(frozen=True)
+class ForeignLadder:
+    """The read depths of a copy over another quantizer's base: a published file's blocks read as they lie, our
+    refinements and exact tail over them. A module the file gives no refinable base keeps the bench's own.
+
+    Invariant: a module with a foreign base reads it at its base depth byte for byte as the file holds it.
+    """
+
+    bases: BaseBlocks
+    own: KQuantLadder = KQuantLadder()
+
+    def quantize(self, name: str, weight: torch.Tensor, depth: int = MAX_DEPTH) -> KRefinedWeight:
+        found = self.bases(name, tuple(weight.shape))
+        if found is None:
+            return self.own.quantize(name, weight, depth)
+        fmt, blocks = found
+        return KRefinedWeight.over(blocks.to(weight.device), fmt, weight, max(depth, fmt.base_depth))
+
+    def read(self, name: str, weight: torch.Tensor, level) -> torch.Tensor:
+        copy = self.quantize(name, weight)
+        return copy.dequantize(weight.dtype, copy.read_depth(level.depth))

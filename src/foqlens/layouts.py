@@ -466,7 +466,7 @@ class GraphZoneLayout:
             lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(int(i)))
             ceilings = zones.zone_ceilings(self.strength.strengths(int(i), found), self.focus_strength, self.floor,
                                            self.ladder)
-            rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine))
+            rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine, self.ladder))
         return np.stack(rows)
 
 
@@ -498,5 +498,5 @@ class QuantileLevels:
             lift = np.maximum(0.0, s - np.quantile(s, 1.0 - self.focus_area))
             top = lift.max()
             lift = lift / top if top > 0 else lift
-            rows.append(zones.levels_from_rungs(lift[None], [ceiling], self.floor))
+            rows.append(zones.levels_from_rungs(lift[None], [ceiling], self.floor, ladder=self.ladder))
         return np.stack(rows)

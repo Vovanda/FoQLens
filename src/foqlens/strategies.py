@@ -12,7 +12,7 @@ medium of the question's own activity (M4, M4b).
 
 Invariant: every name a table does not hold is refused with the names it does.
 Invariant: a layout built here is the same as the one built from its parts by hand - the registry only picks.
-Invariant: f = 0 reads every block at the floor and f = 1, g = 1 lifts every block of a question with a zone.
+Invariant: f = 0 lifts the zone centers alone and f = 1, g = 1 lifts every block of a question with a zone.
 """
 
 from __future__ import annotations

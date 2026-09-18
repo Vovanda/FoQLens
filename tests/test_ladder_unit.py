@@ -40,11 +40,12 @@ def test_the_deepest_read_of_a_set_of_rungs_is_its_largest_code():
 @pytest.mark.parametrize(
     "floor, strength, halo, profile",
     [  # the worked examples of docs/quantization-filter.md, row by row
-        (Level.D4, 1.0, False, "BF16:0.33 D8:0.67 D6:1"),
+        (Level.D4, 1.0, False, "D8:0.5 D6:1"),
         (Level.D4, 0.5, False, "D6:1"),
-        (Level.D2, 1.0, False, "BF16:0.25 D8:0.5 D6:0.75 D4:1"),
-        (Level.ZERO, 1.0, True, "BF16:0.25 D8:0.5 D6:0.75 D4:1 D2:1.5"),
-        (Level.ZERO, 0.5, True, "D4:1 D2:1.5"),
+        (Level.D2, 1.0, False, "D8:0.33 D6:0.67 D4:1"),
+        (Level.ZERO, 1.0, False, "D8:0.25 D6:0.5 D4:0.75 D2:1"),
+        (Level.ZERO, 0.5, False, "D4:0.5 D2:1"),
+        (Level.ZERO, 0.5, True, "D4:1 D2:1.5"),  # the halo past the edge (docs, the profile of a zone)
     ],
 )
 def test_the_ceiling_and_the_profile_are_the_worked_examples_of_the_rules(floor, strength, halo, profile):

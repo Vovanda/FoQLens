@@ -76,10 +76,11 @@ def test_a_lift_is_one_at_the_center_and_nothing_at_the_reach():
     assert np.all(lifts[d >= 5.0] == 0) and np.all(lifts[d < 5.0] > 0)
 
 
-def test_the_front_reaches_nothing_at_zero_and_the_whole_network_at_one():
+def test_the_reach_is_the_center_alone_at_zero_and_the_whole_network_at_one():
     zone = one_zone()
     assert np.all(bz.zone_lifts(zone, bz.FrontReach(1.0, PLANE.diameter()).radii(zone), PLANE) == 1)
-    assert np.all(bz.zone_lifts(zone, bz.FrontReach(0.0, PLANE.diameter()).radii(zone), PLANE) == 0)
+    center = bz.zone_lifts(zone, bz.FrontReach(0.0, PLANE.diameter()).radii(zone), PLANE)[0]
+    assert center[zone.centers[0]] == 1 and np.count_nonzero(center) == 1
     half = bz.zone_lifts(zone, bz.FrontReach(0.5, PLANE.diameter()).radii(zone), PLANE)[0]
     d = PLANE.distances(torch.as_tensor(zone.centers))[0].numpy()
     assert np.all(half[d >= 0.5 * PLANE.diameter()] == 0) and np.all(half[d < 0.5 * PLANE.diameter()] > 0)
@@ -108,7 +109,7 @@ def test_lifts_do_not_fall_as_the_focus_area_grows():
     assert all(np.all(b >= a) for a, b in zip(lifts, lifts[1:]))
 
 
-FLOOR_CEILINGS = [(Level.D4, Level.BF16), (Level.D4, Level.D6), (Level.D2, Level.D8), (Level.ZERO, Level.BF16)]
+FLOOR_CEILINGS = [(Level.D4, Level.D8), (Level.D4, Level.D6), (Level.D2, Level.D8), (Level.ZERO, Level.D8)]
 
 
 @pytest.mark.parametrize("floor, ceiling", FLOOR_CEILINGS)
@@ -124,9 +125,9 @@ def test_rungs_with_one_ceiling_are_rule_five_on_the_even_profile(floor, ceiling
 def test_zones_of_their_own_strength_stay_between_the_floor_and_the_highest_ceiling():
     lifts = np.random.default_rng(1).uniform(0, 1, size=(3, 400))
     ceilings = zones.zone_ceilings(np.array([1.0, 0.5, 0.0]), 1.0, Level.D2)
-    assert [c.name for c in ceilings] == ["BF16", "D6", "D2"]
+    assert [c.name for c in ceilings] == ["D8", "D4", "D2"]
     codes = zones.levels_from_rungs(lifts, ceilings, Level.D2)
-    assert codes.min() >= int(Level.D2) and codes.max() <= int(Level.BF16)
+    assert codes.min() >= int(Level.D2) and codes.max() <= int(Level.D8)
     alone = zones.levels_from_rungs(lifts[2:], ceilings[2:], Level.D2)
     assert np.all(alone == int(Level.D2))  # a zone of strength 0 lifts nothing
 
@@ -149,11 +150,33 @@ def layout(focus_area: float, focus_strength: float, ladder=zones.READ_LEVELS) -
 
 def test_a_graph_layout_lifts_its_centers_to_the_ceiling_and_grows_with_f_and_g():
     codes = layout(0.3, 1.0).levels(np.array([0]))[0]
-    assert codes[nearest([8, 8])] == int(Level.BF16) and codes.min() == int(Level.D4)
+    assert codes[nearest([8, 8])] == int(Level.D8) and codes.min() == int(Level.D4)
+    with_source = layout(0.3, 1.0, LADDER[1:]).levels(np.array([0]))[0]  # a run that reads its source weights
+    assert with_source[nearest([8, 8])] == int(Level.BF16)
     areas = [bits(layout(f, 1.0).levels(np.array([0]))) for f in (0.1, 0.3, 0.5, 0.7)]
     assert areas == sorted(areas) and areas[0] < areas[-1]
     strengths = [bits(layout(0.3, g).levels(np.array([0]))) for g in (0.0, 0.5, 1.0)]
     assert strengths == sorted(strengths) and strengths[0] == Level.D4.bits
+
+
+def test_a_weak_zone_never_rises_past_its_own_ceiling_beside_a_strong_one():
+    # a weak zone (ceiling D4 on a D2 floor) at full lift, and a strong one (D8) barely reaching the same block
+    lifts = np.array([[1.0, 1.0, 0.0], [0.0, 0.05, 1.0]])
+    codes = zones.levels_from_rungs(lifts, [Level.D4, Level.D8], Level.D2)
+    assert codes[0] == int(Level.D4)  # the weak zone alone: its own ceiling
+    assert codes[2] == int(Level.D8)  # the strong zone alone: its own
+    assert codes[1] == int(Level.D6)  # both reach it: 1 rung + 0.05 x 3 rungs, under the strong zone's ceiling
+    weak_only = zones.levels_from_rungs(lifts[:1], [Level.D4], Level.D2)
+    assert weak_only.max() == int(Level.D4)
+
+
+def test_the_rungs_are_counted_on_the_run_s_ladder():
+    short = (Level.D2, Level.D4)  # a copy cut to D4
+    codes = zones.levels_from_rungs(np.ones((1, 4)), [Level.D4], Level.D2, ladder=short)
+    assert codes.tolist() == [int(Level.D4)] * 4
+    skipping = (Level.D2, Level.D6)  # a ladder without D4: a zone steps from the floor to D6
+    half = zones.levels_from_rungs(np.array([[1.0, 0.4]]), [Level.D6], Level.ZERO, ladder=skipping)
+    assert half.tolist() == [int(Level.D6), int(Level.D2)]
 
 
 def test_a_layout_on_the_ladder_of_depths_never_rises_past_its_top():
@@ -174,5 +197,5 @@ def test_the_per_block_control_spends_the_same_share_of_blocks_on_any_question()
 
 
 def test_the_ladder_the_rungs_map_onto_is_the_one_of_quant():
-    codes = zones.levels_from_rungs(np.ones((1, 3)), [Level.BF16], Level.ZERO)
+    codes = zones.levels_from_rungs(np.ones((1, 3)), [Level.BF16], Level.ZERO, ladder=LADDER[1:])
     assert codes.tolist() == [int(LADDER[-1])] * 3

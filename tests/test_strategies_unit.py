@@ -6,6 +6,7 @@ import pytest
 from foqlens import graph_zones as gz
 from foqlens.layouts import GraphZoneLayout, QueryGraphZones
 from foqlens.quant import Level
+from foqlens.zones import MAX_ZONES
 from foqlens.strategies import GRAPHS, MEDIA, STILL, Knobs, Space, per_block_layout, zone_layout
 
 TOPICS, PER_TOPIC, BLOCKS = 3, 12, 90
@@ -58,9 +59,10 @@ def test_the_ends_of_f_hold_on_every_surface_and_topic_zones(medium):
     surface = space.surface(medium, activity=scores, background=scores.mean(axis=0))
     questions = np.arange(len(fields))
     for zones in ("query", "topic"):
-        nothing = zone_layout("z", zones, fields, space, surface, np.ones(BLOCKS), Knobs(Level.D2, 0.0, 1.0), DEPTHS,
+        centers = zone_layout("z", zones, fields, space, surface, np.ones(BLOCKS), Knobs(Level.D2, 0.0, 1.0), DEPTHS,
                               domains=domains).levels(questions)
-        assert np.all(nothing == int(Level.D2))
+        lifted = (centers > int(Level.D2)).sum(axis=1)  # f = 0: the centers alone, at the ceiling
+        assert np.all((lifted >= 1) & (lifted <= MAX_ZONES)) and set(centers.ravel()) == {int(Level.D2), int(Level.D8)}
         everything = zone_layout("z", zones, fields, space, surface, np.ones(BLOCKS), Knobs(Level.D2, 1.0, 1.0), DEPTHS,
                                  domains=domains).levels(questions)
         assert np.all(everything > int(Level.D2)) and everything.max() == int(Level.D8)

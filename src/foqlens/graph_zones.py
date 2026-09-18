@@ -21,7 +21,7 @@ Invariants:
 - Invariant: one zone per hill - a weaker top inside a stronger zone's hill is not a zone.
 - Invariant: the blocks within a zone's radius hold at least its hill's weight, and no smaller radius does.
 - Invariant: a lift is 1 at a zone's center and 0 at and beyond its reach times the last stop; a reach of 0
-  lifts nothing.
+  lifts the center alone (rule 1: f = 0 is the center only).
 - Invariant: the reach at f = 1 lifts every block - the whole network, as precision_lift.
 - Invariant: lifts do not decrease as f grows.
 """
@@ -129,6 +129,8 @@ def zone_lifts(zones: GraphZones, radii: np.ndarray, metric: BlockMetric, last_s
     reach = (np.asarray(radii, dtype=float) * last_stop)[:, None]
     with np.errstate(divide="ignore", invalid="ignore"):
         lifts = np.clip(1.0 - d / reach, 0.0, None)
-    lifts[np.broadcast_to(reach == 0, lifts.shape)] = 0.0  # a zone that reaches nowhere lifts nothing, its center too
+    # rule 1: f = 0 is the center only - a zone that reaches nowhere lifts its own center and nothing around it
+    lifts[np.broadcast_to(reach == 0, lifts.shape)] = 0.0
+    lifts[np.arange(len(zones.centers)), zones.centers] = 1.0
     lifts[np.broadcast_to(np.isinf(reach), lifts.shape)] = 1.0
     return lifts

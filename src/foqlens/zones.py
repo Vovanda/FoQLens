@@ -37,11 +37,11 @@ GRID = 64
 SMOOTH_CELLS = 1.5  # gaussian sigma of the smoothing, in grid cells
 PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field
 MAX_ZONES = 16
-# The rungs a zone can lift a block to: the ladder above ZERO, up to bf16 (docs/quantization-filter.md,
-# rule 2: g = 1 is the top rung). The codes follow the ladder, so levels compare by precision. What a
-# model can actually carry is a choice of the run, not of the layout - a floor of D4 leaves D2 out of the
-# rings, and a run that drops bf16 passes a ladder without it.
-READ_LEVELS = LADDER[1:]
+# The rungs a zone can lift a block to by default: the read depths D2 ... D8, the ladder of
+# docs/quantization-filter.md (rule 2: g = 1 is the top rung, D8). The kernel reads depths and ZERO only, and a
+# model cut to D8 holds nothing above it; a run that reads its source weights passes a ladder with BF16 on top,
+# and a run on a copy cut shorter passes regulator.kernel_ladder.
+READ_LEVELS = tuple(lv for lv in LADDER if lv.depth)
 # A stop past 1 puts a ring outside the zone's radius. On a 2D map a ring out to 1.5 covers 1.25 of
 # the zone's area; further than that it is a second zone, and the size belongs to the focus area.
 MAX_STOP = 1.5
@@ -202,32 +202,36 @@ def zone_ceilings(strengths: np.ndarray, focus_strength: float, floor: Level, la
     return [ceiling_of(focus_strength * float(s), floor, ladder) for s in strengths]
 
 
-def levels_from_rungs(lifts: np.ndarray, ceilings: Sequence[Level], floor: Level, combine: str = "sum") -> np.ndarray:
+def levels_from_rungs(lifts: np.ndarray, ceilings: Sequence[Level], floor: Level, combine: str = "sum",
+                      ladder: Sequence[Level] = READ_LEVELS) -> np.ndarray:
     """Level codes [n_blocks] from every zone's lift [n_zones, n_blocks] and its own ceiling, on the even profile (#19).
 
-    The even profile is linear in rungs: a zone with lift l > 0 reads a block at min(kappa, gamma + 1 +
-    floor(l (kappa - gamma))) - what levels_from_lift gives on even_stops without a halo. Zones with
-    different ceilings add in rungs, r = sum_i l_i (kappa_i - gamma), the level being min(max kappa,
-    gamma + 1 + floor(r)) where r > 0; with one ceiling for all this is rule 5 "sum" exactly. "max" takes
-    the highest level any zone gives alone.
+    Rungs are counted on the run's ladder from the floor up: the floor is rung 0, kappa_i the rung of zone i's
+    ceiling. The even profile is linear in rungs: a zone with lift l > 0 reads a block at min(kappa, 1 +
+    floor(l kappa)) - what levels_from_lift gives on even_stops without a halo. Zones with different
+    ceilings add in rungs, r = sum_i l_i kappa_i, the level being min(kappa*, 1 + floor(r)) where r > 0 and
+    kappa* is the highest ceiling among the zones that reach the block - a zone never lifts a block past its
+    own ceiling, however strong a neighbour is. With one ceiling for all this is rule 5 "sum" exactly. "max"
+    takes the highest level any zone gives alone.
     """
     lifts = np.clip(np.asarray(lifts, dtype=float), 0.0, 1.0)
-    gamma = floor.rung
-    kappa = np.array([c.rung for c in ceilings], dtype=np.int64)
+    rungs = [floor, *(lv for lv in ladder if lv > floor)]
+    kappa = np.array([rungs.index(c) for c in ceilings], dtype=np.int64)
     if len(kappa) != len(lifts):
         raise ValueError(f"{len(kappa)} ceilings for {len(lifts)} zones")
     if len(kappa) == 0:
         return np.full(lifts.shape[1], int(floor), dtype=np.uint8)
-    span = (kappa - gamma)[:, None]
+    reaching = (lifts > 0) & (kappa[:, None] > 0)
     if combine == "sum":
-        r = (lifts * span).sum(axis=0)
-        rung = np.where(r > 0, np.minimum(kappa.max(), gamma + 1 + np.floor(r).astype(np.int64)), gamma)
+        r = (lifts * kappa[:, None]).sum(axis=0)
+        cap = np.where(reaching, kappa[:, None], 0).max(axis=0)
+        rung = np.where(r > 0, np.minimum(cap, 1 + np.floor(r).astype(np.int64)), 0)
     elif combine == "max":
-        alone = np.where((lifts > 0) & (span > 0), np.minimum(kappa[:, None], gamma + 1 + np.floor(lifts * span).astype(np.int64)), gamma)
+        alone = np.where(reaching, np.minimum(kappa[:, None], 1 + np.floor(lifts * kappa[:, None]).astype(np.int64)), 0)
         rung = alone.max(axis=0)
     else:
         raise ValueError(f"unknown combine {combine!r}, expected 'sum' or 'max'")
-    return np.asarray([int(LADDER[i]) for i in range(len(LADDER))], dtype=np.uint8)[rung]
+    return np.asarray([int(lv) for lv in rungs], dtype=np.uint8)[rung]
 
 
 def check_stops(stops: Sequence[tuple[Level, float]], floor: Level, ceiling: Level) -> None:

@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_kquant_kernel_gpu",
+  "gpu": {
+    "samples": 19,
+    "started": "2026-09-18T17:03",
+    "wall_s": 20.391994953155518,
+    "utilization_mean": 91.05263157894737,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 21654.0,
+    "temperature_mean_c": 63.526315789473685,
+    "temperature_peak_c": 66.0,
+    "power_mean_w": 352.06105263157895,
+    "power_peak_w": 394.98,
+    "memory_allocated_peak_mib": 643.00048828125
+  },
+  "note": "14 passed"
+}

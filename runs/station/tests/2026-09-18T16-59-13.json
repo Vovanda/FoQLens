@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_kquant_ladder_gpu",
+  "gpu": {
+    "samples": 854,
+    "started": "2026-09-18T16:43",
+    "wall_s": 923.4536516666412,
+    "utilization_mean": 92.31264637002342,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 19771.0,
+    "temperature_mean_c": 63.52810304449649,
+    "temperature_peak_c": 68.0,
+    "power_mean_w": 329.64915690866513,
+    "power_peak_w": 396.81,
+    "memory_allocated_peak_mib": 17178.4208984375
+  },
+  "note": "4 passed"
+}

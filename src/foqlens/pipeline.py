@@ -11,6 +11,7 @@ Invariant: masks are always computed with every block at bf16.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from functools import cached_property, partial
 from typing import Protocol
 
@@ -18,6 +19,7 @@ import numpy as np
 import torch
 
 from foqlens import model as fm
+from foqlens import refocustensors
 from foqlens.gpu_monitor import gpu_temperature
 from foqlens.gpu_share import FULL, Cooldown, Pacer, ThermalGuard, Throttle
 from foqlens.precision import Controller, install
@@ -70,6 +72,16 @@ class GradientMask:
         return [r["gradient"][0] for r in self.scorer.score_batch(model, tokenizer, texts)]
 
 
+class ModelSource(Enum):
+    """Where the bench takes its model from: the cut .refocustensors folder, read to the source (FILE) or only to its
+    depths with no source weight of a controlled module loaded (RESIDENT - D2 ... D8, no bf16, so no masks), or the
+    Hugging Face checkpoint."""
+
+    FILE = "file"
+    RESIDENT = "resident"
+    CHECKPOINT = "checkpoint"
+
+
 @dataclass
 class Bench:
     model: object
@@ -78,13 +90,28 @@ class Bench:
     throttle: Pacer = FULL
 
     @classmethod
-    def load(cls, model_id: str, attn_implementation: str = "sdpa", gpu_share: float = 1.0) -> Bench:
-        model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
+    def load(cls, model_id: str, attn_implementation: str = "sdpa", gpu_share: float = 1.0,
+             source: ModelSource = ModelSource.FILE) -> Bench:
+        """The bench on the model's cut folder (scripts/cut_model.py) - its copy read from the file, never quantized
+        again - or on the Hugging Face checkpoint, the copy then quantized from bf16 as it is first read."""
+        directory = refocustensors.model_directory(model_id)
+        if source is not ModelSource.CHECKPOINT and not (directory / refocustensors.FILE).exists():
+            raise FileNotFoundError(f"no cut model in {directory}: run scripts/cut_model.py, or load the checkpoint")
+        if source is ModelSource.FILE:
+            model, tokenizer, copy = refocustensors.load(directory, attn_implementation=attn_implementation,
+                                                         gpu_share=gpu_share)
+            ctl = install(model, copy=copy)
+        elif source is ModelSource.RESIDENT:
+            model, tokenizer, ctl = refocustensors.load_resident(directory, attn_implementation=attn_implementation,
+                                                                 gpu_share=gpu_share)
+        else:
+            model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
+            ctl = install(model)
         # the share paces the batches, the hourly break rests the card, the guard keeps it under its
         # ceiling whatever the share
         log = partial(print, flush=True)
         pacer = ThermalGuard(Cooldown(Throttle(gpu_share), log=log), gpu_temperature, log=log)
-        return cls(model, tokenizer, install(model), pacer)
+        return cls(model, tokenizer, ctl, pacer)
 
     @cached_property
     def pooled(self) -> BlockScorer:

@@ -209,6 +209,11 @@ class RefinedWeight(_DepthReader):
         return out, inp // SCALE_GROUP, SCALE_GROUP
 
     @property
+    def depth(self) -> int:
+        """The depth stored: the base and every refinement."""
+        return self.packed.shape[0]
+
+    @property
     def nbytes(self) -> int:
         """Bytes of the stored depths, without the scales."""
         return self.packed.numel() * self.packed.element_size()

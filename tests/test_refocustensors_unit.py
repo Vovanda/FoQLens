@@ -79,3 +79,19 @@ def test_a_file_of_another_format_is_refused(tmp_path):
     save_file({"w": torch.zeros(1)}, tmp_path / FILE, metadata={"format": "pt"})
     with pytest.raises(ValueError):
         ModelFile(tmp_path / FILE)
+
+
+def test_a_stack_cut_to_a_depth_holds_no_tail_and_refuses_the_source(checkpoint, tmp_path):
+    tensors, full = checkpoint
+    source = tmp_path / "source"
+    source.mkdir()
+    save_file(tensors, source / "model.safetensors")
+    (source / "config.json").write_text(json.dumps({"model_type": "fake"}), encoding="utf-8")
+    cut = ModelFile(write(source, tmp_path / "cut", "fake/model@0", depth=2), device=DEVICE)
+    assert not cut.holds_source and ModelFile(full / FILE).holds_source
+    assert not any(".exact" in key for key in cut._keys)
+    with pytest.raises(ValueError, match="resident"):
+        cut.source_state()
+    for key in CONTROLLED_KEYS:
+        assert cut.copy(controlled_name(key)).depth == 2, key  # Q2_K: base and one refinement; Q4_K: its base alone
+    assert (full / FILE).stat().st_size > (tmp_path / "cut" / FILE).stat().st_size

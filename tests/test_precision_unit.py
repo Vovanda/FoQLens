@@ -128,6 +128,24 @@ def test_drop_bf16_keeps_the_depth_outputs_and_refuses_the_dropped_levels():
     assert mixed(x).shape == before.shape
 
 
+def test_a_resident_module_on_a_meta_weight_reads_as_one_built_from_bf16():
+    linear = make_linear(out_features=200)
+    built = MixedPrecisionLinear(linear, block_rows=64)
+    layout = np.array([Level.D8, Level.D4, Level.ZERO, Level.D2], dtype=np.uint8)
+    built.set_levels(layout)
+    copy = built._packed[RefinedWeight]
+    x = make_input()
+    expected = built(x)
+    with torch.device("meta"):
+        empty = nn.Linear(linear.in_features, linear.out_features, bias=False, dtype=torch.bfloat16)
+    resident = MixedPrecisionLinear.resident(empty, copy, DEVICE, block_rows=64)
+    assert resident.weight is None and resident.storages == (RefinedWeight,)
+    with pytest.raises(ValueError):
+        resident.set_levels(Level.BF16)
+    resident.set_levels(layout)
+    assert torch.equal(resident(x), expected)
+
+
 @pytest.mark.parametrize("level", [Level.D2, Level.D4, Level.D6, Level.D8])
 def test_a_baked_level_reads_as_the_refined_depth_and_refuses_bf16(level):
     mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
@@ -331,3 +349,15 @@ def test_layout_reports_actual_levels():
     assert ctl.layout() == {"layers.0.a": [2, 0, 2, 0]}
     with pytest.raises(KeyError):
         ctl.set_layer(5, Level.NF4)
+
+
+def test_a_resident_module_on_a_copy_cut_short_refuses_the_depths_it_does_not_hold():
+    linear = make_linear(out_features=200)
+    copy = RefinedWeight.quantize(linear.weight.data)
+    short = RefinedWeight(packed=copy.packed[:2].clone(), scale=copy.scale)
+    resident = MixedPrecisionLinear.resident(linear, short, DEVICE, block_rows=64)
+    assert resident.levels.tolist() == [Level.D4] * resident.n_blocks
+    for level in (Level.D6, Level.D8):
+        with pytest.raises(ValueError):
+            resident.set_levels(level)
+    resident.set_levels(Level.D2)

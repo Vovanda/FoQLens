@@ -21,6 +21,9 @@ Invariants (each one has a test):
   reads bf16 and ZERO holds no int8 or nf4 copy.
 - Invariant: drop_bf16 changes no output of a read depth; afterwards the module holds its refined
   copy alone, and a level it cannot read is refused when set, not when computed.
+- Invariant: a resident module (MixedPrecisionLinear.resident), built from a copy with no bf16 weight ever loaded,
+  reads every depth exactly as a module built from bf16 reads it after drop_bf16, and refuses a depth its copy does
+  not hold.
 - Invariant: with depth caps a block stores only the depths up to its cap, reads within its cap
   exactly as before, and a read deeper than its cap is refused when set.
 - Invariant: a baked level is bit-exact with reading the same depth from the refined copy; afterwards
@@ -68,6 +71,7 @@ BITS_BY_CODE = np.array([lv.bits for lv in Level], dtype=np.float64)
 STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: RefinedWeight for lv in Level if lv.depth}
 # The depth a level reads, by code; the levels that are not read depths count as the full copy.
 DEPTH_BY_CODE = np.array([lv.depth if lv.depth or lv is Level.ZERO else MAX_DEPTH for lv in Level], dtype=np.uint8)
+DEEPEST = max((lv for lv in Level if lv.depth), key=lambda lv: lv.depth)  # the deepest read depth, D8
 
 
 class RefinedCopy(Protocol):
@@ -159,6 +163,20 @@ class MixedPrecisionLinear(nn.Module):
 
     # What a module still reads after drop_bf16: the depths of its refined copy, and nothing.
     RESIDENT = frozenset({Level.ZERO, *(lv for lv in Level if lv.depth)})
+
+    @classmethod
+    def resident(cls, linear: nn.Linear, copy: _DepthReader, device: str,
+                 block_rows: int = DEFAULT_BLOCK_ROWS) -> MixedPrecisionLinear:
+        """A module that holds `copy` alone from the start, reading its deepest depth: the state drop_bf16 leaves,
+        with no bf16 weight ever loaded. `linear` gives the shape and the bias; its weight may be on meta."""
+        module = cls(linear, block_rows, lambda weight: copy)  # the copy is given, never built from the weight
+        module._device = torch.device(device)  # the weight may be on meta; the rows are read where the copy lies
+        module.set_levels(DEEPEST)
+        module.drop_bf16()
+        # a copy cut short (scripts/cut_model.py --depth) refuses what it does not hold, instead of reading shallower
+        module.readable = frozenset(lv for lv in module.readable if lv.depth <= copy.depth)
+        module.set_levels(max(module.readable, key=lambda lv: lv.depth))
+        return module
 
     def drop_bf16(self) -> None:
         """Keep only the refined copy: the bf16 weight and every other copy leave the GPU.
@@ -421,6 +439,17 @@ def install(model: nn.Module, block_rows: int = DEFAULT_BLOCK_ROWS, copy: Refine
 
     `copy` builds each module's refined copy by its name; the bench's own is the k-quant ladder.
     """
+    return _replace(model, lambda name, linear: MixedPrecisionLinear(linear, block_rows, partial(copy.quantize, name)))
+
+
+def install_resident(model: nn.Module, copy_of: Callable[[str], _DepthReader], device: str,
+                     block_rows: int = DEFAULT_BLOCK_ROWS) -> Controller:
+    """As install, with every module holding the refined copy `copy_of` gives for its name and no bf16 weight at all -
+    drop_bf16's state from the start. The model's linear weights need not exist: they may still be on meta."""
+    return _replace(model, lambda name, linear: MixedPrecisionLinear.resident(linear, copy_of(name), device, block_rows))
+
+
+def _replace(model: nn.Module, make: Callable[[str, nn.Linear], MixedPrecisionLinear]) -> Controller:
     modules: dict[str, MixedPrecisionLinear] = {}
     for i, layer in enumerate(text_layers(model)):
         for dotted in CONTROLLED:
@@ -429,7 +458,7 @@ def install(model: nn.Module, block_rows: int = DEFAULT_BLOCK_ROWS, copy: Refine
                 continue
             parent, leaf = found
             name = f"layers.{i}.{dotted}"
-            mixed = MixedPrecisionLinear(getattr(parent, leaf), block_rows, partial(copy.quantize, name))
+            mixed = make(name, getattr(parent, leaf))
             setattr(parent, leaf, mixed)
             modules[name] = mixed
     return Controller(modules)

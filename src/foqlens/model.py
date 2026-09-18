@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from pathlib import Path
 
 import torch
@@ -91,9 +92,11 @@ def load_state(
     attn_implementation: str | None = None,
     text_only: bool = True,
     gpu_share: float = 1.0,
+    fill: Callable[[Gemma4ForConditionalGeneration], None] | None = None,
 ) -> tuple[Gemma4ForConditionalGeneration, PreTrainedTokenizerBase]:
     """As load, with the weights given and the config and tokenizer read from `directory` - a Hugging Face snapshot or
-    a cut model's folder (foqlens.refocustensors).
+    a cut model's folder (foqlens.refocustensors). `fill` puts in place what the weights leave empty - the resident
+    modules of a model whose controlled weights are read from their copies (precision.install_resident).
 
     The weights become the model's parameters as they are: the model is built with its parameters on meta and the
     tensors are assigned, never copied. from_pretrained copies them and holds every weight twice on the way - 22 GiB of
@@ -106,6 +109,8 @@ def load_state(
         model = Gemma4ForConditionalGeneration._from_config(config, dtype=dtype, attn_implementation=attn_implementation)
     loaded = model.load_state_dict(state_dict, strict=False, assign=True)
     model.tie_weights()
+    if fill is not None:
+        fill(model)
     # The checkpoint holds k/v projections of the layers that share another layer's keys and values; the model lists
     # them to be dropped, as from_pretrained drops them. Nothing else may be left over.
     ignored = [re.compile(p) for m in model.modules() for p in getattr(m, "_keys_to_ignore_on_load_unexpected", None) or ()]

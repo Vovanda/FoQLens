@@ -424,6 +424,9 @@ class EqualStrength:
 # The share of calibration zone centers whose projected score stays below the strength scale Z: the top 1% saturate
 # at full strength instead of one outlier pressing every other zone down, as a normalisation by the maximum would (#19).
 STRENGTH_QUANTILE = 0.99
+# The lift of a block at the per-block threshold: above 0, so it reads the first rung over the floor - any positive
+# lift below 1 / (rungs above the floor) does, and the share lifted is then the top f of the blocks, ties aside.
+THRESHOLD_LIFT = 1e-6
 
 
 @dataclass(frozen=True)
@@ -533,8 +536,10 @@ class QuantileLevels:
         rows = []
         for i in indices:
             s = np.asarray(self.scores[int(i)], dtype=float)
-            lift = np.maximum(0.0, s - np.quantile(s, 1.0 - self.focus_area))
-            top = lift.max()
-            lift = lift / top if top > 0 else lift
+            threshold = np.quantile(s, 1.0 - self.focus_area)
+            span = s.max() - threshold
+            graded = (s - threshold) / span if span > 0 else np.ones_like(s)
+            # a block at the threshold reads the first rung: the top share f is lifted, at f = 0 the top block alone
+            lift = np.where(s >= threshold, THRESHOLD_LIFT + (1.0 - THRESHOLD_LIFT) * graded, 0.0)
             rows.append(zones.levels_from_rungs(lift[None], [ceiling], self.floor, ladder=self.ladder))
         return np.stack(rows)

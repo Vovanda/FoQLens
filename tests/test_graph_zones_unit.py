@@ -189,11 +189,13 @@ def test_a_layout_on_the_ladder_of_depths_never_rises_past_its_top():
 
 def test_the_per_block_control_spends_the_same_share_of_blocks_on_any_question():
     scores = np.random.default_rng(2).standard_normal((3, 1000)) * np.array([[1.0], [10.0], [0.1]])
-    for f in (0.1, 0.3):
+    for f in (0.1, 0.3, 1.0):
         codes = QuantileLevels("control", scores, f, 1.0, Level.D4).levels(np.arange(3))
         above = (codes > int(Level.D4)).mean(axis=1)
         assert np.allclose(above, f, atol=2e-3)  # a preset budget: the query does not decide it
-    assert np.all(QuantileLevels("none", scores, 0.0, 1.0, Level.D4).levels(np.arange(3)) == int(Level.D4))
+    top = QuantileLevels("top", scores, 0.0, 1.0, Level.D4).levels(np.arange(3))
+    assert (top > int(Level.D4)).sum(axis=1).tolist() == [1, 1, 1]  # f = 0: the top block alone, as a zone's center
+    assert top[np.arange(3), scores.argmax(axis=1)].tolist() == [int(Level.D8)] * 3
 
 
 def test_the_ladder_the_rungs_map_onto_is_the_one_of_quant():

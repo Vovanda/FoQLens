@@ -1,6 +1,7 @@
 """Zone strategies by name (foqlens.strategies): the registry picks the parts and adds nothing of its own."""
 
 import numpy as np
+import torch
 import pytest
 
 from foqlens import graph_zones as gz
@@ -85,3 +86,26 @@ def test_the_per_block_control_uses_the_same_knobs():
     codes = per_block_layout("control", scores, Knobs(Level.D4, 0.2, 1.0), DEPTHS).levels(np.arange(4))
     assert codes.min() == int(Level.D4) and codes.max() == int(Level.D8)
     assert np.allclose((codes > int(Level.D4)).mean(axis=1), 0.2, atol=0.02)
+
+
+def test_every_mechanism_is_made_by_its_name_and_keeps_the_ends_of_f():
+    from foqlens.strategies import MECHANISMS, Inputs, mechanism_layout
+
+    scores, domains = calibration()
+    rng = np.random.default_rng(5)
+    # a toy attention of three heads: three q blocks feeding one o block
+    weights = {f"layers.0.{k}": torch.as_tensor(rng.standard_normal(s), dtype=torch.float32)
+               for k, s in {"self_attn.q_proj": (192, 64), "self_attn.o_proj": (64, 192)}.items()}
+    peaked = np.ones((len(scores), 4))
+    peaked[np.arange(len(scores)), np.arange(len(scores)) % 3] = 5.0  # every question peaks on one head's block
+    questions = np.arange(len(scores))
+    for mechanism in MECHANISMS:
+        own = peaked if mechanism == "signal-path" else scores
+        n = own.shape[1]
+        inputs = Inputs(scores=own, calibration=own, block_weights=np.ones(n), domains=domains,
+                        model_weights=weights, n_heads=3)
+        whole = mechanism_layout(mechanism, inputs, Knobs(Level.D2, 1.0, 1.0), DEPTHS, k=1).levels(questions)
+        assert np.all(whole > int(Level.D2)), mechanism
+        assert whole.max() == int(Level.D8), mechanism
+    with pytest.raises(ValueError, match="per-block"):
+        mechanism_layout("router", inputs, Knobs(Level.D2, 0.5, 1.0))

@@ -132,3 +132,66 @@ def per_block_layout(name: str, scores: np.ndarray, knobs: Knobs,
                      ladder: tuple[Level, ...] = READ_LEVELS) -> QuantileLevels:
     """The control the zones must beat (#19): the top share f of blocks by score, no zones, the same knobs."""
     return QuantileLevels(name, scores, knobs.focus_area, knobs.focus_strength, knobs.floor, ladder)
+
+
+# ==== The mechanisms of the filter, by name (Volodya 19.09: checked from the simplest to verify up) ====
+
+
+@dataclass(frozen=True)
+class Inputs:
+    """What a mechanism may read: the questions' scores and the calibration's, and the model's weights for M3."""
+
+    scores: np.ndarray  # [questions, n_blocks] the laid-out questions' raw scores
+    calibration: np.ndarray  # [calibration questions, n_blocks] raw scores of other questions
+    block_weights: np.ndarray  # [n_blocks] weights a block holds
+    domains: tuple[str, ...] | None = None  # every laid-out question's topic, for topic zones
+    model_weights: Mapping[str, torch.Tensor] | None = None  # [out, in] of every module, for the signal's path
+    n_heads: int | None = None
+
+    @property
+    def background(self) -> np.ndarray:
+        return self.calibration.mean(axis=0)
+
+    @property
+    def fields(self) -> np.ndarray:
+        """The scores against the calibration's background: a zone grows where a question stands out."""
+        return self.scores - self.background
+
+
+def _per_block(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+    return per_block_layout("per-block", inputs.fields, knobs, ladder)
+
+
+def _static(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+    space = Space.build(inputs.calibration, graph, k)
+    return zone_layout("static", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder)
+
+
+def _topic(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+    space = Space.build(inputs.calibration, graph, k)
+    return zone_layout("topic", "topic", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
+                       domains=inputs.domains)
+
+
+def _medium(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+    space = Space.build(inputs.calibration, graph, k)
+    surface = space.surface("harmonic", activity=inputs.scores, background=inputs.background)
+    return zone_layout("medium", "query", inputs.fields, space, surface, inputs.block_weights, knobs, ladder)
+
+
+def _signal_path(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int):
+    if inputs.model_weights is None or inputs.n_heads is None:
+        raise ValueError("the signal's path needs the model's weights and its number of heads")
+    space = Space.signal_path(inputs.model_weights, inputs.n_heads, k)
+    return zone_layout("signal-path", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder)
+
+
+# In the order they are checked: the simplest to build and to verify first (per block, no zones - the control).
+MECHANISMS = {"per-block": _per_block, "static": _static, "topic": _topic, "medium": _medium,
+              "signal-path": _signal_path}
+
+
+def mechanism_layout(mechanism: str, inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS,
+                     graph: str = "mutual-nicdm", k: int = NEIGHBOURS):
+    """The layout policy of a mechanism of the filter, by its name, over the questions of `inputs`."""
+    return _pick(MECHANISMS, mechanism, "mechanism")(inputs, knobs, ladder, graph, k)

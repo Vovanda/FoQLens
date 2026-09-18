@@ -76,13 +76,6 @@ def test_a_lift_is_one_at_the_center_and_nothing_at_the_reach():
     assert np.all(lifts[d >= 5.0] == 0) and np.all(lifts[d < 5.0] > 0)
 
 
-def test_found_reach_is_rule_one_nothing_at_zero_everything_at_one():
-    zone = one_zone()
-    assert bz.FoundReach(0.5).radii(zone) == pytest.approx(zone.radii)
-    assert np.all(bz.zone_lifts(zone, bz.FoundReach(0.0).radii(zone), PLANE) == 0)
-    assert np.all(bz.zone_lifts(zone, bz.FoundReach(1.0).radii(zone), PLANE) == 1)
-
-
 def test_the_front_reaches_nothing_at_zero_and_the_whole_network_at_one():
     zone = one_zone()
     assert np.all(bz.zone_lifts(zone, bz.FrontReach(1.0, PLANE.diameter()).radii(zone), PLANE) == 1)
@@ -111,9 +104,8 @@ def test_along_the_graph_a_zone_is_an_arbitrary_figure_not_a_ball():
 
 def test_lifts_do_not_fall_as_the_focus_area_grows():
     zone = one_zone()
-    for reach in (lambda f: bz.FoundReach(f), lambda f: bz.FrontReach(f, PLANE.diameter())):
-        lifts = [bz.zone_lifts(zone, reach(f).radii(zone), PLANE)[0] for f in (0.05, 0.2, 0.4, 0.7, 0.9)]
-        assert all(np.all(b >= a) for a, b in zip(lifts, lifts[1:]))
+    lifts = [bz.zone_lifts(zone, bz.FrontReach(f, PLANE.diameter()).radii(zone), PLANE)[0] for f in (0.05, 0.2, 0.4, 0.7, 0.9)]
+    assert all(np.all(b >= a) for a, b in zip(lifts, lifts[1:]))
 
 
 FLOOR_CEILINGS = [(Level.D4, Level.BF16), (Level.D4, Level.D6), (Level.D2, Level.D8), (Level.ZERO, Level.BF16)]
@@ -149,20 +141,27 @@ def bits(codes: np.ndarray) -> float:
     return float(np.mean([Level(int(c)).bits for c in codes.ravel()]))
 
 
-def layout(focus_area: float, focus_strength: float, reach=bz.FoundReach) -> GraphZoneLayout:
+def layout(focus_area: float, focus_strength: float, ladder=zones.READ_LEVELS) -> GraphZoneLayout:
     source = QueryGraphZones(TWO_BUMPS[None], StillSurface(TABLE, PLANE), WEIGHTS)
-    made = reach(focus_area) if reach is bz.FoundReach else reach(focus_area, PLANE.diameter())
-    return GraphZoneLayout("graph", source, made, StillSurface(TABLE, PLANE), Level.D4, focus_strength)
+    reach = bz.FrontReach(focus_area, PLANE.diameter())
+    return GraphZoneLayout("graph", source, reach, StillSurface(TABLE, PLANE), Level.D4, focus_strength, ladder=ladder)
 
 
 def test_a_graph_layout_lifts_its_centers_to_the_ceiling_and_grows_with_f_and_g():
-    codes = layout(0.5, 1.0).levels(np.array([0]))[0]
+    codes = layout(0.3, 1.0).levels(np.array([0]))[0]
     assert codes[nearest([8, 8])] == int(Level.BF16) and codes.min() == int(Level.D4)
-    for reach in (bz.FoundReach, bz.FrontReach):
-        areas = [bits(layout(f, 1.0, reach).levels(np.array([0]))) for f in (0.1, 0.3, 0.5, 0.7)]
-        assert areas == sorted(areas) and areas[0] < areas[-1]
-    strengths = [bits(layout(0.5, g).levels(np.array([0]))) for g in (0.0, 0.5, 1.0)]
+    areas = [bits(layout(f, 1.0).levels(np.array([0]))) for f in (0.1, 0.3, 0.5, 0.7)]
+    assert areas == sorted(areas) and areas[0] < areas[-1]
+    strengths = [bits(layout(0.3, g).levels(np.array([0]))) for g in (0.0, 0.5, 1.0)]
     assert strengths == sorted(strengths) and strengths[0] == Level.D4.bits
+
+
+def test_a_layout_on_the_ladder_of_depths_never_rises_past_its_top():
+    depths = tuple(lv for lv in zones.READ_LEVELS if lv.depth)
+    codes = layout(0.3, 1.0, depths).levels(np.array([0]))[0]
+    assert codes[nearest([8, 8])] == int(Level.D8) and codes.max() == int(Level.D8)
+    control = QuantileLevels("control", TWO_BUMPS[None], 0.3, 1.0, Level.D4, ladder=depths).levels(np.array([0]))
+    assert control.max() == int(Level.D8)
 
 
 def test_the_per_block_control_spends_the_same_share_of_blocks_on_any_question():

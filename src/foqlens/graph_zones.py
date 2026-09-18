@@ -14,16 +14,16 @@ A zone is a center and a radius, and its figure is every block within the radius
 the layout's metric - the geodesic along the graph (metric.geodesic), or its resistive form - so the
 figure is arbitrary and follows the graph, not a ball cut across the space. A zone lifts the blocks it
 reaches by rule 4 of docs/quantization-filter.md, from 1 at its center to 0 at its reach times the last
-stop. How far it reaches is replaceable (Reach): FoundReach stretches the found radius by f / (1 - f)
-(rule 1 as it is), FrontReach sends every zone a share f of the width of the network (owner, 2026-09-16).
+stop. How far it reaches is replaceable (Reach): FrontReach sends every zone a share f of the width of the
+network, R = f D (rule 1, #19).
 
 Invariants:
 - Invariant: one zone per hill - a weaker top inside a stronger zone's hill is not a zone.
 - Invariant: the blocks within a zone's radius hold at least its hill's weight, and no smaller radius does.
 - Invariant: a lift is 1 at a zone's center and 0 at and beyond its reach times the last stop; a reach of 0
   lifts nothing.
-- Invariant: either reach at f = 1 lifts every block - the whole network, as precision_lift.
-- Invariant: lifts do not decrease as f grows, for either reach.
+- Invariant: the reach at f = 1 lifts every block - the whole network, as precision_lift.
+- Invariant: lifts do not decrease as f grows.
 """
 
 from __future__ import annotations
@@ -106,23 +106,8 @@ class Reach(Protocol):
 
 
 @dataclass(frozen=True)
-class FoundReach:
-    """Rule 1 as it is: the found radius stretched by f / (1 - f) - 0 at f = 0, as found at 0.5, everything at 1."""
-
-    focus_area: float
-
-    def __post_init__(self) -> None:
-        check_focus_area(self.focus_area)
-
-    def radii(self, zones: GraphZones) -> np.ndarray:
-        if self.focus_area == 1.0:
-            return np.full(len(zones.radii), np.inf)
-        return zones.radii * (self.focus_area / (1.0 - self.focus_area))
-
-
-@dataclass(frozen=True)
 class FrontReach:
-    """The owner's front: every zone reaches f times the width of the network - 0 at f = 0, the whole width at 1."""
+    """Rule 1: every zone reaches f times the width of the network - 0 at f = 0, the whole width at 1."""
 
     focus_area: float
     width: float  # the width of the network along the metric (metric.sweep_width), fixed per metric so f means one thing

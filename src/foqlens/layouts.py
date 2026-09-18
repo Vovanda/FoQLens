@@ -444,9 +444,9 @@ class GraphZoneLayout:
 
     Every part is a class behind its own interface - the zones (GraphZoneSource), the surface they
     reach along (metric.Surface: the graph at rest, or its medium per question), the reach
-    (graph_zones.Reach: FoundReach or FrontReach), the strength of a zone (ZoneStrength) - and the knobs
-    mean the same whichever source the zones come from: f is the reach, g the ceiling. The level map is
-    the even profile without a halo (zones.levels_from_rungs).
+    (graph_zones.Reach), the strength of a zone (ZoneStrength) - and the knobs mean the same whichever
+    source the zones come from: f is the reach, g the ceiling. The level map is the even profile without a
+    halo (zones.levels_from_rungs), on `ladder` - the rungs the run's model reads (regulator.kernel_ladder).
     """
 
     name: str
@@ -457,13 +457,15 @@ class GraphZoneLayout:
     focus_strength: float
     strength: ZoneStrength = EqualStrength()
     combine: str = "sum"
+    ladder: tuple[Level, ...] = zones.READ_LEVELS
 
     def levels(self, indices: np.ndarray) -> np.ndarray:
         rows = []
         for i in indices:
             found = self.source.zones(int(i))
             lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(int(i)))
-            ceilings = zones.zone_ceilings(self.strength.strengths(int(i), found), self.focus_strength, self.floor)
+            ceilings = zones.zone_ceilings(self.strength.strengths(int(i), found), self.focus_strength, self.floor,
+                                           self.ladder)
             rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine))
         return np.stack(rows)
 
@@ -483,12 +485,13 @@ class QuantileLevels:
     focus_area: float
     focus_strength: float
     floor: Level
+    ladder: tuple[Level, ...] = zones.READ_LEVELS
 
     def __post_init__(self) -> None:
         zones.check_focus_area(self.focus_area)
 
     def levels(self, indices: np.ndarray) -> np.ndarray:
-        ceiling = zones.ceiling_of(self.focus_strength, self.floor)
+        ceiling = zones.ceiling_of(self.focus_strength, self.floor, self.ladder)
         rows = []
         for i in indices:
             s = np.asarray(self.scores[int(i)], dtype=float)

@@ -2,8 +2,8 @@
 
 Reads raw masks [questions, n_blocks], builds the co-activation metric (M1) and its neighbour graph,
 walks the graph (its components, its width), finds the zones of a few questions along it and prints, per
-question, how many zones there are, their radii and how many blocks their figures cover under both
-reaches, with the time of every step. Block sizes are not known without the model, so every block weighs
+question, how many zones there are, their radii and how many blocks their figures cover at R = f D,
+with the time of every step. Block sizes are not known without the model, so every block weighs
 one here. Masks of the dead experiments E001-E014 only show that the mechanics runs; they are no evidence.
 
     uv run python scripts/graph_zones_check.py --masks runs/E001-run1-exploration/step1/e2b/raw/vectors_pooled.npy
@@ -30,8 +30,7 @@ from foqlens.metric import (
     sweep_width,
 )
 
-FOCUS_AREA = 0.5  # rule 1: the zones as found
-FRONT_AREA = 0.2  # the owner's front: a fifth of the width of the network
+FRONT_AREA = 0.2  # rule 1, R = f D: a fifth of the width of the network
 GRAPHS = {"union": neighbour_table, "mutual-nicdm": mutual_nicdm_table}  # how the block graph is built (#4)
 
 
@@ -67,12 +66,10 @@ def main() -> None:
     for q in range(min(args.questions, len(fields))):
         clock = time.perf_counter()
         zones = gz.find_graph_zones(fields[q], along, table_np, weights)
-        found = gz.zone_lifts(zones, gz.FoundReach(FOCUS_AREA).radii(zones), along)
         front = gz.zone_lifts(zones, gz.FrontReach(FRONT_AREA, width).radii(zones), along)
-        covered = lambda lifts: int((lifts.max(axis=0) > 0).sum()) if len(lifts) else 0  # noqa: E731
+        covered = int((front.max(axis=0) > 0).sum()) if len(front) else 0
         print(f"q{q}: {len(zones.centers)} zones, radii {np.round(zones.radii, 3).tolist()}; "
-              f"blocks covered - found {covered(found)}, front {covered(front)}; {time.perf_counter() - clock:.2f} s",
-              flush=True)
+              f"blocks covered {covered}; {time.perf_counter() - clock:.2f} s", flush=True)
 
 
 if __name__ == "__main__":

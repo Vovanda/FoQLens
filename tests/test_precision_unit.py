@@ -9,9 +9,9 @@ from torch import nn
 
 from functools import partial
 
-from foqlens.kquant import KQuantLadder
+from foqlens.refinements import KQuantLadder
 from foqlens.precision import Controller, MixedPrecisionLinear, samples
-from foqlens.quant import N_SLICES, NF4_BLOCKSIZE, SLICE_GROUP, Int8Weight, Level, Nf4Weight, SlicedWeight
+from foqlens.quant import MAX_DEPTH, NF4_BLOCKSIZE, SCALE_GROUP, Int8Weight, Level, Nf4Weight, RefinedWeight
 
 pytestmark = pytest.mark.gpu
 
@@ -75,26 +75,26 @@ def test_packed_copies_exist_only_for_levels_in_use():
     mixed.set_levels(np.array([0, 1, 2, 3], dtype=np.uint8))
     assert mixed.storages == (Nf4Weight, Int8Weight)
     mixed.set_levels(np.array([Level.D2, Level.D8, Level.D4, Level.ZERO], dtype=np.uint8))
-    assert mixed.storages == (Nf4Weight, Int8Weight, SlicedWeight)  # one sliced copy serves every depth
+    assert mixed.storages == (Nf4Weight, Int8Weight, RefinedWeight)  # one refined copy serves every depth
 
 
-def test_sliced_error_shrinks_by_the_step_of_each_slice():
+def test_the_error_shrinks_by_the_step_of_each_depth():
     weight = make_linear().weight.data
-    sliced = SlicedWeight.quantize(weight)
-    groups = weight.float().view(weight.shape[0], -1, SLICE_GROUP)
-    for depth in range(1, N_SLICES + 1):
-        err = (sliced.dequantize(torch.float32, depth).view_as(groups) - groups).abs()
-        bound = sliced.scale / 2 / 4 ** (depth - 1)
+    full = RefinedWeight.quantize(weight)
+    groups = weight.float().view(weight.shape[0], -1, SCALE_GROUP)
+    for depth in range(1, MAX_DEPTH + 1):
+        err = (full.dequantize(torch.float32, depth).view_as(groups) - groups).abs()
+        bound = full.scale / 2 / 4 ** (depth - 1)
         assert torch.all(err <= bound * (1 + 1e-4)), depth
 
 
-def test_sliced_depth_reads_only_its_own_slices_and_costs_one_byte_per_weight():
+def test_a_depth_reads_only_its_own_codes_and_costs_one_byte_per_weight():
     weight = make_linear().weight.data
-    sliced = SlicedWeight.quantize(weight)
-    shallow = SlicedWeight(packed=sliced.packed[:2].clone(), scale=sliced.scale)
-    assert torch.equal(shallow.dequantize(torch.float32, 2), sliced.dequantize(torch.float32, 2))
-    assert sliced.packed.dtype == torch.uint8 and sliced.packed.numel() == weight.numel()
-    assert sliced.scale.numel() == weight.numel() // SLICE_GROUP
+    full = RefinedWeight.quantize(weight)
+    shallow = RefinedWeight(packed=full.packed[:2].clone(), scale=full.scale)
+    assert torch.equal(shallow.dequantize(torch.float32, 2), full.dequantize(torch.float32, 2))
+    assert full.packed.dtype == torch.uint8 and full.packed.numel() == weight.numel()
+    assert full.scale.numel() == weight.numel() // SCALE_GROUP
 
 
 def test_depth_levels_switch_only_their_block_and_cost_their_bits():
@@ -120,7 +120,7 @@ def test_drop_bf16_keeps_the_depth_outputs_and_refuses_the_dropped_levels():
     before = mixed(x)
     mixed.drop_bf16()
     assert torch.equal(mixed(x), before)
-    assert mixed.weight is None and mixed.storages == (SlicedWeight,)
+    assert mixed.weight is None and mixed.storages == (RefinedWeight,)
     for level in (Level.BF16, Level.INT8, Level.NF4):
         with pytest.raises(ValueError):
             mixed.set_levels(level)
@@ -129,7 +129,7 @@ def test_drop_bf16_keeps_the_depth_outputs_and_refuses_the_dropped_levels():
 
 
 @pytest.mark.parametrize("level", [Level.D2, Level.D4, Level.D6, Level.D8])
-def test_a_baked_level_reads_as_the_sliced_depth_and_refuses_bf16(level):
+def test_a_baked_level_reads_as_the_refined_depth_and_refuses_bf16(level):
     mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
     x = make_input()
     mixed.set_levels(level)
@@ -145,7 +145,7 @@ def test_a_baked_level_reads_as_the_sliced_depth_and_refuses_bf16(level):
         mixed.bake(level)
 
 
-def test_a_weight_baked_from_another_source_is_read_as_given_and_never_sliced_again():
+def test_a_weight_baked_from_another_source_is_read_as_given_and_never_quantized_again():
     linear = make_linear(out_features=200)
     given = linear.weight.data.flip(0).clone()  # any weight other than the module's own
     x = make_input()
@@ -170,7 +170,7 @@ def test_only_a_read_depth_is_baked():
         MixedPrecisionLinear(make_linear(), block_rows=64).bake(Level.NF4)
 
 
-def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_slices():
+def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_depths():
     mixed = MixedPrecisionLinear(make_linear(out_features=200, in_features=256), block_rows=64)
     x = make_input()
     layout = np.array([Level.D8, Level.D4, Level.D2, Level.ZERO], dtype=np.uint8)
@@ -179,7 +179,7 @@ def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_slices():
     mixed.drop_bf16()
     mixed.set_caps(np.array([4, 2, 1, 0]))
     assert torch.equal(mixed(x), before)
-    # slice 0 for blocks 0-2 (192 rows), slice 1 for blocks 0-1, slices 2 and 3 for block 0; 64 bytes a row
+    # depth 0 for blocks 0-2 (192 rows), depth 1 for blocks 0-1, depths 2 and 3 for block 0; 64 bytes a row
     assert mixed.stored_bytes() == (192 + 128 + 64 + 64) * 256 // 4
     with pytest.raises(ValueError):
         mixed.set_levels(np.array([Level.D8, Level.D6, Level.D2, Level.ZERO], dtype=np.uint8))  # block 1 is capped at D4
@@ -191,25 +191,25 @@ def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_slices():
 def test_reading_several_depths_at_once_is_exact_against_separate_reads():
     import torch.nn.functional as F
 
-    from foqlens.quant import CappedSlicedWeight
+    from foqlens.quant import CappedRefinedWeight
 
     linear = make_linear(out_features=192)
     x = make_input()
-    full = SlicedWeight.quantize(linear.weight.data)
-    capped = CappedSlicedWeight.from_sliced(full, torch.tensor([4, 4, 4], device=DEVICE), 64)
+    full = RefinedWeight.quantize(linear.weight.data)
+    capped = CappedRefinedWeight.from_full(full, torch.tensor([4, 4, 4], device=DEVICE), 64)
     for store in (full, capped):
         together = store.linear_at_depths(x, None, [2, 3, 4])
         separate = [F.linear(x, store.dequantize(x.dtype, d)) for d in (2, 3, 4)]
         assert all(torch.equal(a, b) for a, b in zip(together, separate)), type(store).__name__
 
 
-def test_unpacking_all_slices_at_once_sums_exactly_as_slice_by_slice():
-    from foqlens.quant import _SliceReader
+def test_unpacking_all_depths_at_once_sums_exactly_as_depth_by_depth():
+    from foqlens.quant import _DepthReader
 
-    full = SlicedWeight.quantize(make_linear(out_features=192).weight.data)
+    full = RefinedWeight.quantize(make_linear(out_features=192).weight.data)
     for depths in ([1, 2, 3, 4], [2, 4], [3], [4], [1]):
         fast = [w.clone() for w in full._sums(depths)]
-        reference = [w.clone() for w in _SliceReader._sums(full, depths)]  # the slice-by-slice path
+        reference = [w.clone() for w in _DepthReader._sums(full, depths)]  # the depth-by-depth path
         assert all(torch.equal(a, b) for a, b in zip(fast, reference, strict=True)), depths
 
 
@@ -231,14 +231,14 @@ def test_a_k_quant_copy_is_read_by_blocks_each_at_its_own_depth(name):
     linear = make_linear(out_features=200)
     ladder = KQuantLadder()
     copy = ladder.quantize(name, linear.weight.data)
-    mixed = MixedPrecisionLinear(linear, block_rows=64, slices=partial(ladder.quantize, name))
+    mixed = MixedPrecisionLinear(linear, block_rows=64, copy=partial(ladder.quantize, name))
     depths = [Level.D2, Level.D4, Level.D6, Level.D8]
     mixed.set_levels(np.array([int(lv) for lv in depths], dtype=np.uint8))
     x = make_input()
     out = mixed(x)
     for block, level in enumerate(depths):
         rows = slice(64 * block, min(64 * (block + 1), 200))
-        expected = F.linear(x, copy.dequantize(x.dtype, level.slices))
+        expected = F.linear(x, copy.dequantize(x.dtype, level.depth))
         assert torch.equal(out[..., rows], expected[..., rows]), level
 
 

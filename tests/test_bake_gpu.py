@@ -1,4 +1,4 @@
-"""A uniform level baked into the weights of E2B-it answers as the same level read by unpacking its slices.
+"""A uniform level baked into the weights of E2B-it answers as the same level read by unpacking its refined copy.
 
 A file of its own: baking cannot be undone, so it loads its own model rather than the shared fixture.
 """
@@ -36,7 +36,7 @@ def test_a_baked_level_answers_bit_for_bit_as_unpacking_at_less_memory(e2b_it):
     unpacked = generate_replies(model, tokenizer, prompts, TOKENS, END_OF_TURN, STATIC)
     before = torch.cuda.memory_allocated()
     ctl.bake(Level.D4)
-    assert torch.cuda.memory_allocated() < before  # the bf16 weight and the sliced copy leave, one weight stays
+    assert torch.cuda.memory_allocated() < before  # the bf16 weight and the refined copy leave, one weight stays
     ctl.set_all(Level.D4)
     assert generate_replies(model, tokenizer, prompts, TOKENS, END_OF_TURN, STATIC) == unpacked
     with pytest.raises(ValueError):

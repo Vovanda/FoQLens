@@ -25,9 +25,9 @@ The input from the machine (a governor that lowers precision under load or heat)
 In order of work; items 3 and 4 ran in parallel. Each hypothesis is tested at its step.
 
 1. **The bench: its design and optimization** - done, 2026-09-11 → 2026-09-14, and optimized as it goes. One stored copy of the
-   weights read at 2 / 4 / 6 / 8 bits - since 2026-09-17 a k-quant base with residual slices over it
+   weights read at 2 / 4 / 6 / 8 bits - since 2026-09-17 a k-quant base with refinements over it
    ([E002](../experiments/E002-base-precision-d2/results.md)); a decoding step is one CUDA graph over a
-   static cache. A kernel that reads only the bits it needs is written for the former slice format, not yet wired
+   static cache. A kernel that reads only the bits it needs is written for the former copy format, not yet wired
    into decoding.
 2. **A corpus of what the model knows** - done, 2026-09-13 → 2026-09-15. Selected by the model's own answers in three regimes
    and frozen: 20,640 questions - 18,576 E2B-it knows and 2,064 it does not ([corpus.md](corpus.md)).

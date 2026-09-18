@@ -63,15 +63,15 @@ The metaphor of the mechanism - a multi-lens chosen for the query - is in [visua
 | ZERO | 0.5 | `κ = 2`, D4 | `D4:0.5 D2:1` | ZERO |
 | any | 0 | `κ = γ` | none | the base everywhere |
 
-**What the names mean.** `D` is depth, counted in 2-bit planes of the one stored copy, and the number
-is the bits it comes to. The copy is a k-quant base after llama.cpp - Q2_K, one plane, or Q4_K, two
-planes for the sensitive module classes - with residual slices over it, each quantizing what the planes
-before it left with a step four times finer (`foqlens.kquant.KSlicedWeight`, E002). They are not
+**What the names mean.** `D` is depth, counted in 2-bit steps of the one stored copy, and the number
+is the bits it comes to. The copy is a k-quant base after llama.cpp - Q2_K, one step, or Q4_K, two
+steps for the sensitive module classes - with refinements over it, each quantizing what the steps
+before it left with a step four times finer (`foqlens.refinements.KRefinedWeight`, E002). They are not
 different quantizers - they are how deep the same copy is read. A module on a Q4_K base reads the same
 at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 
 `D8` is the top rung. The model holds no bf16 weights: bf16 is the precision of the source model, the
-reference the judge and the retention are measured against. A rung above D8 would take four more slices,
+reference the judge and the retention are measured against. A rung above D8 would take four more refinements,
 about 16.6 bits per weight - more than the bf16 weight itself.
 
 No rung is fixed in the rules: every level follows from the ladder and the controls. On E2B naive

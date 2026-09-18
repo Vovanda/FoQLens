@@ -8,7 +8,8 @@ per sample of the batch.
 Hot-path rule: levels live on the CPU as a numpy array, so forward never synchronizes with the
 GPU to find out what to compute. A mixed layout computes the output once per level in use and
 selects rows with torch.where. A layout of depths and ZERO over a k-quant copy is read by the kernel instead
-(kernels/kquant.py), every block of rows straight from the copy's bytes to its depth.
+(kernels/kquant.py), every block of rows straight from the copy's bytes to its depth; an input longer than
+KERNEL_MAX_TOKENS - a prefill - multiplies in one GEMM by the copy the kernel unpacks, every block to its depth.
 
 Invariants (each one has a test):
 - Invariant: an all-bf16 layout is bit-exact with the original nn.Linear.
@@ -33,6 +34,8 @@ Invariants (each one has a test):
   with F.linear on that weight; setting the level again does not quantize it again.
 - Invariant: a layout read by the kernel gives the unpacked output within a bf16 step of the largest output, and a
   token's output does not depend on the other tokens of the batch; a baked level and bf16 never go to the kernel.
+- Invariant: a layout read by the kernel on an input past KERNEL_MAX_TOKENS is bit-exact with F.linear over the weight
+  read block by block to its depth in torch, and a sample of a per-sample layout reads its own layout.
 """
 
 from __future__ import annotations
@@ -51,7 +54,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from foqlens.kernels.kquant import TILE_ROWS as KERNEL_TILE_ROWS, kernel_reads_format, kquant_matmul
+from foqlens.kernels.kquant import TILE_ROWS as KERNEL_TILE_ROWS, kernel_reads_format, kquant_matmul, kquant_unpack
 from foqlens.refinements import KQuantLadder, KRefinedWeight
 from foqlens.model import text_layers
 from foqlens.quant import MAX_DEPTH, DEPTH_BITS, CappedRefinedWeight, Int8Weight, Level, Nf4Weight, RefinedWeight, _DepthReader
@@ -79,8 +82,8 @@ DEPTH_BY_CODE = np.array([lv.depth if lv.depth or lv is Level.ZERO else MAX_DEPT
 DEEPEST = max((lv for lv in Level if lv.depth), key=lambda lv: lv.depth)  # the deepest read depth, D8
 # A layout of depths and ZERO over a k-quant copy is read by the kernel, straight from the copy's bytes, up to this many
 # tokens: unpacking costs ~3.8 ms a 12288x1536 module whatever the tokens, the kernel 0.10 ms at D8 up to 8 tokens and
-# 1.0 ms at 256 (2026-09-18, scripts/kernel_speed.py), so a longer input - a prefill - unpacks once for a GEMM. Off,
-# every read unpacks.
+# 1.0 ms at 256 (2026-09-18, scripts/kernel_speed.py), so a longer input - a prefill - has the kernel unpack the copy,
+# every block to its depth, for one GEMM (kquant_unpack). Off, every read unpacks in torch.
 KERNEL = True
 KERNEL_MAX_TOKENS = 256
 
@@ -299,8 +302,8 @@ class MixedPrecisionLinear(nn.Module):
         self._samples = part
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if self._depths is not None and x.numel() // x.shape[-1] <= KERNEL_MAX_TOKENS:
-            return self._kernel_forward(x)
+        if self._depths is not None:
+            return self._kernel_forward(x) if x.numel() // x.shape[-1] <= KERNEL_MAX_TOKENS else self._unpacked_forward(x)
         if self._rows is None:
             return self.output_at(self._used[0], x)
         rows = self._rows
@@ -326,6 +329,17 @@ class MixedPrecisionLinear(nn.Module):
             depths = depths[:, None, :].expand(-1, x[0, ..., 0].numel(), -1).reshape(-1, self.n_blocks)
         out = kquant_matmul(self._packed[RefinedWeight], x, depths)
         return out if self.bias is None else out + self.bias
+
+    def _unpacked_forward(self, x: torch.Tensor) -> torch.Tensor:
+        """A long input times the copy unpacked by the kernel, every block to its depth, in one GEMM; under per-sample
+        layouts one unpacking and one GEMM per sample."""
+        copy = self._packed[RefinedWeight]
+        if self._depths.ndim == 1:
+            return F.linear(x, kquant_unpack(copy, self._depths), self.bias)
+        depths = self._depths[self._samples]
+        if x.shape[0] != depths.shape[0]:
+            raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {depths.shape[0]}")
+        return torch.stack([F.linear(sample, kquant_unpack(copy, d), self.bias) for sample, d in zip(x, depths)])
 
     def _outputs_at(self, levels: tuple[Level, ...], x: torch.Tensor) -> dict[Level, torch.Tensor]:
         """output_at for every level; several read depths come from one accumulation of the refined copy."""

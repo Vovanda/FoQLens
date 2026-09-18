@@ -10,6 +10,8 @@ cores, 2.9e-6 on tensor cores, whose mma adds with truncation (tests/test_kquant
 outputs zero.
 Invariant: the kernel reads a row's refinements only to its depth, so a shallower layout reads fewer bytes.
 Invariant: a token's output does not depend on the other tokens of the batch.
+Invariant: kquant_unpack writes the torch path's bf16 weight bit for bit, every block of rows at its depth and zero at
+depth 0, on every base (tests/test_kquant_kernel_gpu.py).
 """
 
 from __future__ import annotations
@@ -106,3 +108,24 @@ def kquant_matmul_fp32(copy: KRefinedWeight, tokens: torch.Tensor, depth: torch.
                        kernel: KQuantKernel | None = None) -> torch.Tensor:
     """float32 [tokens, out]: the sums before the output is rounded to the input's type."""
     return (kernel or KERNEL)(copy, tokens.contiguous(), depth)
+
+
+UNPACK_SOURCE = HERE / "kquant_mma.cu"  # the unpacking kernels build a weight as the mma kernels do, from one source
+UNPACK_ROWS = 16  # rows of a thread block, as UNPACK_ROWS in the source
+UNPACK_STEPS = QK_K // 16  # threads along a row of a super-block: one step of 16 weights each
+
+
+def kquant_unpack(copy: KRefinedWeight, depth: torch.Tensor) -> torch.Tensor:
+    """bf16 [out, in]: the copy read to `depth`, uint8 [out / TILE_ROWS], a block at depth 0 zero.
+
+    Equals copy.dequantize(torch.bfloat16, d) on every block of depth d, bit for bit; one pass over the copy's bytes
+    instead of a pass of torch kernels per depth. No host synchronization.
+    """
+    out_features, in_features = copy.shape
+    weight = torch.empty(out_features, in_features, device=copy.blocks.device, dtype=torch.bfloat16)
+    refinements = copy.refinements if copy.refinements.numel() else copy.blocks  # any valid pointer when none
+    launch(load(f"kquant_unpack_{copy.fmt.name.lower()}", UNPACK_SOURCE),
+           (-(-out_features // UNPACK_ROWS), in_features // QK_K, 1), (UNPACK_STEPS, UNPACK_ROWS, 1),
+           copy.blocks.contiguous(), refinements.contiguous(), depth.contiguous(), weight.view(torch.int16),
+           copy.refinements.shape[0], in_features, out_features)
+    return weight

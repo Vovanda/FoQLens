@@ -8,7 +8,7 @@ import pytest
 import torch
 from torch import nn
 
-from foqlens.kernels.kquant import CUDA_CORES, TENSOR_CORES, TILE_ROWS, kquant_matmul, kquant_matmul_fp32
+from foqlens.kernels.kquant import CUDA_CORES, TENSOR_CORES, TILE_ROWS, kquant_matmul, kquant_matmul_fp32, kquant_unpack
 from foqlens.kquant import Q2_K, Q3_K, Q4_K, Q6_K, QK_K, from_gguf_blocks
 from foqlens.quant import MAX_DEPTH, Level
 from foqlens import precision
@@ -229,11 +229,55 @@ def test_per_sample_layouts_and_a_part_of_the_batch_read_through_the_kernel(monk
         assert torch.equal(module(x[1:3]), got[1:3])
 
 
-def test_a_long_input_unpacks_instead(monkeypatch):
+def test_a_long_input_multiplies_the_copy_the_kernel_unpacks(monkeypatch):
     module = kquant_module()
     module.set_levels(Level.D4)
     x = make_tokens(precision.KERNEL_MAX_TOKENS + 1, IN)
     assert torch.equal(module(x), unpacked(module, x, monkeypatch))
+
+
+def layout_weight(copy: KRefinedWeight, depths: list[int]) -> torch.Tensor:
+    """bf16 [out, in]: the torch path's weight, every block of rows read to its depth, zero at depth 0."""
+    weight = torch.zeros(copy.shape, device=DEVICE, dtype=torch.bfloat16)
+    for block, depth in enumerate(depths):
+        rows = slice(block * TILE_ROWS, min((block + 1) * TILE_ROWS, copy.shape[0]))
+        if depth:
+            weight[rows] = copy.dequantize(torch.bfloat16, depth)[rows]
+    return weight
+
+
+def any_copy(fmt) -> KRefinedWeight:
+    return foreign_copy(fmt) if fmt in FOREIGN else make_copy(fmt)
+
+
+@pytest.mark.parametrize("fmt", [Q2_K, Q3_K, Q4_K, Q6_K], ids=lambda f: f.name)
+def test_the_kernel_unpacks_every_block_to_its_depth_as_the_torch_path(fmt):
+    copy = any_copy(fmt)
+    for depth in range(1, MAX_DEPTH + 1):  # below the base a block reads the base, as the torch path does
+        assert torch.equal(kquant_unpack(copy, blocks([depth] * 4)), copy.dequantize(torch.bfloat16, depth)), depth
+    layout = [MAX_DEPTH, 0, fmt.base_depth, 3]
+    got = kquant_unpack(copy, blocks(layout))
+    assert torch.equal(got, layout_weight(copy, layout))
+    assert not got[TILE_ROWS:2 * TILE_ROWS].any()
+
+
+def test_a_long_input_reads_a_mixed_layout_and_per_sample_layouts_in_one_gemm_each():
+    module = kquant_module()
+    layout = [MAX_DEPTH, 0, 1, 3]
+    module.set_levels(np.array([Level.D8, Level.ZERO, Level.D2, Level.D6], dtype=np.uint8))
+    copy = module._packed[precision.RefinedWeight]  # built on the first read of a depth
+    x = make_tokens(precision.KERNEL_MAX_TOKENS + 1, IN)
+    assert torch.equal(module(x), torch.nn.functional.linear(x, layout_weight(copy, layout)))
+    layouts = np.array([[Level.D8, Level.D2, Level.ZERO, Level.D4],
+                        [Level.D2, Level.ZERO, Level.D6, Level.D8]], dtype=np.uint8)
+    module.set_levels(layouts)
+    samples_x = make_tokens(2 * (precision.KERNEL_MAX_TOKENS + 1), IN).view(2, -1, IN)
+    got = module(samples_x)
+    for sample, levels in enumerate(layouts):
+        weight = layout_weight(copy, [Level(int(c)).depth for c in levels])
+        assert torch.equal(got[sample], torch.nn.functional.linear(samples_x[sample], weight)), sample
+    with samples(module, slice(1, 2)):
+        assert torch.equal(module(samples_x[1:2]), got[1:2])
 
 
 def test_a_copy_of_another_kind_and_a_baked_level_are_never_read_by_the_kernel():

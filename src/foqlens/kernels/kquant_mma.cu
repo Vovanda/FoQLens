@@ -341,3 +341,83 @@ extern "C" __global__ void kquant_mma_q6_k(ARGUMENTS) {
   kquant_mma_rows<Q6K, 210, 3, 1>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features,
                                   out_features, depth_stride);
 }
+
+// The copy unpacked to bf16 [out, in], every block of TILE_ROWS rows read to its own depth and a block at depth 0
+// written as zeros: what a long input - a prefill - multiplies by in one GEMM. The weights are built as the mma builds
+// them above, so they are the torch path's bit for bit. A thread writes one step, 16 weights of a row; a thread block
+// covers UNPACK_ROWS rows of one super-block, and a row's 16 threads write its 512 bytes in one run.
+#define UNPACK_ROWS 16
+
+template <int B, int BYTES, int BASE_DEPTH>
+__device__ __forceinline__ void kquant_unpack_rows(
+    const unsigned char* __restrict__ blocks, const unsigned char* __restrict__ refinements,
+    const unsigned char* __restrict__ depth, unsigned short* __restrict__ w_out, const int n_refinements,
+    const int in_features, const int out_features) {
+  const int s = threadIdx.x, row = blockIdx.x * UNPACK_ROWS + threadIdx.y, sb = blockIdx.y;
+  if (row >= out_features) return;
+  uint4* target = reinterpret_cast<uint4*>(w_out + (long long)row * in_features + sb * QK_K + 16 * s);
+  int d = depth[row / TILE_ROWS];
+  if (d == 0) {
+    target[0] = make_uint4(0u, 0u, 0u, 0u);
+    target[1] = make_uint4(0u, 0u, 0u, 0u);
+    return;
+  }
+  d = min(max(d, BASE_DEPTH), BASE_DEPTH + n_refinements);  // never shallower than the base, never deeper than stored
+  const long long refinement_row = (long long)in_features / 4;
+  const long long refinement_plane = (long long)out_features * refinement_row;
+  const unsigned char* block = blocks + ((long long)row * (in_features / QK_K) + sb) * BYTES;
+  float dd, dmin;
+  multipliers<B>(block, dd, dmin);
+  // w[c] is weight 16s + c of the super-block; decode_step gives the columns 2q, 2q+1, 2q+8, 2q+9 of the step
+  float w[16], step = 0.0f;
+#pragma unroll
+  for (int q = 0; q < 4; ++q) {
+    float offset, code[4];
+    decode_step<B>(block, s, q, dd, dmin, step, offset, code);
+    const int column[4] = {2 * q, 2 * q + 1, 2 * q + 8, 2 * q + 9};
+#pragma unroll
+    for (int k = 0; k < 4; ++k) w[column[k]] = __fsub_rn(__fmul_rn(step, code[k]), offset);
+  }
+  float plane_step = step * 0.25f;  // a power of two: exact
+  for (int e = 0; e < d - BASE_DEPTH; ++e) {
+    const unsigned int* plane = reinterpret_cast<const unsigned int*>(
+        refinements + e * refinement_plane + row * refinement_row + sb * (QK_K / 4));
+#pragma unroll
+    for (int q = 0; q < 4; ++q) {
+      float code[4];
+      plane_codes(plane, s, q, code);
+      const int column[4] = {2 * q, 2 * q + 1, 2 * q + 8, 2 * q + 9};
+#pragma unroll
+      for (int k = 0; k < 4; ++k) w[column[k]] = __fadd_rn(w[column[k]], __fmul_rn(plane_step, code[k] - 2.0f + 0.5f));
+    }
+    plane_step *= 0.25f;
+  }
+  unsigned int packed[8];
+#pragma unroll
+  for (int k = 0; k < 8; ++k) packed[k] = bf16_pair(round_bf16(w[2 * k]), round_bf16(w[2 * k + 1]));
+  target[0] = make_uint4(packed[0], packed[1], packed[2], packed[3]);
+  target[1] = make_uint4(packed[4], packed[5], packed[6], packed[7]);
+}
+
+#define UNPACK_ARGUMENTS                                                                          \
+  const unsigned char* __restrict__ blocks,       /* [out, in / QK_K, block bytes] */             \
+  const unsigned char* __restrict__ refinements,  /* [n_refinements, out, in / 4] */              \
+  const unsigned char* __restrict__ depth,        /* [out / TILE_ROWS]: the depth of each block */ \
+  unsigned short* __restrict__ w_out,             /* [out, in] bf16 */                            \
+  const int n_refinements, const int in_features, const int out_features
+
+extern "C" __global__ void kquant_unpack_q2_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q2K, 84, 1>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}
+
+extern "C" __global__ void kquant_unpack_q4_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q4K, 144, 2>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}
+
+extern "C" __global__ void kquant_unpack_q3_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q3K, 110, 1>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}
+
+extern "C" __global__ void kquant_unpack_q6_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q6K, 210, 3>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}

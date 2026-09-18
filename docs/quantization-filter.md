@@ -70,9 +70,12 @@ before it left with a step four times finer (`foqlens.refinements.KRefinedWeight
 different quantizers - they are how deep the same copy is read. A module on a Q4_K base reads the same
 at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 
-`D8` is the top rung. The model holds no bf16 weights: bf16 is the precision of the source model, the
-reference the judge and the retention are measured against. A rung above D8 would take four more refinements,
-about 16.6 bits per weight - more than the bf16 weight itself.
+`D8` is the top rung of the zones: it keeps 98.8% of bf16's knowledge on the frozen corpus (E002) at 8.57 bits
+per controlled weight. The model's file may hold above the refinements an exact tail to the source weights in
+their own type - bf16, fp16 or fp32 ([the model format](refocustensors.md)). The model then reads back the source
+bit for bit, the bench runs without the checkpoint, and the format does not depend on the type a model is
+published in; the tail also gives the judge its bf16 reference. A zone can be raised to the source as well, but on
+E2B-it that is 15.05 bits per weight against 8.57 at D8 for 1.2 points of knowledge.
 
 No rung is fixed in the rules: every level follows from the ladder and the controls. On E2B naive
 round-to-nearest at two bits breaks the model ([E001](../experiments/E001-uniform-quantization/results.md)); the

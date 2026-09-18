@@ -4,7 +4,7 @@ title: The .refocustensors model format
 
 # The .refocustensors model format
 
-A model is stored as one stack of refinements: any depth is read from one file, from the coarse base to the source weights bit for bit, and nothing is stored twice. A folder with a `.refocustensors` file runs without the Hugging Face checkpoint.
+A model is stored as one stack of refinements: any depth is read from one file, from the coarse base up to the top the model was cut to, and nothing is stored twice. A file cut in full ends in an `exact` tail and reads back the source weights bit for bit, in their own type - bf16, fp16 or fp32. So a folder with a `.refocustensors` file runs without the Hugging Face checkpoint, whatever type the model was published in.
 
 ## The stack
 
@@ -16,7 +16,7 @@ Every controlled weight matrix is stored as a stack. The base is at the bottom, 
 | refinement 1 | 2 | + refinement 1 | D4 |
 | refinement 2 | 2 | + refinement 2 | D6 |
 | refinement 3 | 2 | + refinement 3 | D8 |
-| `exact` | ~4 | everything | the source bit for bit |
+| `exact` | 6.5 (3.8 under an entropy coder) | everything | the source bit for bit |
 
 Example: a 2×256 bf16 matrix, the first weight of row 0.
 
@@ -39,7 +39,7 @@ The base and the refinements are computed in fp32. bf16, fp16 and fp32 convert t
 
 The bottom of the stack is a parameter, D2 (Q2_K) now. There may be any number of refinements: `refinement.<k>` are read in order while they last, and the format fixes no count; the cut lays them to D8 now.
 
-Tensors the regulator does not read (embeddings, norms, the vision and audio towers) lie in the file as in the source. On E2B-it that is 4.7 GB of the per-layer embedding table out of the 9.6 GB checkpoint.
+Tensors the regulator does not read (embeddings, norms, the vision and audio towers) lie in the file as in the source. On E2B-it they are 6.04 of the checkpoint's 9.54 GiB, 4.7 GiB of it the per-layer embedding table.
 
 ## The file
 
@@ -79,7 +79,7 @@ The bench (`Bench.load`) takes its model from one of three sources:
 | `RESIDENT` | the copies alone; no source weight of a controlled module is loaded | D2 ... D8 | 7.06 GiB, of it 1.86 the copies |
 | `CHECKPOINT` | the Hugging Face checkpoint, the copy quantized from bf16 | bf16, D2 ... D8 | 8.6 GiB and the copies |
 
-A model that was never cut is not loaded, and the error names the command that cuts it. The weights become the model's parameters without a copy: 13.5 GiB of commit at the peak of a load. The bench computes masks at bf16, so a resident bench serves runs without masks. In the resident bench 4.7 GiB are the per-layer embedding table in bf16; the copies hold the base as ggml blocks and the refinements packed, as the file does.
+A model that was never cut is not loaded, and the error names the command that cuts it. The weights become the model's parameters without a copy: 13.5 GiB of Windows commit charge at the peak of a load. The bench computes masks at bf16, so a resident bench serves runs without masks. In the resident bench 4.7 GiB are the per-layer embedding table in bf16; the copies hold the base as ggml blocks and the refinements packed, as the file does.
 
 The three sources give the same logits bit for bit at every depth, and `FILE` and `CHECKPOINT` also at bf16 - the logits of `from_pretrained`.
 
@@ -134,6 +134,7 @@ A level with no section downloaded for it is refused when the layout is set, bef
 | bf16 | the bench at D2 ... D8 only, no source | base ... D8 | 8.57 | built (`--depth D8`) |
 | bf16 | a small model, the full one on demand | base, D4 / D6, D8, `exact` | 4.6 / ~10.5 | sections |
 | fp32 | zones to fp32, bf16 as a checkpoint on the way | base ... D8, `exact` to bf16, `exact` to fp32 | not measured | a chain of tails |
+| fp32 | a ceiling of 16 bits: the model read to bf16 at most | base ... D8, `exact` to bf16; the fp32 section is not downloaded | not measured | a chain of tails |
 | someone else's Q8_0, nothing else | base precision below 8 bits | base ... D6, `exact` to Q8_0 | ~8.5, not measured | a Q8_0 port, a block-quantized source |
 | fp8 with block scales | the same | base ... D6, `exact` to fp8 | not measured | a block-quantized source |
 | bf16 and someone else's Q2_K | D2 exactly as published, zones to bf16 | the foreign Q2_K as the base, D4 ... D8, `exact` | not measured | nothing if every tensor is Q2_K or Q4_K; otherwise Q3_K, Q5_K, Q6_K ports |
@@ -141,10 +142,10 @@ A level with no section downloaded for it is refused when the layout is set, bef
 
 ## Memory for the layout, and ZERO
 
-The aim is to hold on the GPU only what the layout reads. Base precision D2 and D8 zones on 10% of the blocks: 0.9 · 2.6 + 0.1 · 8.6 ≈ 3.2 bits per weight. With base precision ZERO outside the zones ≈ 0.9 bits.
+The aim is to hold on the GPU only what the layout reads. Base precision D2 and D8 zones on 10% of the blocks: 0.9 · 3.33 + 0.1 · 8.57 ≈ 3.9 bits per weight. With base precision ZERO outside the zones ≈ 0.9 bits.
 
-ZERO saves computation now: a block at ZERO reads nothing and its output is zero, while the module's copy lies in memory whole. ZERO saves memory once two things exist: a depth cap per block for the k-quant copy (a block capped at 0 stores nothing) and reading the file by blocks for the layout, loading and unloading them as it changes. The file is ready for it: the rows of a block lie back to back in every tensor, and a tensor is read at its offset.
+ZERO saves computation now: the kernel reads nothing for a block at ZERO and its output is zero ([kernels](kernels.md)), while the module's copy lies in memory whole. ZERO saves memory once two things exist: a depth cap per block for the k-quant copy (a block capped at 0 stores nothing) and reading the file by blocks for the layout, loading and unloading them as it changes. The file is ready for it: the rows of a block lie back to back in every tensor, and a tensor is read at its offset.
 
 ## What exists now
 
-Built: the Q2_K / Q4_K base after llama.cpp, refinements to D8, the `exact` tail for bf16, fp16 and fp32, writing a model folder, cutting it at a level, and the bench's three sources. The model from the file matches the checkpoint bit for bit, every module's copy matches the copy quantized from bf16, and the ladder on the corpus matches E002. Sections, extending down, reading by blocks for the layout, ports of other formats and block-quantized sources come later.
+Built: the Q2_K / Q4_K base after llama.cpp, refinements to D8, the `exact` tail for bf16, fp16 and fp32, writing a model folder, cutting it at a level, and the bench's three sources; a layout of depths is read by a CUDA kernel straight from the copy's bytes ([kernels](kernels.md)). The model from the file matches the checkpoint bit for bit, every module's copy matches the copy quantized from bf16, and the ladder on the corpus matches E002. Sections, extending down, reading by blocks for the layout, ports of other formats and block-quantized sources come later.

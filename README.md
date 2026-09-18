@@ -99,9 +99,11 @@ a gain in quality the mechanism saves memory at the same usability.
 
 **Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base (Q2_K, Q4_K for the
 sensitive classes) with 2-bit refinements over it, after MoBiQuant with departures
-([E002](experiments/E002-base-precision-d2/results.md)). The top rung is D8. The copy is still unpacked before
-the multiplication; a CUDA kernel that reads only the bits it needs is written for the former copy format and not
-yet wired into decoding.
+([E002](experiments/E002-base-precision-d2/results.md)). The zones' top rung is D8; the model's file may also hold
+a tail to the source weights of any type, so the model reads back its source bit for bit without the checkpoint
+([docs/refocustensors.md](docs/refocustensors.md)). A layout of depths is read by a CUDA kernel straight from the
+copy's bytes, every block of rows to its depth: a decoding step of E2B-it at a mixed layout takes 17.7 ms against
+401.5 unpacked and 11.6 at bf16 ([docs/kernels.md](docs/kernels.md)); a prefill unpacks the copy for a GEMM.
 
 ## Reproduce
 

@@ -4,7 +4,7 @@ title: The kernel that reads the copy
 
 # The kernel that reads the copy
 
-The kernel `kquant_mma` (`src/foqlens/kernels/kquant_mma.cu`) multiplies the input by the k-quant copy straight from its bytes, on tensor cores: every block of 64 output rows is read to its own depth, and a block at ZERO is not read at all. A zone layout is exactly the depths of the blocks, so a module under a layout is computed by the kernel without unpacking the weight.
+The kernel `kquant_mma` (`src/foqlens/kernels/kquant_mma.cu`) multiplies the input by the k-quant copy straight from its bytes, on tensor cores: every block of 64 output rows is read to its own depth, and a block at ZERO is not read at all. A zone layout is exactly the depths of the blocks, so a module under a layout is computed by the kernel without unpacking the weight, in one launch, blocks of different precision together: a decoding step of E2B-it at a mixed layout costs as much as a uniform depth ([performance](performance.md)).
 
 ## When the bench goes through the kernel
 

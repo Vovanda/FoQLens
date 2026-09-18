@@ -126,7 +126,7 @@ def neighbour_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch.Te
     keeps the graph undirected, so a path found along it runs both ways.
     """
     a, b, w = _directed(*nearest(metric, k))
-    return _padded(torch.cat([a, b]), torch.cat([b, a]), torch.cat([w, w]), metric.n_blocks)
+    return edge_table(torch.cat([a, b]), torch.cat([b, a]), torch.cat([w, w]), metric.n_blocks)
 
 
 def nicdm_scale(metric: BlockMetric, k: int) -> torch.Tensor:
@@ -177,7 +177,7 @@ def mutual_nicdm_table(metric: BlockMetric, k: int) -> tuple[torch.Tensor, torch
     ew = np.concatenate([w[mutual], jw, jw, bw, bw])
     device = lengths.device
     as_tensor = lambda x, dtype: torch.as_tensor(x, dtype=dtype, device=device)  # noqa: E731
-    return _padded(as_tensor(ea, torch.long), as_tensor(eb, torch.long), as_tensor(ew, torch.float32), n)
+    return edge_table(as_tensor(ea, torch.long), as_tensor(eb, torch.long), as_tensor(ew, torch.float32), n)
 
 
 def _join_apart(metric: BlockMetric, scale: torch.Tensor, heads: np.ndarray, tails: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -228,7 +228,7 @@ def graph_report(table: torch.Tensor | np.ndarray, indices: torch.Tensor | np.nd
     return report
 
 
-def _padded(heads: torch.Tensor, tails: torch.Tensor, lengths: torch.Tensor, n: int) -> tuple[torch.Tensor, torch.Tensor]:
+def edge_table(heads: torch.Tensor, tails: torch.Tensor, lengths: torch.Tensor, n: int) -> tuple[torch.Tensor, torch.Tensor]:
     """Edges (head, tail, length), duplicates dropped -> a table [n, width] of tails per head, padded with PAD."""
     key = heads * n + tails
     key, first = np.unique(key.cpu().numpy(), return_index=True)

@@ -6,9 +6,9 @@ medium="jump", zones="topic", strength="equal"` and never builds the parts itsel
 its table, not a branch in the old ones (CLAUDE.md, SOLID). Where the score comes from - the mask source - is the
 bench's (pipeline.Bench.source); this module starts from the scores.
 
-The space is built once from calibration scores (Space.build): the co-activation metric M1, its neighbour graph and
-the graph's width, which fixes what f means for every question. A question's surface is that graph at rest, or its
-medium of the question's own activity (M4, M4b).
+The space is built once: from calibration scores (Space.build) - the co-activation metric M1, its neighbour graph and
+the graph's width, which fixes what f means for every question - or from the weights alone (Space.signal_path, the
+signal's path, M3). A question's surface is that graph at rest, or its medium of the question's own activity (M4, M4b).
 
 Invariant: every name a table does not hold is refused with the names it does.
 Invariant: a layout built here is the same as the one built from its parts by hand - the registry only picks.
@@ -17,12 +17,14 @@ Invariant: f = 0 lifts the zone centers alone and f = 1, g = 1 lifts every block
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 import numpy as np
 import torch
 
 from foqlens import graph_zones as gz
+from foqlens.coupling import STRONGEST, signal_path_table
 from foqlens.layouts import (
     EqualStrength,
     GraphZoneLayout,
@@ -64,10 +66,10 @@ def _pick(table: dict | tuple, name: str, what: str):
 
 @dataclass(frozen=True)
 class Space:
-    """The block graph of a calibration set: its neighbour table, edge lengths and width along it."""
+    """A block graph - of calibration scores or of the weights: its neighbour table, edge lengths, width along it."""
 
     table: torch.Tensor  # [n_blocks, width] neighbours, PAD-padded
-    lengths: torch.Tensor  # [n_blocks, width] edge lengths in M1
+    lengths: torch.Tensor  # [n_blocks, width] edge lengths along the graph
     width: float  # the width of the network along the graph: f = 1 reaches it
 
     @classmethod
@@ -75,6 +77,12 @@ class Space:
               device: str | torch.device = "cpu") -> Space:
         """From raw scores [questions, n_blocks] of calibration questions, never of the questions laid out."""
         table, lengths = _pick(GRAPHS, graph, "graph")(CoactivationMetric(calibration, device), k)
+        return cls(table, lengths, sweep_width(geodesic(table, lengths)))
+
+    @classmethod
+    def signal_path(cls, weights: Mapping[str, torch.Tensor], n_heads: int, strongest: int = STRONGEST) -> Space:
+        """Mechanism 5: the graph of the signal's path through the weights (coupling, M3 of #4) - no calibration."""
+        table, lengths = signal_path_table(weights, n_heads, strongest)
         return cls(table, lengths, sweep_width(geodesic(table, lengths)))
 
     def surface(self, medium: str = STILL, activity: np.ndarray | None = None,

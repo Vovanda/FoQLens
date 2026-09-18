@@ -330,3 +330,12 @@ def test_a_new_mask_source_plugs_into_the_bench_without_touching_it():
     masks = bench.masks(["a", "bbb", "cc"], [PromptLength()])
     assert list(masks) == ["prompt_length"] and masks["prompt_length"][:, 0].tolist() == [1.0, 3.0, 2.0]
     assert levels == [Level.BF16]  # masks are computed with every block at bf16
+
+
+def test_the_bench_refuses_a_model_that_was_never_cut(monkeypatch, tmp_path):
+    from foqlens import refocustensors
+    from foqlens.pipeline import Bench
+
+    monkeypatch.setattr(refocustensors, "model_directory", lambda model_id: tmp_path)
+    with pytest.raises(FileNotFoundError, match="cut_model"):
+        Bench.load("google/gemma-4-E2B-it")

@@ -5,6 +5,7 @@ The checkpoint must be downloaded first (scripts/download_models.py); the folder
 
     uv run python scripts/download_models.py e2b-it
     uv run python scripts/cut_model.py e2b-it
+    uv run python scripts/cut_model.py e2b-it --depth D8   # the stack to D8 only, read resident
 """
 
 from __future__ import annotations
@@ -16,22 +17,26 @@ from pathlib import Path
 from huggingface_hub import snapshot_download
 
 from foqlens.model import E2B, E2B_IT, E4B, E4B_IT, REVISIONS
+from foqlens.quant import Level
 from foqlens.refocustensors import model_directory, source_id, write
 
 MODELS = {"e2b": E2B, "e4b": E4B, "e2b-it": E2B_IT, "e4b-it": E4B_IT}
 GIB = 2**30
+DEPTHS = [level.name for level in Level if level.depth]  # D2 ... D8
 
 
 def main(argv: list[str] | None = None) -> Path:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("model", choices=sorted(MODELS))
     parser.add_argument("--out", type=Path, help="the model folder (default: ~/.cache/foqlens/models/...)")
+    parser.add_argument("--depth", choices=DEPTHS, help="stop the stack at this level, with no exact tail: a smaller "
+                        "file read resident only (default: every depth and the tail to the source)")
     args = parser.parse_args(argv)
     model_id = MODELS[args.model]
     source = Path(snapshot_download(model_id, revision=REVISIONS[model_id], local_files_only=True))
-    out = args.out or model_directory(model_id)
+    out = args.out or model_directory(model_id, args.depth)
     start = time.perf_counter()
-    path = write(source, out, source_id(model_id))
+    path = write(source, out, source_id(model_id), depth=None if args.depth is None else Level[args.depth].depth)
     source_bytes = sum(f.stat().st_size for f in source.glob("*.safetensors"))
     print(f"{path}: {path.stat().st_size / GIB:.2f} GiB, the source {source_bytes / GIB:.2f} GiB, "
           f"{time.perf_counter() - start:.0f} s")

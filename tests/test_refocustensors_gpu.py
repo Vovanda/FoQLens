@@ -13,7 +13,8 @@ from huggingface_hub import snapshot_download
 from transformers import AutoTokenizer, Gemma4ForConditionalGeneration
 
 from foqlens import model as fm
-from foqlens.quant import MAX_DEPTH
+from foqlens.pipeline import Bench, ModelSource
+from foqlens.quant import MAX_DEPTH, Level
 from foqlens.refinements import KQuantLadder
 from foqlens.refocustensors import FILE, FileCopy, ModelFile, controlled_name, load, model_directory
 from foqlens.safetensors_io import SafetensorsReader
@@ -87,3 +88,37 @@ def test_every_module_reads_the_copy_the_bench_builds_from_bf16(cut):
         modules += 1
     assert modules == len(cut.modules)
     print(f"{modules} modules bit for bit at every depth")
+
+
+def test_the_bench_on_the_file_reads_every_depth_as_the_bench_on_the_checkpoint(cut):
+    text = "The mitochondria produce most of the chemical energy a cell needs, stored as ATP."
+    levels = (Level.D2, Level.D4, Level.D8, Level.BF16)
+    logits = {}
+    for source in (ModelSource.FILE, ModelSource.CHECKPOINT):
+        bench = Bench.load(fm.E2B_IT, source=source)
+        for level in levels:
+            bench.ctl.set_all(level)
+            logits[source, level] = fm.logits(bench.model, bench.tokenizer, text)
+        bench = None
+        torch.cuda.empty_cache()
+    for level in levels:
+        assert torch.equal(logits[ModelSource.FILE, level], logits[ModelSource.CHECKPOINT, level]), level.name
+
+
+def test_the_resident_bench_reads_every_depth_as_the_bench_on_the_file_and_holds_no_source_weight(cut):
+    text = "The mitochondria produce most of the chemical energy a cell needs, stored as ATP."
+    levels = (Level.D2, Level.D4, Level.D6, Level.D8)
+    logits = {}
+    for source in (ModelSource.RESIDENT, ModelSource.FILE):
+        bench = Bench.load(fm.E2B_IT, source=source)
+        if source is ModelSource.RESIDENT:
+            assert all(m.weight is None for m in bench.ctl.modules.values())
+            with pytest.raises(ValueError):
+                bench.ctl.set_all(Level.BF16)
+        for level in levels:
+            bench.ctl.set_all(level)
+            logits[source, level] = fm.logits(bench.model, bench.tokenizer, text)
+        bench = None
+        torch.cuda.empty_cache()
+    for level in levels:
+        assert torch.equal(logits[ModelSource.RESIDENT, level], logits[ModelSource.FILE, level]), level.name

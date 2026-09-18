@@ -257,9 +257,11 @@ class KQuantLadder:
     def format_for(self, name: str) -> KFormat:
         return Q4_K if name.endswith(self.sensitive) else Q2_K
 
-    def quantize(self, name: str, weight: torch.Tensor) -> KRefinedWeight:
-        """The module's whole copy, every depth: a precision.RefinedCopy, so the controller reads it by blocks."""
-        return KRefinedWeight.quantize(weight, self.format_for(name))
+    def quantize(self, name: str, weight: torch.Tensor, depth: int = MAX_DEPTH) -> KRefinedWeight:
+        """The module's copy to `depth` - every depth by default, never shallower than its base: a precision.RefinedCopy,
+        so the controller reads it by blocks."""
+        fmt = self.format_for(name)
+        return KRefinedWeight.quantize(weight, fmt, max(depth, fmt.base_depth))
 
     def read(self, name: str, weight: torch.Tensor, level) -> torch.Tensor:
         fmt = self.format_for(name)

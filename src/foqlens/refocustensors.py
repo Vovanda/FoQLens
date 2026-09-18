@@ -32,7 +32,7 @@ import torch
 from foqlens import model as fm
 from foqlens.kquant import KFormat, Q2_K, Q4_K
 from foqlens.model import REVISIONS
-from foqlens.precision import BENCH_COPY, CONTROLLED
+from foqlens.precision import BENCH_COPY, CONTROLLED, Controller, install_resident
 from foqlens.quant import MAX_DEPTH
 from foqlens.refinements import ExactTail, KQuantLadder, KRefinedWeight
 from foqlens.safetensors_io import SafetensorsReader, SafetensorsWriter
@@ -53,9 +53,11 @@ _MAX_PARTS = 2 + MAX_DEPTH + 1  # base, refinements, the tail's widths and bytes
 _METADATA_BYTES_PER_MODULE = 400  # one module's entry in the metadata
 
 
-def model_directory(model_id: str) -> Path:
-    """The folder of a model cut from its pinned revision: <HOME>/models/<name>@<revision>."""
-    return HOME / "models" / f"{model_id.rsplit('/', 1)[-1]}@{REVISIONS[model_id][:8]}"
+def model_directory(model_id: str, level: str | None = None) -> Path:
+    """The folder of a model cut from its pinned revision: <HOME>/models/<name>@<revision>, and -<level> after it for
+    a stack cut to a depth, so the full one is never overwritten."""
+    name = f"{model_id.rsplit('/', 1)[-1]}@{REVISIONS[model_id][:8]}"
+    return HOME / "models" / (name if level is None else f"{name}-{level}")
 
 
 def source_id(model_id: str) -> str:
@@ -70,10 +72,12 @@ def controlled_name(key: str) -> str | None:
     return name if name.split(".", 2)[2] in CONTROLLED else None
 
 
-def write(source: Path, out: Path, source_id: str, copy: KQuantLadder = BENCH_COPY, device: str = "cuda") -> Path:
+def write(source: Path, out: Path, source_id: str, copy: KQuantLadder = BENCH_COPY, device: str = "cuda",
+          depth: int | None = None) -> Path:
     """Cut the source checkpoint in `source` into a model folder `out`; returns the .refocustensors file.
 
     Every controlled weight is quantized on `device`, as the bench quantizes it, so the file holds the bench's copy.
+    With `depth` the stack stops there and holds no exact tail: the file is read resident only (load_resident).
     """
     out.mkdir(parents=True, exist_ok=True)
     keys = _source_keys(source)
@@ -88,12 +92,14 @@ def write(source: Path, out: Path, source_id: str, copy: KQuantLadder = BENCH_CO
             stream.write(key, weight)
         for key, weight in _source_tensors(source, controlled, device):
             name = controlled_name(key)
-            refined = copy.quantize(name, weight)
-            tail = ExactTail.encode(weight, refined.prediction())
-            for part, tensor in (refined.tensors() | tail.tensors()).items():
+            refined = copy.quantize(name, weight, MAX_DEPTH if depth is None else depth)
+            parts = refined.tensors()
+            if depth is None:
+                parts |= ExactTail.encode(weight, refined.prediction()).tensors()
+            for part, tensor in parts.items():
                 stream.write(f"{key}.{part}", tensor)
             modules[key] = {"name": name, "base": refined.base.fmt.name, "shape": list(weight.shape),
-                            "dtype": str(weight.dtype).removeprefix("torch.")}
+                            "dtype": str(weight.dtype).removeprefix("torch."), "exact": depth is None}
         stream.metadata = {"format": FORMAT, "version": str(VERSION), "source": source_id, "modules": json.dumps(modules)}
     for file in source.iterdir():
         if file.is_file() and not file.match(SOURCE_WEIGHTS) and file.name not in NOT_COPIED:
@@ -150,9 +156,20 @@ class ModelFile:
         key = self._key_of[name]
         return self._refined(key, self._parts(key))
 
+    def passed_state(self) -> dict[str, torch.Tensor]:
+        """The weights the regulator does not read, as the source holds them, on the device."""
+        return {key: self._read(key) for key in self._passed}
+
+    @property
+    def holds_source(self) -> bool:
+        """Whether every controlled weight has its exact tail - a file cut to a depth has none."""
+        return all(module["exact"] for module in self.modules.values())
+
     def source_state(self) -> dict[str, torch.Tensor]:
         """Every weight of the source model as the source holds it, bit for bit, on the device."""
-        state = {key: self._read(key) for key in self._passed}
+        if not self.holds_source:
+            raise ValueError(f"{self.path} is cut to a depth and holds no source weights: load it resident")
+        state = self.passed_state()
         for key, module in self.modules.items():
             parts = self._parts(key)
             refined = self._refined(key, parts)
@@ -199,3 +216,15 @@ def load(directory: Path, device: str = "cuda", attn_implementation: str | None 
     model, tokenizer = fm.load_state(directory, file.source_state(), device=device,
                                      attn_implementation=attn_implementation, text_only=text_only, gpu_share=gpu_share)
     return model, tokenizer, FileCopy(file)
+
+
+def load_resident(directory: Path, device: str = "cuda", attn_implementation: str | None = None,
+                  text_only: bool = True, gpu_share: float = 1.0) -> tuple[object, object, Controller]:
+    """The model of a cut folder with its controlled weights read from their copies alone: the source weights of the
+    controlled modules are never loaded, and the controller reads the depths of the file, D2 ... D8 - not bf16."""
+    file = ModelFile(directory / FILE, device=device)
+    controllers: list[Controller] = []
+    model, tokenizer = fm.load_state(
+        directory, file.passed_state(), device=device, attn_implementation=attn_implementation, text_only=text_only,
+        gpu_share=gpu_share, fill=lambda m: controllers.append(install_resident(m, file.copy, device)))
+    return model, tokenizer, controllers[0]

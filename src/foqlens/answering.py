@@ -52,10 +52,10 @@ class Asking:
     def prompts(self, fmt: PromptFormat, rows: list[Row]) -> list[str]:
         return [fmt.render(self.setup.messages(r.context, r.question, self.examples)) for r in rows]
 
-    def batches(self, fmt: PromptFormat, tokenizer, rows: list[Row]) -> list[list[Row]]:
-        """The rows in batches by prompt length: at most BATCH prompts and BATCH_TOKENS padded tokens each."""
+    def batches(self, fmt: PromptFormat, tokenizer, rows: list[Row], max_tokens: int | None = None) -> list[list[Row]]:
+        """The rows in batches by prompt length: at most BATCH prompts and `max_tokens` (BATCH_TOKENS) padded tokens each."""
         lengths = [len(ids) for ids in tokenizer(self.prompts(fmt, rows))["input_ids"]]
-        return [[rows[i] for i in idx.tolist()] for idx in token_batches(lengths, BATCH_TOKENS, BATCH)]
+        return [[rows[i] for i in idx.tolist()] for idx in token_batches(lengths, max_tokens or BATCH_TOKENS, BATCH)]
 
     def answer(self, model, tokenizer, ctl, fmt: PromptFormat, judge, rows: list[Row], pacer: Pacer = FULL,
                decoder: Decoder = DYNAMIC) -> list[Answer]:

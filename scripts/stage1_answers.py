@@ -29,7 +29,7 @@ from pathlib import Path
 
 from foqlens import corpora, refocustensors
 from foqlens import model as fm
-from foqlens.answering import Asking, cut_ids, level_label
+from foqlens.answering import BATCH_TOKENS, Asking, cut_ids, level_label
 from foqlens.attention import PLANS, SPLIT
 from foqlens.generation import DYNAMIC
 from foqlens.gpu_monitor import GpuMonitor
@@ -99,6 +99,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="sdpa kernels per phase (foqlens.attention): the prefill always on math")
     parser.add_argument("--prefill-tokens", type=int, default=PREFILL_TOKENS,
                         help="prompt tokens one prefill pass of the static decoder holds; more are read in chunks of rows")
+    parser.add_argument("--batch-tokens", type=int, default=BATCH_TOKENS,
+                        help="padded prompt tokens a batch of answers holds: more rows decode in one batch, and a batch "
+                        "costs its longest reply in steps")
     return parser.parse_args(argv)
 
 
@@ -159,7 +162,7 @@ def main(argv: list[str] | None = None) -> Path:
                 break
             for corpus, ids in todo.items():
                 asking = askings[corpus]
-                for chunk in asking.batches(fmt, tokenizer, [rows[corpus][i] for i in ids]):
+                for chunk in asking.batches(fmt, tokenizer, [rows[corpus][i] for i in ids], args.batch_tokens):
                     append_answers(paths[corpus], asking.answer(bench.model, tokenizer, bench.ctl, fmt, judge,
                                                                 chunk, bench.throttle, decoder))
             rounds_done += 1
@@ -169,7 +172,7 @@ def main(argv: list[str] | None = None) -> Path:
     # A corpus answered later joins the corpora answered before: their counts stay in the summary.
     earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "base": args.base, "read": args.read, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
+        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "base": args.base, "read": args.read, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens, "batch_tokens": args.batch_tokens,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
         "cut_of": str(args.cut_of) if args.cut_of else None, "written_tokens": args.written_tokens,

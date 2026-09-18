@@ -84,7 +84,7 @@ def test_a_deeper_refinement_never_changes_a_shallower_read(fmt):
     weight = make_weight(seed=3)
     full = KRefinedWeight.quantize(weight, fmt)
     for depth in range(fmt.base_depth, MAX_DEPTH + 1):
-        shallow = KRefinedWeight(base=full.base, refinements=full.refinements[: depth - fmt.base_depth].clone(), shape=full.shape)
+        shallow = KRefinedWeight(fmt=full.fmt, blocks=full.blocks, refinements=full.refinements[: depth - fmt.base_depth].clone(), shape=full.shape)
         assert torch.equal(shallow.dequantize(torch.float32, depth), full.dequantize(torch.float32, depth))
 
 
@@ -123,3 +123,9 @@ def test_the_ladder_reads_each_class_from_its_own_base():
             depth = max(level.depth, fmt.base_depth)
             expected = KRefinedWeight.quantize(weight, fmt, depth=depth).dequantize(weight.dtype, depth)
             assert torch.equal(ladder.read(name, weight, level), expected), (name, level)
+
+
+@pytest.mark.parametrize("fmt", [Q2_K, Q4_K])
+def test_a_copy_holds_its_bits_per_weight_and_no_byte_more(fmt):
+    copy = KRefinedWeight.quantize(make_weight(seed=12), fmt)
+    assert copy.nbytes * 8 == copy.bits_per_weight(MAX_DEPTH) * copy.shape[0] * copy.shape[1]

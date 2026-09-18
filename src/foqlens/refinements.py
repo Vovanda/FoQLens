@@ -41,11 +41,19 @@ class KRefinedWeight(_DepthReader):
     """A k-quant base and refinements over it, up to MAX_DEPTH in all.
 
     A _DepthReader, so the precision controller reads it by blocks at several depths the way it reads quant.RefinedWeight.
+    The base is held as ggml blocks, as the file holds it - 2.625 or 4.5 bits per weight -
+    and unpacked when it is read, as the refinements are.
     """
 
-    base: KBase
+    fmt: KFormat
+    blocks: torch.Tensor  # uint8 [out, super-blocks, bytes]: the base as ggml blocks (kquant.gguf_blocks)
     refinements: torch.Tensor  # uint8 [refinements, out, in // 4] packed 2-bit codes
     shape: tuple[int, int]
+
+    @property
+    def base(self) -> KBase:
+        """The base unpacked from its blocks."""
+        return from_gguf_blocks(self.blocks, self.fmt)
 
     @classmethod
     def quantize(cls, weight: torch.Tensor, fmt: KFormat, depth: int = MAX_DEPTH) -> KRefinedWeight:
@@ -64,32 +72,32 @@ class KRefinedWeight(_DepthReader):
             step = step / _REFINEMENT_LEVELS
             safe_step = safe_step / _REFINEMENT_LEVELS
         refinements = torch.stack(codes) if codes else torch.empty((0, *weight.shape[:-1], weight.shape[1] // 4), dtype=torch.uint8, device=weight.device)
-        return cls(base=base, refinements=refinements, shape=tuple(weight.shape))
+        return cls(fmt=fmt, blocks=gguf_blocks(base), refinements=refinements, shape=tuple(weight.shape))
 
     @property
     def depth(self) -> int:
         """The depth stored: the base's own and one per refinement."""
-        return self.base.fmt.base_depth + self.refinements.shape[0]
+        return self.fmt.base_depth + self.refinements.shape[0]
 
     def read_depth(self, depth: int) -> int:
         """The depth a read asking for `depth` gets: never shallower than the base, never deeper than stored."""
-        return min(max(depth, self.base.fmt.base_depth), self.depth)
+        return min(max(depth, self.fmt.base_depth), self.depth)
 
     def bits_per_weight(self, depth: int) -> float:
-        return self.base.fmt.bits_per_weight + DEPTH_BITS * (self.read_depth(depth) - self.base.fmt.base_depth)
+        return self.fmt.bits_per_weight + DEPTH_BITS * (self.read_depth(depth) - self.fmt.base_depth)
 
     @property
     def nbytes(self) -> int:
-        """Bytes of the stored codes, block scales and super-block pairs."""
-        parts = (self.base.codes, self.base.scales, self.base.mins, self.base.d, self.base.dmin, self.refinements)
-        return sum(t.numel() * t.element_size() for t in parts)
+        """Bytes held: the base's blocks and the refinements."""
+        return sum(t.numel() * t.element_size() for t in (self.blocks, self.refinements))
 
     def _sums(self, depths: list[int]) -> Iterator[torch.Tensor]:
         """The float32 blocks read to each of the ascending `depths`: the base, then one refinement at a time."""
-        w = self.base.dequantize()
-        step, done = self.base.steps() / _REFINEMENT_LEVELS, 0
+        base = self.base
+        w = base.dequantize()
+        step, done = base.steps() / _REFINEMENT_LEVELS, 0
         for depth in depths:
-            for e in range(done, self.read_depth(depth) - self.base.fmt.base_depth):
+            for e in range(done, self.read_depth(depth) - self.fmt.base_depth):
                 w += step * (_unpack(self.refinements[e]).view(w.shape).float() - _REFINEMENT_CENTER + 0.5)
                 step = step / _REFINEMENT_LEVELS
                 done = e + 1
@@ -104,17 +112,17 @@ class KRefinedWeight(_DepthReader):
 
     def tensors(self) -> dict[str, torch.Tensor]:
         """The copy as named tensors: the base as ggml blocks, then every refinement."""
-        return {"base": gguf_blocks(self.base)} | {f"refinement.{k}": r for k, r in enumerate(self.refinements)}
+        return {"base": self.blocks} | {f"refinement.{k}": r for k, r in enumerate(self.refinements)}
 
     @classmethod
     def from_tensors(cls, fmt: KFormat, tensors: Mapping[str, torch.Tensor], shape: tuple[int, int]) -> KRefinedWeight:
         """The copy tensors() took apart; the refinements are read in order while they last."""
-        base = from_gguf_blocks(tensors["base"], fmt)
+        blocks = tensors["base"]
         stack = []
         while f"refinement.{len(stack)}" in tensors:
             stack.append(tensors[f"refinement.{len(stack)}"])
-        refinements = torch.stack(stack) if stack else torch.empty((0, shape[0], shape[1] // 4), dtype=torch.uint8, device=base.codes.device)
-        return cls(base=base, refinements=refinements, shape=tuple(shape))
+        refinements = torch.stack(stack) if stack else torch.empty((0, shape[0], shape[1] // 4), dtype=torch.uint8, device=blocks.device)
+        return cls(fmt=fmt, blocks=blocks, refinements=refinements, shape=tuple(shape))
 
 
 # ==== Exact tail ====

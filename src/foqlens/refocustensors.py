@@ -98,7 +98,7 @@ def write(source: Path, out: Path, source_id: str, copy: KQuantLadder = BENCH_CO
                 parts |= ExactTail.encode(weight, refined.prediction()).tensors()
             for part, tensor in parts.items():
                 stream.write(f"{key}.{part}", tensor)
-            modules[key] = {"name": name, "base": refined.base.fmt.name, "shape": list(weight.shape),
+            modules[key] = {"name": name, "base": refined.fmt.name, "shape": list(weight.shape),
                             "dtype": str(weight.dtype).removeprefix("torch."), "exact": depth is None}
         stream.metadata = {"format": FORMAT, "version": str(VERSION), "source": source_id, "modules": json.dumps(modules)}
     for file in source.iterdir():

@@ -6,7 +6,7 @@ import torch
 from gguf import GGMLQuantizationType
 from gguf.quants import dequantize
 
-from foqlens.kquant import Q2_K, Q4_K, QK_K, KBase, KFormat, make_qkx2_quants
+from foqlens.kquant import Q2_K, Q4_K, QK_K, KBase, KFormat, from_gguf_blocks, gguf_blocks, make_qkx2_quants
 
 pytestmark = pytest.mark.gpu
 
@@ -62,6 +62,17 @@ def test_the_base_reads_exactly_as_gguf_dequantizes_its_bytes(fmt, layout, qtype
     ours = base.dequantize().cpu().numpy().reshape(-1, QK_K)
     theirs = dequantize(layout(base).reshape(-1), qtype).reshape(-1, QK_K)
     np.testing.assert_array_equal(ours, theirs)
+
+
+@pytest.mark.parametrize(("fmt", "layout"), [(Q2_K, gguf_bytes_q2_k), (Q4_K, gguf_bytes_q4_k)])
+def test_the_base_is_laid_out_as_ggml_blocks_and_read_back_exactly(fmt, layout):
+    base = KBase.quantize(make_weight(seed=6), fmt)
+    blocks = gguf_blocks(base)
+    assert blocks.shape == (ROWS, SUPER_BLOCKS, layout(base).shape[1])
+    np.testing.assert_array_equal(blocks.cpu().numpy().reshape(-1, blocks.shape[-1]), layout(base))
+    back = from_gguf_blocks(blocks, fmt)
+    for field in ("codes", "scales", "mins", "d", "dmin"):
+        assert torch.equal(getattr(back, field), getattr(base, field)), field
 
 
 def reference_make_qkx2_quants(x: np.ndarray, weights: np.ndarray, nmax: int, fmt: KFormat):

@@ -54,6 +54,8 @@ The container is safetensors: a JSON header, then raw tensors. A tensor is read 
 
 The base in ggml bytes takes 2.625 and 4.5 bits per weight: exactly the codes, the block scales and the super-block pair. A test checks these bytes against gguf-py's dequantizer. The `exact` distances are mapped to non-negative numbers (zigzag) and written in each group at the width of the largest of them. The bytes of a block of rows lie back to back, so a zone's block is read alone.
 
+This layout is the one the kernel reads: the base as ggml blocks, the refinements four codes to a byte, the rows of a block back to back ([the kernel](kernels.md)). A zone layout is multiplied straight from these bytes, with no weight unpacked.
+
 The file's metadata: the format's name and version, the source with its revision, and for every controlled weight its base format, shape and source type.
 
 The prediction `exact` is counted from is the same for everyone who reads it. A test checks it bit for bit on the CPU and on the GPU.

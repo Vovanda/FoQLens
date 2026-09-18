@@ -11,6 +11,7 @@ Stage 2 reads only the frozen corpus (--frozen): the kept questions and the unkn
     uv run python scripts/stage1_answers.py --level d4 --frozen corpus/e2b-it --out runs/E002-base-precision-d2/ladder
     uv run python scripts/stage1_answers.py --rounds 1 --out /tmp/stage1   # smoke check: one round
     uv run python scripts/stage1_answers.py --level d2 --gguf <file.gguf> --frozen corpus/e2b-it --parts kept --out <dir>
+    uv run python scripts/stage1_answers.py --level d4 --base bartowski-Q2_K --frozen corpus/e2b-it --out <dir>
     uv run python scripts/stage1_answers.py --level d2 --frozen corpus/e2b-it --parts kept \\
         --corpora arc_challenge_closed arc_easy_closed hotpotqa --written-tokens 1024 \\
         --cut-of runs/E002-base-precision-d2/ladder/e2b-it/unjudged/d2 --out runs/E002-base-precision-d2/reask-1024
@@ -26,7 +27,7 @@ import json
 from dataclasses import replace
 from pathlib import Path
 
-from foqlens import corpora
+from foqlens import corpora, refocustensors
 from foqlens import model as fm
 from foqlens.answering import Asking, cut_ids, level_label
 from foqlens.attention import PLANS, SPLIT
@@ -35,7 +36,7 @@ from foqlens.gpu_monitor import GpuMonitor
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
 from foqlens.gpu_share import default_share
 from foqlens.io import answers_path, append_answers, read_answers, read_frozen, write_json, written_ids
-from foqlens.gguf_weights import GgufWeights
+from foqlens.gguf_weights import PUBLISHED, GgufWeights
 from foqlens.judging import ModelJudge, NotJudged
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
@@ -71,6 +72,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--level", choices=list(LEVELS), default="bf16")
     parser.add_argument("--gguf", type=Path, default=None,
                         help="a published .gguf file to read a quantized level from instead of the bench's copy, for comparison")
+    parser.add_argument("--base", choices=sorted(PUBLISHED), default=None,
+                        help="read the model cut over this published file's base (cut_model.py --base); a quantized "
+                        "level is then baked from that copy")
     parser.add_argument("--setups", type=json.loads, default=FROZEN_SETUPS, help="JSON {corpus: setup name}")
     asked = parser.add_mutually_exclusive_group()
     asked.add_argument("--tuning", type=Path, default=None, help="summary.json of prompt_tuning.py: its questions are left out")
@@ -97,7 +101,8 @@ def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
     model_id, level = MODELS[args.model], LEVELS[args.level]
     plan = PLANS[args.attention]
-    bench = Bench.load(model_id, gpu_share=args.gpu_share)
+    directory = refocustensors.model_directory(model_id, args.base) if args.base else None
+    bench = Bench.load(model_id, gpu_share=args.gpu_share, directory=directory)
     tokenizer = bench.tokenizer
     fmt = fm.prompt_format(model_id, tokenizer)
     # A quantized level is baked into the weights - one unpacking, the step and the memory of bf16 - and
@@ -157,7 +162,7 @@ def main(argv: list[str] | None = None) -> Path:
     # A corpus answered later joins the corpora answered before: their counts stay in the summary.
     earlier = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
     summary = {
-        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
+        "model": name, "level": args.level, "weights": "gguf" if args.gguf else "kquant", "gguf": str(args.gguf) if args.gguf else None, "base": args.base, "seed": args.seed, "decoder": args.decoder, "attention": args.attention, "prefill_tokens": args.prefill_tokens,
         "setups": {**earlier.get("setups", {}), **{c: args.setups[c] for c in args.corpora}},
         "tuning": str(args.tuning) if args.tuning else None, "frozen": str(args.frozen) if args.frozen else None,
         "cut_of": str(args.cut_of) if args.cut_of else None, "written_tokens": args.written_tokens,

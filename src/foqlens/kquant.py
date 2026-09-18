@@ -12,6 +12,11 @@ relative (float32 sums in another order), codes identical but for a near tie - m
 5 of 18,432 for Q4_K on heavy-tailed weights.
 Invariant: a base laid out as GGUF blocks (gguf_blocks) is ggml's block_q2_K / block_q4_K byte for byte, and
 from_gguf_blocks reads it back to the same base exactly.
+
+Q3_K and Q6_K are only read: a published GGUF file's blocks of them become a base (refinements.ForeignLadder); no
+quantizer of them is ported.
+Invariant: from_gguf_blocks reads block_q3_K / block_q6_K bytes exactly as gguf-py dequantizes them - every
+controlled tensor of bartowski's E2B-it Q2_K file, 2026-09-18.
 """
 
 from __future__ import annotations
@@ -30,31 +35,46 @@ _FP16_BITS = 16
 
 @dataclass(frozen=True)
 class KFormat:
-    """One k-quant type: its code width, block size, scale width and the search llama.cpp runs for it."""
+    """One k-quant type: its code width, block size, scale width and, where it is ported, the search llama.cpp runs
+    for it.
+
+    An asymmetric type (Q2_K, Q4_K) reads a block as d*scale*code - dmin*min; a symmetric one (Q3_K, Q6_K) as
+    d*scale*(code - zero_point), with a signed scale and no min.
+    """
 
     name: str
     bits: int
     block: int
     scale_bits: int
-    rmin: float
-    rdelta: float
-    nstep: int
-    use_mad: bool
-    rms_weighted: bool  # Q4_K weighs a weight by rms(block) + |x|, Q2_K by |x|
+    rmin: float | None = None  # None: no quantizer ported, the base is only read from a GGUF file
+    rdelta: float | None = None
+    nstep: int | None = None
+    use_mad: bool = False
+    rms_weighted: bool = False  # Q4_K weighs a weight by rms(block) + |x|, Q2_K by |x|
+    zero_point: int = 0  # symmetric types: the code that reads as zero; 0 for an asymmetric type
 
     @property
     def base_depth(self) -> int:
         return self.bits // DEPTH_BITS
 
     @property
+    def symmetric(self) -> bool:
+        return self.zero_point > 0
+
+    @property
     def bits_per_weight(self) -> float:
-        """Codes, the quantized scale and min of a block, the fp16 d and dmin of a super-block."""
-        return self.bits + 2 * self.scale_bits / self.block + 2 * _FP16_BITS / QK_K
+        """Codes, the quantized scale (and min) of a block, the fp16 d (and dmin) of a super-block."""
+        pairs = 1 if self.symmetric else 2
+        return self.bits + pairs * (self.scale_bits / self.block + _FP16_BITS / QK_K)
 
 
 # The search parameters are the ones quantize_row_q2_K_ref / quantize_row_q4_K_ref pass to make_qkx2_quants.
 Q2_K = KFormat("Q2_K", bits=2, block=16, scale_bits=4, rmin=-0.5, rdelta=0.1, nstep=15, use_mad=True, rms_weighted=False)
 Q4_K = KFormat("Q4_K", bits=4, block=32, scale_bits=6, rmin=-1.0, rdelta=0.1, nstep=20, use_mad=False, rms_weighted=True)
+# Read from published GGUF files as a base (dequantize_row_q3_K / _q6_K in ggml-quants.c); no quantizer ported.
+Q3_K = KFormat("Q3_K", bits=3, block=16, scale_bits=6, zero_point=4)
+Q6_K = KFormat("Q6_K", bits=6, block=16, scale_bits=8, zero_point=32)
+FORMATS = {fmt.name: fmt for fmt in (Q2_K, Q3_K, Q4_K, Q6_K)}
 
 
 def make_qkx2_quants(x: torch.Tensor, weights: torch.Tensor, nmax: int, fmt: KFormat) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -123,13 +143,15 @@ class KBase:
 
     fmt: KFormat
     codes: torch.Tensor  # uint8 [out, super-blocks, blocks, block]
-    scales: torch.Tensor  # uint8 [out, super-blocks, blocks]
-    mins: torch.Tensor  # uint8 [out, super-blocks, blocks]
+    scales: torch.Tensor  # uint8 [out, super-blocks, blocks]; int8 for a symmetric type, its scale signed
+    mins: torch.Tensor  # uint8 [out, super-blocks, blocks]; zeros for a symmetric type
     d: torch.Tensor  # fp16 [out, super-blocks]
-    dmin: torch.Tensor  # fp16 [out, super-blocks]
+    dmin: torch.Tensor  # fp16 [out, super-blocks]; zeros for a symmetric type
 
     @classmethod
     def quantize(cls, weight: torch.Tensor, fmt: KFormat) -> KBase:
+        if fmt.rmin is None:
+            raise ValueError(f"no quantizer ported for {fmt.name}: a base of it is read from a GGUF file")
         x = _blocks(weight, fmt)
         nmax, top = 2**fmt.bits - 1, 2**fmt.scale_bits - 1
         if fmt.rms_weighted:
@@ -158,6 +180,8 @@ class KBase:
         return (self.d.float()[..., None] * self.scales.float())[..., None]
 
     def offsets(self) -> torch.Tensor:
+        if self.fmt.symmetric:
+            return self.steps() * self.fmt.zero_point
         return (self.dmin.float()[..., None] * self.mins.float())[..., None]
 
     def dequantize(self) -> torch.Tensor:
@@ -172,6 +196,7 @@ class KBase:
 _FP16_BYTES = 2
 _Q4_K_SPLIT = 4  # block_q4_K keeps the low 6 bits of scales and mins 0..3 whole and splits those of 4..7
 _LOW6, _LOW4 = 0x3F, 0x0F
+_Q3_K_SCALE_BIAS = 32  # block_q3_K stores a signed 6-bit scale as scale + 32
 
 
 def gguf_blocks(base: KBase) -> torch.Tensor:
@@ -220,6 +245,32 @@ def from_gguf_blocks(blocks: torch.Tensor, fmt: KFormat) -> KBase:
         mins = torch.cat([second & _LOW6, (third >> 4) | (second >> 6) << 4], dim=1)
         quarters = qs.view(-1, 4, 1, 32)
         codes = torch.cat([quarters & _LOW4, quarters >> 4], dim=2).reshape(-1, QK_K)
+    elif fmt is Q3_K:
+        # hmask[32], qs[64], scales[12], d: weight 128h + 32g + j reads bits 2g of qs[32h + j] and, as its high bit,
+        # bit (4h + g) of hmask[j]; scale k is the low nibble of byte k mod 8 (shifted by 4 for k >= 8) with bits
+        # 2 * (k div 4) of byte 8 + k mod 4 above it, less 32
+        hmask, qs = flat[:, :QK_K // 8], flat[:, QK_K // 8:QK_K // 8 + QK_K // 4]
+        packed, d = flat[:, 3 * QK_K // 8:3 * QK_K // 8 + 12], flat[:, 3 * QK_K // 8 + 12:]
+        low = (qs.view(-1, 2, 1, 32) >> torch.arange(0, 8, 2, device=flat.device, dtype=torch.uint8).view(1, 1, 4, 1)) & 3
+        high = (hmask.view(-1, 1, 32) >> torch.arange(8, device=flat.device, dtype=torch.uint8).view(1, 8, 1)) & 1
+        codes = (low.reshape(-1, QK_K) | high.reshape(-1, QK_K) << 2)
+        k = torch.arange(n_blocks, device=flat.device)
+        nibbles = (packed[:, k % 8] >> (4 * (k // 8)).to(torch.uint8)) & _LOW4
+        tops = (packed[:, 8 + k % 4] >> (2 * (k // 4)).to(torch.uint8)) & 3
+        scales = (nibbles | tops << 4).to(torch.int8) - _Q3_K_SCALE_BIAS
+        mins = torch.zeros_like(nibbles)
+        dmin = torch.zeros_like(d)
+    elif fmt is Q6_K:
+        # ql[128], qh[64], scales[16] int8, d: weight 128h + 32(2p + c) + j reads nibble p of ql[64h + 32c + j] and,
+        # as its high two bits, bits 2(2p + c) of qh[32h + j]
+        ql, qh = flat[:, :QK_K // 2], flat[:, QK_K // 2:QK_K // 2 + QK_K // 4]
+        packed, d = flat[:, 3 * QK_K // 4:3 * QK_K // 4 + n_blocks], flat[:, 3 * QK_K // 4 + n_blocks:]
+        low = (ql.view(-1, 2, 1, 64) >> torch.tensor([0, 4], device=flat.device, dtype=torch.uint8).view(1, 1, 2, 1)) & _LOW4
+        high = (qh.view(-1, 2, 1, 32) >> torch.arange(0, 8, 2, device=flat.device, dtype=torch.uint8).view(1, 1, 4, 1)) & 3
+        codes = low.reshape(-1, QK_K) | high.reshape(-1, QK_K) << 4
+        scales = packed.contiguous().view(torch.int8)
+        mins = torch.zeros(scales.shape, dtype=torch.uint8, device=flat.device)
+        dmin = torch.zeros_like(d)
     else:
         raise ValueError(f"no GGUF layout for {fmt.name}")
     return KBase(fmt=fmt,

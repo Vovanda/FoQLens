@@ -51,7 +51,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from foqlens.kernels.kquant import TILE_ROWS as KERNEL_TILE_ROWS, kquant_matmul
+from foqlens.kernels.kquant import TILE_ROWS as KERNEL_TILE_ROWS, kernel_reads_format, kquant_matmul
 from foqlens.refinements import KQuantLadder, KRefinedWeight
 from foqlens.model import text_layers
 from foqlens.quant import MAX_DEPTH, DEPTH_BITS, CappedRefinedWeight, Int8Weight, Level, Nf4Weight, RefinedWeight, _DepthReader
@@ -165,9 +165,11 @@ class MixedPrecisionLinear(nn.Module):
         self._depths = self._block_depths(arr, codes) if self._kernel_reads() else None
 
     def _kernel_reads(self) -> bool:
-        """Whether the layout is read by the kernel: a k-quant copy, every level a depth or ZERO, blocks of its rows."""
+        """Whether the layout is read by the kernel: a k-quant copy on a base it reads, every level a depth or ZERO,
+        blocks of its rows."""
+        copy = self._packed.get(RefinedWeight)
         return (KERNEL and self._native is Level.BF16 and self.block_rows == KERNEL_TILE_ROWS
-                and isinstance(self._packed.get(RefinedWeight), KRefinedWeight)
+                and isinstance(copy, KRefinedWeight) and kernel_reads_format(copy.fmt)
                 and all(level is Level.ZERO or level.depth for level in self._used))
 
     def _block_depths(self, arr: np.ndarray, codes: torch.Tensor | None = None) -> torch.Tensor:

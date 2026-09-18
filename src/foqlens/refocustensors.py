@@ -30,7 +30,7 @@ from pathlib import Path
 import torch
 
 from foqlens import model as fm
-from foqlens.kquant import KFormat, Q2_K, Q4_K
+from foqlens.kquant import FORMATS, KFormat
 from foqlens.model import REVISIONS
 from foqlens.precision import BENCH_COPY, CONTROLLED, Controller, install_resident
 from foqlens.quant import MAX_DEPTH
@@ -45,7 +45,7 @@ SOURCE_WEIGHTS = fm.CHECKPOINT_WEIGHTS
 NOT_COPIED = frozenset({"README.md", ".gitattributes"})
 TEXT_DECODER = "model.language_model."  # the source's key prefix of text_layers(model)'s parent
 WEIGHT = ".weight"
-BASE_FORMATS = {fmt.name: fmt for fmt in (Q2_K, Q4_K)}
+BASE_FORMATS = FORMATS  # a file may hold a base read from a published GGUF file (refinements.ForeignLadder)
 DTYPES = {str(dtype).removeprefix("torch."): dtype for dtype in (torch.bfloat16, torch.float16, torch.float32)}
 # Where cut models live: outside the repository, as the Hugging Face cache is; FOQLENS_HOME moves it.
 HOME = Path(os.environ.get("FOQLENS_HOME", Path.home() / ".cache" / "foqlens"))

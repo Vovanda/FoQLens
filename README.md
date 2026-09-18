@@ -101,9 +101,10 @@ a gain in quality the mechanism saves memory at the same usability.
 sensitive classes) with 2-bit refinements over it, after MoBiQuant with departures
 ([E002](experiments/E002-base-precision-d2/results.md)). The zones' top rung is D8; the model's file may also hold
 a tail to the source weights of any type, so the model reads back its source bit for bit without the checkpoint
-([docs/refocustensors.md](docs/refocustensors.md)). A layout of depths is read by a CUDA kernel straight from the
-copy's bytes, every block of rows to its depth: a decoding step of E2B-it at a mixed layout takes 17.7 ms against
-401.5 unpacked and 11.6 at bf16 ([docs/kernels.md](docs/kernels.md)); a prefill unpacks the copy for a GEMM.
+([docs/refocustensors.md](docs/refocustensors.md)). A layout of depths is read by a CUDA kernel on tensor cores
+straight from the copy's bytes, every block of rows to its depth: a decoding step of E2B-it at a mixed layout takes
+28.8 ms at a batch of 32 against 422.6 unpacked and 20.4 at bf16 ([docs/kernels.md](docs/kernels.md)); a prefill
+unpacks the copy for a GEMM.
 
 ## Reproduce
 

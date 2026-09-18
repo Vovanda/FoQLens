@@ -23,6 +23,7 @@ Invariant: no q_proj or k_proj block of a layout the regulator gives reads ZERO 
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -123,6 +124,11 @@ class Regulator:
         self.ctl.set_layout(codes)
         return codes
 
+    def reading(self, index: Mapping[tuple[str, str], int], label: str) -> RegulatedReading:
+        """The regulator as an answering.Reading: `index` maps (corpus, question id) to the question's row of the
+        policy's scores."""
+        return RegulatedReading(self, index, label)
+
     def by_layer(self, codes: np.ndarray) -> list[dict]:
         """Per layer and module kind, over the samples: its blocks, their shallowest and mean depth, and the share read
         deeper than the shallowest - where the zones went and where they did not."""
@@ -135,3 +141,18 @@ class Regulator:
                          "min_depth": int(part.min()), "mean_depth": float(part.mean()),
                          "above_min": float((part > part.min()).mean())})
         return rows
+
+
+@dataclass
+class RegulatedReading:
+    """A batch read at every question's own layout (answering.Reading); every batch's codes are kept for its bytes."""
+
+    regulator: Regulator
+    index: Mapping[tuple[str, str], int]
+    label: str
+    laid: list[np.ndarray] = field(default_factory=list)
+
+    def apply(self, ctl: Controller, corpus: str, rows: list) -> None:
+        if ctl is not self.regulator.ctl:
+            raise ValueError("a regulated reading sets the bench its regulator was built on")
+        self.laid.append(self.regulator.apply(np.array([self.index[(corpus, r.id)] for r in rows])))

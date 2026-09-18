@@ -124,3 +124,30 @@ def test_by_layer_counts_every_block_once_in_its_layer_and_kind():
         (0, "self_attn.q_proj", 2), (0, "mlp.down_proj", 2), (1, "mlp.up_proj", 2)]
     assert sum(r["blocks"] for r in rows) == ctl.n_blocks
     assert rows[0]["above_min"] == 0.5 and rows[1]["above_min"] == 0.0
+
+
+def test_a_regulated_reading_lays_every_row_out_by_its_question_and_keeps_the_codes():
+    from types import SimpleNamespace
+
+    ctl = controller()
+    base = np.full(ctl.n_blocks, int(Level.D2), dtype=np.uint8)
+
+    @dataclass(frozen=True)
+    class ByQuestion:
+        """Question i lifts block i to D8."""
+
+        name: str = "by-question"
+
+        def levels(self, indices):
+            out = np.stack([base] * len(indices))
+            out[np.arange(len(indices)), np.asarray(indices)] = int(Level.D8)
+            return out
+
+    reading = Regulator(ByQuestion(), ctl).reading({("c", "a"): 2, ("c", "b"): 4}, "zones")
+    rows = [SimpleNamespace(id="b"), SimpleNamespace(id="a")]
+    reading.apply(ctl, "c", rows)
+    assert reading.label == "zones" and len(reading.laid) == 1
+    assert reading.laid[0][0, 4] == int(Level.D8) and reading.laid[0][1, 2] == int(Level.D8)
+    assert ctl.modules[NAMES[1]].levels.tolist() == [[int(Level.D2), int(Level.D2)], [int(Level.D8), int(Level.D2)]]
+    with pytest.raises(ValueError, match="bench"):
+        reading.apply(controller(), "c", rows)

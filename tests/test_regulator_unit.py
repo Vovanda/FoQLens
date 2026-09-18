@@ -1,0 +1,113 @@
+"""The regulator (foqlens.regulator): layouts checked against the kernel's ladder, their bytes, their spread over layers."""
+
+from dataclasses import dataclass
+from functools import partial
+
+import numpy as np
+import pytest
+import torch
+from torch import nn
+
+from foqlens.kquant import QK_K
+from foqlens.precision import Controller, MixedPrecisionLinear
+from foqlens.quant import MAX_DEPTH, Level
+from foqlens.refinements import KQuantLadder
+from foqlens.regulator import Regulator, ReadCost, check, kernel_ladder
+
+BLOCK_ROWS = 64
+NAMES = ("layers.0.self_attn.q_proj", "layers.0.mlp.down_proj", "layers.1.mlp.up_proj")  # Q2_K, Q4_K, Q2_K bases
+DEPTHS = (Level.D2, Level.D4, Level.D6, Level.D8)
+
+
+def module(name: str, out: int = 2 * BLOCK_ROWS, inp: int = QK_K) -> MixedPrecisionLinear:
+    torch.manual_seed(0)
+    linear = nn.Linear(inp, out, bias=False, dtype=torch.bfloat16)
+    nn.init.normal_(linear.weight, std=0.02)
+    made = MixedPrecisionLinear(linear, BLOCK_ROWS, partial(KQuantLadder().quantize, name))
+    made.set_levels(Level.D8)  # the copy is built on the first read of a depth
+    return made
+
+
+def controller() -> Controller:
+    return Controller({name: module(name) for name in NAMES})
+
+
+@dataclass(frozen=True)
+class Fixed:
+    """A policy that answers every question with the same codes."""
+
+    codes: np.ndarray
+    name: str = "fixed"
+
+    def levels(self, indices):
+        return np.stack([self.codes] * len(indices))
+
+
+def test_the_kernel_ladder_is_the_depths_every_module_holds():
+    ctl = controller()
+    assert kernel_ladder(ctl) == DEPTHS
+    short = module(NAMES[0])
+    short.readable = frozenset({Level.ZERO, Level.D2, Level.D4})  # a copy cut to D4
+    assert kernel_ladder(Controller({NAMES[0]: short, NAMES[1]: module(NAMES[1])})) == (Level.D2, Level.D4)
+
+
+def test_a_level_the_kernel_does_not_read_is_refused():
+    check(np.array([[int(Level.ZERO), int(Level.D8)]], dtype=np.uint8), DEPTHS)
+    for level in (Level.BF16, Level.NF4):
+        with pytest.raises(ValueError, match=level.name):
+            check(np.array([int(Level.D4), int(level)], dtype=np.uint8), DEPTHS)
+    with pytest.raises(ValueError, match="D8"):
+        check(np.array([int(Level.D8)], dtype=np.uint8), DEPTHS[:2])
+
+
+def test_bytes_are_the_base_blocks_and_a_plane_per_refinement_and_nothing_at_zero():
+    ctl = controller()
+    cost = ReadCost(ctl)
+    q = ctl.modules[NAMES[0]].refined  # Q2_K: 84 bytes a super-block, base depth 1
+    down = ctl.modules[NAMES[1]].refined  # Q4_K: 144 bytes, base depth 2
+    assert (q.blocks.shape[-1], down.blocks.shape[-1]) == (84, 144)
+    plane = QK_K // 4
+    assert cost.table[0].tolist() == [0] + [BLOCK_ROWS * (84 + e * plane) for e in range(MAX_DEPTH)]
+    # a Q4_K base reads the same at D2 and D4: never shallower than its base
+    assert cost.table[2].tolist() == [0, BLOCK_ROWS * 144, BLOCK_ROWS * 144, BLOCK_ROWS * (144 + plane),
+                                      BLOCK_ROWS * (144 + 2 * plane)]
+    zero = np.full(ctl.n_blocks, int(Level.ZERO), dtype=np.uint8)
+    assert cost.read_bytes(zero).tolist() == [0]
+    one = zero.copy()
+    one[0] = int(Level.D6)
+    assert cost.read_bytes(one).tolist() == [BLOCK_ROWS * (84 + 2 * plane)]
+
+
+def test_a_batch_step_reads_every_block_at_its_deepest_depth_over_the_samples():
+    ctl = controller()
+    cost = ReadCost(ctl)
+    rng = np.random.default_rng(0)
+    codes = rng.choice([int(Level.ZERO), *(int(lv) for lv in DEPTHS)], size=(5, ctl.n_blocks)).astype(np.uint8)
+    deepest = codes.max(axis=0)  # the codes of ZERO and the depths follow the ladder
+    assert cost.step_bytes(codes) == cost.read_bytes(deepest)[0]
+    assert cost.step_bytes(codes) >= cost.read_bytes(codes).max()
+
+
+def test_the_regulator_sets_each_question_its_own_layout_and_refuses_what_the_kernel_cannot_read():
+    ctl = controller()
+    codes = np.full(ctl.n_blocks, int(Level.D2), dtype=np.uint8)
+    codes[:2] = int(Level.D8)
+    regulator = Regulator(Fixed(codes), ctl)
+    applied = regulator.apply(np.arange(3))
+    assert applied.shape == (3, ctl.n_blocks)
+    assert ctl.modules[NAMES[0]].levels.tolist() == [[int(Level.D8)] * 2] * 3
+    bf16 = codes.copy()
+    bf16[3] = int(Level.BF16)
+    with pytest.raises(ValueError, match="BF16"):
+        Regulator(Fixed(bf16), ctl).apply(np.arange(2))
+
+
+def test_by_layer_counts_every_block_once_in_its_layer_and_kind():
+    ctl = controller()
+    codes = np.full(ctl.n_blocks, int(Level.D2), dtype=np.uint8)
+    codes[0] = int(Level.D8)  # one block of layer 0's q_proj
+    rows = Regulator(Fixed(codes), ctl).by_layer(codes)
+    assert [(r["layer"], r["kind"], r["blocks"]) for r in rows] == [
+        (0, "self_attn.q_proj", 2), (0, "mlp.down_proj", 2), (1, "mlp.up_proj", 2)]
+    assert sum(r["blocks"] for r in rows) == ctl.n_blocks
+    assert rows[0]["above_min"] == 0.5 and rows[1]["above_min"] == 0.0

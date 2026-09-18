@@ -140,6 +140,11 @@ class MixedPrecisionLinear(nn.Module):
         """Kinds of quantized copies of the weight that are held, in the order they were first needed."""
         return tuple(self._packed)
 
+    @property
+    def refined(self) -> _DepthReader | None:
+        """The refined copy every read depth shares, once some depth has been read; None before that."""
+        return self._packed.get(RefinedWeight)
+
     def _materialize(self, level: Level) -> None:
         """Quantize the weight into the level's storage on its first use; bf16, ZERO and a baked level need no copy."""
         kind = STORAGE.get(level)

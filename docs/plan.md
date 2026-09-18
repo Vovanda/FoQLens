@@ -76,7 +76,7 @@ A side benefit: no need to re-cut blocks by meaning - the layout stays aligned, 
 
 *Updated 2026-09-12.* Memory savings are real on the bench now: one sliced copy replaces the bf16 weights (-1.63 GiB on E2B) and every block can store only the depth it is read to. What is not shown at home is speed and energy: the slices are unpacked before the multiplication, and reading only the needed bits takes a kernel of its own.
 
-*Updated 2026-09-18.* A CUDA kernel reads a zone layout straight from the k-quant copy's bytes, every block of rows to its depth: a decoding step of E2B-it at a mixed layout takes 17.7 ms against 401.5 unpacked and 11.6 at bf16 ([kernels.md](kernels.md)).
+*Updated 2026-09-18.* A CUDA kernel reads a zone layout on tensor cores straight from the k-quant copy's bytes, every block of rows to its depth: a decoding step of E2B-it at a mixed layout takes 28.8 ms at a batch of 32 against 422.6 unpacked and 20.4 at bf16 ([kernels.md](kernels.md)).
 
 What can honestly be shown at home:
 - **memory** - the zones of a query cost only what they read;

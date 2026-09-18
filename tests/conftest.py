@@ -86,6 +86,24 @@ def e2b_it_sdpa():
 
 
 @pytest.fixture(scope="module")
+def e2b_it_refocused():
+    """E2B-it read from its cut folder (scripts/cut_model.py) - no Hugging Face checkpoint - with the controller
+    reading the copy from the file."""
+    from foqlens import model as fm
+    from foqlens.precision import install
+    from foqlens.refocustensors import FILE, load, model_directory
+
+    directory = model_directory(fm.E2B_IT)
+    if not (directory / FILE).exists():
+        pytest.skip(f"no cut model in {directory}: run scripts/cut_model.py e2b-it")
+    model, tokenizer, copy = load(directory, attn_implementation="sdpa")
+    ctl = install(model, copy=copy)
+    yield model, tokenizer, ctl
+    del model
+    torch.cuda.empty_cache()
+
+
+@pytest.fixture(scope="module")
 def e2b_sdpa():
     """Gemma 4 E2B with sdpa attention - the attention of the runs (Bench.load) - and the controller installed."""
     from foqlens import model as fm

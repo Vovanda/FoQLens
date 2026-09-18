@@ -19,6 +19,8 @@ runs/**/raw/
 
 # model cache, if HF_HOME points inside the repo
 hf-cache/
+# cut models (scripts/cut_model.py), if FOQLENS_HOME points inside the repo
+*.refocustensors
 
 # nvcc output, rebuilt from the .cu next to it
 *.ptx

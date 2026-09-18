@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
+
 import torch
+from accelerate import init_empty_weights
+from huggingface_hub import snapshot_download
 from torch import nn
-from transformers import AutoTokenizer, BatchEncoding, Gemma4ForConditionalGeneration, PreTrainedTokenizerBase
+from transformers import AutoConfig, AutoTokenizer, BatchEncoding, Gemma4ForConditionalGeneration, PreTrainedTokenizerBase
 
 from foqlens.prompting import PLAIN, ChatFormat, PromptFormat
+from foqlens.safetensors_io import read_all
 
 E2B = "google/gemma-4-E2B"
 E4B = "google/gemma-4-E4B"
@@ -28,6 +34,7 @@ REVISIONS = {
 # Left outside the allocator cap for memory CUDA libraries take past the torch allocator.
 SPILL_MARGIN_BYTES = 256 * 2**20
 TOWERS = ("vision_tower", "embed_vision", "audio_tower", "embed_audio")
+CHECKPOINT_WEIGHTS = "*.safetensors"
 
 
 def forbid_spill(device: str = "cuda", share: float = 1.0) -> None:
@@ -60,14 +67,56 @@ def load(
     text_only: bool = True,
     gpu_share: float = 1.0,
 ) -> tuple[Gemma4ForConditionalGeneration, PreTrainedTokenizerBase]:
-    """The model at its pinned revision and its tokenizer, in eval mode, with the allocator capped (forbid_spill).
+    """The model at its pinned revision (scripts/download_models.py) and its tokenizer, in eval mode, with the allocator
+    capped (forbid_spill).
 
     text_only drops the vision and audio towers. attn_implementation="eager" is needed wherever
     attention weights are read (step 1). gpu_share caps the VRAM at that share of the card.
 
     Invariant: sdpa attention runs on the math kernel - a padded row of a batch reads what it reads alone,
     within bf16's batch noise (tests/test_padded_batch_gpu.py).
+    Invariant: the model is the one from_pretrained builds from the same checkpoint - its logits bit for bit
+    (tests/test_refocustensors_gpu.py) - loaded at the commit of one copy of the weights (load_state).
     """
+    source = Path(snapshot_download(model_id, revision=REVISIONS[model_id], local_files_only=True))
+    weights = read_all(sorted(source.glob(CHECKPOINT_WEIGHTS)), device)
+    return load_state(source, weights, device, dtype, attn_implementation, text_only, gpu_share)
+
+
+def load_state(
+    directory: str | Path,
+    state_dict: dict[str, torch.Tensor],
+    device: str = "cuda",
+    dtype: torch.dtype = torch.bfloat16,
+    attn_implementation: str | None = None,
+    text_only: bool = True,
+    gpu_share: float = 1.0,
+) -> tuple[Gemma4ForConditionalGeneration, PreTrainedTokenizerBase]:
+    """As load, with the weights given and the config and tokenizer read from `directory` - a Hugging Face snapshot or
+    a cut model's folder (foqlens.refocustensors).
+
+    The weights become the model's parameters as they are: the model is built with its parameters on meta and the
+    tensors are assigned, never copied. from_pretrained copies them and holds every weight twice on the way - 22 GiB of
+    commit for an 8.6 GiB model, against 13.5 here.
+    """
+    _configure(device, gpu_share)
+    tokenizer = _tokenizer(AutoTokenizer.from_pretrained(directory))
+    config = AutoConfig.from_pretrained(directory)
+    with init_empty_weights(include_buffers=False):  # the buffers (rotary frequencies, scales) are computed for real
+        model = Gemma4ForConditionalGeneration._from_config(config, dtype=dtype, attn_implementation=attn_implementation)
+    loaded = model.load_state_dict(state_dict, strict=False, assign=True)
+    model.tie_weights()
+    # The checkpoint holds k/v projections of the layers that share another layer's keys and values; the model lists
+    # them to be dropped, as from_pretrained drops them. Nothing else may be left over.
+    ignored = [re.compile(p) for m in model.modules() for p in getattr(m, "_keys_to_ignore_on_load_unexpected", None) or ()]
+    unexpected = [key for key in loaded.unexpected_keys if not any(p.search(key) for p in ignored)]
+    empty = [name for name, t in (*model.named_parameters(), *model.named_buffers()) if t.is_meta]
+    if unexpected or empty:
+        raise ValueError(f"weights that fit no parameter: {unexpected[:5]}; parameters left empty: {empty[:5]}")
+    return _finish(model.to(device), text_only), tokenizer
+
+
+def _configure(device: str, gpu_share: float) -> None:
     # bf16 matmuls accumulate partial sums in fp32: halves the batch-size dependence of the
     # numbers (letter log-probabilities 0.19 -> 0.09 apart between a batch and one by one).
     torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False
@@ -77,19 +126,21 @@ def load(
     # head_dim of 256 and 512, so sdpa falls back to math.
     torch.backends.cuda.enable_mem_efficient_sdp(False)
     forbid_spill(device, gpu_share)
-    revision = REVISIONS[model_id]
-    tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
+
+
+def _tokenizer(tokenizer: PreTrainedTokenizerBase) -> PreTrainedTokenizerBase:
     # A plain forward takes position ids from arange(seq), not from the attention mask, so left padding
     # would shift the positions of real tokens: forward batches are padded on the right. generate()
     # builds the positions from the mask itself, so generation pads on the left (encode_left).
     tokenizer.padding_side = "right"
-    model = Gemma4ForConditionalGeneration.from_pretrained(
-        model_id, revision=revision, dtype=dtype, device_map=device, attn_implementation=attn_implementation
-    )
+    return tokenizer
+
+
+def _finish(model: Gemma4ForConditionalGeneration, text_only: bool) -> Gemma4ForConditionalGeneration:
     model.eval()
     if text_only:
         drop_towers(model)
-    return model, tokenizer
+    return model
 
 
 CHAT_MODELS = frozenset({E2B_IT, E4B_IT})

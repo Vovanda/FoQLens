@@ -1,6 +1,7 @@
 """The bench's copy answers as the committed k-quant ladder of E002 did, at every read depth.
 
-E002's ladder was answered with each level baked into the weights. Here the controller reads the same k-quant copy
+E002's ladder was answered with each level baked into the weights. Here the model is read from its cut folder
+(.refocustensors, no Hugging Face checkpoint) and the controller reads the k-quant copy from the file
 by blocks (set_all), the path the filter's zones take, on 17 known questions of each of the six corpora, and the
 replies are held against the committed answers of those questions.
 
@@ -50,9 +51,9 @@ def questions():
 
 
 @pytest.fixture(scope="module")
-def replies(e2b_it_sdpa, questions):
+def replies(e2b_it_refocused, questions):
     """{level: {(corpus, id): (reply now, reply committed)}}"""
-    model, tokenizer, ctl = e2b_it_sdpa
+    model, tokenizer, ctl = e2b_it_refocused
     fmt = fm.prompt_format(fm.E2B_IT, tokenizer)
     decoder = StaticDecoder(attention=SPLIT)
     out = {}

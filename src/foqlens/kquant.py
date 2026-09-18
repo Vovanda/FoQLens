@@ -10,6 +10,8 @@ Invariant: the base read back equals gguf-py's dequantizer on the same blocks la
 Invariant: the block search matches a loop port of llama.cpp's make_qkx2_quants: scales and mins within 1e-5
 relative (float32 sums in another order), codes identical but for a near tie - measured 0 of 18,432 for Q2_K,
 5 of 18,432 for Q4_K on heavy-tailed weights.
+Invariant: a base laid out as GGUF blocks (gguf_blocks) is ggml's block_q2_K / block_q4_K byte for byte, and
+from_gguf_blocks reads it back to the same base exactly.
 """
 
 from __future__ import annotations
@@ -161,6 +163,71 @@ class KBase:
     def dequantize(self) -> torch.Tensor:
         """float32 [out, super-blocks, blocks, block]."""
         return self.steps() * self.codes.float() - self.offsets()
+
+
+# ==== GGUF block layout ====
+# The base is stored as ggml stores it: the codes, block scales and super-block pair with no bit to spare
+# (KFormat.bits_per_weight), checked byte for byte against gguf-py's dequantizer.
+
+_FP16_BYTES = 2
+_Q4_K_SPLIT = 4  # block_q4_K keeps the low 6 bits of scales and mins 0..3 whole and splits those of 4..7
+_LOW6, _LOW4 = 0x3F, 0x0F
+
+
+def gguf_blocks(base: KBase) -> torch.Tensor:
+    """uint8 [out, super-blocks, bytes]: every super-block of the base as ggml's block_q2_K or block_q4_K."""
+    out, n_super = base.d.shape
+    codes = base.codes.reshape(out * n_super, QK_K)
+    scales = base.scales.reshape(out * n_super, -1)
+    mins = base.mins.reshape(out * n_super, -1)
+    d = base.d.reshape(-1, 1).view(torch.uint8)
+    dmin = base.dmin.reshape(-1, 1).view(torch.uint8)
+    if base.fmt is Q2_K:
+        # qs[32 * half + i] holds the codes 128 * half + 32 * g + i of the four groups g, group g in bits 2g
+        groups = codes.view(-1, 2, 4, 32)
+        qs = (groups[:, :, 0] | groups[:, :, 1] << 2 | groups[:, :, 2] << 4 | groups[:, :, 3] << 6).reshape(-1, QK_K // 4)
+        blocks = torch.cat([scales | mins << 4, qs, d, dmin], dim=1)
+    elif base.fmt is Q4_K:
+        # qs[32 * quarter + i] holds codes 64 * quarter + i (low nibble) and 64 * quarter + 32 + i (high)
+        halves = codes.view(-1, 4, 2, 32)
+        qs = (halves[:, :, 0] | halves[:, :, 1] << 4).reshape(-1, QK_K // 2)
+        low, high = slice(0, _Q4_K_SPLIT), slice(_Q4_K_SPLIT, None)
+        packed = torch.cat([scales[:, low] | (scales[:, high] >> 4) << 6,
+                            mins[:, low] | (mins[:, high] >> 4) << 6,
+                            (scales[:, high] & _LOW4) | (mins[:, high] & _LOW4) << 4], dim=1)
+        blocks = torch.cat([d, dmin, packed, qs], dim=1)
+    else:
+        raise ValueError(f"no GGUF layout for {base.fmt.name}")
+    return blocks.view(out, n_super, -1)
+
+
+def from_gguf_blocks(blocks: torch.Tensor, fmt: KFormat) -> KBase:
+    """The base gguf_blocks laid out: uint8 [out, super-blocks, bytes] in, the codes and scales as KBase holds them out."""
+    out, n_super, _ = blocks.shape
+    flat = blocks.reshape(out * n_super, -1)
+    n_blocks = QK_K // fmt.block
+    if fmt is Q2_K:
+        packed, qs, tail = flat[:, :n_blocks], flat[:, n_blocks:n_blocks + QK_K // 4], flat[:, n_blocks + QK_K // 4:]
+        scales, mins = packed & _LOW4, packed >> 4
+        shifts = torch.arange(0, 8, 2, device=flat.device, dtype=torch.uint8)
+        codes = ((qs.view(-1, 2, 1, 32) >> shifts.view(1, 1, 4, 1)) & 3).reshape(-1, QK_K)
+        d, dmin = tail[:, :_FP16_BYTES], tail[:, _FP16_BYTES:]
+    elif fmt is Q4_K:
+        d, dmin = flat[:, :_FP16_BYTES], flat[:, _FP16_BYTES:2 * _FP16_BYTES]
+        packed, qs = flat[:, 2 * _FP16_BYTES:2 * _FP16_BYTES + 12], flat[:, 2 * _FP16_BYTES + 12:]
+        first, second, third = packed[:, :4], packed[:, 4:8], packed[:, 8:]
+        scales = torch.cat([first & _LOW6, (third & _LOW4) | (first >> 6) << 4], dim=1)
+        mins = torch.cat([second & _LOW6, (third >> 4) | (second >> 6) << 4], dim=1)
+        quarters = qs.view(-1, 4, 1, 32)
+        codes = torch.cat([quarters & _LOW4, quarters >> 4], dim=2).reshape(-1, QK_K)
+    else:
+        raise ValueError(f"no GGUF layout for {fmt.name}")
+    return KBase(fmt=fmt,
+                 codes=codes.reshape(out, n_super, n_blocks, fmt.block).contiguous(),
+                 scales=scales.reshape(out, n_super, n_blocks).contiguous(),
+                 mins=mins.reshape(out, n_super, n_blocks).contiguous(),
+                 d=d.contiguous().view(torch.float16).reshape(out, n_super),
+                 dmin=dmin.contiguous().view(torch.float16).reshape(out, n_super))
 
 
 def _quantize_scale(values: torch.Tensor, max_value: torch.Tensor, top: int) -> torch.Tensor:

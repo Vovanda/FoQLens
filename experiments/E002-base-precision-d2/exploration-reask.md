@@ -28,4 +28,4 @@ changed over the last steps, and check that the reply does not loop. The window 
 probability rose without being high and there is no repetition. If it stays flat, the model is producing nonsense
 without an answer and gets no extension.
 
-Runs: `runs/E002-base-precision-d2/reask-1024`, code `stage1_answers --cut-of --written-tokens` (e5a5abb).
+Runs: `runs/E002-base-precision-d2/reask-1024`, code `stage1_answers --cut-of --written-tokens` (06994b3).

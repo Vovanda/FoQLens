@@ -1,7 +1,7 @@
 # Results - uniform quantization on the corpus
 
 Measured 2026-09-16. gemma-4-E2B-it answers the frozen corpus, 20,640 questions a level: 18,576 it knows at
-bf16 and 2,064 of the unknown share. Answers at `0e08906`, the reasoning judge at `5b54c9e`
+bf16 and 2,064 of the unknown share. Answers at `7dc6070`, the reasoning judge at `02171b8`
 ([the corpus](../../docs/corpus.md)), raw lines in `runs/E001-uniform-quantization/`. Intervals are 95%, paired
 over the same questions, 10,000 bootstrap resamples.
 

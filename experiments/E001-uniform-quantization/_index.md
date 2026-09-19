@@ -6,8 +6,8 @@ hypotheses: [H6]
 statuses: [done]
 params:
   fixed: "cab0c69"
-  run: "2026-09-16 - answers 0e08906, the reasoning judge 5b54c9e, bf16 on the unknown share again 5b54c9e"
-  results: "5a0c108"
+  run: "2026-09-16 - answers 7dc6070, the reasoning judge 02171b8, bf16 on the unknown share again 02171b8"
+  results: "42f9622"
   verdict: "D8 keeps 98.8%, D6 96.6%, D4 85.7% - losing the facts in the weights first (19.8% against 5.6% with the passage) to wrong answers (Garbage under 1%); naive D2 is garbage (99.5%); on the unknown share D4 answers where bf16 refuses and is accepted 6.3 points more"
 ---
 

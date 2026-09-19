@@ -6,7 +6,7 @@ hypotheses: []
 statuses: [done]
 params:
   fixed: ""
-  run: "2026-09-17 - the k-quant ladder and two GGUF, judge 5b54c9e"
+  run: "2026-09-17 - the k-quant ladder and two GGUF, judge 02171b8"
   results: ""
   verdict: "D2 keeps 51.4% of bf16's knowledge, D4 91.0%, D6 96.8%, D8 98.8%"
 ---

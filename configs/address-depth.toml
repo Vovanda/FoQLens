@@ -10,3 +10,6 @@ depths = [1, 2, 4, 6, 8, 12, 18, 24]
 ridges = [0.01, 0.1, 1.0]
 base_level = "d2"
 base = "bartowski-Q2_K"
+# Windows [start, end) the address is read from, beside the depths' [0, N) (Volodya 19.09: read layers 4, 5 and 6,
+# not all before them): the pass still runs to the end, the window leaves out the layers close to the tokens.
+windows = [[2, 6], [3, 6], [4, 6], [5, 6], [4, 8], [6, 8]]

@@ -82,14 +82,16 @@ def working_address(frozen: np.ndarray, working: np.ndarray, seen: np.ndarray) -
 
 
 def deep_address(train_work: np.ndarray, train_full: np.ndarray, test_work: np.ndarray, test_full: np.ndarray,
-                 layers: np.ndarray, weights: np.ndarray, depth: int, ridge: float) -> dict:
-    """Does the working reading of the first `depth` layers name the address where the zones act - the layers after it.
+                 layers: np.ndarray, weights: np.ndarray, depth: int, ridge: float, start: int = 0) -> dict:
+    """Does the working reading of layers [start, depth) name the address where the zones act - the layers after it.
 
-    A ridge projection (projection.Projection) is fitted on the calibration questions from their working reading on
-    the early blocks to their full reading on the deep ones; the laid-out questions' deep address predicted by it is
-    identified against their real one. `ridge` is relative: alpha = ridge times the mean variance of an early block,
-    so that one value means the same at every depth. Beside it, the share of the weights left to the zones."""
-    early, deep = layers < depth, layers >= depth
+    The pass still runs every layer before `depth` at the base; `start` only chooses which of them the address is read
+    from, so that layers close to the tokens can be left out. A ridge projection (projection.Projection) is fitted on
+    the calibration questions from their working reading on the read blocks to their full reading on the deep ones; the
+    laid-out questions' deep address predicted by it is identified against their real one. `ridge` is relative:
+    alpha = ridge times the mean variance of a read block, so that one value means the same at every window. Beside
+    it, the share of the weights left to the zones."""
+    early, deep = (layers >= start) & (layers < depth), layers >= depth
     x = train_work[:, early]
     alpha = ridge * float(np.var(x, axis=0).mean()) * len(x)
     predicted = Projection.fit(x, train_full[:, deep], alpha).apply(test_work[:, early]).cpu().numpy()

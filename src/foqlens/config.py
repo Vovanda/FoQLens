@@ -88,9 +88,12 @@ class DepthCheck:
     corpora: tuple[str, ...]
     sources: tuple[str, ...]
     depths: tuple[int, ...]
-    ridges: tuple[float, ...]  # relative: alpha is ridge times the mean variance of an early block; every one tried
+    ridges: tuple[float, ...]  # relative: alpha is ridge times the mean variance of a read block; every one tried
     base_level: str
     base: str | None = None
+    # windows [start, end) of layers the address is read from, beside the depths' [0, N): the pass runs up to the end
+    # either way, the window only leaves out layers close to the tokens
+    windows: tuple[tuple[int, int], ...] = ()
 
 
 @dataclass(frozen=True)

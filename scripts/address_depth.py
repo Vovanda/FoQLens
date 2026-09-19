@@ -85,14 +85,16 @@ def main(argv: list[str] | None = None) -> Path:
                 made = bench.source(source_name)
                 full = bench.masks(prompts, [made])[made.name]
                 work = bench.masks(prompts, [made], level=base_level)[made.name]
-                curves = {ridge: {depth: deep_address(work[:n_train], full[:n_train], work[n_train:], full[n_train:],
-                                                      layers, weights, depth, ridge) for depth in check.depths}
-                          for ridge in check.ridges}
+                train, test = (work[:n_train], full[:n_train]), (work[n_train:], full[n_train:])
+                reads = {f"{start}-{end}": (start, end) for start, end in
+                         [(0, depth) for depth in check.depths] + [tuple(w) for w in check.windows]}
+                curves = {ridge: {label: deep_address(*train, *test, layers, weights, end, ridge, start)
+                                  for label, (start, end) in reads.items()} for ridge in check.ridges}
                 summary["sources"][source_name][corpus] = curves
                 for ridge, curve in curves.items():
                     print(f"{source_name} {corpus} ridge {ridge:g} ({len(laid)} laid, {n_train} calibration): " +
-                          ", ".join(f"N={d} {r['identified']:.3f} (zoned {r['zoned_weight_share']:.2f})"
-                                    for d, r in curve.items()), flush=True)
+                          ", ".join(f"[{w}) {r['identified']:.3f} (zoned {r['zoned_weight_share']:.2f})"
+                                    for w, r in curve.items()), flush=True)
                 write_json(target, summary)  # a source at a time: a later failure keeps what is measured
     summary["gpu"] = gpu.summary()
     write_json(target, summary)

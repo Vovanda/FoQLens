@@ -57,6 +57,19 @@ def test_early_layers_that_carry_the_question_predict_its_deep_address_and_noise
     assert lost["identified"] < 0.1
 
 
+def test_a_window_reads_only_its_layers_and_leaves_the_same_deep_part():
+    rng = np.random.default_rng(4)
+    layers = np.repeat(np.arange(4), 50)
+    weights = np.ones(len(layers))
+    latent = rng.normal(size=(500, 8))
+    masks = latent @ rng.normal(size=(8, len(layers))) + rng.normal(size=(500, len(layers))) * 0.1
+    blind = masks.copy()
+    blind[:, layers == 0] = rng.normal(size=(500, 50))  # layer 0 carries nothing: a window that skips it loses nothing
+    window = deep_address(blind[:400], masks[:400], blind[400:], masks[400:], layers, weights, depth=2, ridge=1e-3,
+                          start=1)
+    assert window["identified"] > 0.9 and window["zoned_weight_share"] == 0.5
+
+
 def test_the_bag_counts_every_token_once_per_occurrence_over_a_shared_vocabulary():
     bag = bag_of_tokens([[5, 7, 7], [7, 9]])
     assert bag.shape == (2, 3)  # tokens 5, 7, 9

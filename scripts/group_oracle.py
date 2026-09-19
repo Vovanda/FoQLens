@@ -19,7 +19,7 @@ import numpy as np
 from foqlens import config, refocustensors, runlog
 from foqlens import model as fm
 from foqlens.gpu_share import default_share
-from foqlens.group_oracle import answer_nll, block_groups, lift_layouts, minimal_prefix
+from foqlens.group_oracle import answer_nll, block_groups, joined_answer, lift_layouts, minimal_prefix
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
@@ -31,16 +31,18 @@ MODEL = fm.E2B_IT
 LOG = logging.getLogger("foqlens.group_oracle")
 
 
-def variants_nll(bench: Bench, prompt: str, answer: str, layouts: np.ndarray, batch_tokens: int) -> np.ndarray:
-    """The answer's NLL under every layout, as many variants a batch as `batch_tokens` holds: [variants]."""
-    length = len(bench.tokenizer(prompt + answer)["input_ids"])
-    size = max(1, batch_tokens // length)
+def variants_nll(bench: Bench, prompt: str, answer: str, layouts: np.ndarray, size: int) -> np.ndarray:
+    """The answer's NLL under every layout, `size` variants a batch: [variants].
+
+    The last batch is filled up to `size` by repeating its last layout, so every batch of a question is one GEMM shape:
+    bf16 rounds by the shape, and the variants of a question are compared across batches."""
     out = []
     for start in range(0, len(layouts), size):
         part = layouts[start:start + size]
+        full = np.concatenate([part, np.repeat(part[-1:], size - len(part), axis=0)])
         with bench.throttle.batch():
-            bench.ctl.set_layout(part)
-            out.append(answer_nll(bench.model, bench.tokenizer, [prompt] * len(part), [answer] * len(part)).cpu())
+            bench.ctl.set_layout(full)
+            out.append(answer_nll(bench.model, bench.tokenizer, [prompt] * size, [answer] * size)[:len(part)].cpu())
     return np.concatenate([o.numpy() for o in out])
 
 
@@ -74,18 +76,20 @@ def main(argv: list[str] | None = None) -> Path:
     progress = Progress(len(laid), "question")
     with stage(LOG, f"oracles by trying on {len(laid)} questions, {g} groups"):
         for q, ((corpus, row), prompt) in enumerate(zip(laid, prompts)):
-            answer = " " + row.answers[0] if row.answers else ""
+            answer = joined_answer(prompt, row.answers[0]) if row.answers else ""
             if not answer.strip():
                 LOG.warning("%s %s has no reference answer and is left out", corpus, row.id)
                 continue
-            nll = variants_nll(bench, prompt, answer, np.concatenate([fixed, dropped]), check.batch_tokens)
+            first = np.concatenate([fixed, dropped])
+            length = len(bench.tokenizer(prompt + answer)["input_ids"])
+            size = max(1, min(check.batch_tokens // length, len(first)))
+            nll = variants_nll(bench, prompt, answer, first, size)
             ends[q] = nll[:2]  # every block at low, every block at high
             lift[q] = nll[0] - nll[2:2 + g]
             drop[q] = nll[2 + g:] - nll[1]
             order = np.argsort(-lift[q], kind="stable")
             prefix[q] = variants_nll(bench, prompt, answer,
-                                     lift_layouts(groups, [order[:k + 1] for k in range(g)], low, high),
-                                     check.batch_tokens)
+                                     lift_layouts(groups, [order[:k + 1] for k in range(g)], low, high), size)
             minimal[q] = minimal_prefix(np.concatenate([[ends[q, 0]], prefix[q]]), ends[q, 1], check.tolerance)
             LOG.info(progress.step(f"{corpus} {row.id}: minimal mask {minimal[q]} of {g} groups"),
                      extra={"corpus": corpus, "id": row.id, "minimal": int(minimal[q])})

@@ -172,3 +172,16 @@ class GroupOracleCheck:
     high: str
     tolerance: float  # nats of the answer's mean NLL: how close to every block at `high` a minimal mask must come
     batch_tokens: int  # padded tokens a batch of variants holds
+
+
+@dataclass(frozen=True)
+class OverlayCheck:
+    """The overlay of the oracles (foqlens.oracle_overlay): block oracles' kept masks and the oracles by trying, on the
+    small corpus's laid-out questions the model knows."""
+
+    block_oracles: Mapping[str, str]  # name -> masks kept by small_corpus_masks.py
+    group_oracle: str  # the file of group_oracle.py
+    top_share: float  # the share of groups whose overlap between two oracles is read
+    bootstrap_draws: int
+    level: float  # of the bootstrap intervals
+    seed: int = 0

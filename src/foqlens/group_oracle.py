@@ -53,6 +53,13 @@ def lift_layouts(groups: np.ndarray, chosen: list[np.ndarray], low: Level, high:
     return out
 
 
+def joined_answer(prompt: str, answer: str) -> str:
+    """The answer as the model would write it after `prompt`: right after a prompt that ends on whitespace (the -it
+    turn ends with "model\\n", where a leading space makes another first token and costs it ~20 nats), else after one."""
+    answer = answer.strip()
+    return answer if not prompt or prompt[-1].isspace() else " " + answer
+
+
 def minimal_prefix(nll: np.ndarray, target: float, tolerance: float) -> int:
     """The fewest groups of a prefix sweep (nll[k] = the answer's NLL with the first k groups lifted) whose NLL is
     within `tolerance` of `target`; the whole sweep when none is."""

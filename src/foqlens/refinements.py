@@ -22,6 +22,8 @@ Invariant: the exact tail restores the source weight bit for bit from the predic
 source type in ORDER_BITS.
 Invariant: a copy taken apart into tensors and put back (tensors, KRefinedWeight.from_tensors) reads exactly as before
 at every depth.
+Invariant: stack_fit counts a weight past the stored depth's bound only if its base error is past half a step - the
+refinements bring every other weight within step / 2 / 4**k.
 """
 
 from __future__ import annotations
@@ -310,3 +312,37 @@ class ForeignLadder:
     def read(self, name: str, weight: torch.Tensor, level) -> torch.Tensor:
         copy = self.quantize(name, weight)
         return copy.dequantize(weight.dtype, copy.read_depth(level.depth))
+
+
+# How far past half a step a base error must be to count as out of the refinements' reach: fp32 noise of the
+# subtraction, relative to the step.
+HALF_STEP_SLACK = 1e-5
+
+
+@dataclass(frozen=True)
+class StackFit:
+    """How a copy holds the weight it was cut from, depth by depth.
+
+    A refinement codes the rest within +-half its step, so a weight whose base error is past half the block's step is out
+    of the refinements' reach: every depth leaves it where the first one clamped it. A base quantized to the nearest
+    level has few such weights; a base fitted to a weighted error (an imatrix) may leave more.
+    """
+
+    past_half_step: float  # share of weights whose base error is past half their block's step
+    past_bound_at_top: float  # share whose error at the stored depth is past half the step of that depth
+    error_by_depth: dict[int, float]  # RMS error against the source over the source's RMS, at every depth held
+
+
+def stack_fit(copy: KRefinedWeight, source: torch.Tensor) -> StackFit:
+    """StackFit of `copy` against the `source` weight [out, in] it was cut from."""
+    base = copy.base
+    step = base.steps().abs()  # a symmetric base's scale is signed
+    past = (_blocks(source, copy.fmt) - base.dequantize()).abs() > step / 2 * (1 + HALF_STEP_SLACK)
+    top = copy.depth
+    top_step = step / float(_REFINEMENT_LEVELS) ** (top - copy.fmt.base_depth)
+    top_error = (copy.dequantize(torch.float32, top).view_as(past) - _blocks(source, copy.fmt)).abs()
+    scale = source.float().pow(2).mean().sqrt()
+    by_depth = {d: float((copy.dequantize(torch.float32, d) - source.float()).pow(2).mean().sqrt() / scale)
+                for d in range(copy.fmt.base_depth, top + 1)}
+    return StackFit(float(past.float().mean()),
+                    float((top_error > top_step / 2 * (1 + HALF_STEP_SLACK)).float().mean()), by_depth)

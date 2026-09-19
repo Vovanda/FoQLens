@@ -156,6 +156,14 @@ class ModelFile:
         key = self._key_of[name]
         return self._refined(key, self._parts(key))
 
+    def source_weight(self, name: str) -> torch.Tensor:
+        """The source weight of the controlled weight `name`, bit for bit, from its copy and exact tail."""
+        key = self._key_of[name]
+        if not self.modules[key]["exact"]:
+            raise ValueError(f"{self.path} is cut to a depth and holds no source of {name}")
+        parts = self._parts(key)
+        return ExactTail.from_tensors(parts, DTYPES[self.modules[key]["dtype"]]).decode(self._refined(key, parts).prediction())
+
     def passed_state(self) -> dict[str, torch.Tensor]:
         """The weights the regulator does not read, as the source holds them, on the device."""
         return {key: self._read(key) for key in self._passed}
@@ -171,10 +179,7 @@ class ModelFile:
             raise ValueError(f"{self.path} is cut to a depth and holds no source weights: load it resident")
         state = self.passed_state()
         for key, module in self.modules.items():
-            parts = self._parts(key)
-            refined = self._refined(key, parts)
-            tail = ExactTail.from_tensors(parts, DTYPES[module["dtype"]])
-            state[key] = tail.decode(refined.prediction())
+            state[key] = self.source_weight(module["name"])
         return state
 
     def _parts(self, key: str) -> dict[str, torch.Tensor]:

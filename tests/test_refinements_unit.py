@@ -129,3 +129,24 @@ def test_the_ladder_reads_each_class_from_its_own_base():
 def test_a_copy_holds_its_bits_per_weight_and_no_byte_more(fmt):
     copy = KRefinedWeight.quantize(make_weight(seed=12), fmt)
     assert copy.nbytes * 8 == copy.bits_per_weight(MAX_DEPTH) * copy.shape[0] * copy.shape[1]
+
+
+def test_a_weight_past_half_a_step_of_its_base_is_out_of_the_refinements_reach():
+    from foqlens.kquant import KBase, gguf_blocks
+    from foqlens.refinements import stack_fit
+
+    torch.manual_seed(0)
+    source = torch.randn(64, 256) * 0.02
+    base = KBase.quantize(source, Q2_K)
+    fitted = stack_fit(KRefinedWeight.over(gguf_blocks(base), Q2_K, source), source)
+    # every weight within half a step of its base is brought within the top depth's bound
+    assert fitted.past_bound_at_top <= fitted.past_half_step
+    errors = list(fitted.error_by_depth.values())
+    assert errors == sorted(errors, reverse=True) and errors[-1] < errors[0] / 16
+    # push some weights two steps away from the base they were quantized to: the refinements cannot bring them back
+    step = base.steps().reshape(64, 256 // Q2_K.block, 1).expand(-1, -1, Q2_K.block).reshape(64, 256)
+    moved = source.clone()
+    moved[:, :8] += 2 * step[:, :8].abs()
+    off = stack_fit(KRefinedWeight.over(gguf_blocks(base), Q2_K, moved), moved)
+    assert off.past_half_step >= 8 / 256 and off.past_bound_at_top >= 8 / 256
+    assert off.error_by_depth[4] > 10 * fitted.error_by_depth[4]

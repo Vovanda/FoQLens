@@ -39,7 +39,7 @@ The base and the refinements are computed in fp32. bf16, fp16 and fp32 convert t
 
 The bottom of the stack is a parameter, D2 (Q2_K) now. There may be any number of refinements: `refinement.<k>` are read in order while they last, and the format fixes no count; the cut lays them to D8 now.
 
-Tensors the regulator does not read (embeddings, norms, the vision and audio towers) lie in the file as in the source. On E2B-it they are 6.04 of the checkpoint's 9.54 GiB, 4.7 GiB of it the per-layer embedding table.
+Tensors the regulator does not read (embeddings, norms, the vision and audio towers) lie in the file as in the source. On E2B-it they are 6.04 of the checkpoint's 9.54 GiB, 4.37 GiB of it the per-layer embedding table (262,144 tokens x 35 layers x 256, bf16).
 
 ## The file
 
@@ -81,7 +81,7 @@ The bench (`Bench.load`) takes its model from one of three sources:
 | `RESIDENT` | the copies alone; no source weight of a controlled module is loaded | D2 ... D8 | 7.06 GiB, of it 1.86 the copies |
 | `CHECKPOINT` | the Hugging Face checkpoint, the copy quantized from bf16 | bf16, D2 ... D8 | 8.6 GiB and the copies |
 
-A model that was never cut is not loaded, and the error names the command that cuts it. The weights become the model's parameters without a copy: 13.5 GiB of Windows commit charge at the peak of a load. The bench computes masks at bf16, so a resident bench serves runs without masks. In the resident bench 4.7 GiB are the per-layer embedding table in bf16; the copies hold the base as ggml blocks and the refinements packed, as the file does.
+A model that was never cut is not loaded, and the error names the command that cuts it. The weights become the model's parameters without a copy: 13.5 GiB of Windows commit charge at the peak of a load. The bench computes masks at bf16, so a resident bench serves runs without masks. In the resident bench 4.37 GiB are the per-layer embedding table in bf16; the copies hold the base as ggml blocks and the refinements packed, as the file does.
 
 The three sources give the same logits bit for bit at every depth, and `FILE` and `CHECKPOINT` also at bf16 - the logits of `from_pretrained`.
 

@@ -81,11 +81,13 @@ STORAGE = {Level.INT8: Int8Weight, Level.NF4: Nf4Weight} | {lv: RefinedWeight fo
 DEPTH_BY_CODE = np.array([lv.depth if lv.depth or lv is Level.ZERO else MAX_DEPTH for lv in Level], dtype=np.uint8)
 DEEPEST = max((lv for lv in Level if lv.depth), key=lambda lv: lv.depth)  # the deepest read depth, D8
 # A layout of depths and ZERO over a k-quant copy is read by the kernel, straight from the copy's bytes, up to this many
-# tokens: unpacking costs ~3.8 ms a 12288x1536 module whatever the tokens, the kernel 0.10 ms at D8 up to 8 tokens and
-# 1.0 ms at 256 (2026-09-18, scripts/kernel_speed.py), so a longer input - a prefill - has the kernel unpack the copy,
-# every block to its depth, for one GEMM (kquant_unpack). Off, every read unpacks in torch.
+# tokens; past it the kernel unpacks the copy, every block to its depth, for one GEMM (kquant_unpack). On a 12288x1536
+# module at D8 the two meet at 32 tokens, 0.138 against 0.139 ms, and at 256 the GEMM is 3.6x faster
+# (scripts/kernel_speed.py); a step of E2B-it at a mixed layout takes 28.4 ms at a batch of 64 and 40.0 at 128 with the
+# threshold at 32, against 42.5 and 70.2 at 256, and 27.0 at 32 either way (scripts/decode_step_speed.py, 2026-09-19).
+# Off, every read unpacks in torch.
 KERNEL = True
-KERNEL_MAX_TOKENS = 256
+KERNEL_MAX_TOKENS = 32
 
 
 @functools.cache

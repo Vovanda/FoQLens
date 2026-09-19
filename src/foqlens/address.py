@@ -26,6 +26,9 @@ share, the wrapper included, drops out and only what tells a question apart is l
   target - the layers from the deepest depth on - so that depths differ only in what they read; per question its hit
   and margin; whether the questions a deeper reading rescues stand out at the shallow one (AUC); the stop-or-go-deeper
   policy's identification against its mean depth.
+- stop_summary: how deep a set of questions reads under the silhouette rule. Read on two sets written for it, trivial
+  questions and hard ones: the hard ones read deeper where the AUC of their stops against the trivial ones' is above
+  0.5; a set that mostly hits the cap has no stop to compare.
 - agreement: two sources score different blocks, so their masks are not compared entry by entry; they agree where they
   place the same questions near and far alike - the correlation of their question-by-question cosines.
 
@@ -188,19 +191,35 @@ def silhouette_stop(predicted: dict[int, np.ndarray], k: int, tolerance: float, 
     """Every question's stop (Volodya 19.09): read layer by layer; once the silhouette holds `patience` depths running
     (Jaccard at least 1 - tolerance), roll back to where that run began - the zones act from there. Reading never goes
     past `cap` layers, patience included: a question that has not settled by then stops as deep as the cap allows."""
+    return silhouette_run(predicted, k, tolerance, patience, cap)[0]
+
+
+def silhouette_run(predicted: dict[int, np.ndarray], k: int, tolerance: float, patience: int,
+                   cap: int) -> tuple[np.ndarray, np.ndarray]:
+    """silhouette_stop and whether each question settled: one that settles at the deepest depth the cap allows and one
+    that never settles stop at the same depth, and only the second one hit the cap."""
     depths = [d for d in sorted(predicted) if d <= cap]
     overlap = silhouette_overlap({d: predicted[d] for d in depths}, k)
     held = np.stack([overlap[d] >= 1 - tolerance for d in depths[1:]])  # [depths - 1, questions]: depth i+1 holds i
     last = max(d for d in depths if d + patience <= cap)
     stops = np.full(held.shape[1], last)
+    settled = np.zeros(held.shape[1], dtype=bool)
     for q in range(held.shape[1]):
         for i in range(len(depths) - patience):
             if depths[i] + patience > cap:
                 break
             if held[i : i + patience, q].all():
-                stops[q] = depths[i]
+                stops[q], settled[q] = depths[i], True
                 break
-    return stops
+    return stops, settled
+
+
+def stop_summary(stops: np.ndarray, settled: np.ndarray) -> dict:
+    """How deep a set of questions reads under the silhouette rule: the mean stop, how many stop at every depth, and
+    the share that never settled and hit the cap."""
+    return {"questions": len(stops), "mean_stop": float(stops.mean()),
+            "stops": {int(d): int((stops == d).sum()) for d in np.unique(stops)},
+            "capped_share": float((~settled).mean())}
 
 
 def stop_policy(predicted: dict[int, np.ndarray], actual: np.ndarray, stops: np.ndarray, patience: int) -> dict:

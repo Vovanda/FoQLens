@@ -118,6 +118,29 @@ class AdaptiveCheck:
 
 
 @dataclass(frozen=True)
+class ProbeCheck:
+    """How deep sets of questions written for it read under the silhouette rule (foqlens.address.stop_summary): the
+    projection is fitted on the calibration questions of every corpus together, then predicts each probe's address
+    from every depth, and the rule picks its stop. A probe is asked in the frozen wrapper of `probe_corpus`, one of
+    those corpora, so that the projection meets the form it was fitted on and only the question differs."""
+
+    corpus: str  # the SmallCorpus file
+    corpora: tuple[str, ...]  # whose calibration questions fit the projection, together
+    probe_corpus: str  # whose frozen wrapper every probe is asked in; one of `corpora`
+    probes: Mapping[str, str]  # set name -> a jsonl of {"id", "question"}; other keys are not shown to the model
+    source: str
+    depths: tuple[int, ...]  # every depth predicts the address from the deepest one on
+    ridge: float  # relative, as in DepthCheck
+    base_level: str
+    silhouette: int  # k, as in AdaptiveCheck
+    tolerance: float
+    patience: int
+    cap_share: float
+    base: str | None = None
+    corpus_overrides: Mapping[str, str] = field(default_factory=dict)  # corpus -> its own SmallCorpus file
+
+
+@dataclass(frozen=True)
 class ParaphraseCheck:
     """Does a mask source find a question's meaning or its words: the question against its paraphrase, beside the
     same test on their bags of tokens."""

@@ -1,0 +1,25 @@
+{"id": "h01", "question": "Prove that there are infinitely many prime numbers."}
+{"id": "h02", "question": "Prove that the square root of 2 is irrational."}
+{"id": "h03", "question": "Prove that the sum of the first n odd numbers is n squared."}
+{"id": "h04", "question": "Prove that in any group of six people there are three who all know each other or three who are all strangers."}
+{"id": "h05", "question": "Prove that a graph is bipartite if and only if it has no cycle of odd length."}
+{"id": "h06", "question": "Prove that every tree with n vertices has exactly n - 1 edges."}
+{"id": "h07", "question": "Prove that the harmonic series 1 + 1/2 + 1/3 + ... diverges."}
+{"id": "h08", "question": "Prove that the set of real numbers is uncountable."}
+{"id": "h09", "question": "Prove that for any integer n, n cubed minus n is divisible by 6."}
+{"id": "h10", "question": "Prove that the angles of a triangle add up to 180 degrees in Euclidean geometry."}
+{"id": "h11", "question": "Prove that a continuous function on a closed interval attains a maximum."}
+{"id": "h12", "question": "Prove that the arithmetic mean of two non-negative numbers is at least their geometric mean."}
+{"id": "h13", "question": "Prove that if a prime p divides a product ab, then p divides a or p divides b."}
+{"id": "h14", "question": "Prove that the number of subsets of a set with n elements is 2 to the power n."}
+{"id": "h15", "question": "Prove that every positive integer greater than 1 can be written as a product of primes."}
+{"id": "h16", "question": "Derive the formula for the sum of a geometric series and state when the infinite series converges."}
+{"id": "h17", "question": "Prove that the halting problem is undecidable."}
+{"id": "h18", "question": "Show that comparison-based sorting needs at least on the order of n log n comparisons in the worst case."}
+{"id": "h19", "question": "Explain why the determinant of a matrix is zero exactly when its columns are linearly dependent, and prove one direction."}
+{"id": "h20", "question": "Prove that Dijkstra's algorithm finds shortest paths when all edge weights are non-negative, and show why a negative edge breaks it."}
+{"id": "h21", "question": "Derive the escape velocity from the surface of a planet of mass M and radius R."}
+{"id": "h22", "question": "Explain from conservation of energy and momentum why a perfectly elastic head-on collision of equal masses swaps their velocities."}
+{"id": "h23", "question": "Prove that the eigenvalues of a real symmetric matrix are real."}
+{"id": "h24", "question": "Prove that there is no largest even number."}
+{"id": "h25", "question": "Show that the expected number of coin flips to get the first head with a fair coin is 2."}

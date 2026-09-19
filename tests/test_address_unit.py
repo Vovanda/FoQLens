@@ -4,7 +4,8 @@ import numpy as np
 import pytest
 
 from foqlens.address import (adaptive_depth, agreement, bag_of_tokens, deep_address, depth_cap, excess,
-                             identification, layer_profile, per_question, rank_auc, silhouette_stop, stop_policy)
+                             identification, layer_profile, per_question, rank_auc, silhouette_run, silhouette_stop,
+                             stop_policy, stop_summary)
 
 
 def test_masks_identify_themselves_and_noise_identifies_nothing_beyond_chance():
@@ -125,6 +126,17 @@ def test_a_settled_silhouette_stops_early_a_moving_one_later_and_a_restless_one_
     stops = silhouette_stop(predicted, k=4, tolerance=0.1, patience=2, cap=12)
     assert stops.tolist() == [6, 8, 10]  # the restless one: 10 + patience 2 = the cap of 12
     assert (stops + 2 <= 12).all()
+
+
+def test_only_a_question_that_never_settles_hit_the_cap_though_a_late_one_stops_as_deep():
+    predicted = silhouettes([10, 20], range(3, 13))  # settles at 10 - the deepest the cap of 12 lets hold - and never
+    stops, settled = silhouette_run(predicted, k=4, tolerance=0.1, patience=2, cap=12)
+    assert stops.tolist() == [10, 10] and settled.tolist() == [True, False]
+
+
+def test_the_stop_summary_counts_every_depth_and_the_questions_that_hit_the_cap():
+    found = stop_summary(np.array([4, 4, 8, 8]), np.array([True, True, True, False]))
+    assert found == {"questions": 4, "mean_stop": 6.0, "stops": {4: 2, 8: 2}, "capped_share": 0.25}
 
 
 def test_the_cap_is_a_share_of_the_network_and_refuses_a_whole_or_empty_one():

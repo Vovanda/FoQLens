@@ -72,3 +72,13 @@ def test_the_adaptive_configuration_reads_and_its_policy_lies_among_its_depths()
     check = config.read(CONFIGS / "address-adaptive.toml", config.AdaptiveCheck)
     assert check.source in ADDRESS_SOURCES and check.low in check.depths and check.high in check.depths
     assert all((CONFIGS.parent / path).exists() for path in check.corpus_overrides.values())
+
+
+def test_the_probe_configuration_reads_and_every_probe_set_names_its_questions_once():
+    check = config.read(CONFIGS / "address-probes.toml", config.ProbeCheck)
+    assert check.source in ADDRESS_SOURCES and all(c in SETUPS for c in check.corpora) and check.probes
+    assert check.probe_corpus in check.corpora
+    for path in check.probes.values():
+        rows = [json.loads(line) for line in (CONFIGS.parent / path).read_text(encoding="utf-8").splitlines() if line]
+        ids = [r["id"] for r in rows]
+        assert ids and len(ids) == len(set(ids)) and all(r["question"] for r in rows)

@@ -47,6 +47,10 @@ DEFAULT_TOP_K = 4
 # largest score (E2B, 8 questions of 131 tokens). The math backend is deterministic, at +5% time and +0.8 GiB peak
 # on that batch (RTX 3090 Ti, 2026-09-12). Forward-only passes stay on the default: its forward is deterministic.
 GRADIENT_ATTENTION = SDPBackend.MATH
+# The math backend keeps a [heads, seq, seq] attention matrix of every layer for the backward pass, so its memory
+# grows with the square of the prompt; memory-efficient attention's grows linearly and is the one a long prompt (a
+# HotpotQA passage of 3000+ tokens) can take, at the non-determinism above. A run names one of these by its config.
+GRADIENT_BACKENDS = {"math": SDPBackend.MATH, "efficient": SDPBackend.EFFICIENT_ATTENTION}
 MODES = ("norm", "pooled", "attention")
 
 Scored = dict[str, tuple[np.ndarray, list[int]]]  # mode -> (mask vector, token positions used)
@@ -371,9 +375,10 @@ class GradientScorer:
     """Gradient x activation per block of each query's own language-model loss."""
 
     def __init__(self, model: nn.Module, modules: dict[str, MixedPrecisionLinear], loss_chunk: int = LOSS_CHUNK,
-                 gap: tuple[Level, Level] | None = None):
+                 gap: tuple[Level, Level] | None = None, attention: SDPBackend = GRADIENT_ATTENTION):
         self.modules = modules
         self.loss_chunk = loss_chunk
+        self.attention = attention  # the sdpa backend of the backward pass (GRADIENT_BACKENDS)
         self.gap = gap  # (low, high): the same backward pass also gives the "quant_gap" form (QuantGapRecorder)
         # parameters stay frozen: the graph runs through activations, starting at the embedding output
         model.requires_grad_(False)
@@ -390,7 +395,7 @@ class GradientScorer:
         valid[:, 0] = 0
         with ExitStack() as stack:
             stack.enter_context(torch.enable_grad())
-            stack.enter_context(sdpa_kernel(GRADIENT_ATTENTION))
+            stack.enter_context(sdpa_kernel(self.attention))
             rec = stack.enter_context(TaylorRecorder(self.modules, valid))
             gap = stack.enter_context(QuantGapRecorder(self.modules, valid, *self.gap)) if self.gap else None
             hidden = model.model(**enc).last_hidden_state

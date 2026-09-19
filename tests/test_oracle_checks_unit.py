@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from foqlens.oracle_checks import base_agreement, end_gaps, matched, nll_agreement, rank_agreement, rung_ratio
+from foqlens.oracle_checks import base_agreement, end_gaps, matched, top_groups, nll_agreement, rank_agreement, rung_ratio
 from foqlens.oracle_overlay import block_group_ids
 
 
@@ -46,6 +46,11 @@ def test_end_gaps_count_where_the_low_base_is_within_the_tolerance_or_better():
     found = end_gaps(ends, np.array(["t", "t", "t", "s"]), tolerance=0.02)
     assert found["t"]["questions"] == 3 and found["t"]["within_tolerance"] == 2 / 3
     assert found["t"]["low_better"] == 1 / 3 and found["s"]["within_tolerance"] == 1.0
+
+
+def test_top_groups_rank_by_density_not_by_size():
+    got = top_groups(np.array([10.0, 3.0, 4.0]), ["big", "small", "mid"], np.array([100.0, 1.0, 2.0]), top=2)
+    assert got == ["small 3", "mid 2"]
 
 
 def test_blocks_go_to_their_layers_attention_or_the_rest_of_the_layer():

@@ -27,7 +27,7 @@ from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
 from foqlens.regulator import block_kinds, block_layers
 from foqlens.runlog import stage
-from foqlens.scoring import GradientScorer
+from foqlens.scoring import GRADIENT_BACKENDS, GradientScorer
 from foqlens.small_corpus import draw, pick_shard, store
 
 MODEL = fm.E2B_IT
@@ -70,7 +70,8 @@ def main(argv: list[str] | None = None) -> list[Path]:
     todo = todo[:args.limit] if args.limit else todo
     LOG.info("%d of %d questions within %d tokens with an answer", len(todo), len(pairs), check.max_tokens)
     gap = (Level[check.gap_low.upper()], Level[check.gap_high.upper()]) if check.gap_low else None
-    scorer = GradientScorer(bench.model, bench.ctl.modules, gap=gap)
+    scorer = GradientScorer(bench.model, bench.ctl.modules, gap=gap,
+                            attention=GRADIENT_BACKENDS[config.choose(check.attention, GRADIENT_BACKENDS, "attention")])
     # every form's source name: the rung gap is part of the quant_gap form's name
     forms_named = {form: form for form in FORMS} | (
         {"quant_gap": f"quant_gap_{gap[0].name.lower()}{gap[1].name.lower()}"} if gap else {})
@@ -91,18 +92,40 @@ def main(argv: list[str] | None = None) -> list[Path]:
         nll, first = kept["nll"], int(kept["batches_done"])
         masks = {form: kept[f"mask_{form}"] for form in forms_named}
         LOG.info("resumed after %d of %d batches from %s", first, len(batches), checkpoint.path)
+
+    def score(part: list[int]) -> bool:
+        """The gradients of `part` into the masks; False where it ran out of memory. The retry happens outside the
+        except, so the failed pass's tensors are freed first."""
+        try:
+            with bench.throttle.batch():
+                forms, nll[part] = scorer.answer_batch(bench.model, bench.tokenizer, [prompts[i] for i in part],
+                                                       [answers[i] for i in part])
+        except torch.OutOfMemoryError:
+            return False
+        for form in forms_named:
+            masks[form][part] = forms[form]
+        return True
+
     progress = Progress(len(batches) - first, "batch")
+    lost = int(kept["lost"]) if kept is not None else 0
     with stage(LOG, f"answer gradients of {len(todo)} questions at {level.name}"):
         for b, batch in enumerate(batches[first:], start=first):
-            with bench.throttle.batch():
-                forms, nll[batch] = scorer.answer_batch(bench.model, bench.tokenizer, [prompts[i] for i in batch],
-                                                        [answers[i] for i in batch])
-            for form in forms_named:
-                masks[form][batch] = forms[form]
+            if not score(batch):
+                torch.cuda.empty_cache()
+                # one question at a time; one that does not fit alone keeps no mask (NaN), counted like an overlong one
+                failed = list(batch) if len(batch) == 1 else []
+                for i in batch if len(batch) > 1 else []:
+                    if not score([i]):
+                        torch.cuda.empty_cache()
+                        failed.append(i)
+                for i in failed:
+                    LOG.warning("%s %s (%d tokens) runs out of memory alone and keeps no mask", pairs[i][0],
+                                pairs[i][1].id, lengths[i], extra={"tokens": int(lengths[i])})
+                lost += len(failed)
             LOG.info(progress.step(f"{len(batch)} questions, peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GiB"),
                      extra={"questions": len(batch), "peak_gib": torch.cuda.max_memory_allocated() / 2**30})
             if (b + 1) % SAVE_EVERY == 0:
-                checkpoint.save(nll=nll, batches_done=b + 1, **{f"mask_{f}": m for f, m in masks.items()})
+                checkpoint.save(nll=nll, batches_done=b + 1, lost=lost, **{f"mask_{f}": m for f, m in masks.items()})
     modules = bench.ctl.modules.values()
     targets = []
     for form, source in forms_named.items():
@@ -110,7 +133,8 @@ def main(argv: list[str] | None = None) -> list[Path]:
                      np.concatenate([m.block_sizes() * m.in_features for m in modules]),
                      {"model": name, "source": f"answer_{source}", "model_source": "file", "base": check.base,
                       "level": level.name, "corpus": check.corpus, "corpora": args.corpora,
-                      "max_tokens": check.max_tokens, "without_mask": int(len(pairs) - len(todo))})
+                      "max_tokens": check.max_tokens, "without_mask": int(len(pairs) - len(todo) + lost),
+                      "out_of_memory": lost, "attention": check.attention})
         target = args.out / f"answer_{source}-{stem}.npz"
         kept.save(target)
         LOG.info("written %s", target)

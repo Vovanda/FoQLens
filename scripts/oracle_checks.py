@@ -5,6 +5,7 @@
     energy:   the D4-D8 error energy against the D2-D8 on the same questions
     zero:     the oracle by trying over ZERO against the one over D2
     ends:     per topic, where every block low already answers within the tolerance of every block high
+    view:     a few questions of every corpus by eye - the minimal mask and every oracle's top groups
 
     uv run python scripts/oracle_checks.py --group-oracle runs/oracles/e2b-it/group-oracle-d2d8-....npz \
         gradient --masks runs/masks/e2b-it/answer_gradient-d8-....npz --nll runs/masks/e2b-it/answer_nll-d8-....npz
@@ -20,7 +21,15 @@ import numpy as np
 
 from foqlens.group_oracle import RUN_FIELDS
 from foqlens.io import read_npz_parts
-from foqlens.oracle_checks import base_agreement, end_gaps, matched, nll_agreement, rank_agreement, rung_ratio
+from foqlens.oracle_checks import (
+    base_agreement,
+    end_gaps,
+    matched,
+    nll_agreement,
+    rank_agreement,
+    rung_ratio,
+    top_groups,
+)
 from foqlens.oracle_overlay import block_group_ids, to_groups
 from foqlens.small_corpus import StoredMasks
 
@@ -45,6 +54,10 @@ def main(argv: list[str] | None = None) -> dict:
     zero = sub.add_parser("zero")
     zero.add_argument("--other", required=True)
     sub.add_parser("ends")
+    view = sub.add_parser("view", help="a few questions of every corpus by eye: every oracle's top groups")
+    view.add_argument("--masks", nargs="*", default=[], help="NAME=PATH of block oracles (a glob joins shards)")
+    view.add_argument("--per-corpus", type=int, default=2)
+    view.add_argument("--top", type=int, default=8)
     args = parser.parse_args(argv)
     if args.check != "energy":
         if args.group_oracle is None:
@@ -78,6 +91,27 @@ def main(argv: list[str] | None = None) -> dict:
         a, b = matched(keys(upper.corpus, upper.ids), keys(lower.corpus, lower.ids))
         has = ~np.isnan(upper.masks[a]).any(axis=1) & ~np.isnan(lower.masks[b]).any(axis=1)
         found = {"questions": int(has.sum()), **rung_ratio(upper.masks[a][has], lower.masks[b][has])}
+    elif args.check == "view":
+        names = trying["groups"].tolist()
+        block = {name: StoredMasks.read(path) for name, path in (m.split("=", 1) for m in args.masks)}
+        first = next(iter(block.values()), None)
+        ids = block_group_ids(first.block_layer, first.block_kind, names) if first else None
+        weights = to_groups(first.block_weights[None].astype(float), ids, len(names))[0] if first else None
+        found = {}
+        tried = ~np.isnan(trying["lift"]).any(axis=1)
+        for corpus in dict.fromkeys(trying["corpus"].tolist()):
+            for q in np.flatnonzero((trying["corpus"] == corpus) & tried)[:args.per_corpus]:
+                order = np.argsort(-trying["lift"][q], kind="stable")
+                row = {"nll_low_high": [round(float(x), 3) for x in trying["ends"][q]],
+                       "minimal": [names[g] for g in order[:int(trying["minimal"][q])]],
+                       "lift_top": [f"{names[g]} {trying['lift'][q, g]:.3g}" for g in order[:args.top]],
+                       "drop_top": [f"{names[g]} {trying['drop'][q, g]:.3g}"
+                                    for g in np.argsort(-trying["drop"][q], kind="stable")[:args.top]]}
+                for name, kept in block.items():
+                    got = kept.rows_of([(corpus, str(trying["ids"][q]))])
+                    if not np.isnan(got).any():
+                        row[name] = top_groups(to_groups(np.abs(got), ids, len(names))[0], names, weights, args.top)
+                found[f"{corpus} {trying['ids'][q]}"] = row
     elif args.check == "ends":
         found = end_gaps(trying["ends"], trying["corpus"], float(trying["tolerance"]))
     else:

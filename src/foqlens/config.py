@@ -210,3 +210,4 @@ class GradientOracle:
     calibration_questions: int  # calibration questions given a mask, spread evenly over the corpora; the rest NaN
     gap_low: str | None = None  # with gap_high: also the "quant_gap" form, the loss's change read at low for high
     gap_high: str | None = None
+    attention: str = "math"  # the backward pass's sdpa backend (scoring.GRADIENT_BACKENDS)

@@ -65,6 +65,14 @@ def end_gaps(ends: np.ndarray, topics: np.ndarray, tolerance: float) -> dict:
     return found
 
 
+def top_groups(scores: np.ndarray, names: list[str], weights: np.ndarray, top: int) -> list[str]:
+    """A question's `top` groups by score per weight ([groups] each), as 'name density' - read by eye: a group's plain
+    sum is mostly its size, its density is what the oracle says of it."""
+    density = scores / weights
+    order = np.argsort(-density, kind="stable")[:top]
+    return [f"{names[g]} {density[g]:.3g}" for g in order]
+
+
 def base_agreement(ends: np.ndarray, reference_ends: np.ndarray, prefix: np.ndarray) -> dict:
     """An oracle by trying over another base against the run over the reference base, on the same questions: the
     everything-high end is the same network and must match bit for bit; the everything-low end is the base itself;

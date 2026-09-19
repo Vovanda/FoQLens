@@ -51,11 +51,21 @@ rose most on ARC (Challenge 40.6 -> 75.1, Easy 43.8 -> 82.3), HotpotQA (41.1 -> 
 on TriviaQA (51.4 -> 60.8) and NQ (37.8 -> 47.8).
 
 The loss at D8 sits in the answers from the weights (TriviaQA 102.8 -> 100.6, NQ 81.6 -> 79.9) and on HotpotQA
-(99.5 -> 97.6); on SQuAD, where the answer is in the passage, there is none. Why the refinements over a calibrated base
-reach D8 less well I have not looked into yet.
+(99.5 -> 97.6); on SQuAD, where the answer is in the passage, there is none.
 
 On unknown questions the share of excellent answers again grows as the model is coarsened: 13.8% at D8, 18.7% at D2 -
 the trend of E001 and E002.
+
+## What D2 cost
+
+A refinement brings a weight no closer to its source than half the step of the base's block. bartowski's imatrix fits
+the base to a weighted error and leaves some weights further than half a step from their source. In layers 0, 17 and
+34 these are 1.3-4.8% of the weights, against 0.15-0.46% with my base ([`scripts/stack_fit.py`](../../scripts/stack_fit.py)).
+The refinements do not reach them, and at D8 exactly these stay inexact: the error at D8 over bartowski's base is 3-20
+times the error over mine. That is the price: 25.3 points more at D2 cost 0.7 points at D6 and 1.3 at D8.
+
+I have not yet found a way to get D6 and D8 back without giving up D2 or adding memory. A wide plane or a scale of its
+own over the base reaches these weights, but costs memory on every weight. So I leave it as it is.
 
 ## What it took
 
@@ -71,5 +81,6 @@ cuBLAS otherwise, and a greedy reply that meets a near tie goes its own way.
 
 ## What next
 
-bartowski's base can be frozen for the zones: D2 keeps 76.7% at base precision, D4-D8 are within 1.3 points of my
-ladder. The baseline of the zones is then this ladder.
+I freeze bartowski's base for the zones: D2 keeps 76.7% at base precision, D4-D8 are within 1.3 points of my ladder.
+The main baseline of the zones is this ladder. The corpus is answered on E002's ladder too; testing the zones on it
+takes its .refocustensors file.

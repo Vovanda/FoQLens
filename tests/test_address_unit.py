@@ -3,7 +3,8 @@
 import numpy as np
 import pytest
 
-from foqlens.address import agreement, bag_of_tokens, deep_address, excess, identification, layer_profile
+from foqlens.address import (adaptive_depth, agreement, bag_of_tokens, deep_address, excess, identification,
+                             layer_profile, per_question, rank_auc)
 
 
 def test_masks_identify_themselves_and_noise_identifies_nothing_beyond_chance():
@@ -68,6 +69,33 @@ def test_a_window_reads_only_its_layers_and_leaves_the_same_deep_part():
     window = deep_address(blind[:400], masks[:400], blind[400:], masks[400:], layers, weights, depth=2, ridge=1e-3,
                           start=1)
     assert window["identified"] > 0.9 and window["zoned_weight_share"] == 0.5
+
+
+def test_a_question_is_hit_when_its_own_is_nearest_and_its_margin_says_by_how_much():
+    actual = np.eye(4) * 10.0
+    predicted = actual.copy()
+    predicted[3] = actual[2]  # question 3 predicted as question 2
+    verdict = per_question(predicted, actual)
+    assert verdict["hit"].tolist() == [True, True, True, False]
+    assert verdict["margin"][3] < 0 < verdict["margin"][0]
+
+
+def test_the_rank_auc_is_one_when_every_positive_is_above_and_half_without_signal():
+    assert rank_auc(np.array([3.0, 4.0, 1.0, 2.0]), np.array([True, True, False, False])) == 1.0
+    assert rank_auc(np.array([1.0, 1.0]), np.array([True, False])) == 0.5
+    assert np.isnan(rank_auc(np.array([1.0]), np.array([True])))
+
+
+def test_the_policy_spans_from_the_shallow_depth_to_the_deep_one():
+    rng = np.random.default_rng(5)
+    actual = rng.normal(size=(60, 40))
+    shallow = actual + rng.normal(size=actual.shape) * 3.0  # noisy: many misses
+    deep = actual + rng.normal(size=actual.shape) * 0.1  # almost exact
+    found = adaptive_depth({4: shallow, 8: deep}, actual, low=4, high=8)
+    assert found["hits"][8] > found["hits"][4]
+    depths = [p["mean_depth"] for p in found["policy"]]
+    assert depths[0] == 4 and depths[-1] == pytest.approx(4 + 4 * (59 / 60))  # the top quantile keeps one question
+    assert found["only_high"] + found["hit_low_and_high"] == round(found["hits"][8] * 60)
 
 
 def test_the_bag_counts_every_token_once_per_occurrence_over_a_shared_vocabulary():

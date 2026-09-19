@@ -66,3 +66,9 @@ def test_the_depth_configuration_reads_and_names_what_exists():
     check = config.read(CONFIGS / "address-depth.toml", config.DepthCheck)
     assert all(s in ADDRESS_SOURCES and ADDRESS_SOURCES[s].reads_layers for s in check.sources)
     assert all(c in SETUPS for c in check.corpora) and list(check.depths) == sorted(check.depths)
+
+
+def test_the_adaptive_configuration_reads_and_its_policy_lies_among_its_depths():
+    check = config.read(CONFIGS / "address-adaptive.toml", config.AdaptiveCheck)
+    assert check.source in ADDRESS_SOURCES and check.low in check.depths and check.high in check.depths
+    assert all((CONFIGS.parent / path).exists() for path in check.corpus_overrides.values())

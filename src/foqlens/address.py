@@ -22,6 +22,10 @@ share, the wrapper included, drops out and only what tells a question apart is l
   on the blocks it read. A ridge projection fitted on calibration questions carries the first `depth` layers onto the
   rest; the predicted deep address is identified against the real one. Few layers read carry little; many leave few
   to the zones - the best depth is between, and the run reports both curves.
+- adaptive_depth: whether a question tells at a shallow depth that it needs a deeper one. Every depth predicts one
+  target - the layers from the deepest depth on - so that depths differ only in what they read; per question its hit
+  and margin; whether the questions a deeper reading rescues stand out at the shallow one (AUC); the stop-or-go-deeper
+  policy's identification against its mean depth.
 - agreement: two sources score different blocks, so their masks are not compared entry by entry; they agree where they
   place the same questions near and far alike - the correlation of their question-by-question cosines.
 
@@ -96,6 +100,65 @@ def deep_address(train_work: np.ndarray, train_full: np.ndarray, test_work: np.n
     alpha = ridge * float(np.var(x, axis=0).mean()) * len(x)
     predicted = Projection.fit(x, train_full[:, deep], alpha).apply(test_work[:, early]).cpu().numpy()
     return {**identification(predicted, test_full[:, deep]), "zoned_weight_share": float(weights[deep].sum() / weights.sum())}
+
+
+def predict_deep(train_work: np.ndarray, train_full: np.ndarray, test_work: np.ndarray, layers: np.ndarray,
+                 read_until: int, target_from: int, ridge: float) -> np.ndarray:
+    """The laid-out questions' address in the layers from `target_from` on, predicted from their working reading of
+    layers [0, read_until) by a ridge projection fitted on the calibration questions: [test questions, target blocks].
+    With one target for every depth, two depths differ only in what they read."""
+    read, target = layers < read_until, layers >= target_from
+    x = train_work[:, read]
+    alpha = ridge * float(np.var(x, axis=0).mean()) * len(x)
+    return Projection.fit(x, train_full[:, target], alpha).apply(test_work[:, read]).cpu().numpy()
+
+
+def per_question(predicted: np.ndarray, actual: np.ndarray) -> dict[str, np.ndarray]:
+    """Every question's own verdict: whether its predicted address is nearest to its own real one (hit), and by how
+    much its own cosine exceeds the best other's (margin; below 0 is a miss)."""
+    cos = _unit(excess(predicted)) @ _unit(excess(actual)).T
+    own = np.diag(cos).copy()
+    others = cos.copy()
+    np.fill_diagonal(others, -np.inf)
+    margin = own - others.max(axis=1)
+    return {"hit": margin > 0, "margin": margin}
+
+
+def rank_auc(scores: np.ndarray, positive: np.ndarray) -> float:
+    """How often a positive scores above a negative (ties count half): 0.5 is no signal. NaN without both kinds."""
+    pos, neg = scores[positive], scores[~positive]
+    if not len(pos) or not len(neg):
+        return float("nan")
+    above = (pos[:, None] > neg[None, :]).mean() + 0.5 * (pos[:, None] == neg[None, :]).mean()
+    return float(above)
+
+
+def adaptive_depth(predicted: dict[int, np.ndarray], actual: np.ndarray, low: int, high: int) -> dict:
+    """Does a question tell at depth `low` whether it needs `high`: per depth the questions hit; how far the predicted
+    address moves from one depth to the next; among the questions missed at `low`, whether those that `high` rescues
+    stand out by their margin at `low` or by how much their prediction still moved into `low` (AUC, 0.5 is no signal);
+    and the policy "stop at low when the margin is at least t, else read to high" - identification against mean depth."""
+    depths = sorted(predicted)
+    verdicts = {d: per_question(predicted[d], actual) for d in depths}
+    moved = {d: 1 - np.sum(_unit(predicted[d]) * _unit(predicted[p]), axis=1) for p, d in zip(depths, depths[1:])}
+    hit_low, hit_high = verdicts[low]["hit"], verdicts[high]["hit"]
+    missed = ~hit_low
+    rescued = hit_high[missed]
+    margin = verdicts[low]["margin"]
+    policy = []
+    for t in np.quantile(margin, np.linspace(0, 1, 11)):
+        deeper = margin < t
+        policy.append({"threshold": float(t), "mean_depth": float(low + (high - low) * deeper.mean()),
+                       "identified": float(np.where(deeper, hit_high, hit_low).mean())})
+    return {
+        "hits": {d: float(v["hit"].mean()) for d, v in verdicts.items()},
+        "moved": {d: float(m.mean()) for d, m in moved.items()},
+        "hit_low_and_high": int((hit_low & hit_high).sum()), "only_low": int((hit_low & ~hit_high).sum()),
+        "only_high": int((~hit_low & hit_high).sum()), "neither": int((~hit_low & ~hit_high).sum()),
+        "rescue_auc_margin": rank_auc(margin[missed], rescued),
+        "rescue_auc_moved": rank_auc(moved[low][missed], rescued) if low in moved else float("nan"),
+        "policy": policy,
+    }
 
 
 def agreement(a: np.ndarray, b: np.ndarray) -> float:

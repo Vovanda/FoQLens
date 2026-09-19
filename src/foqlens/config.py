@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import tomllib
 from collections.abc import Mapping
-from dataclasses import MISSING, dataclass, fields, is_dataclass
+from dataclasses import MISSING, dataclass, field, fields, is_dataclass
 from pathlib import Path
 from typing import Any, TypeVar, get_type_hints
 
@@ -94,6 +94,23 @@ class DepthCheck:
     # windows [start, end) of layers the address is read from, beside the depths' [0, N): the pass runs up to the end
     # either way, the window only leaves out layers close to the tokens
     windows: tuple[tuple[int, int], ...] = ()
+
+
+@dataclass(frozen=True)
+class AdaptiveCheck:
+    """Does a question tell at a shallow depth that it needs a deeper one (foqlens.address.adaptive_depth): one source,
+    every depth of `depths` predicting the address from the deepest one on, the policy between `low` and `high`."""
+
+    corpus: str  # the SmallCorpus file
+    corpora: tuple[str, ...]
+    source: str
+    depths: tuple[int, ...]
+    low: int
+    high: int
+    ridge: float  # relative, as in DepthCheck
+    base_level: str
+    base: str | None = None
+    corpus_overrides: Mapping[str, str] = field(default_factory=dict)  # corpus -> its own SmallCorpus file
 
 
 @dataclass(frozen=True)

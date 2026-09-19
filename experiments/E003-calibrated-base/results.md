@@ -5,6 +5,15 @@ every module, as they lie in the file, and laid my refinements up to D8 over the
 own base; D6 and D8 keep 0.7 and 1.3 points less. Measured as the [preregistration](PREREG.md) says: the whole frozen
 corpus, the judge of E002.
 
+## Why bartowski's base
+
+While the bench built the model's copy in memory, quantizing bf16 at every load, the base could only be our own
+quantization. Now the model is read from its own file, where the base of every module lies as ggml blocks, as in a GGUF
+([the model format](../../docs/refocustensors.md)). So any published k-quant file can be the base as it lies, with my
+refinements up to D8 over it. bartowski's Q2_K is k-quant in all 315 controlled tensors and calibrated with an
+imatrix, so I took it. unsloth's UD-Q2_K_XL keeps more, but 40 of its tensors are IQ with no block step, and no
+refinement can be laid over them.
+
 ## What every level keeps
 
 | Model | Excellent on known | Kept | Good | Bad | Incoherent | Excellent on unknown |

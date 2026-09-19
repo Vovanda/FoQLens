@@ -77,12 +77,14 @@ regimes in it - the answer in a passage, only in the weights, across two passage
 20,640 questions: 18,576 the model knows and 2,064 it does not
 ([docs/corpus.md](docs/corpus.md)).
 
-**How the model holds its knowledge under uniform quantization is measured:** D8 keeps 98.8% of what the full
-model knows, D6 96.8%, D4 91.0%, D2 51.4%. Knowledge goes from the weights first: with the answer in the
-passage D4 loses 2.5%, with the answer only in the weights 13.0%. This is the baseline for every test of the
-filter ([E002](experiments/E002-base-precision-d2/results.md)). On the first measurement naive rounding made
-D2 incoherent ([E001](experiments/E001-uniform-quantization/results.md)); with the quantization method changed to
-k-quant base precision D2 keeps half of the knowledge, and the filter is tested from D2.
+**How the model holds its knowledge under uniform quantization is measured:** over a base calibrated with an
+imatrix D8 keeps 97.5% of what the full model knows, D6 96.2%, D4 90.8%, D2 76.7%. This is the baseline for every
+test of the filter, and the filter is tested from D2 ([E003](experiments/E003-calibrated-base/results.md)). Over
+the bench's own k-quant base the same ladder keeps 98.8%, 96.8%, 91.0% and 51.4%
+([E002](experiments/E002-base-precision-d2/results.md)): the calibrated base raised D2 by 25.3 points at a cost of
+0.7 at D6 and 1.3 at D8. Knowledge goes from the weights first: with the answer in the passage D4 loses 2.5%, with
+the answer only in the weights 13.0% (E002). On the first measurement naive rounding made D2 incoherent
+([E001](experiments/E001-uniform-quantization/results.md)).
 
 **The premise of the main hypothesis came up on its own.** On the questions the full model does not know, the
 coarser model answers where the precise one refuses: in E001 on HotpotQA bf16 says the passages hold no answer in
@@ -97,9 +99,10 @@ purpose is an experiment of its own.
 details where sharpness is needed, a gain over iterations. Saving memory is a secondary goal, plan B: even without
 a gain in quality the mechanism saves memory at the same usability.
 
-**Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base (Q2_K, Q4_K for the
-sensitive classes) with 2-bit refinements over it, after MoBiQuant with departures
-([E002](experiments/E002-base-precision-d2/results.md)). The zones' top rung is D8; the model's file may also hold
+**Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base with 2-bit
+refinements over it, after MoBiQuant with departures ([E002](experiments/E002-base-precision-d2/results.md)). The
+base is the blocks of a published Q2_K file calibrated with an imatrix (bartowski), as they lie in it
+([E003](experiments/E003-calibrated-base/results.md)). The zones' top rung is D8; the model's file may also hold
 a tail to the source weights of any type, so the model reads back its source bit for bit without the checkpoint
 ([docs/refocustensors.md](docs/refocustensors.md)). A layout of depths is read by a CUDA kernel on tensor cores
 straight from the copy's bytes, every block of rows to its depth: a decoding step of E2B-it at a mixed layout takes

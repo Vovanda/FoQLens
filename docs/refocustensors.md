@@ -99,6 +99,8 @@ The file cut at a level (`--depth`), and the share of bf16's knowledge kept on t
 | D8 | 8.57 | 1.88 | 7.92 | 98.8% |
 | the bf16 source (`exact`) | 15.05 | 3.30 | 9.34 | 100% |
 | bf16 checkpoint | 16 | 3.51 | 9.54 | 100% |
+
+Over the base of bartowski's Q2_K file, the bench's base since E003, the file is 9.33 GiB, and D2, D4, D6 and D8 keep 76.7%, 90.8%, 96.2% and 97.5% ([E003](../experiments/E003-calibrated-base/results.md)).
 | GGUF UD-Q2_K_XL / Q4_K_M | - | - | 2.24 / 2.89 | 80.0% / 95.0% |
 
 D8 and the full file are measured by cutting, D2-D6 are summed from the sizes of the parts. GGUF files quantize the tensors the regulator does not read as well, so they are smaller; our controlled weights at D4 and D6 take 1.00 and 1.44 GiB.

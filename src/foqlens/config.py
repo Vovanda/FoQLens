@@ -109,6 +109,10 @@ class AdaptiveCheck:
     high: int
     ridge: float  # relative, as in DepthCheck
     base_level: str
+    silhouette: int  # k: the top blocks of the predicted excess - the future zones - whose staying put stops reading
+    tolerance: float  # epsilon: a silhouette holds when its Jaccard with the depth before is at least 1 - tolerance
+    patience: int  # p: depths a silhouette must hold running before reading stops and rolls back
+    cap_shares: tuple[float, ...]  # the deepest reading, patience included, as a share of the network; each tried
     base: str | None = None
     corpus_overrides: Mapping[str, str] = field(default_factory=dict)  # corpus -> its own SmallCorpus file
 

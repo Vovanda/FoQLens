@@ -15,7 +15,7 @@ from pathlib import Path
 
 from foqlens import config, corpora, refocustensors
 from foqlens import model as fm
-from foqlens.address import adaptive_depth, predict_deep
+from foqlens.address import adaptive_depth, depth_cap, predict_deep, silhouette_stop, stop_policy
 from foqlens.answering import Asking
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
@@ -72,12 +72,20 @@ def main(argv: list[str] | None = None) -> Path:
             work = bench.masks(prompts, [made], level=base_level)[made.name]
             predicted = {d: predict_deep(work[:n], full[:n], work[n:], layers, d, target_from, check.ridge)
                          for d in check.depths}
-            found = adaptive_depth(predicted, full[n:, layers >= target_from], check.low, check.high)
+            actual = full[n:, layers >= target_from]
+            found = adaptive_depth(predicted, actual, check.low, check.high)
+            found["silhouette"] = {}
+            for share in check.cap_shares:
+                cap = depth_cap(int(layers.max()) + 1, share)
+                stops = silhouette_stop(predicted, check.silhouette, check.tolerance, check.patience, cap)
+                found["silhouette"][share] = {"cap": cap, **stop_policy(predicted, actual, stops, check.patience)}
             summary["corpora"][corpus] = {"laid": len(laid), "calibration": n, **found}
-            print(f"{corpus} ({len(laid)} laid): hits {found['hits']}; moved {found['moved']}; "
-                  f"both {found['hit_low_and_high']}, only low {found['only_low']}, only high {found['only_high']}, "
-                  f"neither {found['neither']}; rescue AUC margin {found['rescue_auc_margin']:.3f}, "
-                  f"moved {found['rescue_auc_moved']:.3f}", flush=True)
+            print(f"{corpus} ({len(laid)} laid): hits {found['hits']}; rescue AUC margin "
+                  f"{found['rescue_auc_margin']:.3f}, moved {found['rescue_auc_moved']:.3f}", flush=True)
+            for share, policy in found["silhouette"].items():
+                print(f"  cap {share:g} ({policy['cap']} layers): identified {policy['identified']:.3f} at mean stop "
+                      f"{policy['mean_stop']:.2f}, read {policy['mean_read']:.2f}, stops {policy['stops']}; fixed "
+                      f"{policy['fixed_depth']}: {policy['fixed_identified']:.3f}", flush=True)
             write_json(target, summary)
     summary["gpu"] = gpu.summary()
     write_json(target, summary)

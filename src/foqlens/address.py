@@ -140,7 +140,10 @@ def adaptive_depth(predicted: dict[int, np.ndarray], actual: np.ndarray, low: in
     and the policy "stop at low when the margin is at least t, else read to high" - identification against mean depth."""
     depths = sorted(predicted)
     verdicts = {d: per_question(predicted[d], actual) for d in depths}
-    moved = {d: 1 - np.sum(_unit(predicted[d]) * _unit(predicted[p]), axis=1) for p, d in zip(depths, depths[1:])}
+    # on the excess, as identification is: the mean address is shared and far larger, so on raw predictions it alone
+    # sets the cosine and every step looks like 1e-4
+    moved = {d: 1 - np.sum(_unit(excess(predicted[d])) * _unit(excess(predicted[p])), axis=1)
+             for p, d in zip(depths, depths[1:])}
     hit_low, hit_high = verdicts[low]["hit"], verdicts[high]["hit"]
     missed = ~hit_low
     rescued = hit_high[missed]
@@ -159,6 +162,57 @@ def adaptive_depth(predicted: dict[int, np.ndarray], actual: np.ndarray, low: in
         "rescue_auc_moved": rank_auc(moved[low][missed], rescued) if low in moved else float("nan"),
         "policy": policy,
     }
+
+
+def silhouette_overlap(predicted: dict[int, np.ndarray], k: int) -> dict[int, np.ndarray]:
+    """How much every question's silhouette - the top k blocks of its predicted excess, its future zones - keeps from
+    the depth before: Jaccard [questions] at every depth but the first."""
+    depths = sorted(predicted)
+    tops = {d: np.argpartition(-excess(predicted[d]), k - 1, axis=1)[:, :k] for d in depths}
+    overlap = {}
+    for p, d in zip(depths, depths[1:]):
+        shared = np.array([len(np.intersect1d(a, b, assume_unique=True)) for a, b in zip(tops[p], tops[d])])
+        overlap[d] = shared / (2 * k - shared)
+    return overlap
+
+
+def depth_cap(n_layers: int, share: float) -> int:
+    """The deepest a working reading may go, as a share of the network (Volodya 19.09): the budget holds whatever the
+    question, and the same share carries to a model of another length."""
+    if not 0 < share < 1:
+        raise ValueError(f"the cap is a share of the network in (0, 1), not {share}")
+    return int(share * n_layers)
+
+
+def silhouette_stop(predicted: dict[int, np.ndarray], k: int, tolerance: float, patience: int, cap: int) -> np.ndarray:
+    """Every question's stop (Volodya 19.09): read layer by layer; once the silhouette holds `patience` depths running
+    (Jaccard at least 1 - tolerance), roll back to where that run began - the zones act from there. Reading never goes
+    past `cap` layers, patience included: a question that has not settled by then stops as deep as the cap allows."""
+    depths = [d for d in sorted(predicted) if d <= cap]
+    overlap = silhouette_overlap({d: predicted[d] for d in depths}, k)
+    held = np.stack([overlap[d] >= 1 - tolerance for d in depths[1:]])  # [depths - 1, questions]: depth i+1 holds i
+    last = max(d for d in depths if d + patience <= cap)
+    stops = np.full(held.shape[1], last)
+    for q in range(held.shape[1]):
+        for i in range(len(depths) - patience):
+            if depths[i] + patience > cap:
+                break
+            if held[i : i + patience, q].all():
+                stops[q] = depths[i]
+                break
+    return stops
+
+
+def stop_policy(predicted: dict[int, np.ndarray], actual: np.ndarray, stops: np.ndarray, patience: int) -> dict:
+    """The silhouette rule against a fixed depth: identification at every question's own stop, the mean stop and the
+    mean layers read (stop + patience), beside identification at the fixed depth nearest the mean stop."""
+    verdicts = {d: per_question(predicted[d], actual)["hit"] for d in predicted}
+    at_stop = np.array([verdicts[int(s)][q] for q, s in enumerate(stops)])
+    nearest = min(verdicts, key=lambda d: abs(d - stops.mean()))
+    return {"identified": float(at_stop.mean()), "mean_stop": float(stops.mean()),
+            "mean_read": float((stops + patience).mean()),
+            "stops": {int(d): int((stops == d).sum()) for d in sorted(predicted)},
+            "fixed_depth": int(nearest), "fixed_identified": float(verdicts[nearest].mean())}
 
 
 def agreement(a: np.ndarray, b: np.ndarray) -> float:

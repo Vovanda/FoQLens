@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from foqlens.address import (adaptive_depth, agreement, bag_of_tokens, deep_address, excess, identification,
-                             layer_profile, per_question, rank_auc)
+from foqlens.address import (adaptive_depth, agreement, bag_of_tokens, deep_address, depth_cap, excess,
+                             identification, layer_profile, per_question, rank_auc, silhouette_stop, stop_policy)
 
 
 def test_masks_identify_themselves_and_noise_identifies_nothing_beyond_chance():
@@ -96,6 +96,49 @@ def test_the_policy_spans_from_the_shallow_depth_to_the_deep_one():
     depths = [p["mean_depth"] for p in found["policy"]]
     assert depths[0] == 4 and depths[-1] == pytest.approx(4 + 4 * (59 / 60))  # the top quantile keeps one question
     assert found["only_high"] + found["hit_low_and_high"] == round(found["hits"][8] * 60)
+
+
+def test_the_drift_between_depths_is_read_on_the_excess_not_drowned_by_a_shared_mean():
+    rng = np.random.default_rng(6)
+    actual = rng.normal(size=(50, 30))
+    shared = np.full(30, 1000.0)  # a mean address far louder than any question
+    before, after = shared + rng.normal(size=actual.shape), shared + rng.normal(size=actual.shape)
+    found = adaptive_depth({4: before, 5: after}, actual, low=4, high=5)
+    assert found["moved"][5] > 0.5  # two unrelated predictions move a lot, whatever mean they share
+
+
+def silhouettes(changes_until: list[int], depths: range, blocks: int = 40, k: int = 4) -> dict[int, np.ndarray]:
+    """Predictions whose top k blocks move at every depth up to changes_until[q] and hold after it."""
+    predicted = {}
+    for d in depths:
+        rows = np.zeros((len(changes_until), blocks))
+        for q, last in enumerate(changes_until):
+            start = (min(d, last) * k + q * 7) % (blocks - k)  # a new silhouette every depth until `last`
+            rows[q, start : start + k] = 10.0
+        predicted[d] = rows
+    return predicted
+
+
+def test_a_settled_silhouette_stops_early_a_moving_one_later_and_a_restless_one_at_the_cap():
+    depths = range(3, 13)
+    predicted = silhouettes([6, 8, 20], depths)  # settles at 6, at 8, never
+    stops = silhouette_stop(predicted, k=4, tolerance=0.1, patience=2, cap=12)
+    assert stops.tolist() == [6, 8, 10]  # the restless one: 10 + patience 2 = the cap of 12
+    assert (stops + 2 <= 12).all()
+
+
+def test_the_cap_is_a_share_of_the_network_and_refuses_a_whole_or_empty_one():
+    assert depth_cap(35, 0.3) == 10 and depth_cap(42, 0.3) == 12
+    with pytest.raises(ValueError):
+        depth_cap(35, 1.0)
+
+
+def test_the_policy_reports_identification_at_each_questions_own_stop():
+    actual = np.eye(3) * 5.0
+    predicted = {4: np.eye(3)[[1, 0, 2]] * 5.0, 5: actual.copy()}  # at 4 two questions are swapped, at 5 all right
+    found = stop_policy(predicted, actual, np.array([5, 5, 4]), patience=1)
+    assert found["identified"] == 1.0 and found["mean_read"] == pytest.approx(14 / 3 + 1)
+    assert found["stops"] == {4: 1, 5: 2}
 
 
 def test_the_bag_counts_every_token_once_per_occurrence_over_a_shared_vocabulary():

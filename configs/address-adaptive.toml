@@ -1,13 +1,21 @@
-# Does a question tell at 4 layers that it needs 8 (Volodya 19.09: can the question say how many layers it needs?).
-# The hybrid, depths 3 to 8 each predicting the address from layer 8 on; the policy stops at 4 or reads to 8.
+# Does a question tell how deep its working address must read (Volodya 19.09). The hybrid, depths 1 to 10 each
+# predicting the address from layer 10 on. The silhouette rule: the top blocks of the predicted address - the future
+# zones - must hold for `patience` depths running, then reading rolls back to where they settled; never past the cap,
+# a share of the network: 0.2 by default (Volodya 19.09: 80% of the network left to the zones; at 0.5 half of it is
+# read at the base or read twice), 0.3 beside it to see what more depth buys.
 corpus = "configs/small-corpus.toml"
 corpora = ["triviaqa", "nq_open", "squad_v2"]
 source = "hybrid"
-depths = [3, 4, 5, 6, 7, 8]
+depths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 low = 4
 high = 8
 ridge = 0.1
 base_level = "d2"
+# The silhouette: 1% of E2B's 14 708 blocks, the scale of a zone's core.
+silhouette = 147
+tolerance = 0.2
+patience = 2
+cap_shares = [0.2, 0.3]
 base = "bartowski-Q2_K"
 
 [corpus_overrides]

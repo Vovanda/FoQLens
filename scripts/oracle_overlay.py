@@ -16,7 +16,7 @@ import numpy as np
 
 from foqlens import config, runlog
 from foqlens.io import write_json
-from foqlens.oracle_overlay import bootstrap, group_ranks, jaccard_within_between, static_share, to_groups
+from foqlens.oracle_overlay import bootstrap, contrast, group_ranks, jaccard_within_between, static_share, to_groups
 from foqlens.sensitivity import rank_correlation, top_overlap
 from foqlens.small_corpus import StoredMasks
 
@@ -54,11 +54,13 @@ def main(argv: list[str] | None = None) -> Path:
         found["static_share"][name] = {"value": static_share(r), "interval": bootstrap(
             r, static_share, check.bootstrap_draws, check.seed, check.level)}
         LOG.info("%s: static share %.3f", name, found["static_share"][name]["value"], extra={"oracle": name})
-    order = list(scores)
+    # a block oracle's contrast has mean 1 in every group by construction: compared, never given a static share
+    compared = scores | {f"{name}/contrast": contrast(scores[name]) for name in check.block_oracles}
+    order = list(compared)
     for i, a in enumerate(order):
         for b in order[i + 1:]:
-            rho = rank_correlation(scores[a], scores[b])
-            overlap = top_overlap(scores[a], scores[b], check.top_share)
+            rho = rank_correlation(compared[a], compared[b])
+            overlap = top_overlap(compared[a], compared[b], check.top_share)
             found["agreement"][f"{a} ~ {b}"] = {"rho_median": float(np.median(rho)),
                                                 "top_overlap_median": float(np.median(overlap))}
             LOG.info("%s ~ %s: rho median %.3f, top %g overlap %.3f", a, b, float(np.median(rho)), check.top_share,

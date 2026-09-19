@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from foqlens.oracle_overlay import bootstrap, group_ranks, jaccard_within_between, static_share, to_groups
+from foqlens.oracle_overlay import bootstrap, contrast, group_ranks, jaccard_within_between, static_share, to_groups
 
 
 def test_blocks_sum_into_their_groups_and_a_missing_score_counts_nothing():
@@ -22,6 +22,14 @@ def test_a_topic_with_its_own_zone_shows_a_higher_jaccard_within_than_between():
     masks = np.array([[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 1]], dtype=bool)
     within, between = jaccard_within_between(masks, np.array(["a", "a", "b", "b"]))
     assert within == 1.0 and between == 0.0
+
+
+def test_the_contrast_has_mean_one_and_ignores_a_scale_per_group():
+    scores = np.random.default_rng(0).random((30, 5)) + 0.1
+    scores[:, 4] = 0.0
+    got = contrast(scores)
+    assert np.allclose(got[:, :4].mean(axis=0), 1.0) and not got[:, 4].any()
+    assert np.allclose(contrast(scores * np.array([1.0, 10.0, 100.0, 0.5, 3.0])), got)
 
 
 def test_the_bootstrap_interval_holds_the_statistic_of_a_constant_sample():

@@ -3,6 +3,8 @@ whether a topic shares its zones - read from their kept scores, never from the m
 
 - to_groups: blocks' scores summed over a group (a layer's attention, the rest of the layer), so a block oracle meets
   the oracles by trying at their granularity.
+- contrast: a group's score over its mean over the questions - a block oracle's sum over a group is mostly the group's
+  size and the background every question shares, and its contrast is what the question itself asks.
 - group_ranks: every question's groups ranked by a score, 0 the least needed, as a share of the groups - comparable
   across questions whatever the scale of the score.
 - static_share: of the spread of the ranks over questions and groups, the share the groups' mean ranks explain - the part
@@ -14,6 +16,7 @@ whether a topic shares its zones - read from their kept scores, never from the m
 Invariants:
 - Invariant: static_share is 1 when every question ranks the groups alike and near 0 when the ranks are random.
 - Invariant: a Jaccard of a mask with itself is 1; empty masks are left out.
+- Invariant: the contrast of every read group has mean 1 over the questions; a scale per group changes nothing.
 """
 
 from __future__ import annotations
@@ -28,6 +31,13 @@ def to_groups(scores: np.ndarray, groups: np.ndarray, n_groups: int) -> np.ndarr
     out = np.zeros((scores.shape[0], n_groups))
     np.add.at(out.T, groups, np.nan_to_num(scores, nan=0.0).T)
     return out
+
+
+def contrast(scores: np.ndarray) -> np.ndarray:
+    """Every group's score over its mean over the questions: [questions, groups] - what a question asks of a group
+    beyond what every question does. A group no question reads stays 0."""
+    mean = scores.mean(axis=0)
+    return np.divide(scores, mean, out=np.zeros_like(scores, dtype=float), where=mean > 0)
 
 
 def group_ranks(scores: np.ndarray) -> np.ndarray:

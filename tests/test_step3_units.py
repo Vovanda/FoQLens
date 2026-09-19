@@ -4,6 +4,7 @@ import json
 
 import numpy as np
 import pytest
+import torch
 
 from foqlens import budget as bg
 from foqlens.evaluate import Question, mc_prompt
@@ -113,6 +114,30 @@ def test_batches_cover_everything_in_order():
 def test_compute_masks_stacks_batches_in_order():
     masks = compute_masks(lambda texts: [np.full(3, float(len(t))) for t in texts], ["a", "bb", "ccc"], batch_size=2)
     assert masks[:, 0].tolist() == [1.0, 2.0, 3.0]
+
+
+def test_a_batch_out_of_memory_is_halved_until_it_fits_and_the_order_holds():
+    fits = 2  # the GPU of this test holds two prompts at a time
+    seen = []
+
+    def score(texts):
+        if len(texts) > fits:
+            raise torch.OutOfMemoryError("too many")
+        seen.append(len(texts))
+        return [np.full(3, float(len(t))) for t in texts]
+
+    prompts = ["a", "bb", "ccc", "dddd", "eeeee"]
+    masks = compute_masks(score, prompts, batch_size=len(prompts))
+    assert masks[:, 0].tolist() == [1.0, 2.0, 3.0, 4.0, 5.0]
+    assert max(seen) <= fits and sum(seen) == len(prompts)
+
+
+def test_a_single_prompt_out_of_memory_is_an_error():
+    def score(texts):
+        raise torch.OutOfMemoryError("too long")
+
+    with pytest.raises(torch.OutOfMemoryError):
+        compute_masks(score, ["a"], batch_size=1)
 
 
 def test_token_batches_keep_the_budget_and_take_every_index_once():

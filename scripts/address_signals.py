@@ -89,6 +89,7 @@ def main(argv: list[str] | None = None) -> Path:
 
     summary = {"model": name, "config": str(args.config), "check": check.__dict__ | {"two_shot": dict(check.two_shot)},
                "corpus": corpus_config.__dict__, "usable": USABLE, "sources": {}}
+    target = args.out / args.model / f"{args.config.stem}.json"
     with GpuMonitor() as gpu:
         for source_name in sources:
             reads_layers = ADDRESS_SOURCES[source_name].reads_layers
@@ -104,8 +105,8 @@ def main(argv: list[str] | None = None) -> Path:
                 print(f"{source_name} {corpus}: wrappers {report['wrappers']['identified']:.3f}, "
                       f"working {report['working']['identified']:.3f} (chance {report['wrappers']['chance']:.4f})",
                       flush=True)
+            write_json(target, summary)  # a source at a time: a later failure keeps what is measured
     summary["gpu"] = gpu.summary()
-    target = args.out / args.model / f"{args.config.stem}.json"
     write_json(target, summary)
     print(f"written {target}", flush=True)
     return target

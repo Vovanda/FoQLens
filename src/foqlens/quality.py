@@ -13,6 +13,7 @@ from concurrent.futures import Executor, Future, ProcessPoolExecutor
 from functools import partial
 
 import numpy as np
+import torch
 
 from foqlens.evaluate import QualityMetric, Question
 from foqlens.gpu_share import FULL, Pacer
@@ -56,16 +57,32 @@ def compute_masks(
     """Mask vectors of all prompts: [len(prompts), n_blocks], in the prompts' order.
 
     `groups` are the batches of prompt indices (token_batches); without them, batch_size prompts in order.
+    A batch the GPU has no memory for is halved until it fits (_scored): a budget of batch_size of the run's longest
+    prompts is measured on short questions, and a run with long passages must not die on it. The halves are read as
+    batches of their own; bf16 masks move slightly with the batch, so a halved batch is not bit for bit the whole one.
     """
     groups = list(batches(len(prompts), batch_size)) if groups is None else groups
-    parts = []
-    for idx in groups:
-        with throttle.batch():
-            parts.append(np.stack(score([prompts[i] for i in idx])))
-    stacked = np.concatenate(parts)
+    parts = [part for idx in groups for part in _scored(score, prompts, idx, throttle)]
+    order = np.concatenate([idx for idx, _ in parts])
+    stacked = np.concatenate([masks for _, masks in parts])
     out = np.empty_like(stacked)
-    out[np.concatenate(groups)] = stacked
+    out[order] = stacked
     return out
+
+
+def _scored(score: BatchScorer, prompts: list[str], idx: np.ndarray, throttle: Pacer) -> list[tuple[np.ndarray, np.ndarray]]:
+    """The masks of one batch as (indices, masks) parts: the whole batch, or its halves when it runs out of memory."""
+    try:
+        with throttle.batch():
+            return [(idx, np.stack(score([prompts[i] for i in idx])))]
+    except torch.OutOfMemoryError:
+        if len(idx) == 1:
+            raise
+    # Out of the except block: a live exception holds the failed pass's frames and every tensor in them, so the halves
+    # are read only after it is gone and its memory is back.
+    torch.cuda.empty_cache()
+    half = len(idx) // 2
+    return _scored(score, prompts, idx[:half], throttle) + _scored(score, prompts, idx[half:], throttle)
 
 
 def policy_layouts(policy: LayoutPolicy, groups: list[np.ndarray]) -> list[np.ndarray]:

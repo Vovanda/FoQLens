@@ -1,0 +1,493 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "config": "configs\\address-probes.toml",
+  "calibration": 2638,
+  "cap": 10,
+  "check": {
+    "corpus": "configs/small-corpus.toml",
+    "corpora": [
+      "triviaqa",
+      "nq_open",
+      "squad_v2",
+      "arc_challenge_closed"
+    ],
+    "probe_corpus": "arc_challenge_closed",
+    "probes": {
+      "trivial": "prompts/probes/trivial.jsonl",
+      "hard": "prompts/probes/hard.jsonl"
+    },
+    "source": "hybrid",
+    "depths": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "ridge": 0.1,
+    "base_level": "d2",
+    "silhouette": 147,
+    "tolerance": 0.2,
+    "patience": 2,
+    "cap_share": 0.3,
+    "base": "bartowski-Q2_K",
+    "corpus_overrides": {
+      "nq_open": "configs/wide-corpus.toml"
+    }
+  },
+  "probes": [
+    {
+      "set": "trivial",
+      "id": "t01",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t02",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t03",
+      "stop": 8,
+      "capped": true,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t04",
+      "stop": 8,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t05",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t06",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t07",
+      "stop": 7,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t08",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t09",
+      "stop": 8,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t10",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t11",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t12",
+      "stop": 8,
+      "capped": true,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t13",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t14",
+      "stop": 5,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t15",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t16",
+      "stop": 8,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t17",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t18",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t19",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t20",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t21",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t22",
+      "stop": 7,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t23",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t24",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t25",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t26",
+      "stop": 8,
+      "capped": true,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t27",
+      "stop": 8,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "trivial",
+      "id": "t28",
+      "stop": 8,
+      "capped": true,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t29",
+      "stop": 7,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "trivial",
+      "id": "t30",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h01",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h02",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h03",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h04",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h05",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h06",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h07",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h08",
+      "stop": 8,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h09",
+      "stop": 7,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h10",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h11",
+      "stop": 8,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h12",
+      "stop": 7,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h13",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h14",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h15",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h16",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h17",
+      "stop": 7,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h18",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h19",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h20",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h21",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h22",
+      "stop": 6,
+      "capped": false,
+      "identified": true
+    },
+    {
+      "set": "hard",
+      "id": "h23",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h24",
+      "stop": 8,
+      "capped": false,
+      "identified": false
+    },
+    {
+      "set": "hard",
+      "id": "h25",
+      "stop": 6,
+      "capped": false,
+      "identified": false
+    }
+  ],
+  "sets": {
+    "trivial": {
+      "questions": 30,
+      "mean_stop": 6.7,
+      "stops": {
+        "5": 1,
+        "6": 15,
+        "7": 6,
+        "8": 8
+      },
+      "capped_share": 0.13333333333333333
+    },
+    "hard": {
+      "questions": 25,
+      "mean_stop": 6.48,
+      "stops": {
+        "6": 16,
+        "7": 6,
+        "8": 3
+      },
+      "capped_share": 0.0
+    }
+  },
+  "overlap": {
+    "trivial": {
+      "2": 0.4051525677068163,
+      "3": 0.5517146875208542,
+      "4": 0.7382107094152512,
+      "5": 0.4626274030153404,
+      "6": 0.6287930662017889,
+      "7": 0.8155330473185558,
+      "8": 0.8412121582011162,
+      "9": 0.8669233867003444,
+      "10": 0.8469318209731826
+    },
+    "hard": {
+      "2": 0.33045033447528516,
+      "3": 0.5194638421721784,
+      "4": 0.768552413678178,
+      "5": 0.43080088215876294,
+      "6": 0.5929711395937418,
+      "7": 0.8158194722015356,
+      "8": 0.856948066344887,
+      "9": 0.8988130594742174,
+      "10": 0.8836489248075438
+    }
+  },
+  "deeper_auc": {
+    "hard > trivial": 0.43733333333333335
+  },
+  "gpu": {
+    "samples": 229,
+    "started": "2026-09-19T19:38",
+    "wall_s": 248.1889524459839,
+    "utilization_mean": 76.02620087336244,
+    "utilization_median": 99.0,
+    "memory_reserved_peak_mib": 23652.0,
+    "temperature_mean_c": 63.38864628820961,
+    "temperature_peak_c": 68.0,
+    "power_mean_w": 326.05017467248905,
+    "power_peak_w": 400.14,
+    "memory_allocated_peak_mib": 21641.66943359375
+  }
+}

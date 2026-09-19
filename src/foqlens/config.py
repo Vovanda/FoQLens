@@ -88,7 +88,7 @@ class DepthCheck:
     corpora: tuple[str, ...]
     sources: tuple[str, ...]
     depths: tuple[int, ...]
-    ridge: float  # relative: alpha is ridge times the mean variance of an early block
+    ridges: tuple[float, ...]  # relative: alpha is ridge times the mean variance of an early block; every one tried
     base_level: str
     base: str | None = None
 

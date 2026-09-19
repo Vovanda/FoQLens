@@ -13,6 +13,7 @@ the real one; beside it, the share of the weights the zones would act on.
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -38,6 +39,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b-it")
     parser.add_argument("--frozen", type=Path, default=Path("corpus/e2b-it"))
+    parser.add_argument("--sources", nargs="+", help="override the configuration's sources; the summary is named by them")
     parser.add_argument("--out", type=Path, default=Path("runs/address"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     return parser.parse_args(argv)
@@ -46,6 +48,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> Path:
     args = parse_args(argv)
     check = config.read(args.config, config.DepthCheck)
+    if args.sources:
+        check = replace(check, sources=tuple(args.sources))
     small = config.read(Path(check.corpus), config.SmallCorpus)
     sources = [config.choose(s, ADDRESS_SOURCES, "mask source") for s in check.sources]
     model_id = MODELS[args.model]
@@ -59,7 +63,8 @@ def main(argv: list[str] | None = None) -> Path:
 
     summary = {"model": name, "config": str(args.config), "check": check.__dict__, "corpus": small.__dict__,
                "sources": {s: {} for s in sources}}
-    target = args.out / args.model / f"{args.config.stem}.json"
+    named = f"{args.config.stem}-{'-'.join(check.sources)}" if args.sources else args.config.stem
+    target = args.out / args.model / f"{named}.json"
     with GpuMonitor() as gpu:
         for corpus in check.corpora:
             rows, source = corpora.read(corpus)
@@ -75,12 +80,14 @@ def main(argv: list[str] | None = None) -> Path:
                 made = bench.source(source_name)
                 full = bench.masks(prompts, [made])[made.name]
                 work = bench.masks(prompts, [made], level=base_level)[made.name]
-                curve = {depth: deep_address(work[:n_train], full[:n_train], work[n_train:], full[n_train:], layers,
-                                             weights, depth, check.ridge) for depth in check.depths}
-                summary["sources"][source_name][corpus] = curve
-                print(f"{source_name} {corpus} ({len(laid)} laid, {n_train} calibration): " + ", ".join(
-                    f"N={d} {r['identified']:.3f} (zoned {r['zoned_weight_share']:.2f})" for d, r in curve.items()),
-                    flush=True)
+                curves = {ridge: {depth: deep_address(work[:n_train], full[:n_train], work[n_train:], full[n_train:],
+                                                      layers, weights, depth, ridge) for depth in check.depths}
+                          for ridge in check.ridges}
+                summary["sources"][source_name][corpus] = curves
+                for ridge, curve in curves.items():
+                    print(f"{source_name} {corpus} ridge {ridge:g} ({len(laid)} laid, {n_train} calibration): " +
+                          ", ".join(f"N={d} {r['identified']:.3f} (zoned {r['zoned_weight_share']:.2f})"
+                                    for d, r in curve.items()), flush=True)
                 write_json(target, summary)  # a source at a time: a later failure keeps what is measured
     summary["gpu"] = gpu.summary()
     write_json(target, summary)

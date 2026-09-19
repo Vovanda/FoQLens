@@ -88,7 +88,8 @@ def main(argv: list[str] | None = None) -> Path:
 
     summary = {"model": name, "config": str(args.config), "check": check.__dict__ | {"two_shot": dict(check.two_shot)},
                "corpus": corpus_config.__dict__, "usable": USABLE, "sources": {}}
-    target = args.out / args.model / f"{args.config.stem}.json"
+    named = f"{args.config.stem}-{'-'.join(check.sources)}" if args.sources else args.config.stem
+    target = args.out / args.model / f"{named}.json"
     with GpuMonitor() as gpu:
         for source_name in sources:
             reads_layers = ADDRESS_SOURCES[source_name].reads_layers

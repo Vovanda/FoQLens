@@ -6,7 +6,7 @@ corpora = ["triviaqa", "nq_open", "squad_v2"]
 sources = ["neuron_activity", "head_energy", "hybrid"]
 depths = [1, 2, 4, 6, 8, 12, 18, 24]
 # Relative ridge: alpha is this times the mean variance of an early block times the calibration size. A starting
-# value, not tuned yet: early blocks outnumber the calibration questions (NQ: 162), so some shrinkage is needed.
-ridge = 0.1
+# value, tried at three scales: early blocks outnumber the calibration questions (NQ: 162), so the shrinkage matters.
+ridges = [0.01, 0.1, 1.0]
 base_level = "d2"
 base = "bartowski-Q2_K"

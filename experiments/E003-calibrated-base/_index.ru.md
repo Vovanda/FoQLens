@@ -5,8 +5,8 @@ weight: 18
 hypotheses: []
 statuses: [done]
 params:
-  fixed: "1df7243"
-  run: "2026-09-18..19 - the ladder D2-D8 over bartowski's Q2_K, judge 5b54c9e, the kernel round (4652a4e, 05616a9)"
+  fixed: "c89bede"
+  run: "2026-09-18..19 - the ladder D2-D8 over bartowski's Q2_K, judge 02171b8, the kernel round (5de1fdd, 38757ad)"
   results: ""
   verdict: "D2 держит 76.7% знаний bf16 (51.4% на нашей базе), D4 90.8%, D6 96.2%, D8 97.5%; T1, T2 выполнены, P1 нет на D6, D8"
 ---

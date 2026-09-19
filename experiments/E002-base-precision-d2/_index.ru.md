@@ -6,7 +6,7 @@ hypotheses: []
 statuses: [done]
 params:
   fixed: ""
-  run: "2026-09-17 - лестница k-quant и два GGUF, судья 5b54c9e"
+  run: "2026-09-17 - лестница k-quant и два GGUF, судья 02171b8"
   results: ""
   verdict: "D2 держит 51.4% знаний bf16, D4 91.0%, D6 96.8%, D8 98.8%"
 ---

@@ -15,4 +15,3 @@ answer_gradient = "runs/masks/e2b-it/answer_gradient-d8-file-bartowski-Q2_K-smal
 answer_quant_gap = "runs/masks/e2b-it/answer_quant_gap_d2d8-d8-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
 error_energy = "runs/masks/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus.npz"
 error_energy_d4 = "runs/masks/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
-hybrid = "runs/masks/e2b-it/hybrid-file-bartowski-Q2_K-small-corpus.npz"

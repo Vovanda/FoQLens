@@ -280,6 +280,20 @@ def test_a_long_input_reads_a_mixed_layout_and_per_sample_layouts_in_one_gemm_ea
         assert torch.equal(module(samples_x[1:2]), got[1:2])
 
 
+def test_per_sample_layouts_over_fewer_levels_than_samples_unpack_once_per_level():
+    module = kquant_module()
+    layouts = np.array([[Level.D8, Level.D2, Level.D2, Level.D8],
+                        [Level.D2, Level.D2, Level.D8, Level.D8],
+                        [Level.D2, Level.D2, Level.D2, Level.D2]], dtype=np.uint8)
+    module.set_levels(layouts)
+    copy = module._packed[precision.RefinedWeight]
+    samples_x = make_tokens(3 * (precision.KERNEL_MAX_TOKENS + 1), IN).view(3, -1, IN)
+    got = module(samples_x)
+    for sample, levels in enumerate(layouts):
+        weight = layout_weight(copy, [Level(int(c)).depth for c in levels])
+        assert torch.equal(got[sample], torch.nn.functional.linear(samples_x[sample], weight)), sample
+
+
 def test_a_copy_of_another_kind_and_a_baked_level_are_never_read_by_the_kernel():
     symmetric = MixedPrecisionLinear(nn.Linear(IN, OUT, bias=False, device=DEVICE, dtype=torch.bfloat16), TILE_ROWS)
     symmetric.set_levels(Level.D4)

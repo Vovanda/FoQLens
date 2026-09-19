@@ -6,6 +6,13 @@ title: Performance of the bench
 
 **The bench is ready for zones.** A zone layout - every block of 64 rows of every module at its own depth, D2 ... D8 or ZERO - is multiplied by one kernel straight from the model's copy, on tensor cores ([the kernel](kernels.md)). A decoding step of E2B-it at such a layout takes 28.8 ms at a batch of 32: as much as a uniform depth (27.0), 1.4 times bf16 (20.4), and 15 times faster than unpacking the weights (422.6).
 
+The kernel speeds up what could not be baked. A uniform level - every corpus run of the ladder - is baked into the
+weights once and multiplied by cuBLAS at the speed of bf16 (2e6ed30), where the kernel would be slower (0.045 ms a
+module against 0.056-0.10). On the corpus a round of D4 (1 029 questions) took 157 s baked and 199 s read by blocks
+through the kernel (E003, 05616a9). The GPU tests show the same split: the ladder test, which reads the model by
+blocks, went from 13.9 to 3.0 minutes, the graph test, mostly
+at bf16, stays at 18-20.
+
 A decoding step of E2B-it, one CUDA graph, ms (`scripts/decode_step_speed.py`, 97e655a; the mixed layout draws D2 ... D8 per block):
 
 | Reading | Batch 1 | Batch 8 | Batch 32 |

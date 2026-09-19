@@ -17,3 +17,7 @@ gap_high = "d8"
 # dataset's first reference is its spelling - TriviaQA's capitals, NQ's first of several - and cost 15-28 nats at D8
 # on questions the model knows (20.09 night)
 replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"
+# memory-efficient attention in the backward pass (scoring.GRADIENT_BACKENDS): with the math backend round 1 lost 91 of
+# ~313 questions of shard 1 to memory - HotpotQA and SQuAD prompts keep a [heads, seq, seq] matrix a layer; the
+# efficient backward is not bit-deterministic (masks moved up to 9e-3 of the largest score, 2026-09-12), fine for an oracle
+attention = "efficient"

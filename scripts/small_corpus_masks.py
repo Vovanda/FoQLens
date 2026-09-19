@@ -1,11 +1,11 @@
 """The masks of the small corpus, computed once and kept (foqlens.small_corpus.StoredMasks).
 
 A mask pass is minutes of GPU that no knob of a layout changes, so a run of layouts reads it from disk
-(strategy_answers --masks). The oracle - the gradient's Taylor score, the true sensitivity of the blocks - is read at
-full precision from the checkpoint (--model-source checkpoint): on the cut model's file every layer unpacks its weights
-for the forward pass and the backward pass keeps them all, and a long prompt runs out of memory.
+(strategy_answers --masks). The oracle - the gradient's Taylor score - is read at full precision from the checkpoint
+(--model-source checkpoint); a backward pass over the longest prompts (HotpotQA's passages, over 3000 tokens) runs out
+of memory even alone, so prompts over --max-tokens get no mask (NaN) and every reader counts them apart.
 
-    uv run python scripts/small_corpus_masks.py --source gradient --model-source checkpoint
+    uv run python scripts/small_corpus_masks.py --source gradient --model-source checkpoint --max-tokens 2048
     uv run python scripts/small_corpus_masks.py --source hybrid --base bartowski-Q2_K
 """
 
@@ -42,6 +42,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--corpora", nargs="+", default=list(SETUPS), choices=list(SETUPS))
     parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"))
     parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), required=True)
+    parser.add_argument("--max-tokens", type=int, default=None,
+                        help="prompts longer than this get no mask (NaN): a backward pass over them runs out of memory")
     parser.add_argument("--out", type=Path, default=Path("runs/masks"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     return parser.parse_args(argv)
@@ -60,12 +62,22 @@ def main(argv: list[str] | None = None) -> Path:
     found = draw(args.corpora, args.frozen, small, name)
     fmt = fm.prompt_format(model_id, bench.tokenizer)
     source = bench.source(args.source)
-    masks = bench.masks(found.prompts(fmt, found.laid + found.calibration), [source])[source.name]
+    prompts = found.prompts(fmt, found.laid + found.calibration)
+    lengths = np.array([len(ids) for ids in bench.tokenizer(prompts)["input_ids"]])
+    # a backward pass over a prompt longer than the cap runs out of memory alone: its mask stays NaN, and every reader
+    # counts such questions apart
+    fits = lengths <= args.max_tokens if args.max_tokens else np.ones(len(prompts), dtype=bool)
+    LOG.info("%d of %d prompts within %s tokens", int(fits.sum()), len(prompts), args.max_tokens,
+             extra={"within": int(fits.sum()), "prompts": len(prompts)})
+    computed = bench.masks([p for p, ok in zip(prompts, fits) if ok], [source])[source.name]
+    masks = np.full((len(prompts), computed.shape[1]), np.nan, dtype=np.float32)
+    masks[fits] = computed
     modules = bench.ctl.modules.values()
     kept = store(found, masks, block_layers(bench.ctl), block_kinds(bench.ctl),
                  np.concatenate([m.block_sizes() * m.in_features for m in modules]),
                  {"model": name, "source": args.source, "model_source": args.model_source, "base": args.base,
-                  "level": Level.BF16.name, "corpus": str(args.corpus_config), "corpora": args.corpora})
+                  "level": Level.BF16.name, "corpus": str(args.corpus_config), "corpora": args.corpora,
+                  "max_tokens": args.max_tokens, "without_mask": int((~fits).sum())})
     target = out / f"{args.source}-{args.model_source}-{args.base or 'own'}-{args.corpus_config.stem}.npz"
     with stage(LOG, f"save {target}"):
         kept.save(target)

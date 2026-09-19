@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_foreign_base_gpu",
+  "gpu": {
+    "samples": 1310,
+    "started": "2026-09-19T06:04",
+    "wall_s": 1432.3648142814636,
+    "utilization_mean": 94.86259541984732,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 24112.0,
+    "temperature_mean_c": 51.81908396946565,
+    "temperature_peak_c": 65.0,
+    "power_mean_w": 161.88290839694656,
+    "power_peak_w": 399.37,
+    "memory_allocated_peak_mib": 15153.1630859375
+  },
+  "note": "2 passed"
+}

@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_coupling_gpu",
+  "gpu": {
+    "samples": 3,
+    "started": "2026-09-19T07:07",
+    "wall_s": 2.2669382095336914,
+    "utilization_mean": 4.333333333333333,
+    "utilization_median": 0.0,
+    "memory_reserved_peak_mib": 889.0,
+    "temperature_mean_c": 46.666666666666664,
+    "temperature_peak_c": 47.0,
+    "power_mean_w": 107.64,
+    "power_peak_w": 108.07,
+    "memory_allocated_peak_mib": 8.75390625
+  },
+  "note": "1 passed"
+}

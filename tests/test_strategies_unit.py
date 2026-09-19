@@ -46,7 +46,7 @@ def test_a_layout_by_name_is_the_layout_built_by_hand(graph):
     space = Space.build(scores, graph=graph, k=6)
     surface, weights, knobs = space.surface(), np.ones(BLOCKS), Knobs(Level.D2, 0.3, 1.0)
     named = zone_layout("z", "query", fields, space, surface, weights, knobs, DEPTHS)
-    by_hand = GraphZoneLayout("z", QueryGraphZones(fields, surface, weights), gz.FrontReach(0.3, space.width),
+    by_hand = GraphZoneLayout("z", QueryGraphZones(fields, surface, weights), gz.EqualReach(0.3, space.width),
                               surface, Level.D2, 1.0, ladder=DEPTHS)
     questions = np.arange(len(fields))
     assert np.array_equal(named.levels(questions), by_hand.levels(questions))
@@ -116,7 +116,7 @@ def test_the_reach_is_picked_by_name_and_the_proportional_one_spends_the_mean_of
     fields = scores - scores.mean(axis=0)
     space = Space.build(scores, k=6)
     questions = np.arange(len(fields))
-    for reach in ("network", "proportional"):
+    for reach in ("equal", "proportional"):
         layout = zone_layout("z", "query", fields, space, space.surface(), np.ones(BLOCKS), Knobs(Level.D2, 0.2, 1.0),
                              DEPTHS, reach=reach)
         assert layout.levels(questions).max() == int(Level.D8), reach

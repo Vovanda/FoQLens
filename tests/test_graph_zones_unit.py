@@ -79,10 +79,10 @@ def test_a_lift_is_one_at_the_center_and_nothing_at_the_reach():
 
 def test_the_reach_is_the_center_alone_at_zero_and_the_whole_network_at_one():
     zone = one_zone()
-    assert np.all(bz.zone_lifts(zone, bz.FrontReach(1.0, PLANE.diameter()).radii(zone), PLANE) == 1)
-    center = bz.zone_lifts(zone, bz.FrontReach(0.0, PLANE.diameter()).radii(zone), PLANE)[0]
+    assert np.all(bz.zone_lifts(zone, bz.EqualReach(1.0, PLANE.diameter()).radii(zone), PLANE) == 1)
+    center = bz.zone_lifts(zone, bz.EqualReach(0.0, PLANE.diameter()).radii(zone), PLANE)[0]
     assert center[zone.centers[0]] == 1 and np.count_nonzero(center) == 1
-    half = bz.zone_lifts(zone, bz.FrontReach(0.5, PLANE.diameter()).radii(zone), PLANE)[0]
+    half = bz.zone_lifts(zone, bz.EqualReach(0.5, PLANE.diameter()).radii(zone), PLANE)[0]
     d = PLANE.distances(torch.as_tensor(zone.centers))[0].numpy()
     assert np.all(half[d >= 0.5 * PLANE.diameter()] == 0) and np.all(half[d < 0.5 * PLANE.diameter()] > 0)
 
@@ -106,7 +106,7 @@ def test_along_the_graph_a_zone_is_an_arbitrary_figure_not_a_ball():
 
 def test_lifts_do_not_fall_as_the_focus_area_grows():
     zone = one_zone()
-    lifts = [bz.zone_lifts(zone, bz.FrontReach(f, PLANE.diameter()).radii(zone), PLANE)[0] for f in (0.05, 0.2, 0.4, 0.7, 0.9)]
+    lifts = [bz.zone_lifts(zone, bz.EqualReach(f, PLANE.diameter()).radii(zone), PLANE)[0] for f in (0.05, 0.2, 0.4, 0.7, 0.9)]
     assert all(np.all(b >= a) for a, b in zip(lifts, lifts[1:]))
 
 
@@ -145,7 +145,7 @@ def bits(codes: np.ndarray) -> float:
 
 def layout(focus_area: float, focus_strength: float, ladder=zones.READ_LEVELS) -> GraphZoneLayout:
     source = QueryGraphZones(TWO_BUMPS[None], StillSurface(TABLE, PLANE), WEIGHTS)
-    reach = bz.FrontReach(focus_area, PLANE.diameter())
+    reach = bz.EqualReach(focus_area, PLANE.diameter())
     return GraphZoneLayout("graph", source, reach, StillSurface(TABLE, PLANE), Level.D4, focus_strength, ladder=ladder)
 
 
@@ -209,7 +209,7 @@ def test_the_proportional_reach_keeps_the_mean_at_f_d_and_each_zone_s_own_width(
     radii = bz.ProportionalReach(0.2, 10.0).radii(two)
     assert radii.mean() == pytest.approx(0.2 * 10.0) and radii[1] / radii[0] == pytest.approx(3.0)
     one = bz.GraphZones(centers=np.array([0]), radii=np.array([4.0]))
-    assert bz.ProportionalReach(0.2, 10.0).radii(one).tolist() == bz.FrontReach(0.2, 10.0).radii(one).tolist()
+    assert bz.ProportionalReach(0.2, 10.0).radii(one).tolist() == bz.EqualReach(0.2, 10.0).radii(one).tolist()
     flat = bz.GraphZones(centers=np.array([0, 1]), radii=np.zeros(2))
     assert bz.ProportionalReach(0.2, 10.0).radii(flat).tolist() == [2.0, 2.0]
     assert np.all(np.isinf(bz.ProportionalReach(1.0, 10.0).radii(two)))

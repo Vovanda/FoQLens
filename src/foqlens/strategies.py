@@ -56,7 +56,7 @@ STILL = "still"
 ZONES = ("query", "topic")  # the question's own mask, or its topic's mean without it
 COMBINE = ("sum", "max")  # rule 5
 # How far a zone reaches: f D for every zone (rule 1), or f D split by the zones' own widths (a candidate)
-REACHES = {"network": gz.FrontReach, "proportional": gz.ProportionalReach}
+REACHES = {"equal": gz.EqualReach, "proportional": gz.ProportionalReach}
 NEIGHBOURS = 16  # blocks every block is linked to: the k of #4's measurements on E001's masks
 
 
@@ -123,7 +123,7 @@ def zone_source(zones: str, scores: np.ndarray, surface: Surface, weights: np.nd
 
 def zone_layout(name: str, zones: str, scores: np.ndarray, space: Space, surface: Surface, weights: np.ndarray,
                 knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS, strength: ZoneStrength = EqualStrength(),
-                reach: str = "network",
+                reach: str = "equal",
                 domains: tuple[str, ...] | None = None) -> GraphZoneLayout:
     """Zones on the block graph with every part picked by name; the reach along the space's graph by `reach`."""
     reaching = _pick(REACHES, reach, "reach")(knobs.focus_area, space.width)
@@ -198,6 +198,6 @@ MECHANISMS = {"per-block": _per_block, "static": _static, "topic": _topic, "medi
 
 
 def mechanism_layout(mechanism: str, inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS,
-                     graph: str = "mutual-nicdm", k: int = NEIGHBOURS, reach: str = "network"):
+                     graph: str = "mutual-nicdm", k: int = NEIGHBOURS, reach: str = "equal"):
     """The layout policy of a mechanism of the filter, by its name, over the questions of `inputs`."""
     return _pick(MECHANISMS, mechanism, "mechanism")(inputs, knobs, ladder, graph, k, reach)

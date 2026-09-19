@@ -62,7 +62,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--focus-area", type=float, required=True, help="f: the share of the network a zone reaches")
     parser.add_argument("--focus-strength", type=float, default=1.0, help="g: how far a zone rises of the way to D8")
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
-    parser.add_argument("--reach", choices=sorted(REACHES), default="network",
+    parser.add_argument("--reach", choices=sorted(REACHES), default="equal",
                         help="f D for every zone (rule 1), or f D split by the zones' own widths")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--out", type=Path, default=Path("runs/strategies"))

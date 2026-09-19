@@ -14,7 +14,7 @@ A zone is a center and a radius, and its figure is every block within the radius
 the layout's metric - the geodesic along the graph (metric.geodesic), or its resistive form - so the
 figure is arbitrary and follows the graph, not a ball cut across the space. A zone lifts the blocks it
 reaches by rule 4 of docs/quantization-filter.md, from 1 at its center to 0 at its reach times the last
-stop. How far it reaches is replaceable (Reach): FrontReach sends every zone a share f of the width of the
+stop. How far it reaches is replaceable (Reach): EqualReach sends every zone a share f of the width of the
 network, R = f D (rule 1, #19); ProportionalReach splits the same share by the zones' own radii.
 
 Invariants:
@@ -107,7 +107,7 @@ class Reach(Protocol):
 
 
 @dataclass(frozen=True)
-class FrontReach:
+class EqualReach:
     """Rule 1: every zone reaches f times the width of the network - 0 at f = 0, the whole width at 1."""
 
     focus_area: float
@@ -128,8 +128,8 @@ class ProportionalReach:
 
     r_i is a zone's own radius, found from the query - the radius around its center that holds its hill above half
     height (find_graph_zones). The zones' mean reach is f D, so f keeps its meaning; a narrow peak reaches less than a
-    spread one. One zone, or zones of one width, reach f D exactly - FrontReach. Derivation: the session note
-    knobs-from-the-query.md (a change of rule 1 for the owner to decide; this class stands beside FrontReach).
+    spread one. One zone, or zones of one width, reach f D exactly - EqualReach. Derivation: the session note
+    knobs-from-the-query.md (a change of rule 1 for the owner to decide; this class stands beside EqualReach).
     """
 
     focus_area: float

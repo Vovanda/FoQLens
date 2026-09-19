@@ -30,7 +30,7 @@ from foqlens.metric import (
     sweep_width,
 )
 
-FRONT_AREA = 0.2  # rule 1, R = f D: a fifth of the width of the network
+FOCUS_AREA = 0.2  # rule 1, R = f D: a fifth of the width of the network
 GRAPHS = {"union": neighbour_table, "mutual-nicdm": mutual_nicdm_table}  # how the block graph is built (#4)
 
 
@@ -66,8 +66,8 @@ def main() -> None:
     for q in range(min(args.questions, len(fields))):
         clock = time.perf_counter()
         zones = gz.find_graph_zones(fields[q], along, table_np, weights)
-        front = gz.zone_lifts(zones, gz.FrontReach(FRONT_AREA, width).radii(zones), along)
-        covered = int((front.max(axis=0) > 0).sum()) if len(front) else 0
+        lifts = gz.zone_lifts(zones, gz.EqualReach(FOCUS_AREA, width).radii(zones), along)
+        covered = int((lifts.max(axis=0) > 0).sum()) if len(lifts) else 0
         print(f"q{q}: {len(zones.centers)} zones, radii {np.round(zones.radii, 3).tolist()}; "
               f"blocks covered {covered}; {time.perf_counter() - clock:.2f} s", flush=True)
 

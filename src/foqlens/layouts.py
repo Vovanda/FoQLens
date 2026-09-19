@@ -301,7 +301,7 @@ class GraphZoneLayout:
     """Levels from zones on the block graph: zones -> how far each reaches -> lifts -> levels in rungs (#19).
 
     Every part is a class behind its own interface - the zones (GraphZoneSource), the surface they
-    reach along (metric.Surface: the graph at rest, or its medium per question), the reach
+    reach along (metric.Surface: the graph's fixed distances, or its medium per question), the reach
     (graph_zones.Reach), the strength of a zone (ZoneStrength) - and the knobs mean the same whichever
     source the zones come from: f is the reach, g the ceiling. The level map is the even profile without a
     halo (zones.levels_from_rungs), on `ladder` - the rungs the run's model reads (regulator.kernel_ladder).

@@ -8,7 +8,7 @@ bench's (pipeline.Bench.source); this module starts from the scores.
 
 The space is built once: from calibration scores (Space.build) - the co-activation metric M1, its neighbour graph and
 the graph's width, which fixes what f means for every question - or from the weights alone (Space.signal_path, the
-signal's path, M3). A question's surface is that graph at rest, or its medium of the question's own activity (M4, M4b).
+signal's path, M3). A question's surface is that graph's fixed distances, or its medium of the question's own activity (M4, M4b).
 
 Invariant: every name a table does not hold is refused with the names it does.
 Invariant: a layout built here is the same as the one built from its parts by hand - the registry only picks.
@@ -37,10 +37,10 @@ from foqlens.layouts import (
 )
 from foqlens.metric import (
     CoactivationMetric,
+    FixedSurface,
     HarmonicConductance,
     JumpConductance,
     MediumSurface,
-    StillSurface,
     Surface,
     geodesic,
     mutual_nicdm_table,
@@ -51,8 +51,8 @@ from foqlens.quant import Level
 from foqlens.zones import READ_LEVELS
 
 GRAPHS = {"union": neighbour_table, "mutual-nicdm": mutual_nicdm_table}  # how the block graph is built (#4)
-MEDIA = {"harmonic": HarmonicConductance, "jump": JumpConductance}  # M4, M4b (#4); "still" is the graph at rest
-STILL = "still"
+MEDIA = {"harmonic": HarmonicConductance, "jump": JumpConductance}  # M4, M4b (#4); "fixed" is the graph's geodesic for every question
+FIXED = "fixed"
 ZONES = ("query", "topic")  # the question's own mask, or its topic's mean without it
 COMBINE = ("sum", "max")  # rule 5
 # How far a zone reaches: f D for every zone (rule 1), or f D split by the zones' own widths (a candidate)
@@ -87,11 +87,12 @@ class Space:
         table, lengths = signal_path_table(weights, n_heads, strongest)
         return cls(table, lengths, sweep_width(geodesic(table, lengths)))
 
-    def surface(self, medium: str = STILL, activity: np.ndarray | None = None,
+    def surface(self, medium: str = FIXED, activity: np.ndarray | None = None,
                 background: np.ndarray | None = None) -> Surface:
-        """The graph at rest, or through the medium of every question's `activity` against its `background`."""
-        if medium == STILL:
-            return StillSurface(self.table.cpu().numpy(), geodesic(self.table, self.lengths))
+        """The graph's geodesic for every question, or through the medium of every question's `activity` against its
+        `background`."""
+        if medium == FIXED:
+            return FixedSurface(self.table.cpu().numpy(), geodesic(self.table, self.lengths))
         conductance = _pick(MEDIA, medium, "medium")
         if activity is None or background is None:
             raise ValueError(f"the medium {medium!r} needs every question's activity and its background")

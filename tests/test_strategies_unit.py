@@ -8,7 +8,7 @@ from foqlens import graph_zones as gz
 from foqlens.layouts import GraphZoneLayout, QueryGraphZones
 from foqlens.quant import Level
 from foqlens.zones import MAX_ZONES
-from foqlens.strategies import GRAPHS, MEDIA, STILL, Knobs, Space, per_block_layout, zone_layout
+from foqlens.strategies import FIXED, GRAPHS, MEDIA, Knobs, Space, per_block_layout, zone_layout
 
 TOPICS, PER_TOPIC, BLOCKS = 3, 12, 90
 DEPTHS = (Level.D2, Level.D4, Level.D6, Level.D8)
@@ -52,7 +52,7 @@ def test_a_layout_by_name_is_the_layout_built_by_hand(graph):
     assert np.array_equal(named.levels(questions), by_hand.levels(questions))
 
 
-@pytest.mark.parametrize("medium", [STILL, *sorted(MEDIA)])
+@pytest.mark.parametrize("medium", [FIXED, *sorted(MEDIA)])
 def test_the_ends_of_f_hold_on_every_surface_and_topic_zones(medium):
     scores, domains = calibration()
     fields = scores - scores.mean(axis=0)

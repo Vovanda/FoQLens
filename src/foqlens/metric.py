@@ -310,8 +310,8 @@ class Surface(Protocol):
 
 
 @dataclass(frozen=True)
-class StillSurface:
-    """One set of distances for every question: the graph at rest (geodesic) or any fixed metric."""
+class FixedSurface:
+    """One set of distances for every question: the geodesic along the graph, or any other fixed metric."""
 
     table: np.ndarray
     fixed: BlockMetric

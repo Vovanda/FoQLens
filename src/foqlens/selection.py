@@ -22,6 +22,7 @@ file; how it was assembled is recorded, not re-derived.
 Invariant: a verdict never depends on the order of answers or on which level wrote an answer other than its own line.
 Invariant: an Answer and a ClaudeVerdict survive a round trip through their JSON lines unchanged.
 Invariant: every answer either waits in exactly one turn or is decided by the rule without reading, never both.
+Invariant: the draws of split_shares never share a question, and the same seed gives the same draws.
 """
 
 from __future__ import annotations
@@ -171,6 +172,16 @@ def tuning_sample(ids: list[str], seed: int, share: float = TUNING_SHARE, floor:
     count = min(len(ids), max(floor, round(share * len(ids))))
     picked = np.random.default_rng(seed).choice(len(ids), size=count, replace=False)
     return [ids[i] for i in sorted(picked.tolist())]
+
+
+def split_shares(ids: list[str], seed: int, shares: tuple[float, ...], floor: int = 0) -> list[list[str]]:
+    """Disjoint seeded draws: the i-th holds shares[i] of `ids`, at least `floor` of them, in the ids' own order."""
+    counts = [min(len(ids), max(floor, round(share * len(ids)))) for share in shares]
+    if sum(counts) > len(ids):
+        raise ValueError(f"shares {shares} with floor {floor} ask {sum(counts)} of {len(ids)} questions")
+    order = np.random.default_rng(seed).permutation(len(ids))
+    starts = np.cumsum([0, *counts])
+    return [[ids[i] for i in sorted(order[a:b].tolist())] for a, b in zip(starts[:-1], starts[1:])]
 
 
 def strip_markup(text: str) -> str:

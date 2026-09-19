@@ -8,7 +8,7 @@ from foqlens.extractive import NO_ANSWER
 from foqlens.io import (answers_path, append_answers, append_verdicts, read_answers, read_frozen, read_verdicts,
                         write_json, written_ids)
 from foqlens.selection import (Answer, ClaudeVerdict, FrozenCorpus, Reading, Reason, Turn, Verdict, freeze,
-                               split_reasoning, strip_markup, turn, two_way_choice, verdict)
+                               split_reasoning, split_shares, strip_markup, turn, two_way_choice, verdict)
 
 ANSWER = Answer(corpus="triviaqa", id="tc_1", revision="0f7faf33", model="google/gemma-4-E2B-it@3e22461f",
                 level="bf16", prompt="short-0shot", reply="Paris", answer="Paris", reasoning=None,
@@ -250,3 +250,17 @@ def test_a_kept_guess_between_two_is_marked():
 def test_answers_from_two_prompts_are_not_one_corpus():
     with pytest.raises(ValueError):
         freeze([answered("1", 1.0), replace(answered("2", 1.0), prompt="other")], {}, QUESTIONS, (), seed=0)
+
+
+def test_the_shares_are_disjoint_seeded_floored_and_in_the_corpus_order():
+    ids = [f"q{i}" for i in range(1000)]
+    laid, calibration = split_shares(ids, seed=3, shares=(0.05, 0.2), floor=50)
+    assert (len(laid), len(calibration)) == (50, 200)
+    assert not set(laid) & set(calibration)
+    assert laid == sorted(laid, key=ids.index) and calibration == sorted(calibration, key=ids.index)
+    assert split_shares(ids, seed=3, shares=(0.05, 0.2), floor=50) == [laid, calibration]
+    assert split_shares(ids, seed=4, shares=(0.05, 0.2), floor=50)[0] != laid
+    small = [f"a{i}" for i in range(520)]  # ARC-Challenge: 5% is 26, the floor lifts it to 50
+    assert len(split_shares(small, seed=0, shares=(0.05,), floor=50)[0]) == 50
+    with pytest.raises(ValueError):
+        split_shares(small, seed=0, shares=(0.6, 0.6))

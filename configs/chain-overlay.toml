@@ -1,0 +1,9 @@
+# The overlay of the chains (Volodya 20.09 02:08): what the oracles' chains share and where they differ, the antinodes
+# (groups at least half of the questions need at D8) and nodes (groups at least half can switch off), the spread of the
+# early, middle and late layers within and between topics. E2B has 35 layers.
+group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus*.npz"
+chains = "runs/oracles/e2b-it/chains-d2d8-bartowski-Q2_K-small-corpus*.npz"
+antinode_share = 0.5
+bands = [[0, 12], [12, 24], [24, 35]]
+bootstrap_draws = 1000
+level = 0.95

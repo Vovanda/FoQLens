@@ -101,3 +101,26 @@ def test_a_chain_stops_its_sweeps_at_the_first_prefix_within_and_the_first_step_
     assert chain.minimal == 2 and np.isnan(chain.prefix[2:]).all()  # stopped at the first prefix within
     assert chain.zeroed == 2  # groups 2 and 0 cost nothing off; the sweep ran out of groups, none left the tolerance
     assert len(calls) == 2 + 2
+
+
+def test_grading_takes_each_chain_groups_coarsest_rung_that_holds_least_needed_first(monkeypatch):
+    import foqlens.group_oracle as go
+
+    groups = np.arange(3)
+    # what a group costs below D8: group 0 nothing at D4; group 1 too much at D4, nothing at D6; group 2 too much at both
+    cost = {(0, Level.D4): 0.0, (0, Level.D6): 0.0, (1, Level.D4): 1.0, (1, Level.D6): 0.0,
+            (2, Level.D4): 1.0, (2, Level.D6): 1.0}
+    ctl = _Layouts()
+
+    def nll(_model, _tok, prompts, _answers):
+        import torch
+
+        rows = [sum(cost.get((g, Level(int(v))), 0.0) for g, v in enumerate(lay)) for lay in ctl.layout]
+        return torch.tensor(rows, dtype=torch.float64)
+
+    monkeypatch.setattr(go, "answer_nll", nll)
+    layout = np.full(3, int(Level.D8), dtype=np.uint8)
+    graded, levels = go.grade_chain(None, None, ctl, _Pacer(), "p", "a", groups, layout, np.array([2, 1, 0]),
+                                    (Level.D4, Level.D6), target=0.0, tolerance=0.1, size=2)
+    assert levels.tolist() == [int(Level.D8), int(Level.D6), int(Level.D4)]  # chain order: 2, 1, 0
+    assert graded.tolist() == [int(Level.D4), int(Level.D6), int(Level.D8)]

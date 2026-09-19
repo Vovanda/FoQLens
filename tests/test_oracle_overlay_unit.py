@@ -34,3 +34,17 @@ def test_the_contrast_has_mean_one_and_ignores_a_scale_per_group():
 
 def test_the_bootstrap_interval_holds_the_statistic_of_a_constant_sample():
     assert bootstrap(np.full(20, 3.0), np.mean, draws=50, seed=0, level=0.95) == (3.0, 3.0)
+
+
+def test_chains_antinodes_and_bands_read_the_sets_as_they_are():
+    from foqlens.oracle_overlay import antinodes, band_spread, chain_sets, frequency, pair_jaccard
+
+    orders = np.array([[2, 0, 1, 3], [2, 1, 0, 3], [0, 1, 2, 3]])
+    chain, off = chain_sets(orders, np.array([1, 2, -1]), np.array([1, 0, 2]), 4)
+    assert chain.tolist() == [[False, False, True, False], [False, True, True, False], [False] * 4]
+    assert off.tolist() == [[False, False, False, True], [False] * 4, [False] * 4]
+    assert pair_jaccard(chain, chain)[:2].tolist() == [1.0, 1.0] and np.isnan(pair_jaccard(chain, chain)[2])
+    assert frequency(chain).tolist() == [0.0, 1 / 3, 2 / 3, 0.0]
+    assert antinodes(frequency(chain), 0.5).tolist() == [2]
+    bands = band_spread(chain, np.array([0, 0, 1, 1]), [(0, 1), (1, 2)], np.array(["t", "t", "s"]))
+    assert bands[0]["mean"] == 1 / 6 and bands[1]["mean"] == 1 / 3

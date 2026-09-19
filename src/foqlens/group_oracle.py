@@ -179,6 +179,28 @@ def build_chain(model: nn.Module, tokenizer, ctl: Controller, pacer, prompt: str
     return Chain(prefix, minimal, zero_sweep, zeroed)
 
 
+def grade_chain(model: nn.Module, tokenizer, ctl: Controller, pacer, prompt: str, answer: str, groups: np.ndarray,
+                layout: np.ndarray, chain: np.ndarray, rungs: tuple[Level, ...], target: float, tolerance: float,
+                size: int) -> tuple[np.ndarray, np.ndarray]:
+    """The chain graded (Volodya 20.09 02:10: not the whole chain at the top): its groups from the least needed (the
+    last of `chain`) to the most, each read at the coarsest of `rungs` (coarsest first, all below the chain's level)
+    that keeps the answer within `tolerance` of `target`, on top of the grades already taken; a group no rung holds
+    stays. The rungs of one group are one batch. Returns the graded layout [n_blocks] and every chain group's level."""
+    layout = layout.copy()
+    levels = np.array([layout[groups == c][0] for c in chain], dtype=np.uint8)
+    for k in range(len(chain) - 1, -1, -1):
+        tries = np.repeat(layout[None], len(rungs), axis=0)
+        for r, rung in enumerate(rungs):
+            tries[r, groups == chain[k]] = int(rung)
+        nll = sweep_until(model, tokenizer, ctl, pacer, prompt, answer, tries, max(1, min(size, len(rungs))),
+                          lambda _: False)
+        held = np.flatnonzero(nll <= target + tolerance)
+        if len(held):
+            layout = tries[held[0]]
+            levels[k] = int(rungs[held[0]])
+    return layout, levels
+
+
 @torch.no_grad()
 def answer_nll(model: nn.Module, tokenizer, prompts: list[str], answers: list[str]) -> torch.Tensor:
     """The mean negative log-likelihood of every answer's tokens after its prompt, one sample each: [batch].

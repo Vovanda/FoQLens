@@ -197,6 +197,37 @@ class OracleChains:
 
 
 @dataclass(frozen=True)
+class ChainGrades:
+    """The chains graded (scripts/oracle_grades.py, group_oracle.grade_chain): every chain's groups from the least needed
+    lowered to the coarsest of `rungs` that keeps the answer within `tolerance` of every block at the top, on top of its
+    zeroing - so every question has its lens in every level: how few groups at D8, D6, D4, D2, how many off."""
+
+    group_oracle: str  # the oracle by trying's file (a glob joins parts): its chain, ends and target
+    chains: str | None  # the file of oracle_chains.py: every block oracle's chain; None - the lift's chain alone
+    rungs: tuple[str, ...]  # coarsest first, all below the chain's level
+    tolerance: float  # nats above every block at the top, for the graded lens as a whole
+    batch_tokens: int
+    corpus: str
+    base: str
+    replies: str | None = None  # must be the oracle by trying's target
+
+
+@dataclass(frozen=True)
+class ChainOverlay:
+    """The overlay of the chains (scripts/chain_overlay.py, foqlens.oracle_overlay): what the oracles' chains share and
+    where they differ, the antinodes (groups nearly every question needs) and nodes (groups nearly every question can
+    switch off), and the spread of each band of layers within and between topics."""
+
+    group_oracle: str  # the oracle by trying's file (a glob joins parts): the chain in the order of the lift
+    chains: str  # the file of oracle_chains.py: every block oracle's chain
+    antinode_share: float  # a group in the sets of at least this share of the questions is an antinode (or a node)
+    bands: tuple[tuple[int, int], ...]  # [lo, hi) bands of layers
+    bootstrap_draws: int
+    level: float
+    seed: int = 0
+
+
+@dataclass(frozen=True)
 class OverlayCheck:
     """The overlay of the oracles (foqlens.oracle_overlay): block oracles' kept masks and the oracles by trying, on the
     small corpus's laid-out questions the model knows."""

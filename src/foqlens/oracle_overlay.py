@@ -12,6 +12,12 @@ whether a topic shares its zones - read from their kept scores, never from the m
 - jaccard_within_between: the mean Jaccard of the minimal masks of two questions of one topic, and of two of different
   topics: a topic with zones of its own shows the first above the second.
 - bootstrap: an interval of a statistic of the questions by resampling them.
+- chain_sets: every question's chain (its groups at `high`) and its switched-off groups as sets [questions, groups].
+- pair_jaccard: two oracles' sets on the same questions, a Jaccard per question - what the oracles share.
+- frequency, antinodes: how often each group is in a set over the questions; the antinodes are the groups nearly every
+  question has in its chain, the nodes the groups nearly every question can switch off - the rest varies by question.
+- band_spread: the share of each band of layers a set takes, its mean and its spread over the questions within a topic
+  and between topics - where the spread is large the band is the question's, where small it is common.
 
 Invariants:
 - Invariant: static_share is 1 when every question ranks the groups alike and near 0 when the ranks are random.
@@ -83,3 +89,49 @@ def bootstrap(values: np.ndarray, statistic: Callable[[np.ndarray], float], draw
     stats = [statistic(values[rng.integers(0, len(values), len(values))]) for _ in range(draws)]
     tail = (1 - level) / 2
     return float(np.quantile(stats, tail)), float(np.quantile(stats, 1 - tail))
+
+
+def chain_sets(orders: np.ndarray, minimal: np.ndarray, zeroed: np.ndarray,
+               n_groups: int) -> tuple[np.ndarray, np.ndarray]:
+    """Every question's chain - the first `minimal` groups of its order - and its switched-off groups - the last
+    `zeroed` of its order, the least needed: two bool [questions, groups]; a question with no chain (minimal < 0) has
+    empty sets."""
+    chain = np.zeros((len(orders), n_groups), dtype=bool)
+    off = np.zeros_like(chain)
+    for q, (order, m, z) in enumerate(zip(orders, minimal, zeroed)):
+        if m < 0:
+            continue
+        chain[q, order[:m]] = True
+        if z > 0:
+            off[q, order[::-1][:z]] = True
+    return chain, off
+
+
+def pair_jaccard(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Per question, the Jaccard of two oracles' sets [questions, groups]; NaN where both are empty."""
+    union = (a | b).sum(axis=1)
+    return np.where(union > 0, (a & b).sum(axis=1) / np.maximum(union, 1), np.nan)
+
+
+def frequency(sets: np.ndarray) -> np.ndarray:
+    """The share of the questions whose set holds each group: [groups]."""
+    return sets.mean(axis=0) if len(sets) else np.zeros(sets.shape[1])
+
+
+def antinodes(freq: np.ndarray, share: float) -> np.ndarray:
+    """The groups at least `share` of the questions hold: sorted group indices."""
+    return np.flatnonzero(freq >= share)
+
+
+def band_spread(sets: np.ndarray, layers: np.ndarray, bands: list[tuple[int, int]], topics: np.ndarray) -> list[dict]:
+    """For each band [lo, hi) of layers: the share of the band's groups a question's set takes - its mean, its
+    standard deviation over the questions of one topic (averaged over the topics), and the spread of the topics' means."""
+    out = []
+    for lo, hi in bands:
+        inside = (layers >= lo) & (layers < hi)
+        share = sets[:, inside].mean(axis=1)
+        means = {t: share[topics == t].mean() for t in np.unique(topics)}
+        within = np.mean([share[topics == t].std() for t in means]) if means else np.nan
+        out.append({"band": [int(lo), int(hi)], "mean": float(share.mean()), "within_topic_std": float(within),
+                    "between_topics_std": float(np.std(list(means.values())))})
+    return out

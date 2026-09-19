@@ -1,0 +1,18 @@
+# The chain every block oracle gives (Volodya 20.09 01:58): its groups in the order of its score lifted to D8 over the D2
+# base until the model's own reply is within the tolerance of every block at D8, then the least needed of the rest off
+# (ZERO) while it stays within the zero tolerance. Same questions, target and ends as the oracle by trying, the same
+# tolerances, so the chains compare: whose is shortest for the same answer.
+group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus*.npz"
+tolerance = 0.02
+zero_tolerance = 0.1
+batch_tokens = 32768
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"
+
+[orders]
+answer_gradient = "runs/masks/e2b-it/answer_gradient-d8-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
+answer_quant_gap = "runs/masks/e2b-it/answer_quant_gap_d2d8-d8-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
+error_energy = "runs/masks/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus.npz"
+error_energy_d4 = "runs/masks/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
+hybrid = "runs/masks/e2b-it/hybrid-file-bartowski-Q2_K-small-corpus.npz"

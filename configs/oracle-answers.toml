@@ -3,3 +3,5 @@
 # oracle ran with (0.02 nats) to a loose one, so the ideal's own quality-bytes curve shows.
 group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus*.npz"
 tolerances = [0.02, 0.1, 0.5]
+# the chain of every block oracle, answered beside the oracle by trying's (scripts/oracle_chains.py)
+chains = "runs/oracles/e2b-it/chains-d2d8-bartowski-Q2_K-small-corpus*.npz"

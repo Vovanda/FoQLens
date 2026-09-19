@@ -174,6 +174,26 @@ class GroupOracleCheck:
     tolerance: float  # nats of the answer's mean NLL: how close to every block at `high` a minimal mask must come
     batch_tokens: int  # padded tokens a batch of variants holds
     replies: str | None = None  # small_corpus.targets: the answers whose replies are the target; None - the reference
+    # with a value, the zeroing after the minimal mask (group_oracle.zeroed_layouts): nats above every block at `high`
+    # the answer may lose while the least needed groups go off
+    zero_tolerance: float | None = None
+
+
+@dataclass(frozen=True)
+class OracleChains:
+    """The chain every block oracle gives (scripts/oracle_chains.py, group_oracle.build_chain): its groups in the order
+    of the oracle's score lifted to `high` over `low` until the answer is within `tolerance` of every block at `high`,
+    then the least needed of the rest off within `zero_tolerance` - read on the same questions, target and ends as the
+    oracle by trying."""
+
+    group_oracle: str  # the oracle by trying's file (a glob joins shards): its ends, levels and target
+    orders: Mapping[str, str]  # name -> the block oracle's kept masks (a glob joins shards)
+    tolerance: float
+    zero_tolerance: float | None
+    batch_tokens: int
+    corpus: str
+    base: str
+    replies: str | None = None  # must be the oracle by trying's target
 
 
 @dataclass(frozen=True)
@@ -196,6 +216,7 @@ class OracleAnswers:
 
     group_oracle: str  # the file of group_oracle.py, of the same small corpus
     tolerances: tuple[float, ...]  # nats of the answer's mean NLL above every block at `high`
+    chains: str | None = None  # the file of oracle_chains.py: every block oracle's chain and zeroing, answered too
 
 
 @dataclass(frozen=True)

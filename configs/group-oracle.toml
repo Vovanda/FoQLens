@@ -13,3 +13,7 @@ batch_tokens = 32768
 # dataset's first reference is its spelling - TriviaQA's capitals, NQ's first of several - and cost 15-28 nats at D8
 # on questions the model knows (20.09 night)
 replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"
+# the chain that gives the answer at D8, the rest at D2, then the least needed of the rest off (ZERO) while the answer
+# stays within this of every block at D8 (Volodya 20.09 01:55); a first guess - the whole sweep is kept, and the
+# answers decide
+zero_tolerance = 0.1

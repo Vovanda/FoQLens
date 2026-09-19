@@ -19,7 +19,7 @@ import numpy as np
 from foqlens import config, refocustensors, runlog
 from foqlens import model as fm
 from foqlens.gpu_share import default_share
-from foqlens.group_oracle import answer_nll, block_groups, joined_answer, lift_layouts, minimal_prefix
+from foqlens.group_oracle import block_groups, build_chain, group_order, joined_answer, lift_layouts, variants_nll
 from foqlens.io import save_npz_atomic
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
@@ -33,21 +33,6 @@ LOG = logging.getLogger("foqlens.group_oracle")
 # the file is written every this many questions: a stopped run loses at most ~5 minutes at SQuAD's pace (13 s a
 # question) and resumes from the file; a HotpotQA question alone takes ~55 s
 SAVE_EVERY = 25
-
-
-def variants_nll(bench: Bench, prompt: str, answer: str, layouts: np.ndarray, size: int) -> np.ndarray:
-    """The answer's NLL under every layout, `size` variants a batch: [variants].
-
-    The last batch is filled up to `size` by repeating its last layout, so every batch of a question is one GEMM shape:
-    bf16 rounds by the shape, and the variants of a question are compared across batches."""
-    out = []
-    for start in range(0, len(layouts), size):
-        part = layouts[start:start + size]
-        full = np.concatenate([part, np.repeat(part[-1:], size - len(part), axis=0)])
-        with bench.throttle.batch():
-            bench.ctl.set_layout(full)
-            out.append(answer_nll(bench.model, bench.tokenizer, [prompt] * size, [answer] * size)[:len(part)].cpu())
-    return np.concatenate([o.numpy() for o in out])
 
 
 def main(argv: list[str] | None = None) -> Path:
@@ -77,8 +62,8 @@ def main(argv: list[str] | None = None) -> Path:
     fixed = lift_layouts(groups, [np.array([], dtype=int), np.arange(g)] + singles, low, high)
     dropped = lift_layouts(groups, [np.setdiff1d(np.arange(g), s) for s in singles], low, high)
 
-    lift, drop, prefix = (np.full((len(laid), g), np.nan) for _ in range(3))
-    ends, minimal = np.full((len(laid), 2), np.nan), np.full(len(laid), -1)
+    lift, drop, prefix, zero_sweep = (np.full((len(laid), g), np.nan) for _ in range(4))
+    ends, minimal, zeroed = np.full((len(laid), 2), np.nan), np.full(len(laid), -1), np.full(len(laid), -1)
     subset = "" if args.corpora == list(SETUPS) else "-" + "+".join(args.corpora)
     target = (args.out / f"group-oracle-{check.low}{check.high}-{check.base}-{Path(check.corpus).stem}{subset}"
               f"{suffix}.npz")
@@ -92,14 +77,16 @@ def main(argv: list[str] | None = None) -> Path:
                         groups=np.array(names), corpus=np.array([c for c, _ in laid]),
                         ids=np.array([r.id for _, r in laid]),
                         unknown=np.array([(c, r.id) in found.unknown for c, r in laid]), low=check.low,
-                        high=check.high, tolerance=check.tolerance, target=aim)
+                        high=check.high, tolerance=check.tolerance, target=aim, zero_sweep=zero_sweep,
+                        zeroed=zeroed, zero_tolerance=np.nan if check.zero_tolerance is None else check.zero_tolerance)
 
     done = set()
     if target.exists():  # a run stopped midway: the questions it finished are read back, not asked again
         with np.load(target, allow_pickle=False) as kept:
             ran = (str(kept["low"]), str(kept["high"]), float(kept["tolerance"]),
-                   str(kept["target"]) if "target" in kept.files else "reference")
-            if ran != (check.low, check.high, check.tolerance, aim):
+                   str(kept["target"]) if "target" in kept.files else "reference",
+                   str(kept["zero_tolerance"]) if "zero_tolerance" in kept.files else "nan")
+            if ran != (check.low, check.high, check.tolerance, aim, str(float(check.zero_tolerance or np.nan))):
                 raise ValueError(f"{target} is another oracle's run {ran}; move it away to start over")
             where = {k: i for i, k in enumerate(zip(kept["corpus"].tolist(), kept["ids"].tolist()))}
             for q, k in enumerate(keys):
@@ -107,6 +94,8 @@ def main(argv: list[str] | None = None) -> Path:
                 if i is not None and not np.isnan(kept["ends"][i]).any():
                     lift[q], drop[q], prefix[q] = kept["lift"][i], kept["drop"][i], kept["prefix"][i]
                     ends[q], minimal[q] = kept["ends"][i], kept["minimal"][i]
+                    if "zeroed" in kept.files:
+                        zero_sweep[q], zeroed[q] = kept["zero_sweep"][i], kept["zeroed"][i]
                     done.add(q)
         LOG.info("resumed %d of %d questions from %s", len(done), len(laid), target)
     progress = Progress(len(laid) - len(done), "question")
@@ -121,16 +110,18 @@ def main(argv: list[str] | None = None) -> Path:
             first = np.concatenate([fixed, dropped])
             length = len(bench.tokenizer(prompt + answer)["input_ids"])
             size = max(1, min(check.batch_tokens // length, len(first)))
-            nll = variants_nll(bench, prompt, answer, first, size)
+            reading = (bench.model, bench.tokenizer, bench.ctl, bench.throttle, prompt, answer)
+            nll = variants_nll(*reading, first, size)
             ends[q] = nll[:2]  # every block at low, every block at high
             lift[q] = nll[0] - nll[2:2 + g]
             drop[q] = nll[2 + g:] - nll[1]
-            order = np.argsort(-lift[q], kind="stable")
-            prefix[q] = variants_nll(bench, prompt, answer,
-                                     lift_layouts(groups, [order[:k + 1] for k in range(g)], low, high), size)
-            minimal[q] = minimal_prefix(np.concatenate([[ends[q, 0]], prefix[q]]), ends[q, 1], check.tolerance)
-            LOG.info(progress.step(f"{corpus} {row.id}: minimal mask {minimal[q]} of {g} groups"),
-                     extra={"corpus": corpus, "id": row.id, "minimal": int(minimal[q])})
+            # the chain that gives the answer in the order of the lift, then the least needed of the rest off
+            chain = build_chain(*reading, groups, group_order(lift[q]), ends[q], low, high, check.tolerance,
+                                check.zero_tolerance, size)
+            prefix[q], minimal[q], zero_sweep[q], zeroed[q] = chain.prefix, chain.minimal, chain.zero_sweep, chain.zeroed
+            LOG.info(progress.step(f"{corpus} {row.id}: minimal mask {minimal[q]} of {g} groups, "
+                                   f"{zeroed[q]} of the rest off"),
+                     extra={"corpus": corpus, "id": row.id, "minimal": int(minimal[q]), "zeroed": int(zeroed[q])})
             if (q + 1) % SAVE_EVERY == 0:
                 save()
     save()

@@ -26,7 +26,7 @@ from foqlens.gguf_weights import PUBLISHED
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
-from foqlens.group_oracle import RUN_FIELDS, block_groups, minimal_layouts, minimal_prefix
+from foqlens.group_oracle import RUN_FIELDS, block_groups, chain_layout, group_order, minimal_layouts, minimal_prefix
 from foqlens.io import answers_path, append_answers, read_npz_parts, write_json, written_ids
 from foqlens.judging import NotJudged
 from foqlens.layouts import GivenLevels
@@ -39,6 +39,16 @@ from foqlens.small_corpus import draw, pick_shard
 
 MODEL = fm.E2B_IT
 LOG = logging.getLogger("foqlens.oracle_answers")
+
+
+def chains_variant(label: str, groups: np.ndarray, orders: np.ndarray, minimal: np.ndarray, zeroed: np.ndarray,
+                   low: Level, high: Level) -> tuple:
+    """A variant of every question's chain in three levels (group_oracle.chain_layout); a question the oracle has no
+    chain for (minimal < 0) is read at `high` whole - it is counted, never scored as a chain."""
+    everything = np.full(len(groups), int(high), dtype=np.uint8)
+    layouts = np.stack([chain_layout(groups, o, int(m), int(z), low, high) if m >= 0 else everything
+                        for o, m, z in zip(orders, minimal, zeroed)])
+    return label, None, minimal, layouts
 
 
 def main(argv: list[str] | None = None) -> list[Path]:
@@ -67,7 +77,7 @@ def main(argv: list[str] | None = None) -> list[Path]:
     found, suffix = pick_shard(draw(args.corpora, args.frozen, small, name), small, args.shard)
     # the oracle's questions by key: a whole run, a check run (--limit) or shards all serve any shard of the draw
     row = {k: i for i, k in enumerate(zip(trying["corpus"].tolist(), trying["ids"].tolist()))
-           if not np.isnan(trying["prefix"][i]).any()}
+           if not np.isnan(trying["ends"][i]).any()}  # a prefix sweep stops early: its tail is NaN by design
     laid = [(c, r) for c, r in found.laid if (c, r.id) in row]
     if len(laid) < len(found.laid):
         LOG.warning("%d questions the oracle did not try are left out", len(found.laid) - len(laid))
@@ -85,13 +95,37 @@ def main(argv: list[str] | None = None) -> list[Path]:
     index = {(c, r.id): i for i, (c, r) in enumerate(laid)}
     # the reference first: every group lifted is every block at `high`, answered in the batches the ideals are - its
     # label names no oracle, so the run over another base reads the answers it already has
-    variants = [(f"everything-{high.name.lower()}-{args.base}", None, np.full(len(laid), len(names)))] + [
-        (f"minimal-{args.base}-{low.name.lower()}{high.name.lower()}-t{t:g}", t,
-         np.array([minimal_prefix(s, e, t) for s, e in zip(sweeps, ends[:, 1])])) for t in check.tolerances]
+    rungs = f"{low.name.lower()}{high.name.lower()}"
+    lift_order = group_order(lift)
+    # every variant: a label, the tolerance it was chosen at, the groups at `high`, the layouts [questions, n_blocks]
+    everything = np.full(len(laid), len(names))
+    variants = [(f"everything-{high.name.lower()}-{args.base}", None, everything,
+                 minimal_layouts(groups, lift_order, everything, low, high))]
+    for t in check.tolerances:
+        minimal = np.array([minimal_prefix(s, e, t) for s, e in zip(sweeps, ends[:, 1])])
+        variants.append((f"minimal-{args.base}-{rungs}-t{t:g}", t, minimal,
+                         minimal_layouts(groups, lift_order, minimal, low, high)))
+    zero_tag = f"t{float(trying['tolerance']):g}-z{float(trying['zero_tolerance']):g}" if "zeroed" in trying else ""
+    if "zeroed" in trying and (trying["zeroed"][rows] >= 0).any():
+        # the chain at `high`, the least needed switched off, the rest at `low` (Volodya 20.09 01:55)
+        variants.append(chains_variant(f"zeroed-lift-{args.base}-{rungs}-{zero_tag}", groups, lift_order,
+                                       trying["minimal"][rows], trying["zeroed"][rows], low, high))
+    if check.chains:  # every block oracle's chain and its zeroing, on the same questions
+        chains = read_npz_parts(check.chains, RUN_FIELDS | {"sources"})
+        at = {k: i for i, k in enumerate(zip(chains["corpus"].tolist(), chains["ids"].tolist()))}
+        held = [at.get(k, -1) for k in index]
+        for source in chains["sources"].tolist():
+            order = np.array([chains[f"order_{source}"][i] if i >= 0 else np.full(len(names), -1) for i in held])
+            minimal = np.array([chains[f"minimal_{source}"][i] if i >= 0 else -1 for i in held])
+            zeroed = np.array([chains[f"zeroed_{source}"][i] if i >= 0 else -1 for i in held])
+            variants.append(chains_variant(f"chain-{source}-{args.base}-{rungs}-{zero_tag}", groups, order, minimal,
+                                           np.zeros_like(zeroed), low, high))
+            variants.append(chains_variant(f"zeroed-{source}-{args.base}-{rungs}-{zero_tag}", groups, order, minimal,
+                                           zeroed, low, high))
     targets = []
     progress = Progress(len(variants), "layout")
-    for label, tolerance, minimal in variants:
-        regulator = Regulator(GivenLevels(label, minimal_layouts(groups, lift, minimal, low, high)), ctl)
+    for label, tolerance, minimal, layouts in variants:
+        regulator = Regulator(GivenLevels(label, layouts), ctl)
         reading = regulator.reading(index, label)
         codes = regulator.layout(np.arange(len(laid)))
         read = regulator.cost.read_bytes(codes)

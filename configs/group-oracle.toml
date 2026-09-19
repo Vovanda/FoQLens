@@ -1,0 +1,11 @@
+# The oracles by trying (Volodya 19.09: ideal models first, the minimal mask is the ideal): on the small corpus's
+# laid-out questions (5% known, 5% unknown), every group - a layer's attention or its MLP - lifted from D2 to D8 and
+# dropped from D8 to D2, and the minimal mask within 0.02 nats of the answer's NLL with every block at D8.
+# The tolerance is a first guess, not measured: the run records every prefix's NLL, so it is chosen again from the
+# spread it shows.
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+low = "d2"
+high = "d8"
+tolerance = 0.02
+batch_tokens = 32768

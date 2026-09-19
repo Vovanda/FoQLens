@@ -159,3 +159,16 @@ class OracleCheck:
     estimate: str  # masks kept by small_corpus_masks.py: the address
     oracle: str  # the same draw's masks of the oracle
     shares: tuple[float, ...]  # the top shares of blocks the overlap and the tail correlation are read at
+
+
+@dataclass(frozen=True)
+class GroupOracleCheck:
+    """The oracles by trying (foqlens.group_oracle): every group lifted from `low` to `high` and dropped from `high`, and
+    the minimal mask - the fewest groups, in the order of their lift, within `tolerance` of every block at `high`."""
+
+    corpus: str  # the SmallCorpus file: its laid-out questions are the ones tried
+    base: str  # the published base the model is cut over
+    low: str
+    high: str
+    tolerance: float  # nats of the answer's mean NLL: how close to every block at `high` a minimal mask must come
+    batch_tokens: int  # padded tokens a batch of variants holds

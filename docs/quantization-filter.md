@@ -13,7 +13,7 @@ and the model that carries the regulator; the lens is its metaphor.
 
 The metaphor of the mechanism - a multi-lens chosen for the query - is in [visual-metaphor.md](visual-metaphor.md).
 
-**The distance `d` is an input of the mechanism.** The rules below need a distance between blocks and do not say which. In what space the regions of a query are defined, and what makes two weights close, is the first open hole of the [problem statement](problem-statement.md). Where zones grow from, along what, how far and how fast are strategies to be tested: [zone-strategies.md](zone-strategies.md).
+**The distance $d$ is an input of the mechanism.** The rules below need a distance between blocks and do not say which. In what space the regions of a query are defined, and what makes two weights close, is the first open hole of the [problem statement](problem-statement.md). Where zones grow from, along what, how far and how fast are strategies to be tested: [zone-strategies.md](zone-strategies.md).
 
 ## The mechanism in formulas
 
@@ -21,53 +21,54 @@ The metaphor of the mechanism - a multi-lens chosen for the query - is in [visua
 
 | Symbol | What it is | E2B |
 | --- | --- | --- |
-| `ℓ_0 < ℓ_1 < … < ℓ_m` | the ladder: the levels a block can be read at, set by the model and its storage; `ℓ_0` = ZERO, nothing read | 0, 2, 4, 6, 8 bits (ZERO, D2, D4, D6, D8) |
-| `w_b` | block `b`: its number of weights | |
-| `d(a, b)` | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), hole 1) | not chosen ([zone-strategies.md](zone-strategies.md)) |
-| `D` | the width of the network in `d` | |
-| `c_i` | the centers of the query's expert zones ([where they come from](#where-the-zones-come-from)) | |
+| $\ell_0 < \ell_1 < \dots < \ell_m$ | the ladder: the levels a block can be read at, set by the model and its storage; $\ell_0$ = ZERO, nothing read | 0, 2, 4, 6, 8 bits (ZERO, D2, D4, D6, D8) |
+| $w_b$ | block $b$: its number of weights | |
+| $d(a, b)$ | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), hole 1) | not chosen ([zone-strategies.md](zone-strategies.md)) |
+| $D$ | the width of the network in $d$ | |
+| $c_i$ | the centers of the query's expert zones ([where they come from](#where-the-zones-come-from)) | |
 
 **Controls**
 
 | Control | Symbol | Range | Default |
 | --- | --- | --- | --- |
-| base precision - the level everything outside the zones is read at; `floor` in the scripts and the runs | `G = ℓ_γ` | any rung | - |
-| focus_area - the share of the network a zone covers | `f` | [0, 1] | - |
-| focus_strength - how far the zone centers rise above the base | `g` | [0, 1] | - |
-| profile - where each ring of a zone ends | stops `s_j` | s > 0, strictly growing; a stop above 1 is a ring past the edge | even, below |
-| attention level - `q_proj`, `k_proj` outside the zones at ZERO base | `A = ℓ_α` | `α ≥ 1` | the lowest non-zero rung |
-| combining overlapping zones | `⊕` | sum, max | sum |
+| base precision - the level everything outside the zones is read at; `floor` in the scripts and the runs | $G = \ell_\gamma$ | any rung | - |
+| focus_area - the share of the network a zone covers | $f$ | $[0, 1]$ | - |
+| focus_strength - how far the zone centers rise above the base | $g$ | $[0, 1]$ | - |
+| profile - where each ring of a zone ends | stops $s_j$ | $s > 0$, strictly growing; a stop above 1 is a ring past the edge | even, below |
+| attention level - `q_proj`, `k_proj` outside the zones at ZERO base | $A = \ell_\alpha$ | $\alpha \ge 1$ | the lowest non-zero rung |
+| combining overlapping zones | $\oplus$ | sum, max | sum |
 
 **The rules**
 
-```
-1. zone radius       R = f · D                        f = 0: the center only;   f = 1: the whole network
-2. ceiling           κ = γ + ⌊g · (m − γ)⌋            g = 0: κ = γ, the zone is the base;   g = 1: κ = m
-3. profile           levels ℓ_κ … ℓ_(γ+1), stops s_κ < … < s_(γ+1)
-     default         s_j = (κ − j + 1) / (κ − γ)        even, the last at the edge
-4. lift of a zone    ρ_i(b) = d(b, c_i) / R,        L_i(b) = max(0, 1 − ρ_i(b) / s_last)       linear for now
-5. combining         L(b) = min(1, Σ_i L_i(b))   (sum)      or      max_i L_i(b)   (max)
-6. level of a block  outside every zone (ρ_i(b) > s_last for all i):  G;  q_proj, k_proj at ZERO base:     A
-                     inside:  ρ* = s_last · (1 − L(b)),  the level ℓ_j with the smallest s_j ≥ ρ*
-7. memory            bits = Σ_b w_b · bits(level of b) / Σ_b w_b
-```
+1. Zone radius: $R = f \cdot D$. At $f = 0$ the zone is its center only, at $f = 1$ the whole network.
+2. Ceiling: $\kappa = \gamma + \lfloor g\,(m - \gamma) \rfloor$. At $g = 0$, $\kappa = \gamma$ and the zone is the base; at $g = 1$, $\kappa = m$.
+3. Profile: the levels $\ell_\kappa, \dots, \ell_{\gamma+1}$ end at stops $s_\kappa < \dots < s_{\gamma+1}$; by default they are even, the last at the edge:
+   $$s_j = \frac{\kappa - j + 1}{\kappa - \gamma}.$$
+4. Lift of a zone, linear for now:
+   $$\rho_i(b) = \frac{d(b, c_i)}{R}, \qquad L_i(b) = \max\Big(0,\ 1 - \frac{\rho_i(b)}{s_\text{last}}\Big).$$
+5. Combining: $L(b) = \min\big(1, \sum_i L_i(b)\big)$ (sum) or $L(b) = \max_i L_i(b)$ (max).
+6. Level of a block: outside every zone ($\rho_i(b) > s_\text{last}$ for all $i$) it is $G$, and `q_proj`, `k_proj` at a ZERO base are at $A$; inside, with $\rho^* = s_\text{last}\,(1 - L(b))$, it is the level $\ell_j$ with the smallest $s_j \ge \rho^*$.
+7. Memory:
+   $$\text{bits} = \frac{\sum_b w_b \cdot \text{bits}(\text{level of } b)}{\sum_b w_b}.$$
+
+The derivations behind these rules - where they come from, what they guarantee and how close they are to the best use of the memory - are in [the mathematics of the filter](quantization-filter-math.md).
 
 **Worked examples** on the E2B ladder:
 
 | Base | g | Ceiling (2) | Profile (3) | Beyond the zone |
 | --- | --- | --- | --- | --- |
-| D4 (`γ = 2`) | 1 | `κ = 4`, D8 | `D8:0.5 D6:1` | D4 |
-| D4 | 0.5 | `κ = 3`, D6 | `D6:1` | D4 |
-| D2 (`γ = 1`) | 1 | `κ = 4`, D8 | `D8:0.33 D6:0.67 D4:1` | D2 |
-| ZERO (`γ = 0`) | 1 | `κ = 4`, D8 | `D8:0.25 D6:0.5 D4:0.75 D2:1` | ZERO |
-| ZERO | 0.5 | `κ = 2`, D4 | `D4:0.5 D2:1` | ZERO |
-| any | 0 | `κ = γ` | none | the base everywhere |
+| D4 ($\gamma = 2$) | 1 | $\kappa = 4$, D8 | `D8:0.5 D6:1` | D4 |
+| D4 | 0.5 | $\kappa = 3$, D6 | `D6:1` | D4 |
+| D2 ($\gamma = 1$) | 1 | $\kappa = 4$, D8 | `D8:0.33 D6:0.67 D4:1` | D2 |
+| ZERO ($\gamma = 0$) | 1 | $\kappa = 4$, D8 | `D8:0.25 D6:0.5 D4:0.75 D2:1` | ZERO |
+| ZERO | 0.5 | $\kappa = 2$, D4 | `D4:0.5 D2:1` | ZERO |
+| any | 0 | $\kappa = \gamma$ | none | the base everywhere |
 
 **What the names mean.** `D` is depth, counted in 2-bit steps of the one stored copy, and the number
 is the bits it comes to. The copy is a k-quant base after llama.cpp - Q2_K, one step, or Q4_K, two
 steps for the sensitive module classes - with refinements over it, each quantizing what the steps
-before it left with a step four times finer (`foqlens.refinements.KRefinedWeight`, E002). They are not
-different quantizers - they are how deep the same copy is read. A module on a Q4_K base reads the same
+before it left with a step four times finer (`foqlens.refinements.KRefinedWeight`, E002). Every level is
+the same copy, read to a different depth. A module on a Q4_K base reads the same
 at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 
 The base may also be the blocks of a published k-quant file as they lie in it; since E003 the bench's base is
@@ -88,13 +89,13 @@ so D2 serves as a base precision and as the ring pushed past a zone edge.
 
 ## Where the zones come from
 
-A source scores how much the query needs each block; the peaks of that score in the metric `d` are the centers
+A source scores how much the query needs each block; the peaks of that score in the metric $d$ are the centers
 of the query's expert zones. Their number is not fixed: the query decides it. Which source and which metric -
 the variants to test are in [zone-strategies.md](zone-strategies.md).
 
 ## The base precision
 
-Everything outside the zones is read at the base level `G`, any rung of the ladder. In the metaphor this is the glass: a coarse base is frosted glass - the whole network still works, coarsely. A ZERO base is an opaque one: outside the zones there is nothing.
+Everything outside the zones is read at the base level $G$, any rung of the ladder. In the metaphor this is the glass: a coarse base is frosted glass - the whole network still works, coarsely. A ZERO base is an opaque one: outside the zones there is nothing.
 
 ZERO means emptiness - no knowledge, as an expert a mixture of experts did not choose. It is applied only where a zero row is emptiness:
 
@@ -103,7 +104,7 @@ ZERO means emptiness - no knowledge, as an expert a mixture of experts did not c
 | `gate_proj`, `up_proj`, `per_layer_input_gate` | the neuron or channel is off, act(0) = 0 | ZERO |
 | `v_proj` | the head carries nothing along those rows | ZERO |
 | `o_proj`, `down_proj`, `per_layer_projection` | the update to the residual stream is empty along those rows | ZERO |
-| `q_proj`, `k_proj` | attention goes flat - a distortion, not emptiness | the attention level `A` |
+| `q_proj`, `k_proj` | attention goes flat - a distortion, not emptiness | the attention level $A$ |
 
 The norms after each sub-block rescale the rows left - as the MoE block of Gemma 4 itself does with the experts it did not choose.
 
@@ -155,4 +156,4 @@ At the same base, focus_area and focus_strength:
 | focus_area (earlier) | focus_area - the same word, now the size of the zones |
 | coarse level / uniform background; frosted (D4) or opaque (ZERO) glass | the floor: any rung of the ladder |
 | glass | floor - the same control, the word the runs and the scripts already use; glass stays its metaphor |
-| - | the site shows it as **base precision**: what the network is read at before any zone. Not *baseline*, which in this bench means the control to beat - uniform quantization at the same memory |
+| - | the site shows it as **base precision**: what the network is read at before any zone. The word *baseline* is taken in this bench by the control to beat - uniform quantization at the same memory |

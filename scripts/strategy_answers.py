@@ -67,8 +67,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
     parser.add_argument("--working-layers", type=int, default=0,
                         help="the first layers the address is read from: they read --working-level, the filter acts after")
-    parser.add_argument("--working-level", choices=list(FLOORS), default="d4",
-                        help="the default level of the working layers")
+    parser.add_argument("--working-level", choices=list(FLOORS), default="d2",
+                        help="the default level of the working layers: the base the working address is checked at")
     parser.add_argument("--reach", choices=sorted(REACHES), default="equal",
                         help="f D for every zone (rule 1), or f D split by the zones' own widths")
     parser.add_argument("--out", type=Path, default=Path("runs/strategies"))

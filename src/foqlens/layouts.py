@@ -392,6 +392,63 @@ class WorkingLayers:
         return np.where(self.blocks[None], np.uint8(int(self.level)), codes)
 
 
+# Every rung of the ladder divides the variance of a block's error by 16 (docs/quantization-filter-math.md, section 2),
+# so the next rung of the same block pays 16 times less per byte and needs a 16 times higher sensitivity.
+RUNG_GAIN = 16.0
+PRICE_STEPS = 60  # bisection steps of the price in log space: 2^-60 of the range, far below one block's bits
+
+
+def knapsack_levels(sensitivity: np.ndarray, price: float, floor: Level, ladder: tuple[Level, ...]) -> np.ndarray:
+    """The best levels at a price of memory (section 9): a block rises one rung above the floor for every k with
+    sensitivity >= price 16^(k-1), up to the top of the ladder. sensitivity [questions, n_blocks] per weight."""
+    above = [lv for lv in ladder if lv > floor]
+    rungs = np.zeros(np.shape(sensitivity), dtype=np.int64)
+    for k in range(len(above)):
+        rungs += np.asarray(sensitivity) >= price * RUNG_GAIN ** k
+    codes = np.array([int(floor)] + [int(lv) for lv in above], dtype=np.uint8)
+    return codes[rungs]
+
+
+def knapsack_price(sensitivity: np.ndarray, weights: np.ndarray, floor: Level, ladder: tuple[Level, ...],
+                   budget_bits: float) -> float:
+    """The one price of memory at which questions spend `budget_bits` per weight on average (rule 7's bits), found on
+    the given (calibration) sensitivities: the more a block is worth per weight, the sooner it rises."""
+    per_code = np.array([lv.bits for lv in Level], dtype=float)
+
+    def bits(price: float) -> float:
+        codes = knapsack_levels(sensitivity, price, floor, ladder)
+        return float((per_code[codes] @ weights / weights.sum()).mean())
+
+    positive = np.asarray(sensitivity)[np.asarray(sensitivity) > 0]
+    if not len(positive):
+        return float("inf")
+    lo, hi = np.log(positive.min()) - np.log(RUNG_GAIN) * len(ladder), np.log(positive.max()) + 1.0
+    for _ in range(PRICE_STEPS):
+        mid = (lo + hi) / 2
+        lo, hi = (lo, mid) if bits(float(np.exp(mid))) <= budget_bits else (mid, hi)
+    return float(np.exp(hi))
+
+
+@dataclass(frozen=True)
+class KnapsackLevels:
+    """The best allocation of section 9 for every question: a block's level from its own sensitivity per weight
+    against one price of memory for all questions, so the layout is the question's and its memory follows it.
+
+    sensitivity is how much the answer needs a block - the gradient's Taylor score as the oracle, the working address
+    as its forward estimate - divided by the block's weights; the price is fixed once on calibration questions for a
+    budget of mean bits per weight (knapsack_price).
+    """
+
+    name: str
+    sensitivity: np.ndarray  # [questions, n_blocks] per weight, >= 0
+    price: float
+    floor: Level
+    ladder: tuple[Level, ...] = zones.READ_LEVELS
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        return knapsack_levels(self.sensitivity[np.asarray(indices)], self.price, self.floor, self.ladder)
+
+
 @dataclass(frozen=True)
 class QuantileLevels:
     """The per-block regulator (#19) - the control the zones must beat, not a mechanism.

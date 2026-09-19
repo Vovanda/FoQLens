@@ -75,6 +75,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="f: the share of the network a zone reaches; every value is a layout of the sweep")
     parser.add_argument("--focus-strength", type=float, default=1.0, help="g: how far a zone rises of the way to D8")
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
+    parser.add_argument("--budget-bits", type=float, default=None,
+                        help="the knapsack's mean bits per weight (rule 7): its one price of memory is fitted to it")
     parser.add_argument("--working-layers", type=int, default=0,
                         help="the first layers the address is read from: they read --working-level, the filter acts after")
     parser.add_argument("--working-level", choices=list(FLOORS), default="d2",
@@ -138,9 +140,9 @@ def main(argv: list[str] | None = None) -> list[Path]:
     layouts = list(product(args.mechanism, args.reach, args.focus_area))
     progress = Progress(len(layouts), "layout")
     for mechanism, reach, focus_area in layouts:
-        knobs = Knobs(FLOORS[args.floor], focus_area, args.focus_strength, args.combine)
+        knobs = Knobs(FLOORS[args.floor], focus_area, args.focus_strength, args.combine, args.budget_bits)
         label = (f"{mechanism}-{args.source}-{reach}-{args.floor}-f{focus_area:g}-g{args.focus_strength:g}"
-                 f"-w{args.working_layers}{args.working_level}")
+                 f"-w{args.working_layers}{args.working_level}-b{args.budget_bits}")
         policy = mechanism_layout(mechanism, spaces, knobs, reach=reach)
         regulator = Regulator(WorkingLayers(policy, working_blocks, FLOORS[args.working_level]), ctl)
         reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)

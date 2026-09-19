@@ -135,7 +135,9 @@ def test_every_mechanism_is_made_by_its_name_and_keeps_the_ends_of_f():
         n = own.shape[1]
         inputs = Inputs(scores=own, calibration=own, block_weights=np.ones(n), domains=domains,
                         model_weights=weights, n_heads=3)
-        whole = mechanism_layout(mechanism, inputs, Knobs(Level.D2, 1.0, 1.0), DEPTHS, k=1).levels(questions)
+        # f = 1 for the zones, the budget of the top rung for the knapsack: either lifts the whole network to D8
+        top = Knobs(Level.D2, 1.0, 1.0, budget_bits=float(Level.D8.bits))
+        whole = mechanism_layout(mechanism, inputs, top, DEPTHS, k=1).levels(questions)
         assert np.all(whole > int(Level.D2)), mechanism
         assert whole.max() == int(Level.D8), mechanism
     with pytest.raises(ValueError, match="per-block"):

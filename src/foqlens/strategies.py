@@ -30,11 +30,13 @@ from foqlens.layouts import (
     EqualStrength,
     GraphZoneLayout,
     GraphZoneSource,
+    KnapsackLevels,
     QuantileLevels,
     QueryGraphZones,
     TopicGraphZones,
     TopicMeans,
     ZoneStrength,
+    knapsack_price,
 )
 from foqlens.metric import (
     CoactivationMetric,
@@ -113,6 +115,7 @@ class Knobs:
     focus_area: float
     focus_strength: float
     combine: str = "sum"
+    budget_bits: float | None = None  # the knapsack's mean bits per weight; the zones follow f and g instead
 
     def __post_init__(self) -> None:
         _pick(COMBINE, self.combine, "combine")
@@ -209,6 +212,17 @@ class Spaces:
         return self._zones[mechanism]
 
 
+def _knapsack(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    if knobs.budget_bits is None:
+        raise ValueError("the knapsack needs a budget of mean bits per weight")
+    inputs = spaces.inputs
+    # how much the answer needs a block, per weight it costs: the raw score - absolute, not the excess that tells
+    # questions apart
+    per_weight = lambda scores: np.clip(scores, 0.0, None) / inputs.block_weights  # noqa: E731
+    price = knapsack_price(per_weight(inputs.calibration), inputs.block_weights, knobs.floor, ladder, knobs.budget_bits)
+    return KnapsackLevels("knapsack", per_weight(inputs.scores), price, knobs.floor, ladder)
+
+
 def _per_block(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
     return per_block_layout("per-block", spaces.inputs.excess, knobs, ladder)
 
@@ -258,7 +272,7 @@ def _signal_path(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach:
 
 
 # In the order they are checked: the simplest to build and to verify first (per block, no zones - the control).
-MECHANISMS = {"per-block": _per_block, "static": _static, "topic": _topic, "medium": _medium,
+MECHANISMS = {"per-block": _per_block, "knapsack": _knapsack, "static": _static, "topic": _topic, "medium": _medium,
               "signal-path": _signal_path}
 
 

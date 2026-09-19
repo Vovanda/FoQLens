@@ -91,6 +91,11 @@ def _layer_and_kind(name: str) -> tuple[int, str]:
     return int(layer), kind
 
 
+def block_kinds(ctl: Controller) -> np.ndarray:
+    """The module kind of every block in the controller's block order: [n_blocks] str, as 'mlp.up_proj'."""
+    return np.concatenate([np.full(m.n_blocks, _layer_and_kind(name)[1]) for name, m in ctl.modules.items()])
+
+
 def block_layers(ctl: Controller) -> np.ndarray:
     """The layer of every block in the controller's block order: [n_blocks]."""
     return np.concatenate([np.full(m.n_blocks, _layer_and_kind(name)[0]) for name, m in ctl.modules.items()])

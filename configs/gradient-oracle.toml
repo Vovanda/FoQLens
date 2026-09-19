@@ -13,3 +13,7 @@ calibration_questions = 500
 # first-order change when a block is read at D2 instead of D8 - the drop oracle's first order, per block
 gap_low = "d2"
 gap_high = "d8"
+# the likelihood is read on the model's own reply at full precision (E001's bf16 answers of the whole corpus): the
+# dataset's first reference is its spelling - TriviaQA's capitals, NQ's first of several - and cost 15-28 nats at D8
+# on questions the model knows (20.09 night)
+replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"

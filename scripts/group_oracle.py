@@ -26,7 +26,7 @@ from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
 from foqlens.runlog import stage
-from foqlens.small_corpus import draw, pick_shard
+from foqlens.small_corpus import draw, pick_shard, targets
 
 MODEL = fm.E2B_IT
 LOG = logging.getLogger("foqlens.group_oracle")
@@ -84,17 +84,23 @@ def main(argv: list[str] | None = None) -> Path:
               f"{suffix}.npz")
     keys = [(c, r.id) for c, r in laid]
 
+    aim = check.replies or "reference"  # what the likelihood is read on (small_corpus.targets)
+    texts = targets(laid, check.replies)
+
     def save() -> None:
-        save_npz_atomic(target, lift=lift, drop=drop, prefix=prefix, ends=ends, minimal=minimal, groups=np.array(names),
-                 corpus=np.array([c for c, _ in laid]), ids=np.array([r.id for _, r in laid]),
-                 unknown=np.array([(c, r.id) in found.unknown for c, r in laid]), low=check.low, high=check.high,
-                 tolerance=check.tolerance)
+        save_npz_atomic(target, lift=lift, drop=drop, prefix=prefix, ends=ends, minimal=minimal,
+                        groups=np.array(names), corpus=np.array([c for c, _ in laid]),
+                        ids=np.array([r.id for _, r in laid]),
+                        unknown=np.array([(c, r.id) in found.unknown for c, r in laid]), low=check.low,
+                        high=check.high, tolerance=check.tolerance, target=aim)
 
     done = set()
     if target.exists():  # a run stopped midway: the questions it finished are read back, not asked again
         with np.load(target, allow_pickle=False) as kept:
-            if (str(kept["low"]), str(kept["high"]), float(kept["tolerance"])) != (check.low, check.high, check.tolerance):
-                raise ValueError(f"{target} is another oracle's run; move it away to start over")
+            ran = (str(kept["low"]), str(kept["high"]), float(kept["tolerance"]),
+                   str(kept["target"]) if "target" in kept.files else "reference")
+            if ran != (check.low, check.high, check.tolerance, aim):
+                raise ValueError(f"{target} is another oracle's run {ran}; move it away to start over")
             where = {k: i for i, k in enumerate(zip(kept["corpus"].tolist(), kept["ids"].tolist()))}
             for q, k in enumerate(keys):
                 i = where.get(k)
@@ -108,9 +114,9 @@ def main(argv: list[str] | None = None) -> Path:
         for q, ((corpus, row), prompt) in enumerate(zip(laid, prompts)):
             if q in done:
                 continue
-            answer = joined_answer(prompt, row.answers[0]) if row.answers else ""
+            answer = joined_answer(prompt, texts[q]) if texts[q].strip() else ""
             if not answer.strip():
-                LOG.warning("%s %s has no reference answer and is left out", corpus, row.id)
+                LOG.warning("%s %s has no %s text and is left out", corpus, row.id, aim)
                 continue
             first = np.concatenate([fixed, dropped])
             length = len(bench.tokenizer(prompt + answer)["input_ids"])

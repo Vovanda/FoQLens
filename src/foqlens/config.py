@@ -173,6 +173,7 @@ class GroupOracleCheck:
     high: str
     tolerance: float  # nats of the answer's mean NLL: how close to every block at `high` a minimal mask must come
     batch_tokens: int  # padded tokens a batch of variants holds
+    replies: str | None = None  # small_corpus.targets: the answers whose replies are the target; None - the reference
 
 
 @dataclass(frozen=True)
@@ -211,3 +212,4 @@ class GradientOracle:
     gap_low: str | None = None  # with gap_high: also the "quant_gap" form, the loss's change read at low for high
     gap_high: str | None = None
     attention: str = "math"  # the backward pass's sdpa backend (scoring.GRADIENT_BACKENDS)
+    replies: str | None = None  # small_corpus.targets: the answers whose replies are the target; None - the reference

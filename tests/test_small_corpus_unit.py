@@ -4,7 +4,7 @@ import numpy as np
 
 from foqlens.config import SmallCorpus
 from foqlens.corpora import Row
-from foqlens.small_corpus import Draw, StoredMasks, pick_shards, store, stratified_shards
+from foqlens.small_corpus import Draw, StoredMasks, pick_shards, store, stratified_shards, targets
 
 ROWS = [("t", Row(f"t{i}", "q", ("a",), None)) for i in range(6)] + [("n", Row(f"n{i}", "q", ("a",), None))
                                                                      for i in range(4)]
@@ -21,6 +21,17 @@ def test_shards_together_are_their_union_in_the_draws_order_and_name_their_files
     order = [ROWS.index(p) for p in both.laid]
     assert order == sorted(order)
     assert pick_shards(found, small, None) == (found, "")
+
+
+def test_targets_are_the_models_own_replies_or_the_first_reference(tmp_path):
+    from foqlens.io import append_answers
+    from foqlens.selection import Answer
+
+    pairs = [("t", Row("t0", "q", ("CARBON", "Carbon"), None)), ("t", Row("t1", "q", (), None))]
+    assert targets(pairs, None) == ["CARBON", ""]
+    append_answers(tmp_path / "t.jsonl", [Answer("t", "t0", "rev", "m", "bf16", "p", "Carbon.", "Carbon", None,
+                                                 0.0, 0.0, 3, True)])
+    assert targets(pairs, str(tmp_path)) == ["Carbon.", ""]
 
 
 def test_masks_are_read_by_question_and_a_glob_joins_the_shards(tmp_path):

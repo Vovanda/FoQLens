@@ -24,7 +24,7 @@ import numpy as np
 from foqlens import config, corpora
 from foqlens.answering import Asking
 from foqlens.corpora import Row
-from foqlens.io import read_frozen, save_npz_atomic
+from foqlens.io import read_answers, read_frozen, save_npz_atomic
 from foqlens.prompt_variants import TRAIN_POOL, examples_for, needs_train, setup_named
 from foqlens.prompting import PromptFormat
 from foqlens.quant import Level
@@ -85,6 +85,19 @@ def stratified_shards(labels: list[str], count: int, seed: int) -> list[np.ndarr
         positions = rng.permutation(np.flatnonzero(names == label))
         owner[positions] = (np.arange(len(positions)) + rng.integers(count)) % count
     return [np.flatnonzero(owner == k) for k in range(count)]
+
+
+def targets(pairs: list[tuple[str, Row]], replies: str | None) -> list[str]:
+    """The text every question's likelihood is read on: the model's own reply of an answers directory (answers of the
+    model at full precision - what it writes when it knows, in its own words), or with no directory the corpus's first
+    reference. The reference is the dataset's spelling - TriviaQA's is often in capitals ("CARBON"), NQ's first of
+    several - and the model at D8 can find it 15-28 nats unlikely while it knows the answer (20.09 night). A question
+    with no reply gets "" and is left out by the reader."""
+    if replies is None:
+        return [r.answers[0] if r.answers else "" for _, r in pairs]
+    written = {c: {a.id: a.reply for a in read_answers(Path(replies) / f"{c}.jsonl")}
+               for c in dict.fromkeys(c for c, _ in pairs)}
+    return [written[c].get(r.id, "") for c, r in pairs]
 
 
 def draw(corpus_names: list[str], frozen_dir: Path, small: config.SmallCorpus, model: str) -> Draw:

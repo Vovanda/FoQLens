@@ -28,7 +28,7 @@ from foqlens.quant import Level
 from foqlens.regulator import block_kinds, block_layers
 from foqlens.runlog import stage
 from foqlens.scoring import GRADIENT_BACKENDS, GradientScorer
-from foqlens.small_corpus import draw, pick_shard, store
+from foqlens.small_corpus import draw, pick_shard, store, targets
 
 MODEL = fm.E2B_IT
 LOG = logging.getLogger("foqlens.gradient_oracle")
@@ -60,7 +60,7 @@ def main(argv: list[str] | None = None) -> list[Path]:
     fmt = fm.prompt_format(MODEL, bench.tokenizer)
     pairs = found.laid + found.calibration
     prompts = found.prompts(fmt, pairs)
-    answers = [joined_answer(p, r.answers[0]) if r.answers else "" for p, (_, r) in zip(prompts, pairs)]
+    answers = [joined_answer(p, t) if t.strip() else "" for p, t in zip(prompts, targets(pairs, check.replies))]
     lengths = np.array([len(ids) for ids in bench.tokenizer([p + a for p, a in zip(prompts, answers)])["input_ids"]])
     # the calibration is ordered by corpus: evenly spaced picks reach every corpus; a shard takes its share of them
     wanted = check.calibration_questions // (small.shards if args.shard else 1)

@@ -1,0 +1,8 @@
+# The small corpus the strategies are tried on (Volodya 19.09): 5% of every corpus's kept questions, one seeded draw
+# for every run; 20% more give the background and the co-activation graph (60 a corpus was too few for a graph over
+# thousands of blocks); 50 a corpus at least, as ARC-Challenge's 5% is 26; 5% of the unknown share on a line of its own.
+share = 0.05
+calibration_share = 0.2
+floor = 50
+unknown_share = 0.05
+seed = 0

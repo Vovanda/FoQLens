@@ -5,7 +5,11 @@ anything with a name, a batch size and a score_batch (MaskSource): Bench.masks d
 scorer is behind it, so a new score is a new source class. The bench runs at a share of the GPU
 (gpu_share.py): that share of the VRAM, and rest after every batch.
 
-Invariant: masks are always computed with every block at bf16.
+The address sources of #18 are registered by name in ADDRESS_SOURCES with their batch and whether they can read the
+first layers only; a new source is one more entry, and every script that lists sources takes it from there.
+
+Invariant: masks are computed with every block at one level - bf16 unless a working address asks for its base.
+Invariant: every name of ADDRESS_SOURCES builds a source of that name.
 """
 
 from __future__ import annotations
@@ -14,7 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property, partial
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 import numpy as np
 import torch
@@ -164,24 +168,24 @@ class Bench:
         """The standard mask sources, named as MASK_SOURCES."""
         return [PooledMask(self.pooled, pooled_batch), GradientMask(self.gradient, gradient_batch)]
 
-    def source(self, name: str, batch_size: int, layers: set[int] | None = None) -> MaskSource:
-        """A mask source of #18 by its name; `layers` limits the forward sources to those layers - the first N of a
-        working address. The backward sources read every layer."""
-        n_heads = self.model.config.get_text_config(decoder=True).num_attention_heads
-        made = {
-            "pooled": lambda: PooledMask(self.pooled, batch_size),
-            "gradient": lambda: GradientMask(self.gradient, batch_size),
-            "gradient_magnitude": lambda: GradientMagnitudeMask(self.gradient, batch_size),
-            "neuron_activity": lambda: NeuronActivityMask(NeuronActivityScorer(self.ctl.modules, layers), batch_size),
-            "head_energy": lambda: HeadEnergyMask(HeadEnergyScorer(self.ctl.modules, n_heads, layers), batch_size),
-        }
-        if name not in made:
-            raise ValueError(f"unknown mask source {name!r}, expected one of {sorted(made)}")
-        return made[name]()
+    def source(self, name: str, batch_size: int | None = None, layers: set[int] | None = None) -> MaskSource:
+        """A mask source of #18 by its name (ADDRESS_SOURCES), at its own batch unless `batch_size` is given; `layers`
+        limits a source that can read the first layers only - the first N of a working address."""
+        if name not in ADDRESS_SOURCES:
+            raise ValueError(f"unknown mask source {name!r}, expected one of {sorted(ADDRESS_SOURCES)}")
+        spec = ADDRESS_SOURCES[name]
+        if layers is not None and not spec.reads_layers:
+            raise ValueError(f"{name} reads every layer; only {sorted(n for n, s in ADDRESS_SOURCES.items() if s.reads_layers)} read the first ones")
+        return spec.make(self, batch_size or spec.batch, layers)
 
-    def masks(self, prompts: list[str], sources: list[MaskSource]) -> dict[str, np.ndarray]:
-        """Raw masks of every prompt from every source: {source name: [prompts, n_blocks]}."""
-        self.ctl.set_all(Level.BF16)
+    @property
+    def n_heads(self) -> int:
+        return self.model.config.get_text_config(decoder=True).num_attention_heads
+
+    def masks(self, prompts: list[str], sources: list[MaskSource], level: Level = Level.BF16) -> dict[str, np.ndarray]:
+        """Raw masks of every prompt from every source, the model read at `level`: {source name: [prompts, n_blocks]}.
+        bf16 is the reference; a working address reads at the base precision."""
+        self.ctl.set_all(level)
         lengths = [len(ids) for ids in self.tokenizer(prompts)["input_ids"]]  # the tokens encode() pads to
         longest = max(lengths, default=1)
         masks = {
@@ -194,6 +198,27 @@ class Bench:
         # the backward pass leaves a fragmented cache behind; evaluation starts from a clean one
         torch.cuda.empty_cache()
         return masks
+
+
+@dataclass(frozen=True)
+class AddressSource:
+    """How a mask source of #18 is built on a bench: make(bench, batch size, layers or None), its own batch, and whether
+    it can read the first layers only (a forward source) or needs the whole pass (a backward one)."""
+
+    make: Callable[[Bench, int, set[int] | None], MaskSource]
+    batch: int
+    reads_layers: bool
+
+
+ADDRESS_SOURCES: dict[str, AddressSource] = {
+    "pooled": AddressSource(lambda b, n, _: PooledMask(b.pooled, n), POOLED_BATCH, False),
+    "neuron_activity": AddressSource(
+        lambda b, n, layers: NeuronActivityMask(NeuronActivityScorer(b.ctl.modules, layers), n), POOLED_BATCH, True),
+    "head_energy": AddressSource(
+        lambda b, n, layers: HeadEnergyMask(HeadEnergyScorer(b.ctl.modules, b.n_heads, layers), n), POOLED_BATCH, True),
+    "gradient": AddressSource(lambda b, n, _: GradientMask(b.gradient, n), GRADIENT_BATCH, False),
+    "gradient_magnitude": AddressSource(lambda b, n, _: GradientMagnitudeMask(b.gradient, n), GRADIENT_BATCH, False),
+}
 
 
 def subtract_background(masks: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

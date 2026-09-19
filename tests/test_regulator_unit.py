@@ -12,7 +12,7 @@ from foqlens.kquant import QK_K
 from foqlens.precision import Controller, MixedPrecisionLinear
 from foqlens.quant import MAX_DEPTH, Level
 from foqlens.refinements import KQuantLadder
-from foqlens.regulator import Regulator, ReadCost, check, kernel_ladder
+from foqlens.regulator import Regulator, ReadCost, block_layers, check, kernel_ladder
 
 BLOCK_ROWS = 64
 NAMES = ("layers.0.self_attn.q_proj", "layers.0.mlp.down_proj", "layers.1.mlp.up_proj")  # Q2_K, Q4_K, Q2_K bases
@@ -124,6 +124,10 @@ def test_by_layer_counts_every_block_once_in_its_layer_and_kind():
         (0, "self_attn.q_proj", 2), (0, "mlp.down_proj", 2), (1, "mlp.up_proj", 2)]
     assert sum(r["blocks"] for r in rows) == ctl.n_blocks
     assert rows[0]["above_min"] == 0.5 and rows[1]["above_min"] == 0.0
+
+
+def test_every_block_is_named_by_its_layer_in_the_controllers_order():
+    assert block_layers(controller()).tolist() == [0, 0, 0, 0, 1, 1]
 
 
 def test_a_regulated_reading_lays_every_row_out_by_its_question_and_keeps_the_codes():

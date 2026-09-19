@@ -91,6 +91,11 @@ def _layer_and_kind(name: str) -> tuple[int, str]:
     return int(layer), kind
 
 
+def block_layers(ctl: Controller) -> np.ndarray:
+    """The layer of every block in the controller's block order: [n_blocks]."""
+    return np.concatenate([np.full(m.n_blocks, _layer_and_kind(name)[0]) for name, m in ctl.modules.items()])
+
+
 @dataclass
 class Regulator:
     """A policy's layouts on one bench: levels of a batch of questions, checked, set on the controller, measured.

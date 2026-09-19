@@ -1,0 +1,6 @@
+# A smoke of the small corpus: a handful of questions to see a script run through, never a measurement.
+share = 0.002
+calibration_share = 0.004
+floor = 8
+unknown_share = 0.01
+seed = 0

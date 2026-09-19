@@ -36,8 +36,7 @@ import numpy as np
 # The share of each corpus spent on choosing its prompt, drawn at random (Volodya 14.09: 1%), and the
 # fewest questions that can still tell two prompts apart: 1% of ARC-Challenge is 10, of NQ-open 36.
 TUNING_SHARE = 0.01
-TUNING_FLOOR = 50
-# The model judge's probability of Yes above which it says the answer is right. Its verdicts on E2B-it
+TUNING_FLOOR = 50# The model judge's probability of Yes above which it says the answer is right. Its verdicts on E2B-it
 # sit at 0 and 1 (tests/test_it_gpu.py), so the threshold is the middle rather than a tuned value.
 JUDGE_YES = 0.5
 # Below this P(Yes) the judge is sure of its No: 55% of TriviaQA's answers and 77% of NQ-open's sit

@@ -73,8 +73,8 @@ at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 The base may also be the blocks of a published k-quant file as they lie in it; since E003 the bench's base is
 bartowski's Q2_K, calibrated with an imatrix.
 
-`D8` is the top rung of the zones: it keeps 97.5% of bf16's knowledge on the frozen corpus over bartowski's base
-(E003) and 98.8% over the bench's own, at 8.57 bits per controlled weight. The model's file may hold above the refinements an exact tail to the source weights in
+`D8` is the top rung of the zones: on the frozen corpus it keeps 98.8% of bf16's knowledge over the bench's own base
+at 8.57 bits per controlled weight (E002), and 97.5% over bartowski's (E003). The model's file may hold above the refinements an exact tail to the source weights in
 their own type - bf16, fp16 or fp32 ([the model format](refocustensors.md)). The model then reads back the source
 bit for bit, the bench runs without the checkpoint, and the format does not depend on the type a model is
 published in; the tail also gives the judge its bf16 reference. A zone can be raised to the source as well, but on

@@ -33,9 +33,13 @@ def main(argv: list[str] | None = None) -> Path:
     estimate, oracle = StoredMasks.load(Path(check.estimate)), StoredMasks.load(Path(check.oracle))
     if estimate.ids.tolist() != oracle.ids.tolist() or estimate.masks.shape != oracle.masks.shape:
         raise ValueError("the address and the oracle hold other questions or blocks")
-    known = estimate.laid & ~estimate.unknown
+    # questions whose prompt was too long for the oracle's backward pass have no oracle mask: counted apart
+    has_oracle = ~np.isnan(oracle.masks).any(axis=1)
+    known = estimate.laid & ~estimate.unknown & has_oracle
     e, o = estimate.masks[known], np.abs(oracle.masks[known])
-    found = {"questions": int(known.sum()), "estimate": estimate.meta, "oracle": oracle.meta,
+    found = {"questions": int(known.sum()),
+             "without_oracle": int((estimate.laid & ~estimate.unknown & ~has_oracle).sum()),
+             "estimate": estimate.meta, "oracle": oracle.meta,
              "rank_correlation": spread(rank_correlation(e, o)), "shares": {}, "by_kind": {}}
     for share in check.shares:
         found["shares"][share] = {"top_overlap": spread(top_overlap(e, o, share)), "chance": share,

@@ -123,14 +123,23 @@ def main(argv: list[str] | None = None) -> list[Path]:
     laid, calibration, unknown, askings = found.laid, found.calibration, found.unknown, found.askings
     masks = (stored_masks(args.masks, found, ctl.n_blocks) if args.masks is not None else
              bench.masks(found.prompts(fmt, laid + calibration), [bench.source(args.source)])[args.source])
+    prior = (np.nanmean(np.abs(stored_masks(args.prior, found, ctl.n_blocks)[len(laid):]), axis=0)
+             if args.prior is not None else None)
+    # questions whose prompt was too long for a mask (the oracle's backward pass) are left out, and counted
+    has, n = ~np.isnan(masks).any(axis=1), len(laid)
+    if not has.all():
+        LOG.warning("%d laid-out and %d calibration questions have no mask and are left out", int((~has[:n]).sum()),
+                    int((~has[n:]).sum()), extra={"without_mask": int((~has).sum())})
+    laid = [p for p, h in zip(laid, has[:n]) if h]
+    calibration = [p for p, h in zip(calibration, has[n:]) if h]
+    masks = masks[has]
     modules = ctl.modules.values()
     inputs = Inputs(scores=masks[: len(laid)], calibration=masks[len(laid):],
                     block_weights=np.concatenate([m.block_sizes() * m.in_features for m in modules]),
                     domains=tuple(c for c, _ in laid),
                     model_weights={n: m.weight for n, m in ctl.modules.items()},
                     n_heads=bench.model.config.get_text_config(decoder=True).num_attention_heads,
-                    prior=(np.abs(stored_masks(args.prior, found, ctl.n_blocks)[len(laid):]).mean(axis=0)
-                           if args.prior is not None else None))
+                    prior=prior)
     spaces = Spaces(inputs, args.graph, args.k)  # the graphs of the sweep, built once
     working_blocks = block_layers(ctl) < args.working_layers
     decoder = StaticDecoder(attention=PLANS[args.attention], prefill_tokens=PREFILL_TOKENS)

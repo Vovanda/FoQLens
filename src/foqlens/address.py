@@ -15,6 +15,11 @@ share, the wrapper included, drops out and only what tells a question apart is l
   pass the regulator can afford before the weights are chosen - against the full pass at bf16 on the same blocks.
 - layer_profile: the share of every layer in the positive excess, averaged over the questions - where the address
   lives.
+- Meaning, not words: identification between a question and its paraphrase (the same meaning in other words, names
+  kept), against the same identification of their bags of tokens. A source that beats its bag finds the meaning; one
+  that does not finds the words the two share.
+- agreement: two sources score different blocks, so their masks are not compared entry by entry; they agree where they
+  place the same questions near and far alike - the correlation of their question-by-question cosines.
 
 Fixed readings: a source is an address where identification between the wrappers is at least USABLE; its working
 reading holds where identification between the working and the full reading is at least USABLE too. Below it the
@@ -63,6 +68,24 @@ def assess(frozen: np.ndarray, shots: np.ndarray, working: np.ndarray, seen: np.
     reading, which sees only the blocks `seen` [n_blocks]; the layer profile of the frozen reading."""
     return {"questions": len(frozen), "wrappers": identification(frozen, shots),
             "working": identification(working[:, seen], frozen[:, seen]), "layers": layer_profile(frozen, layers)}
+
+
+def agreement(a: np.ndarray, b: np.ndarray) -> float:
+    """Do two sources place the same questions alike, whatever blocks each scores: the correlation of their
+    question-by-question cosine matrices off the diagonal (representational similarity). 1 is the same geometry."""
+    ca, cb = (_unit(excess(m)) @ _unit(excess(m)).T for m in (a, b))
+    off = ~np.eye(len(ca), dtype=bool)
+    return float(np.corrcoef(ca[off], cb[off])[0, 1])
+
+
+def bag_of_tokens(token_ids: list[list[int]]) -> np.ndarray:
+    """The lexical control of a paraphrase: every text as counts of its tokens, [texts, distinct tokens]. A source that
+    finds a paraphrase no better than this finds its words, not its meaning."""
+    vocab = {t: i for i, t in enumerate(sorted({t for ids in token_ids for t in ids}))}
+    counts = np.zeros((len(token_ids), len(vocab)))
+    for row, ids in enumerate(token_ids):
+        np.add.at(counts[row], [vocab[t] for t in ids], 1.0)
+    return counts
 
 
 def layer_profile(masks: np.ndarray, layers: np.ndarray) -> dict[int, float]:

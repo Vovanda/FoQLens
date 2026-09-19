@@ -1,0 +1,49 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "config": "configs\\address-paraphrase.toml",
+  "questions": 60,
+  "bag_of_tokens": {
+    "identified": 0.7166666666666667,
+    "chance": 0.016666666666666666,
+    "own_cos": 0.3407449089253108,
+    "other_cos": -0.005042617475504678
+  },
+  "sources": {
+    "pooled": {
+      "identified": 0.30833333333333335,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.40031667287752953,
+      "other_cos": -0.0028296415529938486
+    },
+    "neuron_activity": {
+      "identified": 0.8916666666666666,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.5438699058093607,
+      "other_cos": -0.007420123961763634
+    },
+    "head_energy": {
+      "identified": 0.6916666666666667,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.5322889877183337,
+      "other_cos": -0.007221479341964714
+    }
+  },
+  "agreement": {
+    "pooled~neuron_activity": 0.28081815206556404,
+    "pooled~head_energy": 0.231844650001579,
+    "neuron_activity~head_energy": 0.730103251511092
+  },
+  "gpu": {
+    "samples": 6,
+    "started": "2026-09-19T16:14",
+    "wall_s": 6.314443826675415,
+    "utilization_mean": 37.333333333333336,
+    "utilization_median": 33.5,
+    "memory_reserved_peak_mib": 13195.0,
+    "temperature_mean_c": 48.833333333333336,
+    "temperature_peak_c": 51.0,
+    "power_mean_w": 172.17333333333332,
+    "power_peak_w": 211.8,
+    "memory_allocated_peak_mib": 10884.20751953125
+  }
+}

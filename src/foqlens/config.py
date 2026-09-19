@@ -76,3 +76,14 @@ class AddressCheck:
     working_layers: int
     base_level: str
     base: str | None = None
+
+
+@dataclass(frozen=True)
+class ParaphraseCheck:
+    """Does a mask source find a question's meaning or its words: the question against its paraphrase, beside the
+    same test on their bags of tokens."""
+
+    corpus: str  # the corpus the paraphrased questions come from
+    paraphrases: str  # a jsonl of {"id", "paraphrase"}
+    sources: tuple[str, ...]
+    base: str | None = None

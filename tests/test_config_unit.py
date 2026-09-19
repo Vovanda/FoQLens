@@ -1,5 +1,6 @@
 """Run configurations: a TOML table maps onto a dataclass field by field, and the repository's own files read cleanly."""
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -51,3 +52,11 @@ def test_the_repositorys_configurations_read_and_name_what_exists():
     assert all(s in ADDRESS_SOURCES for s in check.sources)
     for corpus_name, wrapper in check.two_shot.items():
         assert setup_named(corpus_name, wrapper).shots > 0 and corpus_name in SETUPS
+
+
+def test_the_paraphrase_configuration_reads_and_its_file_names_every_id_once():
+    check = config.read(CONFIGS / "address-paraphrase.toml", config.ParaphraseCheck)
+    assert all(s in ADDRESS_SOURCES for s in check.sources)
+    lines = (CONFIGS.parent / check.paraphrases).read_text(encoding="utf-8").splitlines()
+    ids = [json.loads(line)["id"] for line in lines if line]
+    assert len(ids) == len(set(ids)) and ids

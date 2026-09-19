@@ -6,7 +6,7 @@ import torch
 
 from foqlens import graph_zones as bz
 from foqlens import zones
-from foqlens.layouts import GraphZoneLayout, EqualStrength, QuantileLevels, QueryGraphZones
+from foqlens.layouts import GraphZoneLayout, QuantileLevels, QueryGraphZones
 from foqlens.metric import FixedSurface, geodesic, neighbour_table
 from foqlens.quant import LADDER, Level
 

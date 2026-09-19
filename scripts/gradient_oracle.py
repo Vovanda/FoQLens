@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> list[Path]:
             if (b + 1) % SAVE_EVERY == 0:
                 checkpoint.save(nll=nll, batches_done=b + 1, lost=lost, **{f"mask_{f}": m for f, m in masks.items()})
     modules = bench.ctl.modules.values()
-    targets = []
+    written = []
     for form, source in forms_named.items():
         kept = store(found, masks[form], block_layers(bench.ctl), block_kinds(bench.ctl),
                      np.concatenate([m.block_sizes() * m.in_features for m in modules]),
@@ -138,13 +138,13 @@ def main(argv: list[str] | None = None) -> list[Path]:
         target = args.out / f"answer_{source}-{stem}.npz"
         kept.save(target)
         LOG.info("written %s", target)
-        targets.append(target)
+        written.append(target)
     # the NLL the gradient was taken of, to be checked against the oracle by trying's at the same level
     target = args.out / f"answer_nll-{stem}.npz"
     save_npz_atomic(target, nll=nll, corpus=np.array([c for c, _ in pairs]), ids=np.array([r.id for _, r in pairs]))
     LOG.info("written %s", target)
     checkpoint.clear()
-    return targets + [target]
+    return written + [target]
 
 
 if __name__ == "__main__":

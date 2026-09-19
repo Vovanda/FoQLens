@@ -19,6 +19,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ninja>=1.13.2",
+    "pyflakes>=3.4.0",
     "pytest",
 ]
 eval = ["lm-eval"]

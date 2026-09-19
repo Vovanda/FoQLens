@@ -2,5 +2,5 @@
 # the other words changed), beside the same test on their bags of tokens.
 corpus = "triviaqa"
 paraphrases = "prompts/paraphrases/triviaqa.jsonl"
-sources = ["pooled", "neuron_activity", "head_energy"]
+sources = ["pooled", "neuron_activity", "head_energy", "hybrid"]
 base = "bartowski-Q2_K"

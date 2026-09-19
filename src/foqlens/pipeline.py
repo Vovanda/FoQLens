@@ -25,7 +25,7 @@ import torch
 
 from foqlens import model as fm
 from foqlens import refocustensors
-from foqlens.activity import HeadEnergyScorer, NeuronActivityScorer
+from foqlens.activity import HeadEnergyScorer, HybridScorer, NeuronActivityScorer
 from foqlens.gpu_monitor import gpu_temperature
 from foqlens.gpu_share import FULL, Cooldown, Pacer, ThermalGuard, Throttle
 from foqlens.precision import Controller, install
@@ -109,6 +109,19 @@ class HeadEnergyMask:
     scorer: HeadEnergyScorer
     batch_size: int
     name: str = "head_energy"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
+@dataclass(frozen=True)
+class HybridMask:
+    """Neuron activity and head energy in one forward pass, each at length 1 per question, summed (activity.HybridScorer):
+    the MLP's gate and up blocks and the attention's q blocks in one address."""
+
+    scorer: HybridScorer
+    batch_size: int
+    name: str = "hybrid"
 
     def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
         return list(self.scorer.score_batch(model, tokenizer, texts))
@@ -216,6 +229,10 @@ ADDRESS_SOURCES: dict[str, AddressSource] = {
         lambda b, n, layers: NeuronActivityMask(NeuronActivityScorer(b.ctl.modules, layers), n), POOLED_BATCH, True),
     "head_energy": AddressSource(
         lambda b, n, layers: HeadEnergyMask(HeadEnergyScorer(b.ctl.modules, b.n_heads, layers), n), POOLED_BATCH, True),
+    "hybrid": AddressSource(
+        lambda b, n, layers: HybridMask(HybridScorer((NeuronActivityScorer(b.ctl.modules, layers),
+                                                     HeadEnergyScorer(b.ctl.modules, b.n_heads, layers))), n),
+        POOLED_BATCH, True),
     "gradient": AddressSource(lambda b, n, _: GradientMask(b.gradient, n), GRADIENT_BATCH, False),
     "gradient_magnitude": AddressSource(lambda b, n, _: GradientMagnitudeMask(b.gradient, n), GRADIENT_BATCH, False),
 }

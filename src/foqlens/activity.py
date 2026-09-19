@@ -16,9 +16,15 @@ Invariants:
 - Invariant: padding and the first token never contribute to a signal.
 - Invariant: the gate and up blocks of one group of neurons get the same score.
 - Invariant: every q_proj block of one head gets that head's energy; blocks of unread layers and modules score 0.
+- Invariant: in a HybridScorer every part enters at length 1 per question, and a part with no signal enters at 0.
+
+A HybridScorer reads several of these signals in one pass and sums them, each scaled to length 1 per question.
 """
 
 from __future__ import annotations
+
+from contextlib import ExitStack
+from typing import Protocol
 
 import numpy as np
 import torch
@@ -26,6 +32,8 @@ from torch import nn
 
 from foqlens import model as fm
 from foqlens.precision import MixedPrecisionLinear
+
+TINY = 1e-12  # a part with no signal on a question has no direction: it is left at 0, not divided by 0
 
 
 def valid_tokens(attention_mask: torch.Tensor) -> torch.Tensor:
@@ -97,12 +105,15 @@ class NeuronActivityScorer:
         self.n_blocks = sum(m.n_blocks for m in modules.values())
         self.down = {n: m for n, m in modules.items() if n.endswith("mlp.down_proj") and (layers is None or _layer(n) in layers)}
 
+    def recorder(self, valid: torch.Tensor) -> _InputRecorder:
+        """The hooks that reduce every read down_proj's input to its neuron groups' activity."""
+        block_rows = next(iter(self.modules.values())).block_rows
+        return _InputRecorder(self.down, lambda x: block_activity(x, valid, block_rows))
+
     @torch.no_grad()
     def score_batch(self, model: nn.Module, tokenizer, texts: list[str]) -> np.ndarray:
         enc = fm.encode(tokenizer, texts, model.device)
-        valid = valid_tokens(enc["attention_mask"])
-        block_rows = next(iter(self.modules.values())).block_rows
-        with _InputRecorder(self.down, lambda x: block_activity(x, valid, block_rows)) as rec:
+        with self.recorder(valid_tokens(enc["attention_mask"])) as rec:
             model(**enc)
         return self.assemble(rec.values, len(texts)).cpu().numpy()
 
@@ -126,12 +137,15 @@ class HeadEnergyScorer:
         self.n_blocks = sum(m.n_blocks for m in modules.values())
         self.o = {n: m for n, m in modules.items() if n.endswith("self_attn.o_proj") and (layers is None or _layer(n) in layers)}
 
+    def recorder(self, valid: torch.Tensor) -> _InputRecorder:
+        """The hooks that reduce every read o_proj's input to its heads' energy."""
+        return _InputRecorder(self.o, lambda x: head_energy(x, valid, self.n_heads))
+
     @torch.no_grad()
     def energies(self, model: nn.Module, tokenizer, texts: list[str]) -> dict[str, torch.Tensor]:
         """Every read layer's head energies: {o_proj name: [batch, n_heads]}."""
         enc = fm.encode(tokenizer, texts, model.device)
-        valid = valid_tokens(enc["attention_mask"])
-        with _InputRecorder(self.o, lambda x: head_energy(x, valid, self.n_heads)) as rec:
+        with self.recorder(valid_tokens(enc["attention_mask"])) as rec:
             model(**enc)
         return rec.values
 
@@ -147,3 +161,34 @@ class HeadEnergyScorer:
             start = self.offsets[q]
             out[:, start : start + per_head * self.n_heads] = values.repeat_interleave(per_head, dim=1)
         return out
+
+
+class ForwardPart(Protocol):
+    """A forward signal that can share a pass with others: its hooks, and how their values land on the blocks."""
+
+    def recorder(self, valid: torch.Tensor) -> _InputRecorder: ...
+
+    def assemble(self, values: dict[str, torch.Tensor], batch: int) -> torch.Tensor: ...
+
+
+class HybridScorer:
+    """Several forward signals in one pass, summed: every part's vector over the blocks is scaled to length 1 per
+    question first - the parts measure different things in different units, and a sum of raw values would be the
+    loudest part alone. A part that sees nothing on a question adds nothing."""
+
+    def __init__(self, parts: tuple[ForwardPart, ...]):
+        self.parts = parts
+
+    @torch.no_grad()
+    def score_batch(self, model: nn.Module, tokenizer, texts: list[str]) -> np.ndarray:
+        enc = fm.encode(tokenizer, texts, model.device)
+        valid = valid_tokens(enc["attention_mask"])
+        with ExitStack() as hooks:
+            recorders = [hooks.enter_context(part.recorder(valid)) for part in self.parts]
+            model(**enc)
+        return self.combine([p.assemble(r.values, len(texts)) for p, r in zip(self.parts, recorders)]).cpu().numpy()
+
+    @staticmethod
+    def combine(vectors: list[torch.Tensor]) -> torch.Tensor:
+        """The parts' [batch, n_blocks] vectors, each at length 1 per question, summed."""
+        return sum(v / v.norm(dim=1, keepdim=True).clamp_min(TINY) for v in vectors)

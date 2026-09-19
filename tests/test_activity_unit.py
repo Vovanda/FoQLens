@@ -7,6 +7,7 @@ from torch import nn
 
 from foqlens.activity import (
     HeadEnergyScorer,
+    HybridScorer,
     NeuronActivityScorer,
     block_activity,
     block_offsets,
@@ -60,6 +61,23 @@ def test_neuron_activity_lands_on_the_gate_and_up_blocks_of_its_layer_only():
     assert out[at["layers.1.mlp.gate_proj"]: at["layers.1.mlp.gate_proj"] + 3].tolist() == [1.0, 2.0, 3.0]
     assert out[at["layers.1.mlp.up_proj"]: at["layers.1.mlp.up_proj"] + 3].tolist() == [1.0, 2.0, 3.0]
     assert out.sum() == pytest.approx(12.0)  # nothing anywhere else
+
+
+def test_a_hybrid_sums_its_parts_each_at_length_one_and_a_silent_part_adds_nothing():
+    loud = torch.tensor([[300.0, 400.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0]])  # the second question: no signal here
+    quiet = torch.tensor([[0.0, 0.0, 0.6, 0.8], [0.0, 0.0, 3.0, 4.0]])
+    combined = HybridScorer.combine([loud, quiet])
+    torch.testing.assert_close(combined, torch.tensor([[0.6, 0.8, 0.6, 0.8], [0.0, 0.0, 0.6, 0.8]]))
+
+
+def test_the_parts_of_a_hybrid_record_in_the_same_pass():
+    modules = tiny_modules()
+    neurons, heads = NeuronActivityScorer(modules, layers={0}), HeadEnergyScorer(modules, n_heads=2, layers={0})
+    valid = torch.ones(1, 3)
+    with neurons.recorder(valid) as a, heads.recorder(valid) as b:
+        modules["layers.0.mlp.down_proj"](torch.ones(1, 3, 192, dtype=torch.bfloat16))
+        modules["layers.0.self_attn.o_proj"](torch.ones(1, 3, 256, dtype=torch.bfloat16))
+    assert list(a.values) == ["layers.0.mlp.down_proj"] and list(b.values) == ["layers.0.self_attn.o_proj"]
 
 
 def test_head_energy_lands_on_every_q_block_of_its_head():

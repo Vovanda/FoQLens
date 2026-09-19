@@ -220,6 +220,7 @@ class ChainOverlay:
 
     group_oracle: str  # the oracle by trying's file (a glob joins parts): the chain in the order of the lift
     chains: str  # the file of oracle_chains.py: every block oracle's chain
+    grades: str | None  # the file of oracle_grades.py: every chain's map in every level - its lenses, counted
     antinode_share: float  # a group in the sets of at least this share of the questions is an antinode (or a node)
     bands: tuple[tuple[int, int], ...]  # [lo, hi) bands of layers
     bootstrap_draws: int

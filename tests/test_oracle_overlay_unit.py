@@ -48,3 +48,13 @@ def test_chains_antinodes_and_bands_read_the_sets_as_they_are():
     assert antinodes(frequency(chain), 0.5).tolist() == [2]
     bands = band_spread(chain, np.array([0, 0, 1, 1]), [(0, 1), (1, 2)], np.array(["t", "t", "s"]))
     assert bands[0]["mean"] == 1 / 6 and bands[1]["mean"] == 1 / 3
+
+
+def test_lenses_are_runs_of_groups_above_the_base_connected_along_the_depth():
+    from foqlens.oracle_overlay import lenses
+
+    layers = np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4])  # attention and MLP of five layers
+    levels = np.array([2, 8, 6, 2, 2, 2, 2, 4, 8, 2])  # above D2 (code 2): groups 1, 2 (layers 0-1) and 7, 8 (3-4)
+    found = lenses(levels, layers, base=2)
+    assert [f.tolist() for f in found] == [[1, 2], [7, 8]]
+    assert lenses(np.full(10, 2), layers, base=2) == []

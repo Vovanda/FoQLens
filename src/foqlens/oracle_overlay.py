@@ -18,6 +18,7 @@ whether a topic shares its zones - read from their kept scores, never from the m
   question has in its chain, the nodes the groups nearly every question can switch off - the rest varies by question.
 - band_spread: the share of each band of layers a set takes, its mean and its spread over the questions within a topic
   and between topics - where the spread is large the band is the question's, where small it is common.
+- lenses: the runs of a question's map above the base, connected along the depth - a map may hold several.
 
 Invariants:
 - Invariant: static_share is 1 when every question ranks the groups alike and near 0 when the ranks are random.
@@ -135,3 +136,22 @@ def band_spread(sets: np.ndarray, layers: np.ndarray, bands: list[tuple[int, int
         out.append({"band": [int(lo), int(hi)], "mean": float(share.mean()), "within_topic_std": float(within),
                     "between_topics_std": float(np.std(list(means.values())))})
     return out
+
+
+def lenses(levels: np.ndarray, layers: np.ndarray, base: int) -> list[np.ndarray]:
+    """The lenses of one question's map (Volodya 20.09 02:12): the groups read above `base`, split into runs connected
+    along the depth - a group's neighbours are the groups of its own layer and of the layers next to it. Every lens is
+    the sorted group indices of one run; a map may hold several."""
+    above = np.flatnonzero(levels > base)
+    if not len(above):
+        return []
+    order = above[np.argsort(layers[above], kind="stable")]
+    runs, current = [], [order[0]]
+    for g in order[1:]:
+        if layers[g] - layers[current[-1]] <= 1:
+            current.append(g)
+        else:
+            runs.append(np.sort(np.array(current)))
+            current = [g]
+    runs.append(np.sort(np.array(current)))
+    return runs

@@ -19,7 +19,8 @@ import numpy as np
 from foqlens import config, runlog
 from foqlens.group_oracle import RUN_FIELDS, group_order
 from foqlens.io import read_npz_parts, write_json
-from foqlens.oracle_overlay import antinodes, band_spread, bootstrap, chain_sets, frequency, pair_jaccard
+from foqlens.oracle_overlay import antinodes, band_spread, bootstrap, chain_sets, frequency, lenses, pair_jaccard
+from foqlens.quant import Level
 
 LOG = logging.getLogger("foqlens.chain_overlay")
 
@@ -63,6 +64,22 @@ def main(argv: list[str] | None = None) -> Path:
                  np.median(size), np.percentile(size, 90), np.median(gone),
                  found["oracles"][name]["mlp_share_of_chain"], len(found["oracles"][name]["antinodes"]),
                  len(found["oracles"][name]["nodes"]), extra={"oracle": name})
+    if check.grades:  # every chain's map in every level: how many groups each level holds, how many lenses it has
+        graded = read_npz_parts(check.grades, RUN_FIELDS | {"sources", "rungs"})
+        base = int(Level[str(graded["low"]).upper()])
+        shown = [Level[str(graded["high"]).upper()], *(Level[r.upper()] for r in graded["rungs"].tolist()[::-1]),
+                 Level[str(graded["low"]).upper()], Level.ZERO]
+        for name in graded["sources"].tolist():
+            maps = graded[f"grades_{name}"]
+            maps = maps[(maps != 255).all(axis=1)]
+            counts = {lv.name: float(np.median((maps == int(lv)).sum(axis=1))) for lv in shown}
+            count_lenses = np.array([len(lenses(m, layers, base)) for m in maps], dtype=float)
+            found["oracles"].setdefault(name, {})["map"] = {
+                "questions": int(len(maps)), "median_groups": counts,
+                "lenses_median": float(np.median(count_lenses)) if len(maps) else None,
+                "lenses_histogram": {int(k): int((count_lenses == k).sum()) for k in np.unique(count_lenses)}}
+            LOG.info("%s map: median groups %s, lenses median %s", name, counts,
+                     found["oracles"][name]["map"]["lenses_median"], extra={"oracle": name})
     order = list(sets)
     for i, a in enumerate(order):
         for b in order[i + 1:]:

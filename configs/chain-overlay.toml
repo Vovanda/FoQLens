@@ -3,6 +3,7 @@
 # early, middle and late layers within and between topics. E2B has 35 layers.
 group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus*.npz"
 chains = "runs/oracles/e2b-it/chains-d2d8-bartowski-Q2_K-small-corpus*.npz"
+grades = "runs/oracles/e2b-it/grades-d2d8-bartowski-Q2_K-small-corpus*.npz"
 antinode_share = 0.5
 bands = [[0, 12], [12, 24], [24, 35]]
 bootstrap_draws = 1000

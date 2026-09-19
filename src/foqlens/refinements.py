@@ -1,7 +1,7 @@
 """The bench's copy of a weight: a k-quant base with refinements over it, one copy read at its base and deeper.
 
 The base is kquant.KBase - Q2_K or Q4_K after llama.cpp, or a published GGUF file's k-quant blocks read as they lie
-(ForeignLadder: Q2_K, Q3_K, Q4_K, Q6_K). Over it lie refinements as in quant.RefinedWeight:
+(PublishedBaseLadder: Q2_K, Q3_K, Q4_K, Q6_K). Over it lie refinements as in quant.RefinedWeight:
 refinement k quantizes what the base and the refinements before it left, 2-bit symmetric codes with step
 block_step / 4**k, where block_step is the base's own quantized step d * scale of that block - a refinement stores
 codes only, no scale.
@@ -292,7 +292,7 @@ BaseBlocks = Callable[[str, tuple[int, int]], "tuple[KFormat, torch.Tensor] | No
 
 
 @dataclass(frozen=True)
-class ForeignLadder:
+class PublishedBaseLadder:
     """The read depths of a copy over another quantizer's base: a published file's blocks read as they lie, our
     refinements and exact tail over them. A module the file gives no refinable base keeps the bench's own.
 

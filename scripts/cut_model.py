@@ -20,7 +20,7 @@ from huggingface_hub import snapshot_download
 from foqlens.gguf_weights import PUBLISHED, GgufWeights, published_path
 from foqlens.model import E2B, E2B_IT, E4B, E4B_IT, REVISIONS
 from foqlens.quant import Level
-from foqlens.refinements import ForeignLadder
+from foqlens.refinements import PublishedBaseLadder
 from foqlens.refocustensors import BENCH_COPY, model_directory, source_id, write
 
 MODELS = {"e2b": E2B, "e4b": E4B, "e2b-it": E2B_IT, "e4b-it": E4B_IT}
@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None) -> Path:
     source = Path(snapshot_download(model_id, revision=REVISIONS[model_id], local_files_only=True))
     suffix = "-".join(part for part in (args.base, args.depth) if part) or None
     out = args.out or model_directory(model_id, suffix)
-    copy = ForeignLadder(GgufWeights(published_path(args.base)).base_blocks) if args.base else BENCH_COPY
+    copy = PublishedBaseLadder(GgufWeights(published_path(args.base)).base_blocks) if args.base else BENCH_COPY
     start = time.perf_counter()
     path = write(source, out, source_id(model_id), copy=copy,
                  depth=None if args.depth is None else Level[args.depth].depth)

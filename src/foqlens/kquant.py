@@ -13,7 +13,7 @@ relative (float32 sums in another order), codes identical but for a near tie - m
 Invariant: a base laid out as GGUF blocks (gguf_blocks) is ggml's block_q2_K / block_q4_K byte for byte, and
 from_gguf_blocks reads it back to the same base exactly.
 
-Q3_K and Q6_K are only read: a published GGUF file's blocks of them become a base (refinements.ForeignLadder); no
+Q3_K and Q6_K are only read: a published GGUF file's blocks of them become a base (refinements.PublishedBaseLadder); no
 quantizer of them is ported.
 Invariant: from_gguf_blocks reads block_q3_K / block_q6_K bytes exactly as gguf-py dequantizes them - every
 controlled tensor of bartowski's E2B-it Q2_K file, 2026-09-18.

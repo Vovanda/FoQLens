@@ -1,5 +1,5 @@
 """The controlled weights of a published GGUF file: dequantized, a WeightSource to bake a level from, or as their
-k-quant blocks, the base of a stack (refinements.ForeignLadder).
+k-quant blocks, the base of a stack (refinements.PublishedBaseLadder).
 
 Infrastructure: it reads a file. The embeddings and norms stay as the bench loaded them; only the controlled
 matrices (precision.CONTROLLED) come from the file, so a GGUF level and a level of our own ladder differ in those

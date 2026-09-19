@@ -8,7 +8,7 @@ from gguf.quants import dequantize
 
 from foqlens.gguf_weights import GgufWeights
 from foqlens.kquant import Q2_K, Q3_K, Q4_K, Q6_K, QK_K, KBase, from_gguf_blocks, gguf_blocks
-from foqlens.refinements import ExactTail, ForeignLadder, KQuantLadder, KRefinedWeight, ulp_order
+from foqlens.refinements import ExactTail, KQuantLadder, KRefinedWeight, PublishedBaseLadder, ulp_order
 from foqlens.quant import MAX_DEPTH
 
 ROWS, SUPER_BLOCKS = 4, 3
@@ -90,7 +90,7 @@ def gguf_file(path, blocks: torch.Tensor) -> None:
 def test_a_published_files_k_quant_tensor_is_the_base_and_a_float_one_keeps_ours(tmp_path):
     blocks = foreign_blocks(Q3_K, seed=6)
     gguf_file(tmp_path / "model.gguf", blocks)
-    ladder = ForeignLadder(GgufWeights(tmp_path / "model.gguf").base_blocks)
+    ladder = PublishedBaseLadder(GgufWeights(tmp_path / "model.gguf").base_blocks)
     shape = (ROWS, SUPER_BLOCKS * QK_K)
     q = ladder.quantize("layers.0.self_attn.q_proj", source_over(from_gguf_blocks(blocks, Q3_K), seed=7))
     assert q.fmt is Q3_K and torch.equal(q.blocks, blocks) and q.depth == MAX_DEPTH

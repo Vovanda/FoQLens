@@ -95,3 +95,16 @@ def test_a_stack_cut_to_a_depth_holds_no_tail_and_refuses_the_source(checkpoint,
     for key in CONTROLLED_KEYS:
         assert cut.copy(controlled_name(key)).depth == 2, key  # Q2_K: base and one refinement; Q4_K: its base alone
     assert (full / FILE).stat().st_size > (tmp_path / "cut" / FILE).stat().st_size
+
+
+def test_the_stack_read_to_a_depth_takes_the_bytes_of_a_file_cut_there(checkpoint, tmp_path):
+    tensors, full = checkpoint
+    source = tmp_path / "source"
+    source.mkdir()
+    save_file(tensors, source / "model.safetensors")
+    (source / "config.json").write_text(json.dumps({"model_type": "fake"}), encoding="utf-8")
+    whole = ModelFile(full / FILE, device=DEVICE)
+    for depth in range(1, MAX_DEPTH + 1):
+        cut = ModelFile(write(source, tmp_path / f"cut{depth}", "fake/model@0", depth=depth), device=DEVICE)
+        assert whole.stack_bytes(depth) == cut.stack_bytes(MAX_DEPTH), depth
+        assert whole.passed_bytes() == cut.passed_bytes()

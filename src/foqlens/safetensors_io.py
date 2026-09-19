@@ -47,6 +47,11 @@ class SafetensorsReader:
     def dtype(self, key: str) -> torch.dtype:
         return SAFETENSORS_TYPES[self._entries[key]["dtype"]]
 
+    def nbytes(self, key: str) -> int:
+        """The bytes the tensor `key` takes in the file, read from the header alone."""
+        begin, end = self._entries[key]["data_offsets"]
+        return end - begin
+
     def read(self, key: str, device: str = "cpu") -> torch.Tensor:
         entry = self._entries[key]
         begin, end = entry["data_offsets"]

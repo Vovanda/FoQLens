@@ -164,6 +164,21 @@ class ModelFile:
         parts = self._parts(key)
         return ExactTail.from_tensors(parts, DTYPES[self.modules[key]["dtype"]]).decode(self._refined(key, parts).prediction())
 
+    def passed_bytes(self) -> int:
+        """The bytes of the tensors the regulator does not read."""
+        return sum(self._file.nbytes(key) for key in self._passed)
+
+    def stack_bytes(self, depth: int) -> int:
+        """The bytes of every controlled weight read to `depth` - the base and the refinements up to it, from the
+        header alone; a base deeper than `depth` counts whole, as the regulator reads it."""
+        total = 0
+        for key, module in self.modules.items():
+            base_depth = BASE_FORMATS[module["base"]].base_depth
+            total += self._file.nbytes(f"{key}.base")
+            total += sum(self._file.nbytes(f"{key}.refinement.{k}") for k in range(max(depth - base_depth, 0))
+                         if f"{key}.refinement.{k}" in self._parts_of[key])
+        return total
+
     def passed_state(self) -> dict[str, torch.Tensor]:
         """The weights the regulator does not read, as the source holds them, on the device."""
         return {key: self._read(key) for key in self._passed}

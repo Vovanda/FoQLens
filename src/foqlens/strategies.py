@@ -169,6 +169,7 @@ class Inputs:
     domains: tuple[str, ...] | None = None  # every laid-out question's topic, for topic zones
     model_weights: Mapping[str, torch.Tensor] | None = None  # [out, in] of every module, for the signal's path
     n_heads: int | None = None
+    prior: np.ndarray | None = None  # [n_blocks] a static sensitivity of every block (the oracle's mean on calibration)
 
     @property
     def background(self) -> np.ndarray:
@@ -212,15 +213,29 @@ class Spaces:
         return self._zones[mechanism]
 
 
-def _knapsack(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+def _knapsack_of(name: str, sensitivity, spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...]) -> KnapsackLevels:
+    """The knapsack over `sensitivity` (scores -> [questions, n_blocks]), its price fitted on the calibration's."""
     if knobs.budget_bits is None:
         raise ValueError("the knapsack needs a budget of mean bits per weight")
     inputs = spaces.inputs
-    # how much the answer needs a block, per weight it costs: the raw score - absolute, not the excess that tells
-    # questions apart
-    per_weight = lambda scores: np.clip(scores, 0.0, None) / inputs.block_weights  # noqa: E731
+    per_weight = lambda scores: np.clip(sensitivity(scores), 0.0, None) / inputs.block_weights  # noqa: E731
     price = knapsack_price(per_weight(inputs.calibration), inputs.block_weights, knobs.floor, ladder, knobs.budget_bits)
-    return KnapsackLevels("knapsack", per_weight(inputs.scores), price, knobs.floor, ladder)
+    return KnapsackLevels(name, per_weight(inputs.scores), price, knobs.floor, ladder)
+
+
+def _knapsack(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    # the raw score as the sensitivity - absolute, not the excess that tells questions apart
+    return _knapsack_of("knapsack", lambda scores: scores, spaces, knobs, ladder)
+
+
+def _knapsack_modulated(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    # a static sensitivity of every block, modulated by how much louder the question's address is there than its
+    # background: the address alone is mostly the background, and its thresholds would fall by module class
+    inputs = spaces.inputs
+    if inputs.prior is None:
+        raise ValueError("the modulated knapsack needs a prior sensitivity of every block")
+    background = np.maximum(inputs.background, np.finfo(float).tiny)
+    return _knapsack_of("knapsack-modulated", lambda scores: inputs.prior * scores / background, spaces, knobs, ladder)
 
 
 def _per_block(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
@@ -272,7 +287,8 @@ def _signal_path(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach:
 
 
 # In the order they are checked: the simplest to build and to verify first (per block, no zones - the control).
-MECHANISMS = {"per-block": _per_block, "knapsack": _knapsack, "static": _static, "topic": _topic, "medium": _medium,
+MECHANISMS = {"per-block": _per_block, "knapsack": _knapsack, "knapsack-modulated": _knapsack_modulated,
+              "static": _static, "topic": _topic, "medium": _medium,
               "signal-path": _signal_path}
 
 

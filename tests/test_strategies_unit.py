@@ -133,7 +133,7 @@ def test_every_mechanism_is_made_by_its_name_and_keeps_the_ends_of_f():
     for mechanism in MECHANISMS:
         own = peaked if mechanism == "signal-path" else scores
         n = own.shape[1]
-        inputs = Inputs(scores=own, calibration=own, block_weights=np.ones(n), domains=domains,
+        inputs = Inputs(scores=own, calibration=own, block_weights=np.ones(n), domains=domains, prior=np.ones(n),
                         model_weights=weights, n_heads=3)
         # f = 1 for the zones, the budget of the top rung for the knapsack: either lifts the whole network to D8
         top = Knobs(Level.D2, 1.0, 1.0, budget_bits=float(Level.D8.bits))
@@ -155,3 +155,20 @@ def test_the_reach_is_picked_by_name_and_the_proportional_one_spends_the_mean_of
         assert layout.levels(questions).max() == int(Level.D8), reach
     with pytest.raises(ValueError, match="proportional"):
         zone_layout("z", "query", excess, space, space.surface(), np.ones(BLOCKS), Knobs(Level.D2, 0.2, 1.0), reach="gas")
+
+
+def test_the_modulated_knapsack_follows_the_question_where_the_plain_one_follows_the_block():
+    from foqlens.strategies import Inputs, mechanism_layout
+
+    rng = np.random.default_rng(3)
+    background = rng.uniform(1.0, 2.0, BLOCKS)
+    calibration = background * rng.uniform(0.9, 1.1, (40, BLOCKS))
+    scores = np.tile(background, (2, 1))
+    # question 0 is loud on the first blocks, question 1 on the last - by more than a rung (16 times): a lesser contrast
+    # may leave the loud and the quiet blocks on one rung
+    scores[0, :10] *= 40.0
+    scores[1, -10:] *= 40.0
+    inputs = Inputs(scores=scores, calibration=calibration, block_weights=np.ones(BLOCKS), prior=np.ones(BLOCKS))
+    knobs = Knobs(Level.D2, 0.0, 1.0, budget_bits=3.0)
+    codes = mechanism_layout("knapsack-modulated", inputs, knobs, DEPTHS).levels(np.arange(2))
+    assert codes[0, :10].min() > codes[0, -10:].max() and codes[1, -10:].min() > codes[1, :10].max()

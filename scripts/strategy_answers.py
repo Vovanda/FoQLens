@@ -65,6 +65,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"),
                         help="the small corpus (config.SmallCorpus): the shares laid out, for calibration, unknown")
     parser.add_argument("--mechanism", nargs="+", choices=list(MECHANISMS), required=True)
+    parser.add_argument("--prior", type=Path, default=None,
+                        help="masks kept for this draw whose calibration mean is every block's static sensitivity")
     parser.add_argument("--masks", type=Path, default=None,
                         help="masks kept by small_corpus_masks.py for this draw, instead of a mask pass")
     parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), default="pooled",
@@ -126,7 +128,9 @@ def main(argv: list[str] | None = None) -> list[Path]:
                     block_weights=np.concatenate([m.block_sizes() * m.in_features for m in modules]),
                     domains=tuple(c for c, _ in laid),
                     model_weights={n: m.weight for n, m in ctl.modules.items()},
-                    n_heads=bench.model.config.get_text_config(decoder=True).num_attention_heads)
+                    n_heads=bench.model.config.get_text_config(decoder=True).num_attention_heads,
+                    prior=(np.abs(stored_masks(args.prior, found, ctl.n_blocks)[len(laid):]).mean(axis=0)
+                           if args.prior is not None else None))
     spaces = Spaces(inputs, args.graph, args.k)  # the graphs of the sweep, built once
     working_blocks = block_layers(ctl) < args.working_layers
     decoder = StaticDecoder(attention=PLANS[args.attention], prefill_tokens=PREFILL_TOKENS)

@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "docs.html"
 # the documents of the bench that the page is expected to carry, by folder
 SHELVED = (("docs", "*.md"), ("prereg", "*.md"))
+RUSSIAN = ".ru.md"
 
 
 def shelf() -> set[str]:
@@ -36,12 +37,14 @@ def test_the_page_serves_files_rather_than_jekyll_pages():
 
 
 def test_every_document_of_the_repository_is_on_the_shelf():
+    # name.ru.md is the Russian copy of name.md, kept for review: the English one on the shelf carries both
     listed = shelf()
     missing = sorted(
         f"{folder}/{path.name}"
         for folder, pattern in SHELVED
         for path in (ROOT / folder).glob(pattern)
         if f"{folder}/{path.name}" not in listed
+        and f"{folder}/{path.name.removesuffix(RUSSIAN) + '.md'}" not in listed
     )
     assert not missing, f"documents in the repository that the page does not show: {missing}"
 

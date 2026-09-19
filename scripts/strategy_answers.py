@@ -126,7 +126,8 @@ def main(argv: list[str] | None = None) -> Path:
                                            for (c, r), row in zip(laid, rows)]}
     print(f"{label}: lifted share median {found['lifted_share']['median']:.3f}, p90 {found['lifted_share']['p90']:.3f}, "
           f"max {found['lifted_share']['max']:.3f}; over half the network {found['over_half']} of "
-          f"{found['questions']}; zones {found.get('zones')}", flush=True)
+          f"{found['questions']}; zones {found.get('zones')}; levels (median share) "
+          + ", ".join(f"{lv} {s['median']:.3f}" for lv, s in found["levels"].items()), flush=True)
 
     decoder = StaticDecoder(attention=PLANS[args.attention], prefill_tokens=PREFILL_TOKENS)
     judge = ModelJudge(bench.model, tokenizer, ctl, fmt, decoder)

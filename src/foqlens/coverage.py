@@ -31,14 +31,24 @@ def lifted_shares(codes: np.ndarray, floor: Level, weights: np.ndarray) -> np.nd
     return (np.asarray(codes) > int(floor)).astype(float) @ weights / weights.sum()
 
 
+def level_shares(codes: np.ndarray, weights: np.ndarray) -> list[dict[str, float]]:
+    """The share of the network every question reads at every level it uses, by weight: codes [questions, n_blocks]
+    -> per question {level name: share}, the shares summing to 1."""
+    codes = np.asarray(codes)
+    total = weights.sum()
+    return [{Level(int(c)).name: float(weights[row == c].sum() / total) for c in np.unique(row)} for row in codes]
+
+
 def question_coverage(policy: LayoutPolicy, codes: np.ndarray, floor: Level, weights: np.ndarray,
                       read: np.ndarray) -> list[dict]:
-    """Every question's share lifted and bytes read, and - where the policy has zones - every zone's share and its own
-    ceiling: codes [questions, n_blocks] are the policy's layouts of questions 0..n-1, read [questions] their bytes."""
+    """Every question's share lifted, its share at every level and the bytes read, and - where the policy has zones -
+    every zone's share and its own ceiling: codes [questions, n_blocks] are the policy's layouts of questions 0..n-1,
+    read [questions] their bytes."""
     lifted = lifted_shares(codes, floor, weights)
+    levels = level_shares(codes, weights)
     rows = []
     for i in range(len(codes)):
-        row = {"lifted_share": float(lifted[i]), "bytes": int(read[i])}
+        row = {"lifted_share": float(lifted[i]), "levels": levels[i], "bytes": int(read[i])}
         if isinstance(policy, Zoned):
             lifts, ceilings = policy.zone_cover(i)
             row |= {"zone_shares": zone_shares(lifts, weights).tolist(), "zone_ceilings": [lv.name for lv in ceilings]}
@@ -61,6 +71,8 @@ def run_coverage(rows: list[dict], uniform: dict[str, int]) -> dict:
     lifted = np.array([r["lifted_share"] for r in rows])
     read = np.array([r["bytes"] for r in rows], dtype=float)
     found = {"lifted_share": spread(lifted), "over_half": int((lifted > OVER).sum()), "questions": len(rows),
+             "levels": {lv.name: spread(np.array([r.get("levels", {}).get(lv.name, 0.0) for r in rows]))
+                        for lv in Level if any(lv.name in r.get("levels", {}) for r in rows)},
              "bytes": spread(read), "bytes_to_uniform": {rung: spread(read / b) for rung, b in uniform.items()}}
     if rows and "zone_shares" in rows[0]:
         found["zones"] = spread(np.array([len(r["zone_shares"]) for r in rows]))

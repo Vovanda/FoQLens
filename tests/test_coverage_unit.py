@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from foqlens.coverage import lifted_shares, question_coverage, run_coverage, spread, zone_shares
+from foqlens.coverage import level_shares, lifted_shares, question_coverage, run_coverage, spread, zone_shares
 from foqlens.quant import Level
 
 WEIGHTS = np.array([1.0, 1.0, 2.0, 4.0])  # 8 weights in all
@@ -48,9 +48,18 @@ def test_the_share_lifted_counts_overlapping_zones_once_and_lies_between_the_lar
 def test_every_question_gets_its_zones_shares_and_ceilings_and_a_flat_policy_its_share_alone():
     policy = TwoZones()
     rows = question_coverage(policy, policy.levels(np.arange(2)), Level.D2, WEIGHTS, np.array([10, 20]))
-    assert rows[1] == {"lifted_share": 0.5, "bytes": 20, "zone_shares": [0.5, 0.25], "zone_ceilings": ["D8", "D4"]}
+    assert rows[1] == {"lifted_share": 0.5, "levels": {"D2": 0.5, "D8": 0.5}, "bytes": 20,
+                       "zone_shares": [0.5, 0.25], "zone_ceilings": ["D8", "D4"]}
     flat = question_coverage(NoZones(), NoZones().levels(np.arange(1)), Level.D2, WEIGHTS, np.array([5]))
-    assert flat == [{"lifted_share": 0.0, "bytes": 5}]
+    assert flat == [{"lifted_share": 0.0, "levels": {"D2": 1.0}, "bytes": 5}]
+
+
+def test_the_level_shares_of_a_question_sum_to_one_by_weight():
+    codes = np.array([[int(Level.ZERO), int(Level.D2), int(Level.D4), int(Level.D8)]], dtype=np.uint8)
+    shares = level_shares(codes, WEIGHTS)[0]
+    assert shares == {"ZERO": 0.125, "D2": 0.125, "D4": 0.25, "D8": 0.5} and sum(shares.values()) == 1.0
+    run = run_coverage([{"lifted_share": 0.875, "levels": shares, "bytes": 1}], {})
+    assert run["levels"]["ZERO"]["median"] == 0.125 and "D6" not in run["levels"]
 
 
 def test_a_run_counts_the_questions_over_half_and_reads_bytes_against_the_ladder():

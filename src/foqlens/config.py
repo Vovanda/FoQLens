@@ -63,6 +63,7 @@ class SmallCorpus:
     floor: int
     unknown_share: float
     seed: int = 0
+    shards: int = 1  # parts of the draw every oracle takes in turn (Draw.shard): results after every part
 
 
 @dataclass(frozen=True)
@@ -185,3 +186,27 @@ class OverlayCheck:
     bootstrap_draws: int
     level: float  # of the bootstrap intervals
     seed: int = 0
+
+
+@dataclass(frozen=True)
+class OracleAnswers:
+    """The answers at the oracles' minimal masks (foqlens.group_oracle.minimal_layouts): does the ideal answer as the
+    whole network at `high` does, and at what bytes. One layout per tolerance, chosen again from the kept prefixes."""
+
+    group_oracle: str  # the file of group_oracle.py, of the same small corpus
+    tolerances: tuple[float, ...]  # nats of the answer's mean NLL above every block at `high`
+
+
+@dataclass(frozen=True)
+class GradientOracle:
+    """The gradient oracle (scripts/gradient_oracle.py): gradient x activation of every block for the loss of the
+    reference answer, every block at `level`."""
+
+    corpus: str  # the SmallCorpus file
+    base: str  # the published base the model is cut over
+    level: str  # every block's level while the gradient is taken
+    batch_tokens: int  # padded tokens a batch of questions holds
+    max_tokens: int  # prompt + answer longer than this get no mask (NaN)
+    calibration_questions: int  # calibration questions given a mask, spread evenly over the corpora; the rest NaN
+    gap_low: str | None = None  # with gap_high: also the "quant_gap" form, the loss's change read at low for high
+    gap_high: str | None = None

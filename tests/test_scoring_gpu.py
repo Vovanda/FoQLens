@@ -82,6 +82,25 @@ def test_batched_masks_point_the_same_way_as_alone(e2b_eager):
     assert all(p.grad is None for p in model.parameters())
 
 
+ANSWERS = ["glucose", "2x", "the Nile"]
+
+
+def test_answer_gradients_cover_every_block_and_batched_point_as_alone(e2b_eager):
+    model, tokenizer, ctl = e2b_eager
+    grads = GradientScorer(model, ctl.modules)
+    batched, losses = grads.answer_batch(model, tokenizer, TEXTS, ANSWERS)
+    for form in ("gradient", "gradient_magnitude"):
+        assert batched[form].shape == (len(TEXTS), grads.n_blocks) and np.isfinite(batched[form]).all(), form
+    assert losses.shape == (len(TEXTS),) and np.all(losses > 0)
+    signed, magnitude = batched["gradient"], batched["gradient_magnitude"]
+    assert np.all(magnitude >= signed - 1e-4 * np.abs(signed).max())
+    for b, (text, answer) in enumerate(zip(TEXTS, ANSWERS)):
+        alone, alone_loss = grads.answer_batch(model, tokenizer, [text], [answer])
+        assert cosine(signed[b], alone["gradient"][0]) >= MASK_COSINE, b
+        assert abs(losses[b] - alone_loss[0]) <= LOGPROB_ATOL, b
+    assert all(p.grad is None for p in model.parameters())
+
+
 SMALL_CHUNK = 16  # the test texts have ~60 positions in a batch: several chunks and a ragged last one
 LOSS_RTOL = 1e-3  # the head's GEMM on a chunk of rows may round differently from the whole matrix
 CHUNKED_MASK_COSINE = 0.999

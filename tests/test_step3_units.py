@@ -381,3 +381,10 @@ def test_after_one_batch_runs_out_the_later_ones_are_cut_to_what_held_before_the
     masks = compute_masks(score, prompts, 4, groups=groups, lengths=[len(p) for p in prompts])
     assert masks[:, 0].tolist() == [4.0] * 8
     assert tried == [4, 2, 2, 2, 2]  # the first batch fails once and halves; the second is cut before it is tried
+
+
+def test_given_levels_read_every_question_its_own_row():
+    from foqlens.layouts import GivenLevels
+
+    codes = np.array([[1, 2], [3, 4], [5, 6]], dtype=np.uint8)
+    assert GivenLevels("oracle", codes).levels(np.array([2, 0])).tolist() == [[5, 6], [1, 2]]

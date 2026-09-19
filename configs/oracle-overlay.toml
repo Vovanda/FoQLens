@@ -1,6 +1,6 @@
 # The overlay of the oracles (plan ideal-models, stage 2): do they agree, how much of what questions need is the same
 # for all of them, does a topic share its minimal masks. The top fifth of the groups is where a knapsack's ceiling goes.
-group_oracle = "runs/oracles/e2b-it/group-oracle-bartowski-Q2_K-small-corpus.npz"
+group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus*.npz"
 top_share = 0.2
 bootstrap_draws = 1000
 level = 0.95

@@ -7,13 +7,16 @@ Two instruments, both producing one score per block over all controlled modules,
 - GradientScorer - gradient x activation: the first-order estimate of
   the change in the query's own language-model loss if the block's output were zeroed. In two forms from one
   backward pass: "gradient", |sum| of the block's terms, and "gradient_magnitude", the sum of their |.|, whose
-  terms cannot cancel (issue #17).
+  terms cannot cancel (issue #17). Given a rung gap (low, high) the same pass also gives "quant_gap", the signed
+  first-order change of the loss when the block is read at low instead of high (QuantGapRecorder).
 
 Both work on right-padded batches. Background subtraction is done by the caller.
 
 Invariants:
 - Invariant: "gradient_magnitude" >= "gradient" for every block, equal where all the block's terms share a sign.
 - Invariant: padding and the first token (<bos>) never contribute to a mask.
+- Invariant: "quant_gap" is 0 for a block whose two levels read the same weights, and equals
+  sum grad * (W_low - W_high) x over its valid tokens and rows.
 - Invariant: the same texts in the same batch give identical masks - with sdpa attention too: the
   gradient pass runs attention on GRADIENT_ATTENTION, whose backward is deterministic.
 - Invariant (approximate, bf16): a text's mask in a batch points the same way as its mask alone,
@@ -24,6 +27,7 @@ Invariants:
 from __future__ import annotations
 
 import math
+from contextlib import ExitStack
 
 import numpy as np
 import torch
@@ -34,6 +38,7 @@ from torch.utils.checkpoint import checkpoint
 
 from foqlens import model as fm
 from foqlens.precision import MixedPrecisionLinear
+from foqlens.quant import Level
 
 DEFAULT_TOP_K = 4
 
@@ -209,6 +214,19 @@ def chunked_sequence_losses(
     return totals / mask.sum(dim=1)
 
 
+def answer_losses(model: nn.Module, hidden: torch.Tensor, enc, starts: list[int]) -> torch.Tensor:
+    """The mean negative log-likelihood of every answer's tokens, from the last hidden state of prompt + answer on a
+    right-padded batch; `starts` are the prompts' lengths in tokens: [batch]. Logits are taken at the answer's
+    positions only, so a long prompt costs no [seq, vocab] logits."""
+    ends = enc["attention_mask"].sum(dim=1).tolist()
+    out = []
+    for b, (start, end) in enumerate(zip(starts, ends)):
+        positions = torch.arange(start - 1, end - 1, device=hidden.device)  # each predicts the next token
+        logits = head_logits(model, hidden[b, positions]).float()
+        out.append(F.cross_entropy(logits, enc["input_ids"][b, positions + 1]))
+    return torch.stack(out)
+
+
 # --- recording: reduce inside the hooks, never keep whole module outputs ---------------------
 
 
@@ -278,6 +296,33 @@ class TaylorRecorder(_HookSet):
         return hook
 
 
+class QuantGapRecorder(_HookSet):
+    """The first-order change of the loss when a block is read at `low` instead of `high`, [batch, n_blocks]:
+    sum over valid tokens and the block's rows of grad * (W_low - W_high) x - signed, positive where the coarser
+    level raises the loss. The gradient's other half: gradient x activation says how much the loss listens to a
+    block's output, this also says how far the rung gap really moves it. The change (W_low - W_high) x is taken in
+    the forward hook and consumed in the gradient hook; the gap weight is unpacked per batch and dropped at once,
+    so no second model is held.
+    """
+
+    def __init__(self, modules: dict[str, MixedPrecisionLinear], valid: torch.Tensor, low: Level, high: Level):
+        super().__init__(modules)
+        self.valid, self.low, self.high = valid, low, high
+        self.change: dict[str, torch.Tensor] = {}
+
+    def _hook(self, name: str, module: MixedPrecisionLinear):
+        def hook(_m: nn.Module, inputs, output: torch.Tensor) -> None:
+            with torch.no_grad():
+                moved = F.linear(inputs[0].detach(), module.read_weight(self.low) - module.read_weight(self.high))
+
+            def on_grad(grad: torch.Tensor) -> None:
+                self.change[name] = taylor_terms(moved, grad, module.block_rows, self.valid).sum(dim=(1, 3))
+
+            output.register_hook(on_grad)
+
+        return hook
+
+
 def _lengths(attention_mask: torch.Tensor) -> list[int]:
     return attention_mask.sum(dim=1).tolist()
 
@@ -325,9 +370,11 @@ class BlockScorer:
 class GradientScorer:
     """Gradient x activation per block of each query's own language-model loss."""
 
-    def __init__(self, model: nn.Module, modules: dict[str, MixedPrecisionLinear], loss_chunk: int = LOSS_CHUNK):
+    def __init__(self, model: nn.Module, modules: dict[str, MixedPrecisionLinear], loss_chunk: int = LOSS_CHUNK,
+                 gap: tuple[Level, Level] | None = None):
         self.modules = modules
         self.loss_chunk = loss_chunk
+        self.gap = gap  # (low, high): the same backward pass also gives the "quant_gap" form (QuantGapRecorder)
         # parameters stay frozen: the graph runs through activations, starting at the embedding output
         model.requires_grad_(False)
         fm.text_embeddings(model).register_forward_hook(lambda _m, _i, out: out.requires_grad_(True))
@@ -336,19 +383,40 @@ class GradientScorer:
     def n_blocks(self) -> int:
         return sum(m.n_blocks for m in self.modules.values())
 
-    def score_batch(self, model: nn.Module, tokenizer, texts: list[str]) -> list[Scored]:
-        enc = fm.encode(tokenizer, texts, model.device)
+    def _forms(self, model: nn.Module, enc, losses_of) -> tuple[dict[str, np.ndarray], np.ndarray]:
+        """Every form of every block, [batch, n_blocks], for the per-sequence losses `losses_of(hidden)` gives, and
+        those losses: [batch]."""
         valid = enc["attention_mask"].clone()
         valid[:, 0] = 0
-        with torch.enable_grad(), sdpa_kernel(GRADIENT_ATTENTION), TaylorRecorder(self.modules, valid) as rec:
+        with ExitStack() as stack:
+            stack.enter_context(torch.enable_grad())
+            stack.enter_context(sdpa_kernel(GRADIENT_ATTENTION))
+            rec = stack.enter_context(TaylorRecorder(self.modules, valid))
+            gap = stack.enter_context(QuantGapRecorder(self.modules, valid, *self.gap)) if self.gap else None
             hidden = model.model(**enc).last_hidden_state
+            losses = losses_of(hidden)
             # summed per-sequence means: each sequence's gradient is that of its own mean loss
-            losses = chunked_sequence_losses(model, hidden, enc["input_ids"], enc["attention_mask"], self.loss_chunk)
             losses.sum().backward()
-        forms = {form: torch.cat([rec_form[n] for n in self.modules], dim=1).cpu().numpy()
-                 for form, rec_form in (("gradient", rec.scores), ("gradient_magnitude", rec.magnitudes))}
+        read = [("gradient", rec.scores), ("gradient_magnitude", rec.magnitudes)]
+        read += [("quant_gap", gap.change)] if gap else []
+        forms = {form: torch.cat([rec_form[n] for n in self.modules], dim=1).cpu().numpy() for form, rec_form in read}
+        return forms, losses.detach().float().cpu().numpy()
+
+    def score_batch(self, model: nn.Module, tokenizer, texts: list[str]) -> list[Scored]:
+        enc = fm.encode(tokenizer, texts, model.device)
+        forms, _ = self._forms(model, enc, lambda hidden: chunked_sequence_losses(
+            model, hidden, enc["input_ids"], enc["attention_mask"], self.loss_chunk))
         return [{form: (vectors[b], list(range(1, n))) for form, vectors in forms.items()}
                 for b, n in enumerate(_lengths(enc["attention_mask"]))]
+
+    def answer_batch(self, model: nn.Module, tokenizer, prompts: list[str],
+                     answers: list[str]) -> tuple[dict[str, np.ndarray], np.ndarray]:
+        """Both forms for the loss of every answer after its prompt (answer_losses) - the objective the oracles by
+        trying measure (foqlens.group_oracle), so the three are read against one target: [batch, n_blocks]; and the
+        answers' NLL the gradient is taken of: [batch], to be checked against the oracle by trying at the same level."""
+        enc = fm.encode(tokenizer, [p + a for p, a in zip(prompts, answers)], model.device)
+        starts = [len(tokenizer(p)["input_ids"]) for p in prompts]
+        return self._forms(model, enc, lambda hidden: answer_losses(model, hidden, enc, starts))
 
     def score(self, model: nn.Module, tokenizer, text: str) -> Scored:
         return self.score_batch(model, tokenizer, [text])[0]

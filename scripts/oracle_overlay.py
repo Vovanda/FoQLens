@@ -15,19 +15,21 @@ from pathlib import Path
 import numpy as np
 
 from foqlens import config, runlog
-from foqlens.io import write_json
-from foqlens.oracle_overlay import bootstrap, contrast, group_ranks, jaccard_within_between, static_share, to_groups
+from foqlens.group_oracle import RUN_FIELDS
+from foqlens.io import read_npz_parts, write_json
+from foqlens.oracle_overlay import (
+    block_group_ids,
+    bootstrap,
+    contrast,
+    group_ranks,
+    jaccard_within_between,
+    static_share,
+    to_groups,
+)
 from foqlens.sensitivity import rank_correlation, top_overlap
 from foqlens.small_corpus import StoredMasks
 
 LOG = logging.getLogger("foqlens.oracle_overlay")
-
-
-def block_group_ids(masks: StoredMasks, names: list[str]) -> np.ndarray:
-    """Every block's group in the group oracle's order, from its layer and module kind."""
-    label = [f"{layer}.{'attention' if kind.startswith('self_attn.') else 'mlp'}"
-             for layer, kind in zip(masks.block_layer.tolist(), masks.block_kind.tolist())]
-    return np.array([names.index(g) for g in label])
 
 
 def main(argv: list[str] | None = None) -> Path:
@@ -38,16 +40,19 @@ def main(argv: list[str] | None = None) -> Path:
     run = datetime.now().strftime("%Y%m%d-%H%M%S")
     runlog.setup(args.out / "logs" / f"oracle_overlay-{run}.jsonl", {"run": run, "script": "oracle_overlay"})
     check = config.read(args.config, config.OverlayCheck)
-    trying = np.load(check.group_oracle)
+    trying = read_npz_parts(check.group_oracle, RUN_FIELDS)
     names = trying["groups"].tolist()
     keys = list(zip(trying["corpus"].tolist(), trying["ids"].tolist()))  # ids repeat across corpora
     known = ~trying["unknown"] & ~np.isnan(trying["lift"]).any(axis=1)
+    kept = {name: StoredMasks.read(path) for name, path in check.block_oracles.items()}
+    rows = {name: {q: i for i, q in enumerate(zip(k.corpus.tolist(), k.ids.tolist()))
+                   if k.laid[i] and not np.isnan(k.masks[i]).any()} for name, k in kept.items()}
+    # the questions every oracle holds: a round of shards overlays the part done so far
+    known &= np.array([all(q in r for r in rows.values()) for q in keys])
     scores = {"lift": trying["lift"][known], "drop": trying["drop"][known]}
-    for name, path in check.block_oracles.items():
-        kept = StoredMasks.load(Path(path))
-        rows = {q: i for i, q in enumerate(zip(kept.corpus.tolist(), kept.ids.tolist())) if kept.laid[i]}
-        picked = kept.masks[[rows[q] for q, k in zip(keys, known) if k]]
-        scores[name] = to_groups(np.abs(picked), block_group_ids(kept, names), len(names))
+    for name, k in kept.items():
+        picked = k.masks[[rows[name][q] for q, ok in zip(keys, known) if ok]]
+        scores[name] = to_groups(np.abs(picked), block_group_ids(k.block_layer, k.block_kind, names), len(names))
     ranks = {name: group_ranks(s) for name, s in scores.items()}
     found = {"questions": int(known.sum()), "groups": len(names), "static_share": {}, "agreement": {}}
     for name, r in ranks.items():

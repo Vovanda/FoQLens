@@ -21,15 +21,15 @@ from __future__ import annotations
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
 
 from foqlens import model as fm
 from foqlens.precision import Controller
 from foqlens.quant import Level
-from foqlens.scoring import head_logits
+from foqlens.scoring import answer_losses
 
 ATTENTION = "self_attn."
+RUN_FIELDS = frozenset({"groups"})  # of a run's .npz, what describes the run, not its questions (io.read_npz_parts)
 
 
 def block_groups(ctl: Controller) -> tuple[np.ndarray, list[str]]:
@@ -67,6 +67,13 @@ def minimal_prefix(nll: np.ndarray, target: float, tolerance: float) -> int:
     return int(within[0]) if len(within) else len(nll) - 1
 
 
+def minimal_layouts(groups: np.ndarray, lift: np.ndarray, minimal: np.ndarray, low: Level, high: Level) -> np.ndarray:
+    """Every question's minimal mask as a layout: its first `minimal` groups by lift at `high`, the rest at `low`, the
+    order the prefix sweep lifted them in: [questions, n_blocks]."""
+    order = np.argsort(-lift, axis=1, kind="stable")
+    return np.concatenate([lift_layouts(groups, [o[:k]], low, high) for o, k in zip(order, minimal)])
+
+
 @torch.no_grad()
 def answer_nll(model: nn.Module, tokenizer, prompts: list[str], answers: list[str]) -> torch.Tensor:
     """The mean negative log-likelihood of every answer's tokens after its prompt, one sample each: [batch].
@@ -74,11 +81,4 @@ def answer_nll(model: nn.Module, tokenizer, prompts: list[str], answers: list[st
     Logits are taken at the answer's positions only, so a long prompt costs no [seq, vocab] logits."""
     starts = [len(tokenizer(p)["input_ids"]) for p in prompts]
     enc = fm.encode(tokenizer, [p + a for p, a in zip(prompts, answers)], model.device)
-    hidden = model.model(**enc).last_hidden_state
-    ends = enc["attention_mask"].sum(dim=1).tolist()
-    out = []
-    for b, (start, end) in enumerate(zip(starts, ends)):
-        positions = torch.arange(start - 1, end - 1, device=hidden.device)  # each predicts the next token
-        logits = head_logits(model, hidden[b, positions]).float()
-        out.append(F.cross_entropy(logits, enc["input_ids"][b, positions + 1]))
-    return torch.stack(out)
+    return answer_losses(model, model.model(**enc).last_hidden_state, enc, starts)

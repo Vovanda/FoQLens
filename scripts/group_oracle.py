@@ -25,10 +25,13 @@ from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
 from foqlens.runlog import stage
-from foqlens.small_corpus import draw
+from foqlens.small_corpus import draw, pick_shard
 
 MODEL = fm.E2B_IT
 LOG = logging.getLogger("foqlens.group_oracle")
+# the file is written every this many questions: a stopped run loses at most ~5 minutes at SQuAD's pace (13 s a
+# question) and resumes from the file; a HotpotQA question alone takes ~55 s
+SAVE_EVERY = 25
 
 
 def variants_nll(bench: Bench, prompt: str, answer: str, layouts: np.ndarray, size: int) -> np.ndarray:
@@ -52,6 +55,7 @@ def main(argv: list[str] | None = None) -> Path:
     parser.add_argument("--frozen", type=Path, default=Path("corpus/e2b-it"))
     parser.add_argument("--corpora", nargs="+", default=list(SETUPS), choices=list(SETUPS))
     parser.add_argument("--limit", type=int, default=None, help="the first N laid-out questions only: a check")
+    parser.add_argument("--shard", type=int, default=None, help="part 1..shards of the draw (SmallCorpus.shards)")
     parser.add_argument("--out", type=Path, default=Path("runs/oracles/e2b-it"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     args = parser.parse_args(argv)
@@ -61,7 +65,8 @@ def main(argv: list[str] | None = None) -> Path:
     low, high = Level[check.low.upper()], Level[check.high.upper()]
     bench = Bench.load(MODEL, gpu_share=args.gpu_share, directory=refocustensors.model_directory(MODEL, check.base))
     name = f"{MODEL}@{fm.REVISIONS[MODEL][:8]}"
-    found = draw(args.corpora, args.frozen, config.read(Path(check.corpus), config.SmallCorpus), name)
+    small = config.read(Path(check.corpus), config.SmallCorpus)
+    found, suffix = pick_shard(draw(args.corpora, args.frozen, small, name), small, args.shard)
     fmt = fm.prompt_format(MODEL, bench.tokenizer)
     laid = found.laid[:args.limit] if args.limit else found.laid
     prompts = found.prompts(fmt, laid)
@@ -73,9 +78,36 @@ def main(argv: list[str] | None = None) -> Path:
 
     lift, drop, prefix = (np.full((len(laid), g), np.nan) for _ in range(3))
     ends, minimal = np.full((len(laid), 2), np.nan), np.full(len(laid), -1)
-    progress = Progress(len(laid), "question")
+    subset = "" if args.corpora == list(SETUPS) else "-" + "+".join(args.corpora)
+    target = (args.out / f"group-oracle-{check.low}{check.high}-{check.base}-{Path(check.corpus).stem}{subset}"
+              f"{suffix}.npz")
+    keys = [(c, r.id) for c, r in laid]
+
+    def save() -> None:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        np.savez(target, lift=lift, drop=drop, prefix=prefix, ends=ends, minimal=minimal, groups=np.array(names),
+                 corpus=np.array([c for c, _ in laid]), ids=np.array([r.id for _, r in laid]),
+                 unknown=np.array([(c, r.id) in found.unknown for c, r in laid]), low=check.low, high=check.high,
+                 tolerance=check.tolerance)
+
+    done = set()
+    if target.exists():  # a run stopped midway: the questions it finished are read back, not asked again
+        with np.load(target, allow_pickle=False) as kept:
+            if (str(kept["low"]), str(kept["high"]), float(kept["tolerance"])) != (check.low, check.high, check.tolerance):
+                raise ValueError(f"{target} is another oracle's run; move it away to start over")
+            where = {k: i for i, k in enumerate(zip(kept["corpus"].tolist(), kept["ids"].tolist()))}
+            for q, k in enumerate(keys):
+                i = where.get(k)
+                if i is not None and not np.isnan(kept["ends"][i]).any():
+                    lift[q], drop[q], prefix[q] = kept["lift"][i], kept["drop"][i], kept["prefix"][i]
+                    ends[q], minimal[q] = kept["ends"][i], kept["minimal"][i]
+                    done.add(q)
+        LOG.info("resumed %d of %d questions from %s", len(done), len(laid), target)
+    progress = Progress(len(laid) - len(done), "question")
     with stage(LOG, f"oracles by trying on {len(laid)} questions, {g} groups"):
         for q, ((corpus, row), prompt) in enumerate(zip(laid, prompts)):
+            if q in done:
+                continue
             answer = joined_answer(prompt, row.answers[0]) if row.answers else ""
             if not answer.strip():
                 LOG.warning("%s %s has no reference answer and is left out", corpus, row.id)
@@ -93,12 +125,9 @@ def main(argv: list[str] | None = None) -> Path:
             minimal[q] = minimal_prefix(np.concatenate([[ends[q, 0]], prefix[q]]), ends[q, 1], check.tolerance)
             LOG.info(progress.step(f"{corpus} {row.id}: minimal mask {minimal[q]} of {g} groups"),
                      extra={"corpus": corpus, "id": row.id, "minimal": int(minimal[q])})
-    target = args.out / f"group-oracle-{check.base}-{Path(check.corpus).stem}.npz"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(target, lift=lift, drop=drop, prefix=prefix, ends=ends, minimal=minimal, groups=np.array(names),
-             corpus=np.array([c for c, _ in laid]), ids=np.array([r.id for _, r in laid]),
-             unknown=np.array([(c, r.id) in found.unknown for c, r in laid]), low=check.low, high=check.high,
-             tolerance=check.tolerance)
+            if (q + 1) % SAVE_EVERY == 0:
+                save()
+    save()
     LOG.info("written %s", target)
     return target
 

@@ -26,6 +26,14 @@ from collections.abc import Callable
 import numpy as np
 
 
+def block_group_ids(block_layer: np.ndarray, block_kind: np.ndarray, names: list[str]) -> np.ndarray:
+    """Every block's group in the oracle by trying's order (foqlens.group_oracle names), from its layer and module
+    kind: [n_blocks]."""
+    label = [f"{layer}.{'attention' if kind.startswith('self_attn.') else 'mlp'}"
+             for layer, kind in zip(block_layer.tolist(), block_kind.tolist())]
+    return np.array([names.index(g) for g in label])
+
+
 def to_groups(scores: np.ndarray, groups: np.ndarray, n_groups: int) -> np.ndarray:
     """[questions, n_blocks] -> [questions, n_groups]: every group's blocks summed."""
     out = np.zeros((scores.shape[0], n_groups))

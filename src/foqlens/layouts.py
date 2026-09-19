@@ -9,6 +9,7 @@ question (GraphZoneSource), the surface they reach along (metric.Surface), how f
 how strong each is (ZoneStrength) - so a new kind of zones, reach or strength is a new class, not a branch. The
 per-block control (QuantileLevels) takes the same knobs with no zones; AttentionLevel holds rule 6 over any policy, and
 WorkingLayers keeps the layers the address is read from at their default level - the filter acts after them.
+GivenLevels reads layouts an oracle made elsewhere, so an oracle's answers go through the same regulator.
 The policies of the first bench (Uniform, Directed, TopicMask, Random, ShuffledLevels) take a precision share (see
 budget.py): the share of the precision range spent, 0 = everything coarse, 1 = everything sharp.
 
@@ -79,6 +80,21 @@ class Uniform:
 
     def levels(self, indices: np.ndarray) -> np.ndarray:
         return np.full((len(indices), self.n_blocks), int(self.level), dtype=np.uint8)
+
+
+@dataclass(frozen=True)
+class GivenLevels:
+    """Every question's levels as an oracle laid them (a minimal mask of foqlens.group_oracle): read, never made."""
+
+    label: str
+    codes: np.ndarray  # uint8 [questions, n_blocks], in the order of the questions laid out
+
+    @property
+    def name(self) -> str:
+        return self.label
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        return self.codes[np.asarray(indices)]
 
 
 @dataclass(frozen=True)

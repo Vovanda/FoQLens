@@ -27,7 +27,7 @@ from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
 from foqlens.regulator import block_kinds, block_layers
 from foqlens.runlog import stage
-from foqlens.small_corpus import draw, store
+from foqlens.small_corpus import draw, pick_shard, store
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 LOG = logging.getLogger("foqlens.small_corpus_masks")
@@ -44,6 +44,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), required=True)
     parser.add_argument("--max-tokens", type=int, default=None,
                         help="prompts longer than this get no mask (NaN): a backward pass over them runs out of memory")
+    parser.add_argument("--shard", type=int, default=None, help="part 1..shards of the draw (SmallCorpus.shards)")
     parser.add_argument("--out", type=Path, default=Path("runs/masks"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     return parser.parse_args(argv)
@@ -59,7 +60,7 @@ def main(argv: list[str] | None = None) -> Path:
     bench = Bench.load(model_id, gpu_share=args.gpu_share, source=ModelSource(args.model_source), directory=directory)
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     small = config.read(args.corpus_config, config.SmallCorpus)
-    found = draw(args.corpora, args.frozen, small, name)
+    found, suffix = pick_shard(draw(args.corpora, args.frozen, small, name), small, args.shard)
     fmt = fm.prompt_format(model_id, bench.tokenizer)
     source = bench.source(args.source)
     prompts = found.prompts(fmt, found.laid + found.calibration)
@@ -78,7 +79,7 @@ def main(argv: list[str] | None = None) -> Path:
                  {"model": name, "source": args.source, "model_source": args.model_source, "base": args.base,
                   "level": Level.BF16.name, "corpus": str(args.corpus_config), "corpora": args.corpora,
                   "max_tokens": args.max_tokens, "without_mask": int((~fits).sum())})
-    target = out / f"{args.source}-{args.model_source}-{args.base or 'own'}-{args.corpus_config.stem}.npz"
+    target = out / f"{args.source}-{args.model_source}-{args.base or 'own'}-{args.corpus_config.stem}{suffix}.npz"
     with stage(LOG, f"save {target}"):
         kept.save(target)
     return target

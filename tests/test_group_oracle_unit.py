@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from foqlens.group_oracle import block_groups, joined_answer, lift_layouts, minimal_prefix
+from foqlens.group_oracle import block_groups, joined_answer, lift_layouts, minimal_layouts, minimal_prefix
 from foqlens.precision import Controller
 from foqlens.quant import Level
 
@@ -26,6 +26,14 @@ def test_no_group_lifted_is_the_base_and_every_group_is_the_top():
 def test_the_answer_follows_a_turn_ending_on_a_newline_without_a_space_and_a_label_with_one():
     assert joined_answer("<|turn>model\n", " John Ford") == "John Ford"
     assert joined_answer("Answer:", "John Ford") == " John Ford"
+
+
+def test_a_minimal_layout_lifts_the_questions_first_groups_by_lift():
+    groups = np.array([0, 0, 1, 2])
+    lift = np.array([[0.1, 0.5, 0.3], [0.9, 0.0, 0.2]])
+    rows = minimal_layouts(groups, lift, np.array([2, 0]), Level.D2, Level.D8)
+    d2, d8 = int(Level.D2), int(Level.D8)
+    assert rows.tolist() == [[d2, d2, d8, d8], [d2, d2, d2, d2]]
 
 
 def test_the_minimal_mask_is_the_shortest_prefix_within_the_tolerance():

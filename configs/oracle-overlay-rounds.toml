@@ -1,0 +1,15 @@
+# The overlay of the oracles after every round of shards (Volodya 19.09 23:40): the new oracles are read from the
+# shards done so far (a glob joins them), every oracle on the questions all of them hold - after round k, k% of the
+# corpus. The oracles of the whole 5% (the energy D2-D8, the hybrid, the oracle by trying D2/D8) are read on the same
+# questions.
+group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus*.npz"
+top_share = 0.2
+bootstrap_draws = 1000
+level = 0.95
+
+[block_oracles]
+error_energy = "runs/masks/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus.npz"
+error_energy_d4 = "runs/masks/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
+answer_gradient = "runs/masks/e2b-it/answer_gradient-d8-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
+answer_quant_gap = "runs/masks/e2b-it/answer_quant_gap_d2d8-d8-file-bartowski-Q2_K-small-corpus-shard*of5.npz"
+hybrid = "runs/masks/e2b-it/hybrid-file-bartowski-Q2_K-small-corpus.npz"

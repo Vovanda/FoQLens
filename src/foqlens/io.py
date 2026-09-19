@@ -2,11 +2,35 @@
 
 from __future__ import annotations
 
+import glob
 import json
 from pathlib import Path
 
+import numpy as np
+
 from foqlens.evaluate import Question, mc_prompt
 from foqlens.selection import Answer, ClaudeVerdict, FrozenCorpus
+
+
+def read_npz_parts(pattern: str, per_run: frozenset[str] = frozenset()) -> dict[str, np.ndarray]:
+    """One .npz, or the shards a glob names joined in their order: every array per question concatenated; the 0-d
+    values and the `per_run` arrays (what describes the run, as its group names) taken once, refused if parts differ."""
+    paths = sorted(glob.glob(pattern)) if any(c in pattern for c in "*?[") else [pattern]
+    if not paths:
+        raise FileNotFoundError(pattern)
+    parts = []
+    for path in paths:
+        with np.load(path, allow_pickle=False) as z:
+            parts.append({k: z[k] for k in z.files})
+    joined = {}
+    for key, value in parts[0].items():
+        if value.ndim == 0 or key in per_run:
+            if any(not np.array_equal(value, p[key]) for p in parts[1:]):
+                raise ValueError(f"the parts of {pattern} differ in {key}")
+            joined[key] = value
+        else:
+            joined[key] = np.concatenate([p[key] for p in parts])
+    return joined
 
 
 def read_jsonl(path: Path, limit: int | None = None) -> list[dict]:

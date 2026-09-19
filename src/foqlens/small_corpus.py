@@ -8,10 +8,13 @@ blocks (layer, module kind, weights) - enough to read the address without the mo
 
 Invariant: a draw gives the same questions in the same order for the same frozen files and SmallCorpus.
 Invariant: stored masks read back bit for bit with their questions and the blocks' structure.
+Invariant: the shards of a draw part its laid-out and its calibration questions - every question in exactly one shard,
+every corpus's share in every shard to within one question.
 """
 
 from __future__ import annotations
 
+import glob
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -40,6 +43,48 @@ class Draw:
     def prompts(self, fmt: PromptFormat, pairs: list[tuple[str, Row]]) -> list[str]:
         """The prompt each question is answered with - the one its mask reads."""
         return [self.askings[c].prompts(fmt, [r])[0] for c, r in pairs]
+
+    def shard(self, index: int, count: int, seed: int) -> Draw:
+        """Part `index` of `count` of the draw: of every corpus's laid-out and calibration questions an equal share,
+        drawn by `seed`, in the draw's order - so the first k shards are a sample of every corpus as the whole is."""
+        return self.shards([index], count, seed)
+
+    def shards(self, indices: list[int], count: int, seed: int) -> Draw:
+        """The parts `indices` of `count` together (Draw.shard), in the draw's order."""
+        def part(pairs: list[tuple[str, Row]]) -> list[tuple[str, Row]]:
+            parts = stratified_shards([c for c, _ in pairs], count, seed)
+            return [pairs[i] for i in np.sort(np.concatenate([parts[k] for k in indices]))]
+
+        return Draw(part(self.laid), part(self.calibration), set(self.unknown), dict(self.askings))
+
+
+def pick_shards(found: Draw, small: config.SmallCorpus, shards: list[int] | None) -> tuple[Draw, str]:
+    """Shards `shards` (1-based) of the draw together and the suffix their files carry; the whole draw and no suffix
+    for None."""
+    if not shards:
+        return found, ""
+    if not all(1 <= s <= small.shards for s in shards) or len(set(shards)) < len(shards):
+        raise ValueError(f"shards {shards} of {small.shards}")
+    ordered = sorted(shards)
+    name = f"shard{ordered[0]}" if len(ordered) == 1 else "shards" + "-".join(map(str, ordered))
+    return found.shards([s - 1 for s in ordered], small.shards, small.seed), f"-{name}of{small.shards}"
+
+
+def pick_shard(found: Draw, small: config.SmallCorpus, shard: int | None) -> tuple[Draw, str]:
+    """Shard `shard` (1-based) of the draw and the suffix its files carry; the whole draw and no suffix for None."""
+    return pick_shards(found, small, None if shard is None else [shard])
+
+
+def stratified_shards(labels: list[str], count: int, seed: int) -> list[np.ndarray]:
+    """`count` shards of the positions of `labels`, every label dealt round the shards from a seeded shuffle and a
+    seeded first shard, so every shard holds every label's share to within one: sorted positions per shard."""
+    rng = np.random.default_rng(seed)
+    owner = np.empty(len(labels), dtype=np.int64)
+    names = np.array(labels)
+    for label in dict.fromkeys(labels):
+        positions = rng.permutation(np.flatnonzero(names == label))
+        owner[positions] = (np.arange(len(positions)) + rng.integers(count)) % count
+    return [np.flatnonzero(owner == k) for k in range(count)]
 
 
 def draw(corpus_names: list[str], frozen_dir: Path, small: config.SmallCorpus, model: str) -> Draw:
@@ -82,6 +127,34 @@ class StoredMasks:
         np.savez(path, masks=self.masks, corpus=self.corpus, ids=self.ids, laid=self.laid, unknown=self.unknown,
                  block_layer=self.block_layer, block_kind=self.block_kind, block_weights=self.block_weights,
                  meta=np.array(json.dumps(self.meta)))
+
+    @classmethod
+    def concat(cls, parts: list[StoredMasks]) -> StoredMasks:
+        """The shards of one pass as one: their questions in shard order, the blocks and meta of the first."""
+        first = parts[0]
+        return cls(*(np.concatenate([getattr(p, f) for p in parts]) for f in ("masks", "corpus", "ids", "laid", "unknown")),
+                   first.block_layer, first.block_kind, first.block_weights, first.meta)
+
+    @classmethod
+    def read(cls, pattern: str) -> StoredMasks:
+        """One kept file, or the shards a glob names joined in their order."""
+        if not any(c in pattern for c in "*?["):
+            return cls.load(Path(pattern))
+        parts = sorted(Path(p) for p in glob.glob(pattern))  # Path.glob refuses an absolute pattern
+        if not parts:
+            raise FileNotFoundError(pattern)
+        return cls.concat([cls.load(p) for p in parts])
+
+    def rows_of(self, pairs: list[tuple[str, str]]) -> np.ndarray:
+        """The masks of the questions `pairs` (corpus, id) in their order, NaN for a question this file does not hold:
+        [len(pairs), n_blocks] - so a file of the whole draw serves any of its shards."""
+        where = {k: i for i, k in enumerate(zip(self.corpus.tolist(), self.ids.tolist()))}
+        out = np.full((len(pairs), self.masks.shape[1]), np.nan, dtype=np.float32)
+        held = [(q, where[k]) for q, k in enumerate(pairs) if k in where]
+        if held:
+            rows, kept = map(list, zip(*held))
+            out[rows] = self.masks[kept]
+        return out
 
     @classmethod
     def load(cls, path: Path) -> StoredMasks:

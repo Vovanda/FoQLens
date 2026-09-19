@@ -48,7 +48,7 @@ from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
 from foqlens.regulator import Regulator, block_layers
-from foqlens.small_corpus import Draw, StoredMasks, draw
+from foqlens.small_corpus import Draw, StoredMasks, draw, pick_shards
 from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, Knobs, Spaces, mechanism_layout
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
@@ -65,10 +65,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"),
                         help="the small corpus (config.SmallCorpus): the shares laid out, for calibration, unknown")
     parser.add_argument("--mechanism", nargs="+", choices=list(MECHANISMS), required=True)
-    parser.add_argument("--prior", type=Path, default=None,
+    parser.add_argument("--prior", default=None,
                         help="masks kept for this draw whose calibration mean is every block's static sensitivity")
-    parser.add_argument("--masks", type=Path, default=None,
-                        help="masks kept by small_corpus_masks.py for this draw, instead of a mask pass")
+    parser.add_argument("--masks", default=None,
+                        help="masks kept for this draw (a file, or its shards by glob), instead of a mask pass")
+    parser.add_argument("--shards", nargs="+", type=int, default=None,
+                        help="parts 1..shards of the draw together (SmallCorpus.shards): a run on part of the corpus")
     parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), default="pooled",
                         help="the mask source of the address (#18)")
     parser.add_argument("--graph", choices=sorted(GRAPHS), default="mutual-nicdm")
@@ -78,8 +80,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="f: the share of the network a zone reaches; every value is a layout of the sweep")
     parser.add_argument("--focus-strength", type=float, default=1.0, help="g: how far a zone rises of the way to D8")
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
-    parser.add_argument("--budget-bits", type=float, default=None,
-                        help="the knapsack's mean bits per weight (rule 7): its one price of memory is fitted to it")
+    parser.add_argument("--budget-bits", nargs="+", type=float, default=[None],
+                        help="the knapsack's mean bits per weight (rule 7): its one price of memory is fitted to it; "
+                             "every value is a layout of the sweep - the quality-bytes curve over the price")
     parser.add_argument("--working-layers", type=int, default=0,
                         help="the first layers the address is read from: they read --working-level, the filter acts after")
     parser.add_argument("--working-level", choices=list(FLOORS), default="d2",
@@ -94,17 +97,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def stored_masks(path: Path, found: Draw, n_blocks: int) -> np.ndarray:
-    """The masks kept by small_corpus_masks.py, refused unless they are this draw's questions in this order on this
-    model's blocks."""
-    kept = StoredMasks.load(path)
-    pairs = found.laid + found.calibration
-    if kept.ids.tolist() != [r.id for _, r in pairs] or kept.corpus.tolist() != [c for c, _ in pairs]:
-        raise ValueError(f"{path} holds other questions than this draw")
+def stored_masks(path: str, found: Draw, n_blocks: int) -> np.ndarray:
+    """The masks kept for this draw (a file, or shards by glob) read by question: a question the file does not hold is
+    NaN and left out as one too long for a mask is; refused unless they are this model's blocks."""
+    kept = StoredMasks.read(path)
     if kept.masks.shape[1] != n_blocks:
         raise ValueError(f"{path} holds {kept.masks.shape[1]} blocks, the model {n_blocks}")
-    LOG.info("masks read from %s (%s)", path, kept.meta, extra={"masks": str(path)})
-    return kept.masks
+    masks = kept.rows_of([(c, r.id) for c, r in found.laid + found.calibration])
+    LOG.info("masks read from %s (%s), %d of %d questions held", path, kept.meta, int((~np.isnan(masks[:, 0])).sum()),
+             len(masks), extra={"masks": path})
+    return masks
 
 
 def main(argv: list[str] | None = None) -> list[Path]:
@@ -119,7 +121,7 @@ def main(argv: list[str] | None = None) -> list[Path]:
     fmt = fm.prompt_format(model_id, tokenizer)
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     small = config.read(args.corpus_config, config.SmallCorpus)
-    found = draw(args.corpora, args.frozen, small, name)
+    found, suffix = pick_shards(draw(args.corpora, args.frozen, small, name), small, args.shards)
     laid, calibration, unknown, askings = found.laid, found.calibration, found.unknown, found.askings
     masks = (stored_masks(args.masks, found, ctl.n_blocks) if args.masks is not None else
              bench.masks(found.prompts(fmt, laid + calibration), [bench.source(args.source)])[args.source])
@@ -146,12 +148,12 @@ def main(argv: list[str] | None = None) -> list[Path]:
     judge = ModelJudge(bench.model, tokenizer, ctl, fmt, decoder)
     out = args.out / args.model
     targets = []
-    layouts = list(product(args.mechanism, args.reach, args.focus_area))
+    layouts = list(product(args.mechanism, args.reach, args.focus_area, args.budget_bits))
     progress = Progress(len(layouts), "layout")
-    for mechanism, reach, focus_area in layouts:
-        knobs = Knobs(FLOORS[args.floor], focus_area, args.focus_strength, args.combine, args.budget_bits)
+    for mechanism, reach, focus_area, budget_bits in layouts:
+        knobs = Knobs(FLOORS[args.floor], focus_area, args.focus_strength, args.combine, budget_bits)
         label = (f"{mechanism}-{args.source}-{reach}-{args.floor}-f{focus_area:g}-g{args.focus_strength:g}"
-                 f"-w{args.working_layers}{args.working_level}-b{args.budget_bits}")
+                 f"-w{args.working_layers}{args.working_level}-b{budget_bits}{suffix}")
         policy = mechanism_layout(mechanism, spaces, knobs, reach=reach)
         regulator = Regulator(WorkingLayers(policy, working_blocks, FLOORS[args.working_level]), ctl)
         reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)

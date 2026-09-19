@@ -256,6 +256,10 @@ ADDRESS_SOURCES: dict[str, AddressSource] = {
         POOLED_BATCH, True),
     "gradient": AddressSource(lambda b, n, _: GradientMask(b.gradient, n), GRADIENT_BATCH, False),
     "error_energy": AddressSource(lambda b, n, _: ErrorEnergyMask(ErrorEnergyScorer(b.ctl.modules), n), POOLED_BATCH, False),
+    # the upper rung: where D4 still falls short of D8 on the question's inputs
+    "error_energy_d4": AddressSource(
+        lambda b, n, _: ErrorEnergyMask(ErrorEnergyScorer(b.ctl.modules, Level.D4, Level.D8), n, "error_energy_d4"),
+        POOLED_BATCH, False),
     "gradient_magnitude": AddressSource(lambda b, n, _: GradientMagnitudeMask(b.gradient, n), GRADIENT_BATCH, False),
 }
 

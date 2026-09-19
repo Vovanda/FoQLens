@@ -1,0 +1,9 @@
+# The oracles by trying over a ZERO base: every group lifted from ZERO to D8 and dropped from D8 to ZERO, and the
+# minimal mask over an empty network - how many groups a question needs when nothing else is read. A check on a few
+# questions against the D2 base (configs/group-oracle.toml), run with --limit.
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+low = "zero"
+high = "d8"
+tolerance = 0.02
+batch_tokens = 32768

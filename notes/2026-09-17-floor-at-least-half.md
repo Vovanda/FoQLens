@@ -25,3 +25,17 @@ The judge accepts 47.2% of D2's answers against 91.9% of bf16's: a retention of 
 - refusals and incoherent answers (Noise, Garbage): 20.5%.
 
 Excellent and good together are 50.5%. The average result suits me well.
+
+**UPD 2026-09-19.** I changed the base: D2 is now bartowski's Q2_K blocks, calibrated with an imatrix, with my refinements laid over them ([E003](../experiments/E003-calibrated-base/results.md)). On the same 18,576 known questions:
+
+| Judge's grade | D2 over bartowski | D2 over my base | bf16 |
+| --- | --- | --- | --- |
+| Correct | 66.5% | 44.1% | 86.9% |
+| Nearly | 4.0% | 3.1% | 5.0% |
+| Partial | 2.9% | 3.3% | 3.4% |
+| Related | 3.0% | 3.7% | 1.8% |
+| Wrong | 19.6% | 25.2% | 1.9% |
+| Noise | 2.9% | 9.0% | 0.3% |
+| Garbage | 1.1% | 11.5% | 0.6% |
+
+The judge accepts 70.4% of D2's answers, a retention of 76.7% instead of 51.4%. Excellent and good together are 73.4%, refusals and incoherent answers 4.0% instead of 20.5%. The base now clears the bar of half with room to spare. I paid for it with 0.7 points at D6 and 1.3 at D8: the imatrix takes some weights further than the refinements reach.

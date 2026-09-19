@@ -31,10 +31,12 @@ In order of work; items 3 and 4 ran in parallel. Each hypothesis is tested at it
    ([docs/kernels.md](kernels.md)).
 2. **A corpus of what the model knows** - done, 2026-09-13 → 2026-09-15. Selected by the model's own answers in three regimes
    and frozen: 20,640 questions - 18,576 E2B-it knows and 2,064 it does not ([corpus.md](corpus.md)).
-3. **Uniform quantization on the corpus** - done, 2026-09-15 → 2026-09-17. The answers at D8, D6, D4 and D2, judged by the
+3. **Uniform quantization on the corpus** - done, 2026-09-15 → 2026-09-19. The answers at D8, D6, D4 and D2, judged by the
    model at source quality ([invariants.md](invariants.md)): D8 keeps 98.8% of the full model's knowledge,
    D6 96.8%, D4 91.0%, D2 51.4% ([E002 results](../experiments/E002-base-precision-d2/results.md)).
-   It is the baseline the filter is compared with, from D2. The first measurement, on naive rounding, left D2
+   Over the blocks of a published Q2_K file calibrated with an imatrix (bartowski) D2 keeps 76.7%, D4 90.8%, D6 96.2%,
+   D8 97.5% ([E003 results](../experiments/E003-calibrated-base/results.md)): D2 rose by 25.3 points for 0.7 at D6 and
+   1.3 at D8. This ladder is the baseline the filter is compared with, from D2. The first measurement, on naive rounding, left D2
    incoherent ([E001](../experiments/E001-uniform-quantization/results.md)). On the questions the full model does not
    know, D4 answers where bf16 refuses (E001) - on HotpotQA refusals fall from 12.1% to 4.6% and accepted answers rise from 13.4% to
    25.2%: the premise of [H4](hypotheses.md), a guess can be refined and a refusal cannot, came up on data not

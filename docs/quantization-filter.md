@@ -70,8 +70,11 @@ before it left with a step four times finer (`foqlens.refinements.KRefinedWeight
 different quantizers - they are how deep the same copy is read. A module on a Q4_K base reads the same
 at D2 and D4, so base precision D2 comes to about 3.3 bits per weight on E2B.
 
-`D8` is the top rung of the zones: it keeps 98.8% of bf16's knowledge on the frozen corpus (E002) at 8.57 bits
-per controlled weight. The model's file may hold above the refinements an exact tail to the source weights in
+The base may also be the blocks of a published k-quant file as they lie in it; since E003 the bench's base is
+bartowski's Q2_K, calibrated with an imatrix.
+
+`D8` is the top rung of the zones: it keeps 97.5% of bf16's knowledge on the frozen corpus over bartowski's base
+(E003) and 98.8% over the bench's own, at 8.57 bits per controlled weight. The model's file may hold above the refinements an exact tail to the source weights in
 their own type - bf16, fp16 or fp32 ([the model format](refocustensors.md)). The model then reads back the source
 bit for bit, the bench runs without the checkpoint, and the format does not depend on the type a model is
 published in; the tail also gives the judge its bf16 reference. A zone can be raised to the source as well, but on
@@ -79,7 +82,8 @@ E2B-it that is 15.05 bits per weight against 8.57 at D8 for 1.2 points of knowle
 
 No rung is fixed in the rules: every level follows from the ladder and the controls. On E2B naive
 round-to-nearest at two bits breaks the model ([E001](../experiments/E001-uniform-quantization/results.md)); the
-k-quant copy keeps 51.4% of bf16's knowledge at D2 ([E002](../experiments/E002-base-precision-d2/results.md)),
+k-quant copy keeps 51.4% of bf16's knowledge at D2 ([E002](../experiments/E002-base-precision-d2/results.md)), over
+bartowski's calibrated base 76.7% ([E003](../experiments/E003-calibrated-base/results.md)),
 so D2 serves as a base precision and as the ring pushed past a zone edge.
 
 ## Where the zones come from

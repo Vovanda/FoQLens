@@ -61,6 +61,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <ul>
           <li><a href="#e001-results" data-id="e001-results">E001 - uniform quantization on the corpus</a></li>
           <li><a href="#e002-results" data-id="e002-results">E002 - uniform quantization with a working base precision D2</a></li>
+          <li><a href="#e003-results" data-id="e003-results">E003 - the ladder over a calibrated base</a></li>
         </ul>
       </div></div>
   </aside>
@@ -123,6 +124,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <ul>
         <li><a href="#e001-results">E001 - uniform quantization on the corpus</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E001-uniform-quantization/results.md">experiments/E001-uniform-quantization/results.md</a></span></li>
         <li><a href="#e002-results">E002 - uniform quantization with a working base precision D2</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E002-base-precision-d2/results.md">experiments/E002-base-precision-d2/results.md</a></span></li>
+        <li><a href="#e003-results">E003 - the ladder over a calibrated base</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E003-calibrated-base/results.md">experiments/E003-calibrated-base/results.md</a></span></li>
       </ul>
     </main>
 
@@ -174,6 +176,7 @@ const SHELF = [
   { group: "Experiments", docs: [
     ["e001-results", "experiments/E001-uniform-quantization/results.md", "E001 - uniform quantization on the corpus"],
     ["e002-results", "experiments/E002-base-precision-d2/results.md", "E002 - uniform quantization with a working base precision D2"],
+    ["e003-results", "experiments/E003-calibrated-base/results.md", "E003 - the ladder over a calibrated base"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));

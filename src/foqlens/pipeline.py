@@ -213,6 +213,7 @@ class Bench:
                     lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts), prompts, src.batch_size,
                     self.throttle,
                     groups=token_batches(lengths, src.batch_size * longest, src.batch_size * MAX_BATCH_FACTOR),
+                    lengths=lengths,
                 )
         # the backward pass leaves a fragmented cache behind; evaluation starts from a clean one
         torch.cuda.empty_cache()

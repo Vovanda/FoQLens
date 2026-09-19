@@ -364,3 +364,20 @@ def test_the_bench_refuses_a_model_that_was_never_cut(monkeypatch, tmp_path):
     monkeypatch.setattr(refocustensors, "model_directory", lambda model_id: tmp_path)
     with pytest.raises(FileNotFoundError, match="cut_model"):
         Bench.load("google/gemma-4-E2B-it")
+
+
+def test_after_one_batch_runs_out_the_later_ones_are_cut_to_what_held_before_they_are_tried():
+    budget = 8  # padded tokens the GPU of this test holds
+    tried = []
+
+    def score(texts):
+        tried.append(len(texts))
+        if len(texts) * max(len(t) for t in texts) > budget:
+            raise torch.OutOfMemoryError("too many tokens")
+        return [np.full(2, float(len(t))) for t in texts]
+
+    prompts = ["aaaa"] * 4 + ["bbbb"] * 4
+    groups = [np.arange(4), np.arange(4, 8)]
+    masks = compute_masks(score, prompts, 4, groups=groups, lengths=[len(p) for p in prompts])
+    assert masks[:, 0].tolist() == [4.0] * 8
+    assert tried == [4, 2, 2, 2, 2]  # the first batch fails once and halves; the second is cut before it is tried

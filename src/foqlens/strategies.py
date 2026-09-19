@@ -55,8 +55,11 @@ MEDIA = {"harmonic": HarmonicConductance, "jump": JumpConductance}  # M4, M4b (#
 FIXED = "fixed"
 ZONES = ("query", "topic")  # the question's own mask, or its topic's mean without it
 COMBINE = ("sum", "max")  # rule 5
-# How far a zone reaches: f D for every zone (rule 1), or f D split by the zones' own widths (a candidate)
-REACHES = {"equal": gz.EqualReach, "proportional": gz.ProportionalReach}
+# How far a zone reaches, from (f, the width of the network, the blocks of the graph): f D for every zone (rule 1), f D
+# split by the zones' own widths, or the radius at which a ball growing exponentially covers the share f (LogReach)
+REACHES = {"equal": lambda f, width, blocks: gz.EqualReach(f, width),
+           "proportional": lambda f, width, blocks: gz.ProportionalReach(f, width),
+           "log": gz.LogReach}
 NEIGHBOURS = 16  # blocks every block is linked to: the k of #4's measurements on E001's masks
 
 
@@ -127,7 +130,7 @@ def zone_layout(name: str, zones: str, scores: np.ndarray, space: Space, surface
                 reach: str = "equal",
                 domains: tuple[str, ...] | None = None) -> GraphZoneLayout:
     """Zones on the block graph with every part picked by name; the reach along the space's graph by `reach`."""
-    reaching = _pick(REACHES, reach, "reach")(knobs.focus_area, space.width)
+    reaching = _pick(REACHES, reach, "reach")(knobs.focus_area, space.width, scores.shape[1])
     return GraphZoneLayout(name, zone_source(zones, scores, surface, weights, domains), reaching, surface, knobs.floor,
                            knobs.focus_strength, strength, knobs.combine, ladder)
 

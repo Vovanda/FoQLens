@@ -214,3 +214,17 @@ def test_the_proportional_reach_keeps_the_mean_at_f_d_and_each_zone_s_own_width(
     assert bz.ProportionalReach(0.2, 10.0).radii(flat).tolist() == [2.0, 2.0]
     assert np.all(np.isinf(bz.ProportionalReach(1.0, 10.0).radii(two)))
     assert np.all(bz.ProportionalReach(0.0, 10.0).radii(two) == 0)
+
+
+def test_the_log_reach_keeps_the_ends_grows_with_f_and_covers_f_of_an_exponential_ball():
+    two = bz.GraphZones(centers=np.array([0, 1]), radii=np.array([1.0, 3.0]))
+    blocks, width = 1000, 10.0
+    assert np.all(bz.LogReach(0.0, width, blocks).radii(two) == 0)
+    assert np.all(np.isinf(bz.LogReach(1.0, width, blocks).radii(two)))
+    reach = [bz.LogReach(f, width, blocks).radii(two)[0] for f in (0.01, 0.1, 0.5, 0.99)]
+    assert reach == sorted(reach) and reach[-1] < width
+    for f, r in zip((0.01, 0.1, 0.5, 0.99), reach):
+        # a ball of r holding blocks ** (r / width) covers the share f: 1 + f (blocks - 1) blocks
+        assert blocks ** (r / width) == pytest.approx(1 + f * (blocks - 1))
+    with pytest.raises(ValueError):
+        bz.LogReach(0.2, width, 1)

@@ -15,7 +15,8 @@ the layout's metric - the geodesic along the graph (metric.geodesic), or its res
 figure is arbitrary and follows the graph, not a ball cut across the space. A zone lifts the blocks it
 reaches by rule 4 of docs/quantization-filter.md, from 1 at its center to 0 at its reach times the last
 stop. How far it reaches is replaceable (Reach): EqualReach sends every zone a share f of the width of the
-network, R = f D (rule 1, #19); ProportionalReach splits the same share by the zones' own radii.
+network, R = f D (rule 1, #19); ProportionalReach splits the same share by the zones' own radii; LogReach takes the radius
+at which a ball growing exponentially covers the share f of the network.
 
 Invariants:
 - Invariant: one zone per hill - a weaker top inside a stronger zone's hill is not a zone.
@@ -25,6 +26,7 @@ Invariants:
 - Invariant: the reach at f = 1 lifts every block - the whole network.
 - Invariant: lifts do not decrease as f grows.
 - Invariant: ProportionalReach keeps the zones' mean reach at f D and their ratio to one another.
+- Invariant: LogReach keeps the ends of f and grows with it; a ball of |B|^(R/D) blocks at its reach holds 1 + f (|B| - 1).
 """
 
 from __future__ import annotations
@@ -145,6 +147,29 @@ class ProportionalReach:
         mean = own.mean() if len(own) else 0.0
         share = own / mean if mean > 0 else np.ones_like(own)  # hills of one block each: no width to split by
         return self.focus_area * self.width * share
+
+
+@dataclass(frozen=True)
+class LogReach:
+    """f as the share of the network a zone covers where a ball grows exponentially (Volodya 19.09): a ball of R holds
+    |B|^(R/D) blocks - one at R = 0, all at R = D - so it covers the share f at
+    R = D log(1 + f (|B| - 1)) / log |B|. The map is one per graph, whatever the query, so the memory still follows
+    the query. Derivation: docs/quantization-filter-math.md, section 8."""
+
+    focus_area: float
+    width: float
+    blocks: int  # |B|: the blocks of the graph
+
+    def __post_init__(self) -> None:
+        check_focus_area(self.focus_area)
+        if self.blocks < 2:
+            raise ValueError(f"a log reach needs a graph of two blocks at least, not {self.blocks}")
+
+    def radii(self, zones: GraphZones) -> np.ndarray:
+        if self.focus_area == 1.0:
+            return np.full(len(zones.radii), np.inf)
+        reach = self.width * np.log1p(self.focus_area * (self.blocks - 1)) / np.log(self.blocks)
+        return np.full(len(zones.radii), reach)
 
 
 def zone_lifts(zones: GraphZones, radii: np.ndarray, metric: BlockMetric, last_stop: float = 1.0) -> np.ndarray:

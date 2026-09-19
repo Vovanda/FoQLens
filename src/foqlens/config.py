@@ -248,6 +248,7 @@ class OracleAnswers:
     group_oracle: str  # the file of group_oracle.py, of the same small corpus
     tolerances: tuple[float, ...]  # nats of the answer's mean NLL above every block at `high`
     chains: str | None = None  # the file of oracle_chains.py: every block oracle's chain and zeroing, answered too
+    grades: str | None = None  # the file of oracle_grades.py: every chain's graded lens, answered too
 
 
 @dataclass(frozen=True)

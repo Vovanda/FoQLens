@@ -122,6 +122,16 @@ def main(argv: list[str] | None = None) -> list[Path]:
                                            np.zeros_like(zeroed), low, high))
             variants.append(chains_variant(f"zeroed-{source}-{args.base}-{rungs}-{zero_tag}", groups, order, minimal,
                                            zeroed, low, high))
+    if check.grades:  # every chain's lens in every level: must answer as everything at `high` and as its chain
+        graded = read_npz_parts(check.grades, RUN_FIELDS | {"sources", "rungs"})
+        at = {k: i for i, k in enumerate(zip(graded["corpus"].tolist(), graded["ids"].tolist()))}
+        held = [at.get(k, -1) for k in index]
+        for source in graded["sources"].tolist():
+            levels = np.array([graded[f"grades_{source}"][i] if i >= 0 else np.full(len(names), 255) for i in held])
+            has = (levels != 255).all(axis=1)
+            layouts = np.where(has[:, None], levels[:, groups], int(high)).astype(np.uint8)
+            variants.append((f"graded-{source}-{args.base}-{rungs}-g{float(graded['tolerance']):g}", None,
+                             np.where(has, (levels == int(high)).sum(axis=1), -1), layouts))
     targets = []
     progress = Progress(len(variants), "layout")
     for label, tolerance, minimal, layouts in variants:

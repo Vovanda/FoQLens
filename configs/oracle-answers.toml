@@ -5,3 +5,5 @@ group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpu
 tolerances = [0.02, 0.1, 0.5]
 # the chain of every block oracle, answered beside the oracle by trying's (scripts/oracle_chains.py)
 chains = "runs/oracles/e2b-it/chains-d2d8-bartowski-Q2_K-small-corpus*.npz"
+# every chain's graded lens (scripts/oracle_grades.py): must answer as everything at D8 and as its chain
+grades = "runs/oracles/e2b-it/grades-d2d8-bartowski-Q2_K-small-corpus*.npz"

@@ -1,8 +1,8 @@
 # Does a question tell how deep its working address must read (Volodya 19.09). The hybrid, depths 1 to 10 each
 # predicting the address from layer 10 on. The silhouette rule: the top blocks of the predicted address - the future
 # zones - must hold for `patience` depths running, then reading rolls back to where they settled; never past the cap,
-# a share of the network: 0.2 by default (Volodya 19.09: 80% of the network left to the zones; at 0.5 half of it is
-# read at the base or read twice), 0.3 beside it to see what more depth buys.
+# a share of the network: 0.3 by default (Volodya 19.09: the address needs 8 layers, and 8 with the patience is 10 of
+# 35; at 0.5 half of the network is read at the base or read twice), 0.2 beside it - it stops at layer 5.
 corpus = "configs/small-corpus.toml"
 corpora = ["triviaqa", "nq_open", "squad_v2"]
 source = "hybrid"

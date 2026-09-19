@@ -22,6 +22,7 @@ from foqlens import config, refocustensors, runlog
 from foqlens import model as fm
 from foqlens.gguf_weights import PUBLISHED
 from foqlens.gpu_share import default_share
+from foqlens.io import Checkpoint, plan_of
 from foqlens.pipeline import ADDRESS_SOURCES, Bench, ModelSource
 from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
@@ -31,6 +32,9 @@ from foqlens.small_corpus import draw, pick_shard, store
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 LOG = logging.getLogger("foqlens.small_corpus_masks")
+# prompts a chunk of the pass holds between two saves: a shard's ~950 prompts are 4 chunks of about a minute and a half,
+# the whole 5% ~19; a stop or a crash loses one chunk at most
+CHUNK = 256
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -70,18 +74,29 @@ def main(argv: list[str] | None = None) -> Path:
     fits = lengths <= args.max_tokens if args.max_tokens else np.ones(len(prompts), dtype=bool)
     LOG.info("%d of %d prompts within %s tokens", int(fits.sum()), len(prompts), args.max_tokens,
              extra={"within": int(fits.sum()), "prompts": len(prompts)})
-    computed = bench.masks([p for p, ok in zip(prompts, fits) if ok], [source])[source.name]
-    masks = np.full((len(prompts), computed.shape[1]), np.nan, dtype=np.float32)
-    masks[fits] = computed
+    wanted = np.flatnonzero(fits)
+    chunks = [wanted[i:i + CHUNK] for i in range(0, len(wanted), CHUNK)]
+    stem = f"{args.source}-{args.model_source}-{args.base or 'own'}-{args.corpus_config.stem}{suffix}"
+    checkpoint = Checkpoint(out / f"{stem}.partial.npz", plan_of(vars(args), len(prompts), [c.tolist() for c in chunks]))
+    masks = np.full((len(prompts), bench.ctl.n_blocks), np.nan, dtype=np.float32)
+    first = 0
+    if (kept := checkpoint.load()) is not None:  # a stopped or crashed pass goes on from its last saved chunk
+        masks, first = kept["masks"], int(kept["chunks_done"])
+        LOG.info("resumed after %d of %d chunks from %s", first, len(chunks), checkpoint.path)
+    for k, chunk in enumerate(chunks[first:], start=first):
+        with stage(LOG, f"chunk {k + 1} of {len(chunks)}: {len(chunk)} prompts"):
+            masks[chunk] = bench.masks([prompts[i] for i in chunk], [source])[source.name]
+        checkpoint.save(masks=masks, chunks_done=k + 1)
     modules = bench.ctl.modules.values()
     kept = store(found, masks, block_layers(bench.ctl), block_kinds(bench.ctl),
                  np.concatenate([m.block_sizes() * m.in_features for m in modules]),
                  {"model": name, "source": args.source, "model_source": args.model_source, "base": args.base,
                   "level": Level.BF16.name, "corpus": str(args.corpus_config), "corpora": args.corpora,
                   "max_tokens": args.max_tokens, "without_mask": int((~fits).sum())})
-    target = out / f"{args.source}-{args.model_source}-{args.base or 'own'}-{args.corpus_config.stem}{suffix}.npz"
+    target = out / f"{stem}.npz"
     with stage(LOG, f"save {target}"):
         kept.save(target)
+    checkpoint.clear()
     return target
 
 

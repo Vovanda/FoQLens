@@ -20,6 +20,7 @@ from foqlens import config, refocustensors, runlog
 from foqlens import model as fm
 from foqlens.gpu_share import default_share
 from foqlens.group_oracle import joined_answer
+from foqlens.io import Checkpoint, plan_of, save_npz_atomic
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
@@ -32,6 +33,9 @@ from foqlens.small_corpus import draw, pick_shard, store
 MODEL = fm.E2B_IT
 LOG = logging.getLogger("foqlens.gradient_oracle")
 FORMS = ("gradient", "gradient_magnitude")
+# the partial pass is saved every this many batches: a batch of short questions takes about a second, of HotpotQA's
+# longest several - a stop loses at most a minute or two
+SAVE_EVERY = 20
 
 
 def main(argv: list[str] | None = None) -> list[Path]:
@@ -79,9 +83,17 @@ def main(argv: list[str] | None = None) -> list[Path]:
         size = max(1, check.batch_tokens // int(lengths[todo[start]]))
         batches.append(todo[start:start + size])
         start += size
-    progress = Progress(len(batches), "batch")
+    stem = f"{level.name.lower()}-file-{check.base}-{Path(check.corpus).stem}{suffix}"
+    checkpoint = Checkpoint(args.out / f"answer_gradient-{stem}.partial.npz",
+                            plan_of(check.__dict__, batches, [r.id for _, r in pairs]))
+    first = 0
+    if (kept := checkpoint.load()) is not None:  # a stopped or crashed pass goes on from its last saved batch
+        nll, first = kept["nll"], int(kept["batches_done"])
+        masks = {form: kept[f"mask_{form}"] for form in forms_named}
+        LOG.info("resumed after %d of %d batches from %s", first, len(batches), checkpoint.path)
+    progress = Progress(len(batches) - first, "batch")
     with stage(LOG, f"answer gradients of {len(todo)} questions at {level.name}"):
-        for batch in batches:
+        for b, batch in enumerate(batches[first:], start=first):
             with bench.throttle.batch():
                 forms, nll[batch] = scorer.answer_batch(bench.model, bench.tokenizer, [prompts[i] for i in batch],
                                                         [answers[i] for i in batch])
@@ -89,6 +101,8 @@ def main(argv: list[str] | None = None) -> list[Path]:
                 masks[form][batch] = forms[form]
             LOG.info(progress.step(f"{len(batch)} questions, peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GiB"),
                      extra={"questions": len(batch), "peak_gib": torch.cuda.max_memory_allocated() / 2**30})
+            if (b + 1) % SAVE_EVERY == 0:
+                checkpoint.save(nll=nll, batches_done=b + 1, **{f"mask_{f}": m for f, m in masks.items()})
     modules = bench.ctl.modules.values()
     targets = []
     for form, source in forms_named.items():
@@ -97,15 +111,15 @@ def main(argv: list[str] | None = None) -> list[Path]:
                      {"model": name, "source": f"answer_{source}", "model_source": "file", "base": check.base,
                       "level": level.name, "corpus": check.corpus, "corpora": args.corpora,
                       "max_tokens": check.max_tokens, "without_mask": int(len(pairs) - len(todo))})
-        target = (args.out / f"answer_{source}-{level.name.lower()}-file-{check.base}-{Path(check.corpus).stem}"
-                  f"{suffix}.npz")
+        target = args.out / f"answer_{source}-{stem}.npz"
         kept.save(target)
         LOG.info("written %s", target)
         targets.append(target)
     # the NLL the gradient was taken of, to be checked against the oracle by trying's at the same level
-    target = args.out / f"answer_nll-{level.name.lower()}-file-{check.base}-{Path(check.corpus).stem}{suffix}.npz"
-    np.savez(target, nll=nll, corpus=np.array([c for c, _ in pairs]), ids=np.array([r.id for _, r in pairs]))
+    target = args.out / f"answer_nll-{stem}.npz"
+    save_npz_atomic(target, nll=nll, corpus=np.array([c for c, _ in pairs]), ids=np.array([r.id for _, r in pairs]))
     LOG.info("written %s", target)
+    checkpoint.clear()
     return targets + [target]
 
 

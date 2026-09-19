@@ -1,5 +1,5 @@
 # The answers at the minimal masks of the oracle by trying over ZERO (plan ideal-models, night rounds): the fewest
 # groups at D8 with nothing else read. The oracle runs shard by shard; the glob joins the shards done so far, and
 # oracle_answers --shard k answers the questions of shard k.
-group_oracle = "runs/oracles/e2b-it/group-oracle-zerod8-bartowski-Q2_K-small-corpus-shard*of5.npz"
+group_oracle = "runs/oracles/e2b-it/group-oracle-zerod8-bartowski-Q2_K-small-corpus*.npz"
 tolerances = [0.02, 0.1, 0.5]

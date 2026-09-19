@@ -3,13 +3,55 @@
 from __future__ import annotations
 
 import glob
+import hashlib
 import json
+import os
 from pathlib import Path
 
 import numpy as np
 
 from foqlens.evaluate import Question, mc_prompt
 from foqlens.selection import Answer, ClaudeVerdict, FrozenCorpus
+
+
+def save_npz_atomic(path: Path, **arrays) -> None:
+    """np.savez to a temporary file beside `path`, then a rename over it: a process killed while writing leaves the
+    previous file whole, never a torn one."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp.npz")
+    np.savez(tmp, **arrays)
+    os.replace(tmp, path)
+
+
+class Checkpoint:
+    """The partial state of a long pass, kept beside its output: what is done is read back after a stop or a crash,
+    and the pass goes on from there. The pass's work units are fixed before it starts, so a resumed pass computes
+    exactly what an unbroken one would. `plan` names the units (a hash of their layout); a checkpoint of another plan
+    is refused, not resumed.
+
+    Invariant: a checkpoint read back holds bit for bit the arrays saved, and only for the same plan."""
+
+    def __init__(self, path: Path, plan: str):
+        self.path, self.plan = path, plan
+
+    def load(self) -> dict[str, np.ndarray] | None:
+        if not self.path.exists():
+            return None
+        with np.load(self.path, allow_pickle=False) as z:
+            if str(z["plan"]) != self.plan:
+                raise ValueError(f"{self.path} is a checkpoint of another pass; move it away to start over")
+            return {k: z[k] for k in z.files if k != "plan"}
+
+    def save(self, **arrays) -> None:
+        save_npz_atomic(self.path, plan=self.plan, **arrays)
+
+    def clear(self) -> None:
+        self.path.unlink(missing_ok=True)
+
+
+def plan_of(*parts) -> str:
+    """A short fingerprint of a pass's work units (its questions, batches, settings) for a Checkpoint."""
+    return hashlib.sha256(json.dumps(parts, default=str).encode()).hexdigest()[:16]
 
 
 def read_npz_parts(pattern: str, per_run: frozenset[str] = frozenset()) -> dict[str, np.ndarray]:

@@ -1,6 +1,7 @@
 """The answers at the oracles' minimal masks on the small corpus (config.OracleAnswers): every laid-out question read at
-its own minimal mask - its first groups by lift at the oracle's high level, the rest at its low - and judged at bf16.
-Is the ideal as good as the whole network at the high level, and at what bytes against the uniform ladder.
+its own minimal mask - its first groups by lift at the oracle's high level, the rest at its low - beside the answer of
+every block at the high level in the same batches. Does the ideal answer as the whole network does (the same text, and
+where not, read by hand - no judge), and at what bytes against the uniform ladder.
 
 One layout per tolerance: the minimal mask is chosen again from the prefix sweep the oracle kept, the model is never
 asked for it twice.
@@ -26,8 +27,8 @@ from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
 from foqlens.group_oracle import RUN_FIELDS, block_groups, minimal_layouts, minimal_prefix
-from foqlens.io import answers_path, append_answers, read_npz_parts, write_json
-from foqlens.judging import ModelJudge
+from foqlens.io import answers_path, append_answers, read_npz_parts, write_json, written_ids
+from foqlens.judging import NotJudged
 from foqlens.layouts import GivenLevels
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
@@ -78,13 +79,18 @@ def main(argv: list[str] | None = None) -> list[Path]:
     sweeps = np.concatenate([ends[:, :1], prefix], axis=1)  # k groups lifted -> the answer's NLL, k = 0..g
 
     decoder = StaticDecoder(attention=PLANS[args.attention], prefill_tokens=PREFILL_TOKENS)
-    judge = ModelJudge(bench.model, tokenizer, ctl, fmt, decoder)
+    # no judge (Volodya 20.09): the question is whether the ideal answers as the whole network at `high` does - the
+    # same text in the same batches - and where it does not, the answers are read by hand
+    judge = NotJudged()
     index = {(c, r.id): i for i, (c, r) in enumerate(laid)}
+    # the reference first: every group lifted is every block at `high`, answered in the batches the ideals are - its
+    # label names no oracle, so the run over another base reads the answers it already has
+    variants = [(f"everything-{high.name.lower()}-{args.base}", None, np.full(len(laid), len(names)))] + [
+        (f"minimal-{args.base}-{low.name.lower()}{high.name.lower()}-t{t:g}", t,
+         np.array([minimal_prefix(s, e, t) for s, e in zip(sweeps, ends[:, 1])])) for t in check.tolerances]
     targets = []
-    progress = Progress(len(check.tolerances), "tolerance")
-    for tolerance in check.tolerances:
-        minimal = np.array([minimal_prefix(s, e, tolerance) for s, e in zip(sweeps, ends[:, 1])])
-        label = f"minimal-{args.base}-{low.name.lower()}{high.name.lower()}-t{tolerance:g}"
+    progress = Progress(len(variants), "layout")
+    for label, tolerance, minimal in variants:
         regulator = Regulator(GivenLevels(label, minimal_layouts(groups, lift, minimal, low, high)), ctl)
         reading = regulator.reading(index, label)
         codes = regulator.layout(np.arange(len(laid)))
@@ -97,11 +103,13 @@ def main(argv: list[str] | None = None) -> list[Path]:
         with GpuMonitor() as gpu:
             for corpus, asking in found.askings.items():
                 asking = replace(asking, reading=reading)
-                chunks = asking.batches(fmt, tokenizer, [r for c, r in laid if c == corpus])
+                path = answers_path(args.out / "answers", label, corpus)
+                done = written_ids(path)  # a stopped or crashed run answers only what its file does not hold yet
+                chunks = asking.batches(fmt, tokenizer, [r for c, r in laid if c == corpus and r.id not in done])
                 answered = Progress(len(chunks), f"{label} {corpus} answer batch")
                 for chunk in chunks:
                     judged = asking.answer(bench.model, tokenizer, ctl, fmt, judge, chunk, bench.throttle, decoder)
-                    append_answers(answers_path(args.out / "answers", label, corpus), judged)
+                    append_answers(path, judged)
                     LOG.info(answered.step(f"{len(chunk)} questions"), extra={"layout": label, "corpus": corpus})
         target = args.out / f"summary-{label}{suffix}.json"  # the answers of the shards gather in one file per corpus
         write_json(target, {

@@ -20,6 +20,7 @@ from foqlens import config, refocustensors, runlog
 from foqlens import model as fm
 from foqlens.gpu_share import default_share
 from foqlens.group_oracle import answer_nll, block_groups, joined_answer, lift_layouts, minimal_prefix
+from foqlens.io import save_npz_atomic
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
@@ -84,8 +85,7 @@ def main(argv: list[str] | None = None) -> Path:
     keys = [(c, r.id) for c, r in laid]
 
     def save() -> None:
-        target.parent.mkdir(parents=True, exist_ok=True)
-        np.savez(target, lift=lift, drop=drop, prefix=prefix, ends=ends, minimal=minimal, groups=np.array(names),
+        save_npz_atomic(target, lift=lift, drop=drop, prefix=prefix, ends=ends, minimal=minimal, groups=np.array(names),
                  corpus=np.array([c for c, _ in laid]), ids=np.array([r.id for _, r in laid]),
                  unknown=np.array([(c, r.id) in found.unknown for c, r in laid]), low=check.low, high=check.high,
                  tolerance=check.tolerance)

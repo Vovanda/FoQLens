@@ -24,7 +24,7 @@ import numpy as np
 from foqlens import config, corpora
 from foqlens.answering import Asking
 from foqlens.corpora import Row
-from foqlens.io import read_frozen
+from foqlens.io import read_frozen, save_npz_atomic
 from foqlens.prompt_variants import TRAIN_POOL, examples_for, needs_train, setup_named
 from foqlens.prompting import PromptFormat
 from foqlens.quant import Level
@@ -123,10 +123,9 @@ class StoredMasks:
     meta: dict  # source, level, model, base, corpus config
 
     def save(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez(path, masks=self.masks, corpus=self.corpus, ids=self.ids, laid=self.laid, unknown=self.unknown,
-                 block_layer=self.block_layer, block_kind=self.block_kind, block_weights=self.block_weights,
-                 meta=np.array(json.dumps(self.meta)))
+        save_npz_atomic(path, masks=self.masks, corpus=self.corpus, ids=self.ids, laid=self.laid,
+                        unknown=self.unknown, block_layer=self.block_layer, block_kind=self.block_kind,
+                        block_weights=self.block_weights, meta=np.array(json.dumps(self.meta)))
 
     @classmethod
     def concat(cls, parts: list[StoredMasks]) -> StoredMasks:

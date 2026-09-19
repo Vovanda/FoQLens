@@ -73,7 +73,22 @@ class AddressCheck:
     corpus: str  # the SmallCorpus file every run shares, so that every run draws the same questions
     sources: tuple[str, ...]
     two_shot: Mapping[str, str]
-    working_layers: int
+    working_layers: tuple[int, ...]  # every depth of the working reading tried: the fewest that holds is the price
+    base_level: str
+    base: str | None = None
+
+
+@dataclass(frozen=True)
+class DepthCheck:
+    """How deep the working address must read (foqlens.address.deep_address): per corpus, a projection from the first
+    N layers at the base onto the rest at bf16, fitted on the small corpus's calibration questions and tried on its
+    laid-out ones, for every N of `depths`."""
+
+    corpus: str  # the SmallCorpus file
+    corpora: tuple[str, ...]
+    sources: tuple[str, ...]
+    depths: tuple[int, ...]
+    ridge: float  # relative: alpha is ridge times the mean variance of an early block
     base_level: str
     base: str | None = None
 

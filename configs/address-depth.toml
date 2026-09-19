@@ -1,0 +1,12 @@
+# How deep the working address must read: the two forward sources that passed configs/address.toml; the first N layers
+# at the base projected onto the layers after N, for every N below (E2B has 35 layers). Few layers carry little, many
+# leave few to the zones.
+corpus = "configs/small-corpus.toml"
+corpora = ["triviaqa", "nq_open", "squad_v2"]
+sources = ["neuron_activity", "head_energy"]
+depths = [1, 2, 4, 6, 8, 12, 18, 24]
+# Relative ridge: alpha is this times the mean variance of an early block times the calibration size. A starting
+# value, not tuned yet: early blocks outnumber the calibration questions (NQ: 162), so some shrinkage is needed.
+ridge = 0.1
+base_level = "d2"
+base = "bartowski-Q2_K"

@@ -60,3 +60,9 @@ def test_the_paraphrase_configuration_reads_and_its_file_names_every_id_once():
     lines = (CONFIGS.parent / check.paraphrases).read_text(encoding="utf-8").splitlines()
     ids = [json.loads(line)["id"] for line in lines if line]
     assert len(ids) == len(set(ids)) and ids
+
+
+def test_the_depth_configuration_reads_and_names_what_exists():
+    check = config.read(CONFIGS / "address-depth.toml", config.DepthCheck)
+    assert all(s in ADDRESS_SOURCES and ADDRESS_SOURCES[s].reads_layers for s in check.sources)
+    assert all(c in SETUPS for c in check.corpora) and list(check.depths) == sorted(check.depths)

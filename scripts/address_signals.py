@@ -21,7 +21,7 @@ import numpy as np
 
 from foqlens import config, corpora, refocustensors
 from foqlens import model as fm
-from foqlens.address import USABLE, assess
+from foqlens.address import USABLE, assess, working_address
 from foqlens.answering import Asking
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
@@ -83,7 +83,6 @@ def main(argv: list[str] | None = None) -> Path:
     fmt = fm.prompt_format(model_id, bench.tokenizer)
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     layers = block_layers(bench.ctl)
-    working = set(range(check.working_layers))
     base_level = Level[check.base_level.upper()]
     wrappers = prompts_in_wrappers(check, corpus_config, args.frozen, name, fmt, args.corpora or list(check.two_shot))
 
@@ -94,17 +93,22 @@ def main(argv: list[str] | None = None) -> Path:
         for source_name in sources:
             reads_layers = ADDRESS_SOURCES[source_name].reads_layers
             full = bench.source(source_name)
-            cheap = bench.source(source_name, layers=working if reads_layers else None)
-            seen = np.isin(layers, list(working)) if reads_layers else np.ones(len(layers), dtype=bool)
+            # a source that reads every layer has one working reading: the whole pass at the base
+            depths = check.working_layers if reads_layers else (int(layers.max()) + 1,)
             summary["sources"][source_name] = {}
             for corpus, (frozen_prompts, two_shot_prompts) in wrappers.items():
-                report = assess(bench.masks(frozen_prompts, [full])[full.name],
-                                bench.masks(two_shot_prompts, [full])[full.name],
-                                bench.masks(frozen_prompts, [cheap], level=base_level)[cheap.name], seen, layers)
+                frozen = bench.masks(frozen_prompts, [full])[full.name]
+                report = assess(frozen, bench.masks(two_shot_prompts, [full])[full.name], layers)
+                report["working"] = {}
+                for depth in depths:
+                    read = set(range(depth))
+                    cheap = bench.source(source_name, layers=read if reads_layers else None)
+                    work = bench.masks(frozen_prompts, [cheap], level=base_level)[cheap.name]
+                    report["working"][depth] = working_address(frozen, work, np.isin(layers, list(read)))
                 summary["sources"][source_name][corpus] = report
-                print(f"{source_name} {corpus}: wrappers {report['wrappers']['identified']:.3f}, "
-                      f"working {report['working']['identified']:.3f} (chance {report['wrappers']['chance']:.4f})",
-                      flush=True)
+                curve = ", ".join(f"{d}: {r['identified']:.3f}/{r['own_cos']:.2f}" for d, r in report["working"].items())
+                print(f"{source_name} {corpus}: wrappers {report['wrappers']['identified']:.3f}; working by depth "
+                      f"(identified/own cos) {curve}; chance {report['wrappers']['chance']:.4f}", flush=True)
             write_json(target, summary)  # a source at a time: a later failure keeps what is measured
     summary["gpu"] = gpu.summary()
     write_json(target, summary)

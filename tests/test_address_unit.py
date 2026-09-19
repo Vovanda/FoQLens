@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from foqlens.address import agreement, bag_of_tokens, excess, identification, layer_profile
+from foqlens.address import agreement, bag_of_tokens, deep_address, excess, identification, layer_profile
 
 
 def test_masks_identify_themselves_and_noise_identifies_nothing_beyond_chance():
@@ -41,6 +41,20 @@ def test_two_sources_over_different_blocks_agree_when_they_place_the_questions_a
     second = latent @ rng.normal(size=(10, 300))
     assert agreement(first, second) > 0.8
     assert abs(agreement(first, rng.normal(size=(80, 300)))) < 0.1
+
+
+def test_early_layers_that_carry_the_question_predict_its_deep_address_and_noise_does_not():
+    rng = np.random.default_rng(3)
+    layers = np.repeat(np.arange(4), 50)  # four layers of 50 blocks
+    weights = np.ones(len(layers))
+    latent = rng.normal(size=(500, 8))
+    masks = latent @ rng.normal(size=(8, len(layers))) + rng.normal(size=(500, len(layers))) * 0.1
+    train, test = masks[:400], masks[400:]
+    found = deep_address(train, train, test, test, layers, weights, depth=1, ridge=1e-3)
+    assert found["identified"] > 0.9 and found["zoned_weight_share"] == 0.75
+    noise = rng.normal(size=masks.shape)
+    lost = deep_address(noise[:400], train, noise[400:], test, layers, weights, depth=1, ridge=1e-3)
+    assert lost["identified"] < 0.1
 
 
 def test_the_bag_counts_every_token_once_per_occurrence_over_a_shared_vocabulary():

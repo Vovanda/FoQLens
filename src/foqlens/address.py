@@ -18,6 +18,10 @@ share, the wrapper included, drops out and only what tells a question apart is l
 - Meaning, not words: identification between a question and its paraphrase (the same meaning in other words, names
   kept), against the same identification of their bags of tokens. A source that beats its bag finds the meaning; one
   that does not finds the words the two share.
+- deep_address: the zones act after the working layers, so the working reading must name the address there, not only
+  on the blocks it read. A ridge projection fitted on calibration questions carries the first `depth` layers onto the
+  rest; the predicted deep address is identified against the real one. Few layers read carry little; many leave few
+  to the zones - the best depth is between, and the run reports both curves.
 - agreement: two sources score different blocks, so their masks are not compared entry by entry; they agree where they
   place the same questions near and far alike - the correlation of their question-by-question cosines.
 
@@ -32,6 +36,8 @@ Invariant: layer_profile sums to 1 over the layers when every question has some 
 from __future__ import annotations
 
 import numpy as np
+
+from foqlens.projection import Projection
 
 # An address that finds its own question in fewer than half the cases carries more of the reading than of the
 # question: its zones would follow the wrapper as often as the meaning.
@@ -63,11 +69,31 @@ def identification(a: np.ndarray, b: np.ndarray) -> dict:
             "other_cos": float(off.mean()) if off.size else 0.0}
 
 
-def assess(frozen: np.ndarray, shots: np.ndarray, working: np.ndarray, seen: np.ndarray, layers: np.ndarray) -> dict:
-    """One source on one set of questions: its masks in the frozen wrapper, in the two-example one, and its working
-    reading, which sees only the blocks `seen` [n_blocks]; the layer profile of the frozen reading."""
-    return {"questions": len(frozen), "wrappers": identification(frozen, shots),
-            "working": identification(working[:, seen], frozen[:, seen]), "layers": layer_profile(frozen, layers)}
+def assess(frozen: np.ndarray, shots: np.ndarray, layers: np.ndarray) -> dict:
+    """One source on one set of questions: its masks in the frozen wrapper against the two-example one, and the layer
+    profile of the frozen reading."""
+    return {"questions": len(frozen), "wrappers": identification(frozen, shots), "layers": layer_profile(frozen, layers)}
+
+
+def working_address(frozen: np.ndarray, working: np.ndarray, seen: np.ndarray) -> dict:
+    """A working reading against the full one on the blocks it sees (`seen` [n_blocks]): does the cheap pass find the
+    same address."""
+    return identification(working[:, seen], frozen[:, seen])
+
+
+def deep_address(train_work: np.ndarray, train_full: np.ndarray, test_work: np.ndarray, test_full: np.ndarray,
+                 layers: np.ndarray, weights: np.ndarray, depth: int, ridge: float) -> dict:
+    """Does the working reading of the first `depth` layers name the address where the zones act - the layers after it.
+
+    A ridge projection (projection.Projection) is fitted on the calibration questions from their working reading on
+    the early blocks to their full reading on the deep ones; the laid-out questions' deep address predicted by it is
+    identified against their real one. `ridge` is relative: alpha = ridge times the mean variance of an early block,
+    so that one value means the same at every depth. Beside it, the share of the weights left to the zones."""
+    early, deep = layers < depth, layers >= depth
+    x = train_work[:, early]
+    alpha = ridge * float(np.var(x, axis=0).mean()) * len(x)
+    predicted = Projection.fit(x, train_full[:, deep], alpha).apply(test_work[:, early]).cpu().numpy()
+    return {**identification(predicted, test_full[:, deep]), "zoned_weight_share": float(weights[deep].sum() / weights.sum())}
 
 
 def agreement(a: np.ndarray, b: np.ndarray) -> float:

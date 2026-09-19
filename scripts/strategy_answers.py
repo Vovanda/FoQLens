@@ -166,10 +166,13 @@ def main(argv: list[str] | None = None) -> list[Path]:
             for corpus, asking in askings.items() if not args.coverage_only else ():
                 asking = replace(asking, reading=reading)
                 chosen = [r for c, r in laid if c == corpus]
-                for chunk in asking.batches(fmt, tokenizer, chosen):
-                    append_answers(answers_path(out / "answers", label, corpus),
-                                   asking.answer(bench.model, tokenizer, ctl, fmt, judge, chunk, bench.throttle,
-                                                 decoder))
+                chunks = asking.batches(fmt, tokenizer, chosen)
+                answered = Progress(len(chunks), f"{label} {corpus} answer batch")
+                for chunk in chunks:
+                    rows = asking.answer(bench.model, tokenizer, ctl, fmt, judge, chunk, bench.throttle, decoder)
+                    append_answers(answers_path(out / "answers", label, corpus), rows)
+                    LOG.info(answered.step(f"{len(chunk)} questions"),
+                             extra={"layout": label, "corpus": corpus, "done": answered.done, "total": answered.total})
 
         target = out / f"{'coverage' if args.coverage_only else 'summary'}-{label}.json"
         write_json(target, {

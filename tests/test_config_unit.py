@@ -82,3 +82,8 @@ def test_the_probe_configuration_reads_and_every_probe_set_names_its_questions_o
         rows = [json.loads(line) for line in (CONFIGS.parent / path).read_text(encoding="utf-8").splitlines() if line]
         ids = [r["id"] for r in rows]
         assert ids and len(ids) == len(set(ids)) and all(r["question"] for r in rows)
+
+
+def test_the_oracle_configuration_reads_and_its_shares_are_shares():
+    check = config.read(CONFIGS / "address-vs-oracle.toml", config.OracleCheck)
+    assert check.shares and all(0 < s < 1 for s in check.shares) and check.estimate != check.oracle

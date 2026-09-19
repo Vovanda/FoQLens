@@ -149,3 +149,13 @@ class ParaphraseCheck:
     paraphrases: str  # a jsonl of {"id", "paraphrase"}
     sources: tuple[str, ...]
     base: str | None = None
+
+
+@dataclass(frozen=True)
+class OracleCheck:
+    """Does the address stand for the sensitivity (foqlens.sensitivity): the address's stored masks against the
+    oracle's, on the laid-out questions the models know."""
+
+    estimate: str  # masks kept by small_corpus_masks.py: the address
+    oracle: str  # the same draw's masks of the oracle
+    shares: tuple[float, ...]  # the top shares of blocks the overlap and the tail correlation are read at

@@ -40,6 +40,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--model", choices=sorted(MODELS), default="e2b-it")
     parser.add_argument("--frozen", type=Path, default=Path("corpus/e2b-it"))
     parser.add_argument("--sources", nargs="+", help="override the configuration's sources; the summary is named by them")
+    parser.add_argument("--corpora", nargs="+", help="override the configuration's corpora; the summary is named by them")
+    parser.add_argument("--corpus-config", type=Path, help="override the small corpus; the summary is named by its file")
     parser.add_argument("--out", type=Path, default=Path("runs/address"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     return parser.parse_args(argv)
@@ -50,7 +52,9 @@ def main(argv: list[str] | None = None) -> Path:
     check = config.read(args.config, config.DepthCheck)
     if args.sources:
         check = replace(check, sources=tuple(args.sources))
-    small = config.read(Path(check.corpus), config.SmallCorpus)
+    if args.corpora:
+        check = replace(check, corpora=tuple(args.corpora))
+    small = config.read(args.corpus_config or Path(check.corpus), config.SmallCorpus)
     sources = [config.choose(s, ADDRESS_SOURCES, "mask source") for s in check.sources]
     model_id = MODELS[args.model]
     directory = refocustensors.model_directory(model_id, check.base) if check.base else None
@@ -63,7 +67,8 @@ def main(argv: list[str] | None = None) -> Path:
 
     summary = {"model": name, "config": str(args.config), "check": check.__dict__, "corpus": small.__dict__,
                "sources": {s: {} for s in sources}}
-    named = f"{args.config.stem}-{'-'.join(check.sources)}" if args.sources else args.config.stem
+    overrides = [*(args.sources or []), *(args.corpora or []), *([args.corpus_config.stem] if args.corpus_config else [])]
+    named = "-".join([args.config.stem, *overrides])
     target = args.out / args.model / f"{named}.json"
     with GpuMonitor() as gpu:
         for corpus in check.corpora:

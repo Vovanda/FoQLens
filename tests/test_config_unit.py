@@ -44,7 +44,7 @@ def test_a_name_is_chosen_only_from_its_registry():
 
 
 def test_the_repositorys_configurations_read_and_name_what_exists():
-    for name in ("small-corpus.toml", "smoke-corpus.toml"):
+    for name in ("small-corpus.toml", "smoke-corpus.toml", "wide-corpus.toml"):
         corpus = config.read(CONFIGS / name, config.SmallCorpus)
         assert 0 < corpus.share and 0 < corpus.calibration_share and corpus.share + corpus.calibration_share < 1
     check = config.read(CONFIGS / "address.toml", config.AddressCheck)

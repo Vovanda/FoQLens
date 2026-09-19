@@ -1,0 +1,8 @@
+# A wider draw for a corpus too small for the 5% one: NQ-open keeps 812 questions, so 5% laid out is the floor of 50
+# and 20% of calibration is 162 - a step of 0.02 in identification and fewer calibration questions than early blocks.
+# 100 of the 812 laid out (Volodya 19.09: up to 100), 60% for calibration.
+share = 0.123
+calibration_share = 0.6
+floor = 50
+unknown_share = 0.05
+seed = 0

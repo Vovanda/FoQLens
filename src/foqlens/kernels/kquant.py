@@ -10,6 +10,8 @@ cores, 2.9e-6 on tensor cores, whose mma adds with truncation (tests/test_kquant
 outputs zero.
 Invariant: the kernel reads a row's refinements only to its depth, so a shallower layout reads fewer bytes.
 Invariant: a token's output does not depend on the other tokens of the batch.
+Invariant: kquant_unpack writes the torch path's bf16 weight bit for bit, every block of rows at its depth and zero at
+depth 0, on every base (tests/test_kquant_kernel_gpu.py).
 """
 
 from __future__ import annotations
@@ -20,7 +22,8 @@ from pathlib import Path
 import torch
 
 from foqlens.kernels import HERE, launch, load
-from foqlens.kquant import Q2_K, Q4_K, QK_K, KFormat
+from foqlens.kquant import Q2_K, Q3_K, Q4_K, Q6_K, QK_K, KFormat
+from foqlens.quant import MAX_DEPTH
 from foqlens.refinements import KRefinedWeight
 
 TILE_ROWS = 64  # must match both sources: the block of rows a depth is set on
@@ -73,10 +76,13 @@ class KQuantKernel:
 CUDA_CORES = KQuantKernel(HERE / "kquant_matmul.cu", {Q2_K.name: "kquant_matmul_q2_k", Q4_K.name: "kquant_matmul_q4_k"},
                           rows_per_cta=8, tokens_per_cta=8, warps=8)
 # 16 rows, the mma's M, and 32 tokens, four tiles of its N = 8; up to 8 warps split the input (MAX_SPLIT). A warp
-# stages 16 rows of a super-block: the base block and the refinements to D8 (MAX_REFINEMENTS in the source).
-TENSOR_CORES = KQuantKernel(HERE / "kquant_mma.cu", {Q2_K.name: "kquant_mma_q2_k", Q4_K.name: "kquant_mma_q4_k"},
-                            rows_per_cta=16, tokens_per_cta=32, warps=8, split_k=True,
-                            stage_refinements={Q2_K.name: 3, Q4_K.name: 2})
+# stages 16 rows of a super-block: the base block and the refinements to D8 (MAX_REFINEMENTS in the source). It reads
+# every base the model file holds: our Q2_K / Q4_K and a published file's Q3_K / Q6_K.
+TENSOR_CORES = KQuantKernel(
+    HERE / "kquant_mma.cu",
+    {fmt.name: f"kquant_mma_{fmt.name.lower()}" for fmt in (Q2_K, Q3_K, Q4_K, Q6_K)},
+    rows_per_cta=16, tokens_per_cta=32, warps=8, split_k=True,
+    stage_refinements={fmt.name: MAX_DEPTH - fmt.base_depth for fmt in (Q2_K, Q3_K, Q4_K, Q6_K)})
 # The kernel the bench multiplies with. 12288x1536, D2 / D8, in a CUDA graph (scripts/kernel_speed.py, 2026-09-18):
 # 1 token 0.056 / 0.100 ms on tensor cores against 0.078 / 0.093 on CUDA cores, 32 tokens 0.101 / 0.137 against
 # 0.333 / 0.402 - the bench decodes batches of up to 32 rows.
@@ -102,3 +108,24 @@ def kquant_matmul_fp32(copy: KRefinedWeight, tokens: torch.Tensor, depth: torch.
                        kernel: KQuantKernel | None = None) -> torch.Tensor:
     """float32 [tokens, out]: the sums before the output is rounded to the input's type."""
     return (kernel or KERNEL)(copy, tokens.contiguous(), depth)
+
+
+UNPACK_SOURCE = HERE / "kquant_mma.cu"  # the unpacking kernels build a weight as the mma kernels do, from one source
+UNPACK_ROWS = 16  # rows of a thread block, as UNPACK_ROWS in the source
+UNPACK_STEPS = QK_K // 16  # threads along a row of a super-block: one step of 16 weights each
+
+
+def kquant_unpack(copy: KRefinedWeight, depth: torch.Tensor) -> torch.Tensor:
+    """bf16 [out, in]: the copy read to `depth`, uint8 [out / TILE_ROWS], a block at depth 0 zero.
+
+    Equals copy.dequantize(torch.bfloat16, d) on every block of depth d, bit for bit; one pass over the copy's bytes
+    instead of a pass of torch kernels per depth. No host synchronization.
+    """
+    out_features, in_features = copy.shape
+    weight = torch.empty(out_features, in_features, device=copy.blocks.device, dtype=torch.bfloat16)
+    refinements = copy.refinements if copy.refinements.numel() else copy.blocks  # any valid pointer when none
+    launch(load(f"kquant_unpack_{copy.fmt.name.lower()}", UNPACK_SOURCE),
+           (-(-out_features // UNPACK_ROWS), in_features // QK_K, 1), (UNPACK_STEPS, UNPACK_ROWS, 1),
+           copy.blocks.contiguous(), refinements.contiguous(), depth.contiguous(), weight.view(torch.int16),
+           copy.refinements.shape[0], in_features, out_features)
+    return weight

@@ -10,12 +10,12 @@ The kernel `kquant_mma` (`src/foqlens/kernels/kquant_mma.cu`) multiplies the inp
 
 `MixedPrecisionLinear` hands the multiplication to the kernel when all of these hold:
 
-- the module's copy is k-quant (`KRefinedWeight`), on a Q2_K or Q4_K base;
+- the module's copy is k-quant (`KRefinedWeight`), on a base the model file holds: Q2_K or Q4_K of our cut, Q3_K or Q6_K of a published file;
 - every level of the layout is a depth D2 ... D8 or ZERO;
 - a block is 64 rows (`DEFAULT_BLOCK_ROWS`);
-- there are no more than `KERNEL_MAX_TOKENS` = 256 tokens: the decoding steps and short inputs.
+- there are no more than `KERNEL_MAX_TOKENS` = 32 tokens in a call: a decoding step of up to 32 rows.
 
-The bf16 level and a level baked into the weight (`bake`, the way the bench answers in the corpus runs) take the old path. A long input - a prefill - unpacks the weight once and multiplies it on cuBLAS. The flag `precision.KERNEL` turns the kernel off entirely.
+The bf16 level and a level baked into the weight (`bake`, the way the bench answers in the corpus runs) take the old path. A longer input - a prefill, a decoding step of more rows - has a second kernel unpack the copy, every block to its depth, and one GEMM on cuBLAS multiplies it (`kquant_unpack`: 0.12 ms a 12288x1536 module against 3.8 in torch). The two meet at 32 tokens; a step of E2B-it at a mixed layout takes 28.4 ms at a batch of 64 and 40.0 at 128 with the threshold at 32, against 42.5 and 70.2 at 256. The flag `precision.KERNEL` turns both kernels off.
 
 A layout may be one for the batch or one per sample (`set_layout` with per-sample layouts): the kernel gets a depth per token, and the tokens of a sample read its layout.
 

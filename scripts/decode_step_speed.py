@@ -54,7 +54,11 @@ def main() -> None:
     parser.add_argument("--model", default=fm.E2B_IT)
     parser.add_argument("--batches", type=int, nargs="+", default=[1, 8, 32])
     parser.add_argument("--steps", type=int, default=50)
+    parser.add_argument("--kernel-max-tokens", type=int, default=precision.KERNEL_MAX_TOKENS,
+                        help="tokens of a step up to which a layout is read by the kernel; past it, one unpacking by the "
+                        "kernel and a GEMM - to choose precision.KERNEL_MAX_TOKENS on the whole model")
     args = parser.parse_args()
+    precision.KERNEL_MAX_TOKENS = args.kernel_max_tokens  # read at every forward
 
     bench = Bench.load(args.model)
     mixed = np.random.default_rng(0).choice(DEPTH_LEVELS, size=bench.ctl.n_blocks)

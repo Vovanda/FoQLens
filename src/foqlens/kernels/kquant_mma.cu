@@ -5,8 +5,8 @@
 // TOKENS tokens. Its warps split the input (split-K): warp k takes super-blocks k, k + split, ...; a decoding step
 // has few tokens, so without the split a module would give the card too few warps to hide its reads. A warp stages
 // its rows' base blocks and refinement planes of a super-block in its own part of shared memory and takes the
-// super-block in 16 steps of K = 16. A step is one Q2_K block or half a Q4_K block, so a row has one scale and one
-// min in it. Per step a thread builds the eight weights of its A fragment - rows g and g+8, columns 2q, 2q+1, 2q+8,
+// super-block in 16 steps of K = 16. A step is one block of Q2_K, Q3_K or Q6_K or half a Q4_K block, so a row has
+// one scale (and one min) in it. Per step a thread builds the eight weights of its A fragment - rows g and g+8, columns 2q, 2q+1, 2q+8,
 // 2q+9 (g = lane / 4, q = lane % 4) - once, refines them up to the deepest depth any token reads, and at every depth
 // some token reads issues the mma over all token tiles, the B fragment read straight from the input in global memory;
 // a token that reads another depth enters it with a zero input, so it adds exact zeros. Depth 0 is ZERO and reads
@@ -51,28 +51,51 @@ __device__ __forceinline__ void mma(float (&c)[4], const unsigned int (&a)[4], u
       : "r"(a[0]), "r"(a[1]), "r"(a[2]), "r"(a[3]), "r"(b0), "r"(b1));
 }
 
-// The super-block's multipliers of a row: d and dmin, read once per super-block.
-template <bool Q2>
+// The bases the kernel reads, as ggml lays them out. Q2_K and Q4_K are asymmetric - d*scale*code - dmin*min - Q3_K and
+// Q6_K symmetric - d*scale*(code - zero point) with a signed scale; kquant.from_gguf_blocks reads the same bytes.
+enum Base { Q2K, Q3K, Q4K, Q6K };
+#define Q3_K_SCALE_BIAS 32  // block_q3_K stores a signed 6-bit scale as scale + 32
+#define Q3_K_ZERO 4         // a Q3_K code reads as code - 4
+#define Q6_K_ZERO 32        // a Q6_K code reads as code - 32
+
+// The super-block's multipliers of a row: d, and dmin of an asymmetric base, read once per super-block.
+template <int B>
 __device__ __forceinline__ void multipliers(const unsigned char* sb, float& d, float& dmin) {
-  d = from_fp16(sb + (Q2 ? 80 : 0));
-  dmin = from_fp16(sb + (Q2 ? 82 : 2));
+  constexpr int D = B == Q2K ? 80 : B == Q4K ? 0 : B == Q3K ? 108 : 208;  // where d lies in the block
+  d = from_fp16(sb + D);
+  dmin = (B == Q2K || B == Q4K) ? from_fp16(sb + D + 2) : 0.0f;
+}
+
+// Four bytes of a row at columns 2q, 2q+1, 2q+8, 2q+9 of a 16-byte run: two 16-bit reads.
+__device__ __forceinline__ void four_bytes(const unsigned char* run, int q, unsigned int (&b)[4]) {
+  const unsigned int low = reinterpret_cast<const unsigned short*>(run)[q];
+  const unsigned int high = reinterpret_cast<const unsigned short*>(run)[q + 4];
+  b[0] = low & 0xFF;
+  b[1] = low >> 8;
+  b[2] = high & 0xFF;
+  b[3] = high >> 8;
 }
 
 // The step and offset of a row's 16 weights at step s of a super-block, and their codes at the four columns a thread
-// holds: c = 2q, 2q+1, 2q+8, 2q+9 - two 16-bit reads, a code a byte (shifted to its group).
-template <bool Q2>
+// holds: c = 2q, 2q+1, 2q+8, 2q+9. Weight 16s + c of a super-block is weight 128h + 32g + j: h = s / 8,
+// g = (s / 2) mod 4, j = 16 (s mod 2) + c.
+template <int B>
 __device__ __forceinline__ void decode_step(const unsigned char* sb, int s, int q, float d, float dmin, float& step,
                                             float& offset, float (&code)[4]) {
-  int scale, minimum, byte0, shift, mask;
-  if (Q2) {
-    scale = sb[s] & 0xF;
-    minimum = sb[s] >> 4;
-    byte0 = 32 * (s >> 3) + 16 * (s & 1);  // weights 16s ...: bytes 32*(16s/128) + (16s mod 32)
-    shift = 2 * ((s >> 1) & 3);            // shifted by 2 * ((16s / 32) mod 4)
-    mask = 3;
-  } else {
+  const int h = s >> 3, g = (s >> 1) & 3, j0 = 16 * (s & 1);
+  unsigned int b[4];
+  if (B == Q2K) {
+    // scales[16] (scale | min << 4), qs[64]: code 2 bits at 2g of qs[32h + j]
+    step = __fmul_rn(d, (float)(sb[s] & 0xF));
+    offset = __fmul_rn(dmin, (float)(sb[s] >> 4));
+    four_bytes(sb + QS_OFFSET + 32 * h + j0, q, b);
+#pragma unroll
+    for (int k = 0; k < 4; ++k) code[k] = (float)((b[k] >> (2 * g)) & 3);
+  } else if (B == Q4K) {
+    // d, dmin, scales[12] (6-bit scales and mins of 8 blocks of 32), qs[128]: 4 bits of qs[32 (j / 2) + ...]
     const int j = s >> 1;
     const unsigned char* sc = sb + 4;
+    int scale, minimum;
     if (j < 4) {
       scale = sc[j] & 63;
       minimum = sc[j + 4] & 63;
@@ -80,18 +103,35 @@ __device__ __forceinline__ void decode_step(const unsigned char* sb, int s, int 
       scale = (sc[j + 4] & 0xF) | ((sc[j - 4] >> 6) << 4);
       minimum = (sc[j + 4] >> 4) | ((sc[j] >> 6) << 4);
     }
-    byte0 = 32 * (j >> 1) + 16 * (s & 1);
-    shift = 4 * (j & 1);
-    mask = 0xF;
+    step = __fmul_rn(d, (float)scale);
+    offset = __fmul_rn(dmin, (float)minimum);
+    four_bytes(sb + QS_OFFSET + 32 * (j >> 1) + j0, q, b);
+#pragma unroll
+    for (int k = 0; k < 4; ++k) code[k] = (float)((b[k] >> (4 * (j & 1))) & 0xF);
+  } else if (B == Q3K) {
+    // hmask[32], qs[64], scales[12], d: 2 bits at 2g of qs[32h + j], the high bit at 4h + g of hmask[j]
+    const unsigned char* sc = sb + 96;
+    const int scale = (((sc[s & 7] >> (4 * (s >> 3))) & 0xF) | (((sc[8 + (s & 3)] >> (2 * (s >> 2))) & 3) << 4))
+                      - Q3_K_SCALE_BIAS;
+    step = __fmul_rn(d, (float)scale);
+    offset = __fmul_rn(step, (float)Q3_K_ZERO);  // a power of two: exact, as torch's steps * zero point
+    unsigned int m[4];
+    four_bytes(sb + 32 + 32 * h + j0, q, b);
+    four_bytes(sb + j0, q, m);
+#pragma unroll
+    for (int k = 0; k < 4; ++k) code[k] = (float)(((b[k] >> (2 * g)) & 3) | (((m[k] >> (4 * h + g)) & 1) << 2));
+  } else {
+    // ql[128], qh[64], scales[16] int8, d: weight 128h + 32r + j, r = 2p + c', reads nibble p of ql[64h + 32c' + j]
+    // and, as its high two bits, bits 2r of qh[32h + j]
+    step = __fmul_rn(d, (float)(signed char)sb[192 + s]);
+    offset = __fmul_rn(step, (float)Q6_K_ZERO);
+    const int r = g, p = r >> 1, c = r & 1;
+    unsigned int m[4];
+    four_bytes(sb + 64 * h + 32 * c + j0, q, b);
+    four_bytes(sb + 128 + 32 * h + j0, q, m);
+#pragma unroll
+    for (int k = 0; k < 4; ++k) code[k] = (float)(((b[k] >> (4 * p)) & 0xF) | (((m[k] >> (2 * r)) & 3) << 4));
   }
-  step = __fmul_rn(d, (float)scale);
-  offset = __fmul_rn(dmin, (float)minimum);
-  const unsigned short* qs = reinterpret_cast<const unsigned short*>(sb + QS_OFFSET + byte0);  // byte0 is even
-  const unsigned int low = qs[q], high = qs[q + 4];  // columns 2q, 2q+1 and 2q+8, 2q+9
-  code[0] = (float)((low >> shift) & mask);
-  code[1] = (float)((low >> (8 + shift)) & mask);
-  code[2] = (float)((high >> shift) & mask);
-  code[3] = (float)((high >> (8 + shift)) & mask);
 }
 
 // The 2-bit codes of a refinement at step s and the thread's four columns: the step's 16 codes are word s of the
@@ -129,15 +169,22 @@ __device__ __forceinline__ void multiply_at(int depth, const float (&w)[8], unsi
     }
 }
 
-template <bool Q2, int BYTES, int BASE_DEPTH, int MAX_REFINEMENTS>
+// The word a base block is copied in: 32 bits where its size allows, 16 where it does not (block_q3_K is 110 bytes,
+// block_q6_K 210).
+template <bool FOUR> struct Word { typedef unsigned int T; };
+template <> struct Word<false> { typedef unsigned short T; };
+
+template <int B, int BYTES, int BASE_DEPTH, int MAX_REFINEMENTS>
 __device__ __forceinline__ void kquant_mma_rows(
     const unsigned char* __restrict__ blocks, const unsigned char* __restrict__ refinements,
     const unsigned short* __restrict__ x, const unsigned char* __restrict__ depth, float* __restrict__ y,
     const int n_refinements, const int n_tokens, const int in_features, const int out_features, const int depth_stride) {
+  typedef typename Word<BYTES % 4 == 0>::T W;
+  constexpr int WORDS = BYTES / sizeof(W);  // words of a base block
   // a warp's staging of one super-block, in dynamic shared memory sized to the warps the launch gives; after the loop
   // the same memory holds the warps' partial sums, so 8 warps stay within the 48 KiB a launch gets without opting in
   struct Stage {
-    unsigned int base[ROWS][BYTES / 4];
+    W base[ROWS][WORDS];
     unsigned int planes[MAX_REFINEMENTS][ROWS][PLANE_WORDS];
   };
   static_assert(sizeof(Stage) >= WARP * TOKEN_TILES * 4 * sizeof(float), "a warp's sums must fit in its stage");
@@ -191,10 +238,10 @@ __device__ __forceinline__ void kquant_mma_rows(
   if (present) {
     for (int sb = warp; sb < super_blocks; sb += split) {
       // the warp's rows of this super-block, read as whole words; a row past the last one is left out
-      for (int i = lane; i < ROWS * (BYTES / 4); i += WARP) {
-        const int r = i / (BYTES / 4), w = i % (BYTES / 4);
+      for (int i = lane; i < ROWS * WORDS; i += WARP) {
+        const int r = i / WORDS, w = i % WORDS;
         if (row0 + r < out_features)
-          stage.base[r][w] = reinterpret_cast<const unsigned int*>(blocks + (row0 + r) * row_bytes + sb * BYTES)[w];
+          stage.base[r][w] = reinterpret_cast<const W*>(blocks + (row0 + r) * row_bytes + sb * BYTES)[w];
       }
       for (int e = 0; e < levels; ++e)
         for (int i = lane; i < ROWS * PLANE_WORDS; i += WARP) {
@@ -208,7 +255,7 @@ __device__ __forceinline__ void kquant_mma_rows(
                                       reinterpret_cast<const unsigned char*>(stage.base[g + 8])};
       float d[2], dmin[2];
 #pragma unroll
-      for (int h = 0; h < 2; ++h) multipliers<Q2>(rows[h], d[h], dmin[h]);
+      for (int h = 0; h < 2; ++h) multipliers<B>(rows[h], d[h], dmin[h]);
 #pragma unroll 4
       for (int s = 0; s < STEPS; ++s) {
         const int column = (sb * QK_K + 16 * s) / 2;  // in pairs of bf16: this step's column 0
@@ -217,7 +264,7 @@ __device__ __forceinline__ void kquant_mma_rows(
 #pragma unroll
         for (int h = 0; h < 2; ++h) {
           float step, offset, code[4];
-          decode_step<Q2>(rows[h], s, q, d[h], dmin[h], step, offset, code);
+          decode_step<B>(rows[h], s, q, d[h], dmin[h], step, offset, code);
 #pragma unroll
           for (int k = 0; k < 4; ++k) w[4 * h + k] = __fsub_rn(__fmul_rn(step, code[k]), offset);
           plane_step[h] = step * 0.25f;  // a power of two: exact
@@ -274,11 +321,103 @@ __device__ __forceinline__ void kquant_mma_rows(
   const int depth_stride                          /* 0: one layout for every token; out / TILE_ROWS: one each */
 
 extern "C" __global__ void kquant_mma_q2_k(ARGUMENTS) {
-  kquant_mma_rows<true, 84, 1, 3>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features, out_features,
+  kquant_mma_rows<Q2K, 84, 1, 3>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features, out_features,
                                   depth_stride);
 }
 
 extern "C" __global__ void kquant_mma_q4_k(ARGUMENTS) {
-  kquant_mma_rows<false, 144, 2, 2>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features,
+  kquant_mma_rows<Q4K, 144, 2, 2>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features,
                                     out_features, depth_stride);
+}
+
+// Bases read from a published GGUF file (kquant.Q3_K, kquant.Q6_K): a copy over bartowski's Q2_K holds 70 modules on
+// Q3_K and 17 on Q6_K.
+extern "C" __global__ void kquant_mma_q3_k(ARGUMENTS) {
+  kquant_mma_rows<Q3K, 110, 1, 3>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features,
+                                  out_features, depth_stride);
+}
+
+extern "C" __global__ void kquant_mma_q6_k(ARGUMENTS) {
+  kquant_mma_rows<Q6K, 210, 3, 1>(blocks, refinements, x, depth, y, n_refinements, n_tokens, in_features,
+                                  out_features, depth_stride);
+}
+
+// The copy unpacked to bf16 [out, in], every block of TILE_ROWS rows read to its own depth and a block at depth 0
+// written as zeros: what a long input - a prefill - multiplies by in one GEMM. The weights are built as the mma builds
+// them above, so they are the torch path's bit for bit. A thread writes one step, 16 weights of a row; a thread block
+// covers UNPACK_ROWS rows of one super-block, and a row's 16 threads write its 512 bytes in one run.
+#define UNPACK_ROWS 16
+
+template <int B, int BYTES, int BASE_DEPTH>
+__device__ __forceinline__ void kquant_unpack_rows(
+    const unsigned char* __restrict__ blocks, const unsigned char* __restrict__ refinements,
+    const unsigned char* __restrict__ depth, unsigned short* __restrict__ w_out, const int n_refinements,
+    const int in_features, const int out_features) {
+  const int s = threadIdx.x, row = blockIdx.x * UNPACK_ROWS + threadIdx.y, sb = blockIdx.y;
+  if (row >= out_features) return;
+  uint4* target = reinterpret_cast<uint4*>(w_out + (long long)row * in_features + sb * QK_K + 16 * s);
+  int d = depth[row / TILE_ROWS];
+  if (d == 0) {
+    target[0] = make_uint4(0u, 0u, 0u, 0u);
+    target[1] = make_uint4(0u, 0u, 0u, 0u);
+    return;
+  }
+  d = min(max(d, BASE_DEPTH), BASE_DEPTH + n_refinements);  // never shallower than the base, never deeper than stored
+  const long long refinement_row = (long long)in_features / 4;
+  const long long refinement_plane = (long long)out_features * refinement_row;
+  const unsigned char* block = blocks + ((long long)row * (in_features / QK_K) + sb) * BYTES;
+  float dd, dmin;
+  multipliers<B>(block, dd, dmin);
+  // w[c] is weight 16s + c of the super-block; decode_step gives the columns 2q, 2q+1, 2q+8, 2q+9 of the step
+  float w[16], step = 0.0f;
+#pragma unroll
+  for (int q = 0; q < 4; ++q) {
+    float offset, code[4];
+    decode_step<B>(block, s, q, dd, dmin, step, offset, code);
+    const int column[4] = {2 * q, 2 * q + 1, 2 * q + 8, 2 * q + 9};
+#pragma unroll
+    for (int k = 0; k < 4; ++k) w[column[k]] = __fsub_rn(__fmul_rn(step, code[k]), offset);
+  }
+  float plane_step = step * 0.25f;  // a power of two: exact
+  for (int e = 0; e < d - BASE_DEPTH; ++e) {
+    const unsigned int* plane = reinterpret_cast<const unsigned int*>(
+        refinements + e * refinement_plane + row * refinement_row + sb * (QK_K / 4));
+#pragma unroll
+    for (int q = 0; q < 4; ++q) {
+      float code[4];
+      plane_codes(plane, s, q, code);
+      const int column[4] = {2 * q, 2 * q + 1, 2 * q + 8, 2 * q + 9};
+#pragma unroll
+      for (int k = 0; k < 4; ++k) w[column[k]] = __fadd_rn(w[column[k]], __fmul_rn(plane_step, code[k] - 2.0f + 0.5f));
+    }
+    plane_step *= 0.25f;
+  }
+  unsigned int packed[8];
+#pragma unroll
+  for (int k = 0; k < 8; ++k) packed[k] = bf16_pair(round_bf16(w[2 * k]), round_bf16(w[2 * k + 1]));
+  target[0] = make_uint4(packed[0], packed[1], packed[2], packed[3]);
+  target[1] = make_uint4(packed[4], packed[5], packed[6], packed[7]);
+}
+
+#define UNPACK_ARGUMENTS                                                                          \
+  const unsigned char* __restrict__ blocks,       /* [out, in / QK_K, block bytes] */             \
+  const unsigned char* __restrict__ refinements,  /* [n_refinements, out, in / 4] */              \
+  const unsigned char* __restrict__ depth,        /* [out / TILE_ROWS]: the depth of each block */ \
+  unsigned short* __restrict__ w_out,             /* [out, in] bf16 */                            \
+  const int n_refinements, const int in_features, const int out_features
+
+extern "C" __global__ void kquant_unpack_q2_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q2K, 84, 1>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}
+
+extern "C" __global__ void kquant_unpack_q4_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q4K, 144, 2>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}
+
+extern "C" __global__ void kquant_unpack_q3_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q3K, 110, 1>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
+}
+
+extern "C" __global__ void kquant_unpack_q6_k(UNPACK_ARGUMENTS) {
+  kquant_unpack_rows<Q6K, 210, 3>(blocks, refinements, depth, w_out, n_refinements, in_features, out_features);
 }

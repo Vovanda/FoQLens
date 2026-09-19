@@ -115,6 +115,18 @@ def test_q_and_k_blocks_left_at_zero_read_the_attention_level_and_nothing_else_m
     assert raised[0, 0] == int(Level.D4)
 
 
+def test_the_working_layers_read_the_default_level_and_the_filter_acts_after_them():
+    from foqlens.layouts import WorkingLayers
+
+    ctl = controller()
+    codes = np.full(ctl.n_blocks, int(Level.ZERO), dtype=np.uint8)
+    codes[1], codes[5] = int(Level.D8), int(Level.D6)  # a zone in layer 0 and one in layer 1
+    working = block_layers(ctl) < 1  # layer 0 is read before the filter acts
+    laid = Regulator(WorkingLayers(Fixed(codes), working, Level.D2), ctl).layout(np.arange(1))[0]
+    assert np.all(laid[working] == int(Level.D2))  # the zone in layer 0 does not lift it, ZERO does not empty it
+    assert laid[5] == int(Level.D6) and laid[4] == int(Level.ZERO)
+
+
 def test_by_layer_counts_every_block_once_in_its_layer_and_kind():
     ctl = controller()
     codes = np.full(ctl.n_blocks, int(Level.D2), dtype=np.uint8)

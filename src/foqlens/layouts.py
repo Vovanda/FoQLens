@@ -7,7 +7,8 @@ class with the same interface.
 A zone layout on the block graph (GraphZoneLayout) is made of parts behind their own interfaces - the zones of a
 question (GraphZoneSource), the surface they reach along (metric.Surface), how far they reach (graph_zones.Reach),
 how strong each is (ZoneStrength) - so a new kind of zones, reach or strength is a new class, not a branch. The
-per-block control (QuantileLevels) takes the same knobs with no zones; AttentionLevel holds rule 6 over any policy.
+per-block control (QuantileLevels) takes the same knobs with no zones; AttentionLevel holds rule 6 over any policy, and
+WorkingLayers keeps the layers the address is read from at their default level - the filter acts after them.
 The policies of the first bench (Uniform, Directed, TopicMask, Random, ShuffledLevels) take a precision share (see
 budget.py): the share of the precision range spent, 0 = everything coarse, 1 = everything sharp.
 
@@ -16,6 +17,8 @@ Invariants:
 - Invariant: Random is reproducible per question from its seed and differs between questions.
 - Invariant: a question never sees its own scores through its topic's mean (leave-one-out).
 - Invariant: the per-block control lifts the top share f of the blocks (ceil(fN), ties aside), at f = 0 the top one.
+- Invariant: the working layers read their default level whatever the policy lays there; every other block keeps the
+  policy's level.
 """
 
 from __future__ import annotations
@@ -360,6 +363,26 @@ class AttentionLevel:
     def levels(self, indices: np.ndarray) -> np.ndarray:
         codes = np.asarray(self.policy.levels(indices), dtype=np.uint8)
         return np.where(self.blocks[None] & (codes == int(Level.ZERO)), np.uint8(int(self.level)), codes)
+
+
+@dataclass(frozen=True)
+class WorkingLayers:
+    """The working layers over any policy (Volodya 19.09): the filter acts after the layers the address is read from,
+    and those read at the default level - the useful quality the address needs, whatever the base of the zones. At a
+    ZERO base they would otherwise be empty and the address could not be read at all.
+    """
+
+    policy: LayoutPolicy
+    blocks: np.ndarray  # bool [n_blocks]: the blocks of the working layers
+    level: Level  # the default level of the working layers
+
+    @property
+    def name(self) -> str:
+        return self.policy.name
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        codes = np.asarray(self.policy.levels(indices), dtype=np.uint8)
+        return np.where(self.blocks[None], np.uint8(int(self.level)), codes)
 
 
 @dataclass(frozen=True)

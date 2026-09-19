@@ -36,10 +36,11 @@ from foqlens.gpu_share import default_share
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
 from foqlens.io import answers_path, append_answers, read_frozen, write_json
 from foqlens.judging import ModelJudge
+from foqlens.layouts import WorkingLayers
 from foqlens.pipeline import ADDRESS_SOURCES, Bench
 from foqlens.prompt_variants import SETUPS, TRAIN_POOL, examples_for, needs_train, setup_named
 from foqlens.quant import Level
-from foqlens.regulator import Regulator
+from foqlens.regulator import Regulator, block_layers
 from foqlens.selection import split_shares
 from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, Knobs, mechanism_layout
 
@@ -64,6 +65,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--focus-area", type=float, required=True, help="f: the share of the network a zone reaches")
     parser.add_argument("--focus-strength", type=float, default=1.0, help="g: how far a zone rises of the way to D8")
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
+    parser.add_argument("--working-layers", type=int, default=0,
+                        help="the first layers the address is read from: they read --working-level, the filter acts after")
+    parser.add_argument("--working-level", choices=list(FLOORS), default="d4",
+                        help="the default level of the working layers")
     parser.add_argument("--reach", choices=sorted(REACHES), default="equal",
                         help="f D for every zone (rule 1), or f D split by the zones' own widths")
     parser.add_argument("--out", type=Path, default=Path("runs/strategies"))
@@ -112,9 +117,11 @@ def main(argv: list[str] | None = None) -> Path:
                     model_weights={n: m.weight for n, m in ctl.modules.items()},
                     n_heads=bench.model.config.get_text_config(decoder=True).num_attention_heads)
     knobs = Knobs(FLOORS[args.floor], args.focus_area, args.focus_strength, args.combine)
-    label = f"{args.mechanism}-{args.source}-{args.reach}-{args.floor}-f{args.focus_area:g}-g{args.focus_strength:g}"
+    label = (f"{args.mechanism}-{args.source}-{args.reach}-{args.floor}-f{args.focus_area:g}-g{args.focus_strength:g}"
+             f"-w{args.working_layers}{args.working_level}")
     policy = mechanism_layout(args.mechanism, inputs, knobs, graph=args.graph, k=args.k, reach=args.reach)
-    regulator = Regulator(policy, ctl)
+    working = WorkingLayers(policy, block_layers(ctl) < args.working_layers, FLOORS[args.working_level])
+    regulator = Regulator(working, ctl)
     reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)
 
     codes = regulator.layout(np.arange(len(laid)))

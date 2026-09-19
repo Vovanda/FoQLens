@@ -32,24 +32,23 @@ from pathlib import Path
 
 import numpy as np
 
-from foqlens import config, corpora, refocustensors, runlog
+from foqlens import config, refocustensors, runlog
 from foqlens import model as fm
-from foqlens.answering import Asking
 from foqlens.coverage import question_coverage, run_coverage
 from foqlens.attention import PLANS, SPLIT
 from foqlens.gguf_weights import PUBLISHED
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
-from foqlens.io import answers_path, append_answers, read_frozen, write_json
+from foqlens.io import answers_path, append_answers, write_json
 from foqlens.judging import ModelJudge
 from foqlens.layouts import WorkingLayers
 from foqlens.pipeline import ADDRESS_SOURCES, Bench
 from foqlens.progress import Progress
-from foqlens.prompt_variants import SETUPS, TRAIN_POOL, examples_for, needs_train, setup_named
+from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
 from foqlens.regulator import Regulator, block_layers
-from foqlens.selection import split_shares
+from foqlens.small_corpus import Draw, StoredMasks, draw
 from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, Knobs, Spaces, mechanism_layout
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
@@ -66,6 +65,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"),
                         help="the small corpus (config.SmallCorpus): the shares laid out, for calibration, unknown")
     parser.add_argument("--mechanism", nargs="+", choices=list(MECHANISMS), required=True)
+    parser.add_argument("--masks", type=Path, default=None,
+                        help="masks kept by small_corpus_masks.py for this draw, instead of a mask pass")
     parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), default="pooled",
                         help="the mask source of the address (#18)")
     parser.add_argument("--graph", choices=sorted(GRAPHS), default="mutual-nicdm")
@@ -91,6 +92,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def stored_masks(path: Path, found: Draw, n_blocks: int) -> np.ndarray:
+    """The masks kept by small_corpus_masks.py, refused unless they are this draw's questions in this order on this
+    model's blocks."""
+    kept = StoredMasks.load(path)
+    pairs = found.laid + found.calibration
+    if kept.ids.tolist() != [r.id for _, r in pairs] or kept.corpus.tolist() != [c for c, _ in pairs]:
+        raise ValueError(f"{path} holds other questions than this draw")
+    if kept.masks.shape[1] != n_blocks:
+        raise ValueError(f"{path} holds {kept.masks.shape[1]} blocks, the model {n_blocks}")
+    LOG.info("masks read from %s (%s)", path, kept.meta, extra={"masks": str(path)})
+    return kept.masks
+
+
 def main(argv: list[str] | None = None) -> list[Path]:
     args = parse_args(argv)
     run = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -103,28 +117,10 @@ def main(argv: list[str] | None = None) -> list[Path]:
     fmt = fm.prompt_format(model_id, tokenizer)
     name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
     small = config.read(args.corpus_config, config.SmallCorpus)
-    laid, calibration, unknown, askings = [], [], set(), {}
-    for corpus in args.corpora:
-        corpus_rows, source = corpora.read(corpus)
-        frozen = read_frozen(args.frozen / f"{corpus}.json")
-        frozen.check(name, source.revision, frozen.prompt)  # the frozen file names the setup it was frozen in
-        known, background = split_shares(list(frozen.kept), small.seed, (small.share, small.calibration_share),
-                                         small.floor)
-        [strangers] = split_shares(list(frozen.unknown_share), small.seed, (small.unknown_share,))
-        by_id = {r.id: r for r in corpus_rows}
-        laid += [(corpus, by_id[i]) for i in known + strangers]
-        unknown |= {(corpus, i) for i in strangers}
-        calibration += [(corpus, by_id[i]) for i in background]
-        setup = setup_named(corpus, frozen.prompt)
-        train = corpora.read_train(corpus, TRAIN_POOL) if needs_train(setup) else []
-        askings[corpus] = Asking(corpus, source.revision, name, Level.BF16, setup,
-                                 examples_for(corpus, setup, train, small.seed))
-
-    def prompts(pairs: list) -> list[str]:  # the prompt each question is answered with is the one its mask reads
-        return [askings[c].prompts(fmt, [r])[0] for c, r in pairs]
-
-    mask_source = bench.source(args.source)
-    masks = bench.masks(prompts(laid) + prompts(calibration), [mask_source])[mask_source.name]
+    found = draw(args.corpora, args.frozen, small, name)
+    laid, calibration, unknown, askings = found.laid, found.calibration, found.unknown, found.askings
+    masks = (stored_masks(args.masks, found, ctl.n_blocks) if args.masks is not None else
+             bench.masks(found.prompts(fmt, laid + calibration), [bench.source(args.source)])[args.source])
     modules = ctl.modules.values()
     inputs = Inputs(scores=masks[: len(laid)], calibration=masks[len(laid):],
                     block_weights=np.concatenate([m.block_sizes() * m.in_features for m in modules]),

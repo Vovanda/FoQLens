@@ -1,0 +1,76 @@
+"""The masks of the small corpus, computed once and kept (foqlens.small_corpus.StoredMasks).
+
+A mask pass is minutes of GPU that no knob of a layout changes, so a run of layouts reads it from disk
+(strategy_answers --masks). The oracle - the gradient's Taylor score, the true sensitivity of the blocks - is read at
+full precision from the checkpoint (--model-source checkpoint): on the cut model's file every layer unpacks its weights
+for the forward pass and the backward pass keeps them all, and a long prompt runs out of memory.
+
+    uv run python scripts/small_corpus_masks.py --source gradient --model-source checkpoint
+    uv run python scripts/small_corpus_masks.py --source hybrid --base bartowski-Q2_K
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+from datetime import datetime
+from pathlib import Path
+
+import numpy as np
+
+from foqlens import config, refocustensors, runlog
+from foqlens import model as fm
+from foqlens.gguf_weights import PUBLISHED
+from foqlens.gpu_share import default_share
+from foqlens.pipeline import ADDRESS_SOURCES, Bench, ModelSource
+from foqlens.prompt_variants import SETUPS
+from foqlens.quant import Level
+from foqlens.regulator import block_kinds, block_layers
+from foqlens.runlog import stage
+from foqlens.small_corpus import draw, store
+
+MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
+LOG = logging.getLogger("foqlens.small_corpus_masks")
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--model", choices=sorted(MODELS), default="e2b-it")
+    parser.add_argument("--model-source", choices=[s.value for s in ModelSource], default=ModelSource.FILE.value)
+    parser.add_argument("--base", choices=sorted(PUBLISHED), default=None, help="the model cut over a published base")
+    parser.add_argument("--frozen", type=Path, default=Path("corpus/e2b-it"))
+    parser.add_argument("--corpora", nargs="+", default=list(SETUPS), choices=list(SETUPS))
+    parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"))
+    parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), required=True)
+    parser.add_argument("--out", type=Path, default=Path("runs/masks"))
+    parser.add_argument("--gpu-share", type=float, default=default_share())
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> Path:
+    args = parse_args(argv)
+    run = datetime.now().strftime("%Y%m%d-%H%M%S")
+    out = args.out / args.model
+    runlog.setup(out / "logs" / f"small_corpus_masks-{run}.jsonl", {"run": run, "script": "small_corpus_masks"})
+    model_id = MODELS[args.model]
+    directory = refocustensors.model_directory(model_id, args.base) if args.base else None
+    bench = Bench.load(model_id, gpu_share=args.gpu_share, source=ModelSource(args.model_source), directory=directory)
+    name = f"{model_id}@{fm.REVISIONS[model_id][:8]}"
+    small = config.read(args.corpus_config, config.SmallCorpus)
+    found = draw(args.corpora, args.frozen, small, name)
+    fmt = fm.prompt_format(model_id, bench.tokenizer)
+    source = bench.source(args.source)
+    masks = bench.masks(found.prompts(fmt, found.laid + found.calibration), [source])[source.name]
+    modules = bench.ctl.modules.values()
+    kept = store(found, masks, block_layers(bench.ctl), block_kinds(bench.ctl),
+                 np.concatenate([m.block_sizes() * m.in_features for m in modules]),
+                 {"model": name, "source": args.source, "model_source": args.model_source, "base": args.base,
+                  "level": Level.BF16.name, "corpus": str(args.corpus_config), "corpora": args.corpora})
+    target = out / f"{args.source}-{args.model_source}-{args.base or 'own'}-{args.corpus_config.stem}.npz"
+    with stage(LOG, f"save {target}"):
+        kept.save(target)
+    return target
+
+
+if __name__ == "__main__":
+    main()

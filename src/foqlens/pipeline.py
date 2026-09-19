@@ -14,9 +14,10 @@ Invariant: every name of ADDRESS_SOURCES builds a source of that name.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from enum import Enum
-from functools import cached_property, partial
+from functools import cached_property
 from pathlib import Path
 from typing import Callable, Protocol
 
@@ -32,6 +33,9 @@ from foqlens.precision import Controller, install
 from foqlens.quality import compute_masks, token_batches
 from foqlens.quant import Level
 from foqlens.scoring import BlockScorer, GradientScorer
+from foqlens.runlog import stage
+
+LOG = logging.getLogger(__name__)
 
 MASK_SOURCES = ("pooled", "gradient")  # the names of Bench.sources, in order
 # Mask passes are batched by tokens (quality.token_batches): a batch holds at most as many padded tokens as
@@ -153,19 +157,20 @@ class Bench:
         directory = directory or refocustensors.model_directory(model_id)
         if source is not ModelSource.CHECKPOINT and not (directory / refocustensors.FILE).exists():
             raise FileNotFoundError(f"no cut model in {directory}: run scripts/cut_model.py, or load the checkpoint")
-        if source is ModelSource.FILE:
-            model, tokenizer, copy = refocustensors.load(directory, attn_implementation=attn_implementation,
-                                                         gpu_share=gpu_share)
-            ctl = install(model, copy=copy)
-        elif source is ModelSource.RESIDENT:
-            model, tokenizer, ctl = refocustensors.load_resident(directory, attn_implementation=attn_implementation,
-                                                                 gpu_share=gpu_share)
-        else:
-            model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
-            ctl = install(model)
+        with stage(LOG, f"load {model_id} from {source.name.lower()} {directory.name}"):
+            if source is ModelSource.FILE:
+                model, tokenizer, copy = refocustensors.load(directory, attn_implementation=attn_implementation,
+                                                             gpu_share=gpu_share)
+                ctl = install(model, copy=copy)
+            elif source is ModelSource.RESIDENT:
+                model, tokenizer, ctl = refocustensors.load_resident(directory, attn_implementation=attn_implementation,
+                                                                     gpu_share=gpu_share)
+            else:
+                model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
+                ctl = install(model)
         # the share paces the batches, the hourly break rests the card, the guard keeps it under its
         # ceiling whatever the share
-        log = partial(print, flush=True)
+        log = LOG.info
         pacer = ThermalGuard(Cooldown(Throttle(gpu_share), log=log), gpu_temperature, log=log)
         return cls(model, tokenizer, ctl, pacer)
 
@@ -201,13 +206,14 @@ class Bench:
         self.ctl.set_all(level)
         lengths = [len(ids) for ids in self.tokenizer(prompts)["input_ids"]]  # the tokens encode() pads to
         longest = max(lengths, default=1)
-        masks = {
-            src.name: compute_masks(
-                lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts), prompts, src.batch_size,
-                self.throttle, groups=token_batches(lengths, src.batch_size * longest, src.batch_size * MAX_BATCH_FACTOR),
-            )
-            for src in sources
-        }
+        masks = {}
+        for src in sources:
+            with stage(LOG, f"masks {src.name} of {len(prompts)} prompts at {level.name}"):
+                masks[src.name] = compute_masks(
+                    lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts), prompts, src.batch_size,
+                    self.throttle,
+                    groups=token_batches(lengths, src.batch_size * longest, src.batch_size * MAX_BATCH_FACTOR),
+                )
         # the backward pass leaves a fragmented cache behind; evaluation starts from a clean one
         torch.cuda.empty_cache()
         return masks

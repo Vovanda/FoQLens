@@ -7,6 +7,7 @@ Throttle (gpu_share.py): below a share of 1 the GPU rests after it.
 
 from __future__ import annotations
 
+import logging
 import multiprocessing
 from collections.abc import Callable, Iterator, Sequence
 from concurrent.futures import Executor, Future, ProcessPoolExecutor
@@ -20,6 +21,10 @@ from foqlens.gpu_share import FULL, Pacer
 from foqlens.layouts import LayoutPolicy
 from foqlens.precision import Controller
 from foqlens.progress import Progress
+
+LOG = logging.getLogger(__name__)
+# a long loop logs at INFO every tenth of its steps - its pace visible without a line a batch; every step goes to DEBUG
+PROGRESS_SHARE = 0.1
 
 BatchScorer = Callable[[list[str]], list[np.ndarray]]
 
@@ -62,7 +67,15 @@ def compute_masks(
     batches of their own; bf16 masks move slightly with the batch, so a halved batch is not bit for bit the whole one.
     """
     groups = list(batches(len(prompts), batch_size)) if groups is None else groups
-    parts = [part for idx in groups for part in _scored(score, prompts, idx, throttle)]
+    progress = Progress(len(groups), "mask batch")
+    milestone = max(1, round(len(groups) * PROGRESS_SHARE))
+    parts = []
+    for idx in groups:
+        parts += _scored(score, prompts, idx, throttle)
+        line = progress.step(f"{len(idx)} prompts")
+        LOG.debug(line)
+        if progress.done % milestone == 0 or progress.done == progress.total:
+            LOG.info(line, extra={"loop": "mask batch", "done": progress.done, "total": progress.total})
     order = np.concatenate([idx for idx, _ in parts])
     stacked = np.concatenate([masks for _, masks in parts])
     out = np.empty_like(stacked)
@@ -81,6 +94,8 @@ def _scored(score: BatchScorer, prompts: list[str], idx: np.ndarray, throttle: P
     # Out of the except block: a live exception holds the failed pass's frames and every tensor in them, so the halves
     # are read only after it is gone and its memory is back.
     torch.cuda.empty_cache()
+    LOG.warning("a batch of %d prompts ran out of GPU memory; read as two halves", len(idx),
+                extra={"batch": len(idx)})
     half = len(idx) // 2
     return _scored(score, prompts, idx[:half], throttle) + _scored(score, prompts, idx[half:], throttle)
 

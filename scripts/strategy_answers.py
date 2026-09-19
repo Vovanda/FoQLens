@@ -24,13 +24,15 @@ built once for all of them.
 from __future__ import annotations
 
 import argparse
+import logging
+from datetime import datetime
 from dataclasses import replace
 from itertools import product
 from pathlib import Path
 
 import numpy as np
 
-from foqlens import config, corpora, refocustensors
+from foqlens import config, corpora, refocustensors, runlog
 from foqlens import model as fm
 from foqlens.answering import Asking
 from foqlens.coverage import question_coverage, run_coverage
@@ -43,6 +45,7 @@ from foqlens.io import answers_path, append_answers, read_frozen, write_json
 from foqlens.judging import ModelJudge
 from foqlens.layouts import WorkingLayers
 from foqlens.pipeline import ADDRESS_SOURCES, Bench
+from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS, TRAIN_POOL, examples_for, needs_train, setup_named
 from foqlens.quant import Level
 from foqlens.regulator import Regulator, block_layers
@@ -51,6 +54,7 @@ from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, 
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 FLOORS = {lv.name.lower(): lv for lv in (Level.ZERO, Level.D2, Level.D4, Level.D6)}
+LOG = logging.getLogger("foqlens.strategy_answers")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -87,6 +91,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> list[Path]:
     args = parse_args(argv)
+    run = datetime.now().strftime("%Y%m%d-%H%M%S")
+    runlog.setup(args.out / args.model / "logs" / f"strategy_answers-{run}.jsonl",
+                 {"run": run, "script": "strategy_answers"})
     model_id = MODELS[args.model]
     directory = refocustensors.model_directory(model_id, args.base) if args.base else None
     bench = Bench.load(model_id, gpu_share=args.gpu_share, directory=directory)
@@ -128,7 +135,9 @@ def main(argv: list[str] | None = None) -> list[Path]:
     judge = ModelJudge(bench.model, tokenizer, ctl, fmt, decoder)
     out = args.out / args.model
     targets = []
-    for mechanism, reach, focus_area in product(args.mechanism, args.reach, args.focus_area):
+    layouts = list(product(args.mechanism, args.reach, args.focus_area))
+    progress = Progress(len(layouts), "layout")
+    for mechanism, reach, focus_area in layouts:
         knobs = Knobs(FLOORS[args.floor], focus_area, args.focus_strength, args.combine)
         label = (f"{mechanism}-{args.source}-{reach}-{args.floor}-f{focus_area:g}-g{args.focus_strength:g}"
                  f"-w{args.working_layers}{args.working_level}")
@@ -143,10 +152,13 @@ def main(argv: list[str] | None = None) -> list[Path]:
         found = run_coverage(rows, uniform)
         covered = {"run": found, "questions": [{"corpus": c, "id": r.id, "unknown": (c, r.id) in unknown, **row}
                                                for (c, r), row in zip(laid, rows)]}
-        print(f"{label}: lifted share median {found['lifted_share']['median']:.3f}, "
-              f"p90 {found['lifted_share']['p90']:.3f}, max {found['lifted_share']['max']:.3f}; over half the network "
-              f"{found['over_half']} of {found['questions']}; zones {found.get('zones')}; levels (median share) "
-              + ", ".join(f"{lv} {s['median']:.3f}" for lv, s in found["levels"].items()), flush=True)
+        LOG.info(f"{label}: lifted share median {found['lifted_share']['median']:.3f}, "
+                 f"p90 {found['lifted_share']['p90']:.3f}, max {found['lifted_share']['max']:.3f}; over half the "
+                 f"network {found['over_half']} of {found['questions']}; zones {found.get('zones')}; levels (median "
+                 "share) " + ", ".join(f"{lv} {s['median']:.3f}" for lv, s in found["levels"].items()),
+                 extra={"layout": label, "lifted_median": found["lifted_share"]["median"],
+                        "over_half": found["over_half"],
+                        "levels_median": {lv: s["median"] for lv, s in found["levels"].items()}})
 
         with GpuMonitor() as gpu:
             for corpus, asking in askings.items() if not args.coverage_only else ():
@@ -173,7 +185,7 @@ def main(argv: list[str] | None = None) -> list[Path]:
             "coverage": covered,
             "by_layer": regulator.by_layer(codes), "gpu": gpu.summary(), "pacer": bench.throttle.stats(),
         })
-        print(f"written {target}", flush=True)
+        LOG.info(progress.step(f"{label} written {target}"), extra={"layout": label, "file": str(target)})
         targets.append(target)
     return targets
 

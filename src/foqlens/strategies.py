@@ -17,6 +17,7 @@ Invariant: f = 0 lifts the zone centers alone and f = 1, g = 1 lifts every block
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 
@@ -48,6 +49,7 @@ from foqlens.metric import (
     sweep_width,
 )
 from foqlens.quant import Level
+from foqlens.runlog import stage
 from foqlens.zones import READ_LEVELS
 
 GRAPHS = {"union": neighbour_table, "mutual-nicdm": mutual_nicdm_table}  # how the block graph is built (#4)
@@ -61,6 +63,7 @@ REACHES = {"equal": lambda f, width, blocks: gz.EqualReach(f, width),
            "proportional": lambda f, width, blocks: gz.ProportionalReach(f, width),
            "log": gz.LogReach}
 NEIGHBOURS = 16  # blocks every block is linked to: the k of #4's measurements on E001's masks
+LOG = logging.getLogger(__name__)
 
 
 def _pick(table: dict | tuple, name: str, what: str):
@@ -130,9 +133,18 @@ def zone_layout(name: str, zones: str, scores: np.ndarray, space: Space, surface
                 reach: str = "equal",
                 domains: tuple[str, ...] | None = None) -> GraphZoneLayout:
     """Zones on the block graph with every part picked by name; the reach along the space's graph by `reach`."""
-    reaching = _pick(REACHES, reach, "reach")(knobs.focus_area, space.width, scores.shape[1])
-    return GraphZoneLayout(name, zone_source(zones, scores, surface, weights, domains), reaching, surface, knobs.floor,
-                           knobs.focus_strength, strength, knobs.combine, ladder)
+    return reach_layout(name, zone_source(zones, scores, surface, weights, domains), space, surface, knobs, ladder,
+                        strength, reach)
+
+
+def reach_layout(name: str, source: GraphZoneSource, space: Space, surface: Surface, knobs: Knobs,
+                 ladder: tuple[Level, ...] = READ_LEVELS, strength: ZoneStrength = EqualStrength(),
+                 reach: str = "equal") -> GraphZoneLayout:
+    """Zones already found by `source`, laid out with the knobs and the reach picked by name: the part of a layout that
+    changes along a sweep over f and the reach, while the source and its zones stay."""
+    reaching = _pick(REACHES, reach, "reach")(knobs.focus_area, space.width, space.table.shape[0])
+    return GraphZoneLayout(name, source, reaching, surface, knobs.floor, knobs.focus_strength, strength, knobs.combine,
+                           ladder)
 
 
 def per_block_layout(name: str, scores: np.ndarray, knobs: Knobs,
@@ -173,18 +185,28 @@ class Spaces:
     def __init__(self, inputs: Inputs, graph: str = "mutual-nicdm", k: int = NEIGHBOURS):
         self.inputs, self.graph, self.k = inputs, graph, k
         self._built: dict[str, Space] = {}
+        self._zones: dict[str, tuple[GraphZoneSource, Surface]] = {}
 
     def coactivation(self) -> Space:
         if "coactivation" not in self._built:
-            self._built["coactivation"] = Space.build(self.inputs.calibration, self.graph, self.k)
+            with stage(LOG, f"graph {self.graph} k {self.k} of {len(self.inputs.calibration)} calibration questions"):
+                self._built["coactivation"] = Space.build(self.inputs.calibration, self.graph, self.k)
         return self._built["coactivation"]
 
     def signal_path(self) -> Space:
         if "signal_path" not in self._built:
             if self.inputs.model_weights is None or self.inputs.n_heads is None:
                 raise ValueError("the signal's path needs the model's weights and its number of heads")
-            self._built["signal_path"] = Space.signal_path(self.inputs.model_weights, self.inputs.n_heads, self.k)
+            with stage(LOG, f"graph of the signal's path k {self.k}"):
+                self._built["signal_path"] = Space.signal_path(self.inputs.model_weights, self.inputs.n_heads, self.k)
         return self._built["signal_path"]
+
+    def zones(self, mechanism: str, make) -> tuple[GraphZoneSource, Surface]:
+        """A mechanism's zone source and surface, made once: its zones are found once per question and shared by every
+        f and reach of the sweep."""
+        if mechanism not in self._zones:
+            self._zones[mechanism] = make()
+        return self._zones[mechanism]
 
 
 def _per_block(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
@@ -193,27 +215,46 @@ def _per_block(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: s
 
 def _static(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
     inputs, space = spaces.inputs, spaces.coactivation()
-    return zone_layout("static", "query", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
-                       reach=reach)
+
+    def make():
+        surface = space.surface()
+        return QueryGraphZones(inputs.excess, surface, inputs.block_weights), surface
+
+    source, surface = spaces.zones("static", make)
+    return reach_layout("static", source, space, surface, knobs, ladder, reach=reach)
 
 
 def _topic(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
     inputs, space = spaces.inputs, spaces.coactivation()
-    return zone_layout("topic", "topic", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
-                       domains=inputs.domains, reach=reach)
+
+    def make():
+        surface = space.surface()
+        return zone_source("topic", inputs.excess, surface, inputs.block_weights, inputs.domains), surface
+
+    source, surface = spaces.zones("topic", make)
+    return reach_layout("topic", source, space, surface, knobs, ladder, reach=reach)
 
 
 def _medium(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
     inputs, space = spaces.inputs, spaces.coactivation()
-    surface = space.surface("harmonic", activity=inputs.scores, background=inputs.background)
-    return zone_layout("medium", "query", inputs.excess, space, surface, inputs.block_weights, knobs, ladder,
-                       reach=reach)
+
+    def make():
+        surface = space.surface("harmonic", activity=inputs.scores, background=inputs.background)
+        return QueryGraphZones(inputs.excess, surface, inputs.block_weights), surface
+
+    source, surface = spaces.zones("medium", make)
+    return reach_layout("medium", source, space, surface, knobs, ladder, reach=reach)
 
 
 def _signal_path(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
     inputs, space = spaces.inputs, spaces.signal_path()
-    return zone_layout("signal-path", "query", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
-                       reach=reach)
+
+    def make():
+        surface = space.surface()
+        return QueryGraphZones(inputs.excess, surface, inputs.block_weights), surface
+
+    source, surface = spaces.zones("signal-path", make)
+    return reach_layout("signal-path", source, space, surface, knobs, ladder, reach=reach)
 
 
 # In the order they are checked: the simplest to build and to verify first (per block, no zones - the control).

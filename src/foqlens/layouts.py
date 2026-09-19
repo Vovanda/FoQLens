@@ -23,7 +23,7 @@ Invariants:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar, Protocol, runtime_checkable
 
 import numpy as np
@@ -236,16 +236,19 @@ class ZoneStrength(Protocol):
         ...
 
 
-@dataclass(frozen=True)
 class QueryGraphZones:
-    """The zones of the question's own scores - the address read from the query itself."""
+    """The zones of the question's own scores - the address read from the query itself, found once per question: they
+    do not depend on f, g or the reach, so every layout of a sweep that shares this source reuses them."""
 
-    scores: np.ndarray  # [questions, n_blocks], in excess of the background
-    surface: Surface
-    weights: np.ndarray  # block sizes in weights
+    def __init__(self, scores: np.ndarray, surface: Surface, weights: np.ndarray):
+        self.scores, self.surface, self.weights = scores, surface, weights  # scores in excess of the background
+        self._cache: dict[int, graph_zones.GraphZones] = {}
 
     def zones(self, index: int) -> graph_zones.GraphZones:
-        return graph_zones.find_graph_zones(self.scores[index], self.surface.metric(index), self.surface.table, self.weights)
+        if index not in self._cache:
+            self._cache[index] = graph_zones.find_graph_zones(self.scores[index], self.surface.metric(index),
+                                                              self.surface.table, self.weights)
+        return self._cache[index]
 
 
 class TopicGraphZones:
@@ -326,6 +329,7 @@ class GraphZoneLayout:
     strength: ZoneStrength = EqualStrength()
     combine: str = "sum"
     ladder: tuple[Level, ...] = zones.READ_LEVELS
+    _covers: dict = field(default_factory=dict, compare=False, repr=False)  # question -> (lifts, ceilings)
 
     def levels(self, indices: np.ndarray) -> np.ndarray:
         rows = []
@@ -335,12 +339,15 @@ class GraphZoneLayout:
         return np.stack(rows)
 
     def zone_cover(self, index: int) -> tuple[np.ndarray, list[Level]]:
-        """Every zone of question `index`: its lift over every block [zones, n_blocks] and its own ceiling (#19)."""
-        found = self.source.zones(index)
-        lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(index))
-        ceilings = zones.zone_ceilings(self.strength.strengths(index, found), self.focus_strength, self.floor,
-                                       self.ladder)
-        return lifts, ceilings
+        """Every zone of question `index`: its lift over every block [zones, n_blocks] and its own ceiling (#19); built
+        once per question, as both the levels and the coverage read it."""
+        if index not in self._covers:
+            found = self.source.zones(index)
+            lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(index))
+            ceilings = zones.zone_ceilings(self.strength.strengths(index, found), self.focus_strength, self.floor,
+                                           self.ladder)
+            self._covers[index] = (lifts, ceilings)
+        return self._covers[index]
 
 
 @dataclass(frozen=True)

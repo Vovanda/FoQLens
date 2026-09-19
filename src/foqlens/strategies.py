@@ -165,33 +165,53 @@ class Inputs:
         return self.scores - self.background
 
 
-def _per_block(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
-    return per_block_layout("per-block", inputs.excess, knobs, ladder)
+class Spaces:
+    """The block graphs of one set of inputs, each built once on first use: they depend on the calibration or the
+    weights, never on f, g or the reach, so a sweep over the knobs builds them once (the signal's path is minutes of
+    CPU, the co-activation graph seconds)."""
+
+    def __init__(self, inputs: Inputs, graph: str = "mutual-nicdm", k: int = NEIGHBOURS):
+        self.inputs, self.graph, self.k = inputs, graph, k
+        self._built: dict[str, Space] = {}
+
+    def coactivation(self) -> Space:
+        if "coactivation" not in self._built:
+            self._built["coactivation"] = Space.build(self.inputs.calibration, self.graph, self.k)
+        return self._built["coactivation"]
+
+    def signal_path(self) -> Space:
+        if "signal_path" not in self._built:
+            if self.inputs.model_weights is None or self.inputs.n_heads is None:
+                raise ValueError("the signal's path needs the model's weights and its number of heads")
+            self._built["signal_path"] = Space.signal_path(self.inputs.model_weights, self.inputs.n_heads, self.k)
+        return self._built["signal_path"]
 
 
-def _static(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
-    space = Space.build(inputs.calibration, graph, k)
+def _per_block(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    return per_block_layout("per-block", spaces.inputs.excess, knobs, ladder)
+
+
+def _static(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    inputs, space = spaces.inputs, spaces.coactivation()
     return zone_layout("static", "query", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
                        reach=reach)
 
 
-def _topic(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
-    space = Space.build(inputs.calibration, graph, k)
+def _topic(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    inputs, space = spaces.inputs, spaces.coactivation()
     return zone_layout("topic", "topic", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
                        domains=inputs.domains, reach=reach)
 
 
-def _medium(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
-    space = Space.build(inputs.calibration, graph, k)
+def _medium(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    inputs, space = spaces.inputs, spaces.coactivation()
     surface = space.surface("harmonic", activity=inputs.scores, background=inputs.background)
     return zone_layout("medium", "query", inputs.excess, space, surface, inputs.block_weights, knobs, ladder,
                        reach=reach)
 
 
-def _signal_path(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
-    if inputs.model_weights is None or inputs.n_heads is None:
-        raise ValueError("the signal's path needs the model's weights and its number of heads")
-    space = Space.signal_path(inputs.model_weights, inputs.n_heads, k)
+def _signal_path(spaces: Spaces, knobs: Knobs, ladder: tuple[Level, ...], reach: str):
+    inputs, space = spaces.inputs, spaces.signal_path()
     return zone_layout("signal-path", "query", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
                        reach=reach)
 
@@ -201,7 +221,9 @@ MECHANISMS = {"per-block": _per_block, "static": _static, "topic": _topic, "medi
               "signal-path": _signal_path}
 
 
-def mechanism_layout(mechanism: str, inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS,
+def mechanism_layout(mechanism: str, inputs: Inputs | Spaces, knobs: Knobs, ladder: tuple[Level, ...] = READ_LEVELS,
                      graph: str = "mutual-nicdm", k: int = NEIGHBOURS, reach: str = "equal"):
-    """The layout policy of a mechanism of the filter, by its name, over the questions of `inputs`."""
-    return _pick(MECHANISMS, mechanism, "mechanism")(inputs, knobs, ladder, graph, k, reach)
+    """The layout policy of a mechanism of the filter, by its name, over the questions of `inputs`; given Spaces, their
+    graphs are reused (graph and k are theirs)."""
+    spaces = inputs if isinstance(inputs, Spaces) else Spaces(inputs, graph, k)
+    return _pick(MECHANISMS, mechanism, "mechanism")(spaces, knobs, ladder, reach)

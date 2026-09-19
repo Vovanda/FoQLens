@@ -98,6 +98,20 @@ def test_the_zones_lifts_cover_exactly_the_blocks_the_layout_reads_above_the_bas
         assert codes[q].max() == max(ceilings), q  # at g = 1 with equal strength every zone reaches the top rung
 
 
+def test_a_sweep_over_the_knobs_builds_the_graph_once_and_gets_the_layouts_built_alone():
+    from foqlens.strategies import Inputs, Spaces, mechanism_layout
+
+    scores, domains = calibration()
+    inputs = Inputs(scores=scores, calibration=scores, block_weights=np.ones(BLOCKS), domains=domains)
+    spaces = Spaces(inputs, k=6)
+    questions = np.arange(4)
+    for f in (0.1, 0.3):
+        swept = mechanism_layout("static", spaces, Knobs(Level.D2, f, 1.0), DEPTHS).levels(questions)
+        alone = mechanism_layout("static", inputs, Knobs(Level.D2, f, 1.0), DEPTHS, k=6).levels(questions)
+        assert np.array_equal(swept, alone)
+    assert spaces.coactivation() is spaces.coactivation()
+
+
 def test_the_per_block_control_uses_the_same_knobs():
     scores, _ = calibration()
     codes = per_block_layout("control", scores, Knobs(Level.D4, 0.2, 1.0), DEPTHS).levels(np.arange(4))

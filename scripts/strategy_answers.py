@@ -11,8 +11,12 @@ The summary holds the bytes the kernel reads - per question, and per decoding st
 questions' zones) - beside what the uniform ladder reads, so that a mechanism is compared at the same memory; and the
 spread of the layouts over layers and module kinds.
 
+A run is a sweep: every mechanism x reach x f given is one layout, and the model, the masks and the block graphs are
+built once for all of them.
+
     uv run python scripts/strategy_answers.py --mechanism per-block --floor d2 --focus-area 0.2 --focus-strength 1
-    uv run python scripts/strategy_answers.py --mechanism static --base bartowski-Q2_K
+    uv run python scripts/strategy_answers.py --mechanism static medium --reach equal log --focus-area 0.1 0.2 \
+        --base bartowski-Q2_K --floor zero --working-layers 8 --coverage-only
     uv run python scripts/strategy_answers.py --mechanism signal-path --corpora triviaqa \
         --corpus-config configs/smoke-corpus.toml  # smoke
 """
@@ -21,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import replace
+from itertools import product
 from pathlib import Path
 
 import numpy as np
@@ -42,7 +47,7 @@ from foqlens.prompt_variants import SETUPS, TRAIN_POOL, examples_for, needs_trai
 from foqlens.quant import Level
 from foqlens.regulator import Regulator, block_layers
 from foqlens.selection import split_shares
-from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, Knobs, mechanism_layout
+from foqlens.strategies import GRAPHS, MECHANISMS, NEIGHBOURS, REACHES, Inputs, Knobs, Spaces, mechanism_layout
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 FLOORS = {lv.name.lower(): lv for lv in (Level.ZERO, Level.D2, Level.D4, Level.D6)}
@@ -56,21 +61,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--corpora", nargs="+", default=list(SETUPS), choices=list(SETUPS))
     parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"),
                         help="the small corpus (config.SmallCorpus): the shares laid out, for calibration, unknown")
-    parser.add_argument("--mechanism", choices=list(MECHANISMS), required=True)
+    parser.add_argument("--mechanism", nargs="+", choices=list(MECHANISMS), required=True)
     parser.add_argument("--source", choices=sorted(ADDRESS_SOURCES), default="pooled",
                         help="the mask source of the address (#18)")
     parser.add_argument("--graph", choices=sorted(GRAPHS), default="mutual-nicdm")
     parser.add_argument("--k", type=int, default=NEIGHBOURS, help="neighbours (or strongest edges) of every block")
     parser.add_argument("--floor", choices=list(FLOORS), default="d2", help="the base precision")
-    parser.add_argument("--focus-area", type=float, required=True, help="f: the share of the network a zone reaches")
+    parser.add_argument("--focus-area", nargs="+", type=float, required=True,
+                        help="f: the share of the network a zone reaches; every value is a layout of the sweep")
     parser.add_argument("--focus-strength", type=float, default=1.0, help="g: how far a zone rises of the way to D8")
     parser.add_argument("--combine", choices=("sum", "max"), default="sum")
     parser.add_argument("--working-layers", type=int, default=0,
                         help="the first layers the address is read from: they read --working-level, the filter acts after")
     parser.add_argument("--working-level", choices=list(FLOORS), default="d2",
                         help="the default level of the working layers: the base the working address is checked at")
-    parser.add_argument("--reach", choices=sorted(REACHES), default="equal",
-                        help="f D for every zone (rule 1), or f D split by the zones' own widths")
+    parser.add_argument("--reach", nargs="+", choices=sorted(REACHES), default=["equal"],
+                        help="how far a zone reaches (strategies.REACHES)")
     parser.add_argument("--out", type=Path, default=Path("runs/strategies"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name)
@@ -79,7 +85,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> Path:
+def main(argv: list[str] | None = None) -> list[Path]:
     args = parse_args(argv)
     model_id = MODELS[args.model]
     directory = refocustensors.model_directory(model_id, args.base) if args.base else None
@@ -116,54 +122,60 @@ def main(argv: list[str] | None = None) -> Path:
                     domains=tuple(c for c, _ in laid),
                     model_weights={n: m.weight for n, m in ctl.modules.items()},
                     n_heads=bench.model.config.get_text_config(decoder=True).num_attention_heads)
-    knobs = Knobs(FLOORS[args.floor], args.focus_area, args.focus_strength, args.combine)
-    label = (f"{args.mechanism}-{args.source}-{args.reach}-{args.floor}-f{args.focus_area:g}-g{args.focus_strength:g}"
-             f"-w{args.working_layers}{args.working_level}")
-    policy = mechanism_layout(args.mechanism, inputs, knobs, graph=args.graph, k=args.k, reach=args.reach)
-    working = WorkingLayers(policy, block_layers(ctl) < args.working_layers, FLOORS[args.working_level])
-    regulator = Regulator(working, ctl)
-    reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)
-
-    codes = regulator.layout(np.arange(len(laid)))
-    uniform = {lv.name.lower(): int(regulator.cost.read_bytes(np.full(ctl.n_blocks, int(lv), dtype=np.uint8))[0])
-               for lv in regulator.ladder}
-    rows = question_coverage(policy, codes, knobs.floor, inputs.block_weights, regulator.cost.read_bytes(codes))
-    found = run_coverage(rows, uniform)
-    covered = {"run": found, "questions": [{"corpus": c, "id": r.id, "unknown": (c, r.id) in unknown, **row}
-                                           for (c, r), row in zip(laid, rows)]}
-    print(f"{label}: lifted share median {found['lifted_share']['median']:.3f}, p90 {found['lifted_share']['p90']:.3f}, "
-          f"max {found['lifted_share']['max']:.3f}; over half the network {found['over_half']} of "
-          f"{found['questions']}; zones {found.get('zones')}; levels (median share) "
-          + ", ".join(f"{lv} {s['median']:.3f}" for lv, s in found["levels"].items()), flush=True)
-
+    spaces = Spaces(inputs, args.graph, args.k)  # the graphs of the sweep, built once
+    working_blocks = block_layers(ctl) < args.working_layers
     decoder = StaticDecoder(attention=PLANS[args.attention], prefill_tokens=PREFILL_TOKENS)
     judge = ModelJudge(bench.model, tokenizer, ctl, fmt, decoder)
     out = args.out / args.model
-    with GpuMonitor() as gpu:
-        for corpus, asking in askings.items() if not args.coverage_only else ():
-            asking = replace(asking, reading=reading)
-            rows = [r for c, r in laid if c == corpus]
-            for chunk in asking.batches(fmt, tokenizer, rows):
-                append_answers(answers_path(out / "answers", label, corpus),
-                               asking.answer(bench.model, tokenizer, ctl, fmt, judge, chunk, bench.throttle, decoder))
+    targets = []
+    for mechanism, reach, focus_area in product(args.mechanism, args.reach, args.focus_area):
+        knobs = Knobs(FLOORS[args.floor], focus_area, args.focus_strength, args.combine)
+        label = (f"{mechanism}-{args.source}-{reach}-{args.floor}-f{focus_area:g}-g{args.focus_strength:g}"
+                 f"-w{args.working_layers}{args.working_level}")
+        policy = mechanism_layout(mechanism, spaces, knobs, reach=reach)
+        regulator = Regulator(WorkingLayers(policy, working_blocks, FLOORS[args.working_level]), ctl)
+        reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)
 
-    target = out / f"{'coverage' if args.coverage_only else 'summary'}-{label}.json"
-    write_json(target, {
-        "model": name, "base": args.base, "mechanism": args.mechanism, "source": args.source, "graph": args.graph,
-        "k": args.k, "floor": args.floor, "focus_area": args.focus_area, "focus_strength": args.focus_strength,
-        "combine": args.combine, "reach": args.reach, "corpus": small.__dict__,
-        "questions": {c: [r.id for cc, r in laid if cc == c and (cc, r.id) not in unknown] for c in askings},
-        "unknown": {c: [i for cc, i in sorted(unknown) if cc == c] for c in askings},
-        "calibration": len(calibration),
-        "bytes": {"per_question_mean": float(regulator.cost.read_bytes(codes).mean()),
-                  "per_step_mean": (float(np.mean([regulator.cost.step_bytes(c) for c in reading.laid]))
-                                    if reading.laid else None),
-                  "uniform": uniform},
-        "coverage": covered,
-        "by_layer": regulator.by_layer(codes), "gpu": gpu.summary(), "pacer": bench.throttle.stats(),
-    })
-    print(f"written {target}", flush=True)
-    return target
+        codes = regulator.layout(np.arange(len(laid)))
+        uniform = {lv.name.lower(): int(regulator.cost.read_bytes(np.full(ctl.n_blocks, int(lv), dtype=np.uint8))[0])
+                   for lv in regulator.ladder}
+        rows = question_coverage(policy, codes, knobs.floor, inputs.block_weights, regulator.cost.read_bytes(codes))
+        found = run_coverage(rows, uniform)
+        covered = {"run": found, "questions": [{"corpus": c, "id": r.id, "unknown": (c, r.id) in unknown, **row}
+                                               for (c, r), row in zip(laid, rows)]}
+        print(f"{label}: lifted share median {found['lifted_share']['median']:.3f}, "
+              f"p90 {found['lifted_share']['p90']:.3f}, max {found['lifted_share']['max']:.3f}; over half the network "
+              f"{found['over_half']} of {found['questions']}; zones {found.get('zones')}; levels (median share) "
+              + ", ".join(f"{lv} {s['median']:.3f}" for lv, s in found["levels"].items()), flush=True)
+
+        with GpuMonitor() as gpu:
+            for corpus, asking in askings.items() if not args.coverage_only else ():
+                asking = replace(asking, reading=reading)
+                chosen = [r for c, r in laid if c == corpus]
+                for chunk in asking.batches(fmt, tokenizer, chosen):
+                    append_answers(answers_path(out / "answers", label, corpus),
+                                   asking.answer(bench.model, tokenizer, ctl, fmt, judge, chunk, bench.throttle,
+                                                 decoder))
+
+        target = out / f"{'coverage' if args.coverage_only else 'summary'}-{label}.json"
+        write_json(target, {
+            "model": name, "base": args.base, "mechanism": mechanism, "source": args.source, "graph": args.graph,
+            "k": args.k, "floor": args.floor, "focus_area": focus_area, "focus_strength": args.focus_strength,
+            "combine": args.combine, "reach": reach, "working_layers": args.working_layers,
+            "working_level": args.working_level, "corpus": small.__dict__,
+            "questions": {c: [r.id for cc, r in laid if cc == c and (cc, r.id) not in unknown] for c in askings},
+            "unknown": {c: [i for cc, i in sorted(unknown) if cc == c] for c in askings},
+            "calibration": len(calibration),
+            "bytes": {"per_question_mean": float(regulator.cost.read_bytes(codes).mean()),
+                      "per_step_mean": (float(np.mean([regulator.cost.step_bytes(c) for c in reading.laid]))
+                                        if reading.laid else None),
+                      "uniform": uniform},
+            "coverage": covered,
+            "by_layer": regulator.by_layer(codes), "gpu": gpu.summary(), "pacer": bench.throttle.stats(),
+        })
+        print(f"written {target}", flush=True)
+        targets.append(target)
+    return targets
 
 
 if __name__ == "__main__":

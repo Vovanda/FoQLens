@@ -234,6 +234,14 @@ class MixedPrecisionLinear(nn.Module):
         self.weight = None
         self.readable = self.RESIDENT
 
+    def read_weight(self, level: Level) -> torch.Tensor:
+        """The dense weight every block reads at `level` (a read depth), in the weight's dtype - for a signal that needs
+        what a level costs a block (its quantization error), not for the forward pass."""
+        if not level.depth:
+            raise ValueError(f"{level.name} is not a read depth of the refined copy")
+        self._materialize(level)
+        return self._packed[RefinedWeight].dequantize(self.weight.dtype, level.depth)
+
     def bake(self, level: Level) -> None:
         """Read one depth at the cost of bf16: the weight read to it replaces the bf16 weight and every copy.
 

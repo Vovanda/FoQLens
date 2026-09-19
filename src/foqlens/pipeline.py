@@ -27,6 +27,7 @@ import torch
 from foqlens import model as fm
 from foqlens import refocustensors
 from foqlens.activity import HeadEnergyScorer, HybridScorer, NeuronActivityScorer
+from foqlens.error_energy import ErrorEnergyScorer
 from foqlens.gpu_monitor import gpu_temperature
 from foqlens.gpu_share import FULL, Cooldown, Pacer, ThermalGuard, Throttle
 from foqlens.precision import Controller, install
@@ -126,6 +127,19 @@ class HybridMask:
     scorer: HybridScorer
     batch_size: int
     name: str = "hybrid"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
+@dataclass(frozen=True)
+class ErrorEnergyMask:
+    """An oracle of the sensitivity (error_energy.py): the energy of the D2-D8 quantization error in every block's output,
+    on the question's inputs at full precision - a reference of the bench, never a signal at inference."""
+
+    scorer: ErrorEnergyScorer
+    batch_size: int
+    name: str = "error_energy"
 
     def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
         return list(self.scorer.score_batch(model, tokenizer, texts))
@@ -241,6 +255,7 @@ ADDRESS_SOURCES: dict[str, AddressSource] = {
                                                      HeadEnergyScorer(b.ctl.modules, b.n_heads, layers))), n),
         POOLED_BATCH, True),
     "gradient": AddressSource(lambda b, n, _: GradientMask(b.gradient, n), GRADIENT_BATCH, False),
+    "error_energy": AddressSource(lambda b, n, _: ErrorEnergyMask(ErrorEnergyScorer(b.ctl.modules), n), POOLED_BATCH, False),
     "gradient_magnitude": AddressSource(lambda b, n, _: GradientMagnitudeMask(b.gradient, n), GRADIENT_BATCH, False),
 }
 

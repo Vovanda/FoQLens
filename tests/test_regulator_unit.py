@@ -177,3 +177,12 @@ def test_the_regulator_builds_on_a_module_whose_copy_is_not_read_yet():
     assert fresh.levels.tolist() == [int(Level.BF16)] * 2  # nothing read below bf16 yet
     ctl = Controller({NAMES[0]: fresh})
     assert ReadCost(ctl).table.shape == (2, MAX_DEPTH + 1)
+
+
+def test_a_module_reads_its_weight_at_every_depth_and_the_error_shrinks_up_the_ladder():
+    m = module("layers.1.mlp.up_proj")
+    source = m.weight.float()
+    errors = [(m.read_weight(lv).float() - source).abs().mean().item() for lv in DEPTHS]
+    assert errors == sorted(errors, reverse=True) and errors[-1] < errors[0]
+    with pytest.raises(ValueError):
+        m.read_weight(Level.ZERO)

@@ -265,7 +265,8 @@ def from_gguf_blocks(blocks: torch.Tensor, fmt: KFormat) -> KBase:
         # as its high two bits, bits 2(2p + c) of qh[32h + j]
         ql, qh = flat[:, :QK_K // 2], flat[:, QK_K // 2:QK_K // 2 + QK_K // 4]
         packed, d = flat[:, 3 * QK_K // 4:3 * QK_K // 4 + n_blocks], flat[:, 3 * QK_K // 4 + n_blocks:]
-        low = (ql.view(-1, 2, 1, 64) >> torch.tensor([0, 4], device=flat.device, dtype=torch.uint8).view(1, 1, 2, 1)) & _LOW4
+        # the shifts 0, 4 are made on the device: a tensor from a host list is a copy a CUDA graph cannot capture
+        low = (ql.view(-1, 2, 1, 64) >> torch.arange(0, 8, 4, device=flat.device, dtype=torch.uint8).view(1, 1, 2, 1)) & _LOW4
         high = (qh.view(-1, 2, 1, 32) >> torch.arange(0, 8, 2, device=flat.device, dtype=torch.uint8).view(1, 1, 4, 1)) & 3
         codes = low.reshape(-1, QK_K) | high.reshape(-1, QK_K) << 4
         scales = packed.contiguous().view(torch.int8)

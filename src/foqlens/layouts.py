@@ -21,7 +21,7 @@ Invariants:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, Protocol
+from typing import ClassVar, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -214,6 +214,13 @@ class ShuffledLevels:
 # --- Zones on the block graph (#4, #19): the zones of a question, how far they reach, how strong each is.
 
 
+@runtime_checkable
+class Zoned(Protocol):
+    def zone_cover(self, index: int) -> tuple[np.ndarray, list[Level]]:
+        """Every zone of question `index`: its lift over every block [zones, n_blocks] and its own ceiling."""
+        ...
+
+
 class GraphZoneSource(Protocol):
     def zones(self, index: int) -> graph_zones.GraphZones:
         """The expert zones of question `index` on the block graph."""
@@ -320,12 +327,17 @@ class GraphZoneLayout:
     def levels(self, indices: np.ndarray) -> np.ndarray:
         rows = []
         for i in indices:
-            found = self.source.zones(int(i))
-            lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(int(i)))
-            ceilings = zones.zone_ceilings(self.strength.strengths(int(i), found), self.focus_strength, self.floor,
-                                           self.ladder)
+            lifts, ceilings = self.zone_cover(int(i))
             rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine, self.ladder))
         return np.stack(rows)
+
+    def zone_cover(self, index: int) -> tuple[np.ndarray, list[Level]]:
+        """Every zone of question `index`: its lift over every block [zones, n_blocks] and its own ceiling (#19)."""
+        found = self.source.zones(index)
+        lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(index))
+        ceilings = zones.zone_ceilings(self.strength.strengths(index, found), self.focus_strength, self.floor,
+                                       self.ladder)
+        return lifts, ceilings
 
 
 @dataclass(frozen=True)

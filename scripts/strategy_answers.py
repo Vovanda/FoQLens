@@ -28,6 +28,7 @@ import numpy as np
 from foqlens import config, corpora, refocustensors
 from foqlens import model as fm
 from foqlens.answering import Asking
+from foqlens.coverage import question_coverage, run_coverage
 from foqlens.attention import PLANS, SPLIT
 from foqlens.gguf_weights import PUBLISHED
 from foqlens.gpu_monitor import GpuMonitor
@@ -68,6 +69,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out", type=Path, default=Path("runs/strategies"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name)
+    parser.add_argument("--coverage-only", action="store_true",
+                        help="the layouts' zones, shares of the network and bytes, without answering")
     return parser.parse_args(argv)
 
 
@@ -114,21 +117,29 @@ def main(argv: list[str] | None = None) -> Path:
     regulator = Regulator(policy, ctl)
     reading = regulator.reading({(c, r.id): i for i, (c, r) in enumerate(laid)}, label)
 
+    codes = regulator.layout(np.arange(len(laid)))
+    uniform = {lv.name.lower(): int(regulator.cost.read_bytes(np.full(ctl.n_blocks, int(lv), dtype=np.uint8))[0])
+               for lv in regulator.ladder}
+    rows = question_coverage(policy, codes, knobs.floor, inputs.block_weights, regulator.cost.read_bytes(codes))
+    found = run_coverage(rows, uniform)
+    covered = {"run": found, "questions": [{"corpus": c, "id": r.id, "unknown": (c, r.id) in unknown, **row}
+                                           for (c, r), row in zip(laid, rows)]}
+    print(f"{label}: lifted share median {found['lifted_share']['median']:.3f}, p90 {found['lifted_share']['p90']:.3f}, "
+          f"max {found['lifted_share']['max']:.3f}; over half the network {found['over_half']} of "
+          f"{found['questions']}; zones {found.get('zones')}", flush=True)
+
     decoder = StaticDecoder(attention=PLANS[args.attention], prefill_tokens=PREFILL_TOKENS)
     judge = ModelJudge(bench.model, tokenizer, ctl, fmt, decoder)
     out = args.out / args.model
     with GpuMonitor() as gpu:
-        for corpus, asking in askings.items():
+        for corpus, asking in askings.items() if not args.coverage_only else ():
             asking = replace(asking, reading=reading)
             rows = [r for c, r in laid if c == corpus]
             for chunk in asking.batches(fmt, tokenizer, rows):
                 append_answers(answers_path(out / "answers", label, corpus),
                                asking.answer(bench.model, tokenizer, ctl, fmt, judge, chunk, bench.throttle, decoder))
 
-    codes = np.concatenate(reading.laid)
-    uniform = {lv.name.lower(): int(regulator.cost.read_bytes(np.full(ctl.n_blocks, int(lv), dtype=np.uint8))[0])
-               for lv in regulator.ladder}
-    target = out / f"summary-{label}.json"
+    target = out / f"{'coverage' if args.coverage_only else 'summary'}-{label}.json"
     write_json(target, {
         "model": name, "base": args.base, "mechanism": args.mechanism, "source": args.source, "graph": args.graph,
         "k": args.k, "floor": args.floor, "focus_area": args.focus_area, "focus_strength": args.focus_strength,
@@ -137,8 +148,10 @@ def main(argv: list[str] | None = None) -> Path:
         "unknown": {c: [i for cc, i in sorted(unknown) if cc == c] for c in askings},
         "calibration": len(calibration),
         "bytes": {"per_question_mean": float(regulator.cost.read_bytes(codes).mean()),
-                  "per_step_mean": float(np.mean([regulator.cost.step_bytes(c) for c in reading.laid])),
+                  "per_step_mean": (float(np.mean([regulator.cost.step_bytes(c) for c in reading.laid]))
+                                    if reading.laid else None),
                   "uniform": uniform},
+        "coverage": covered,
         "by_layer": regulator.by_layer(codes), "gpu": gpu.summary(), "pacer": bench.throttle.stats(),
     })
     print(f"written {target}", flush=True)

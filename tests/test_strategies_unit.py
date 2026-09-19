@@ -81,6 +81,23 @@ def test_topic_zones_land_on_the_topic_blocks():
         assert len(lifted) and np.all((lifted >= t * third) & (lifted < (t + 1) * third)), t
 
 
+def test_the_zones_lifts_cover_exactly_the_blocks_the_layout_reads_above_the_base():
+    from foqlens.layouts import Zoned
+
+    scores, _ = calibration()
+    excess = scores - scores.mean(axis=0)
+    space = Space.build(scores, k=6)
+    layout = zone_layout("z", "query", excess, space, space.surface(), np.ones(BLOCKS), Knobs(Level.D2, 0.2, 1.0),
+                         DEPTHS)
+    assert isinstance(layout, Zoned) and not isinstance(per_block_layout("c", scores, Knobs(Level.D2, 0.2, 1.0)), Zoned)
+    codes = layout.levels(np.arange(4))
+    for q in range(4):
+        lifts, ceilings = layout.zone_cover(q)
+        assert 1 <= len(lifts) <= MAX_ZONES and len(ceilings) == len(lifts)
+        assert np.array_equal(lifts.max(axis=0) > 0, codes[q] > int(Level.D2)), q
+        assert codes[q].max() == max(ceilings), q  # at g = 1 with equal strength every zone reaches the top rung
+
+
 def test_the_per_block_control_uses_the_same_knobs():
     scores, _ = calibration()
     codes = per_block_layout("control", scores, Knobs(Level.D4, 0.2, 1.0), DEPTHS).levels(np.arange(4))

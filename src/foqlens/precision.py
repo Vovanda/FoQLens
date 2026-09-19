@@ -142,7 +142,10 @@ class MixedPrecisionLinear(nn.Module):
 
     @property
     def refined(self) -> _DepthReader | None:
-        """The refined copy every read depth shares, once some depth has been read; None before that."""
+        """The refined copy every read depth shares, built on the first need as a read of a depth builds it (from the
+        model's file, or quantized from bf16); None for a module that reads a baked level and holds no copy."""
+        if RefinedWeight not in self._packed and self._native is Level.BF16 and self.weight is not None:
+            self._materialize(DEEPEST)
         return self._packed.get(RefinedWeight)
 
     def _materialize(self, level: Level) -> None:

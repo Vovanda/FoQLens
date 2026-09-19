@@ -151,3 +151,13 @@ def test_a_regulated_reading_lays_every_row_out_by_its_question_and_keeps_the_co
     assert ctl.modules[NAMES[1]].levels.tolist() == [[int(Level.D2), int(Level.D2)], [int(Level.D8), int(Level.D2)]]
     with pytest.raises(ValueError, match="bench"):
         reading.apply(controller(), "c", rows)
+
+
+def test_the_regulator_builds_on_a_module_whose_copy_is_not_read_yet():
+    # a bench loaded from its file holds the copy unbuilt until a depth is first read (the smoke of 19.09 found it)
+    torch.manual_seed(0)
+    linear = nn.Linear(QK_K, 2 * BLOCK_ROWS, bias=False, dtype=torch.bfloat16)
+    fresh = MixedPrecisionLinear(linear, BLOCK_ROWS, partial(KQuantLadder().quantize, NAMES[0]))
+    assert fresh.levels.tolist() == [int(Level.BF16)] * 2  # nothing read below bf16 yet
+    ctl = Controller({NAMES[0]: fresh})
+    assert ReadCost(ctl).table.shape == (2, MAX_DEPTH + 1)

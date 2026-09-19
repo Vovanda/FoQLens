@@ -63,21 +63,28 @@ def source_rows(kind: str, upstream_rows: int, columns: int, n_heads: int) -> to
     return (column // head_dim) // group * head_dim + column % head_dim
 
 
+def _row_blocks(rows: int, device: torch.device) -> torch.Tensor:
+    """The block of every row: [rows]."""
+    return torch.arange(rows, device=device) // BLOCK_ROWS
+
+
 def block_norms(weight: torch.Tensor) -> torch.Tensor:
-    """||W[rho, :]||_F of every block of rows: [blocks]."""
+    """||W[rho, :]||_F of every block of rows: [blocks], on the weight's device."""
     squares = weight.float().square().sum(dim=1)
-    return torch.zeros(-(-len(squares) // BLOCK_ROWS)).index_add_(0, torch.arange(len(squares)) // BLOCK_ROWS,
-                                                                   squares).sqrt()
+    return torch.zeros(-(-len(squares) // BLOCK_ROWS), device=weight.device).index_add_(
+        0, _row_blocks(len(squares), weight.device), squares).sqrt()
 
 
 def conductance(upstream: torch.Tensor, downstream: torch.Tensor, feeds: torch.Tensor) -> torch.Tensor:
-    """kappa [blocks of upstream, blocks of downstream]; feeds[c] is the upstream row read at downstream column c."""
+    """kappa [blocks of upstream, blocks of downstream]; feeds[c] is the upstream row read at downstream column c.
+    Computed on the downstream weight's device; the upstream and `feeds` are moved there."""
+    device = downstream.device
     squares = downstream.float().square()
-    by_block = torch.zeros(-(-downstream.shape[0] // BLOCK_ROWS), downstream.shape[1]).index_add_(
-        0, torch.arange(downstream.shape[0]) // BLOCK_ROWS, squares)  # [downstream blocks, columns]
-    indicator = torch.zeros(downstream.shape[1], -(-upstream.shape[0] // BLOCK_ROWS))
-    indicator[torch.arange(downstream.shape[1]), feeds // BLOCK_ROWS] = 1.0
-    return block_norms(upstream)[:, None] * (by_block @ indicator).sqrt().T
+    by_block = torch.zeros(-(-downstream.shape[0] // BLOCK_ROWS), downstream.shape[1], device=device).index_add_(
+        0, _row_blocks(downstream.shape[0], device), squares)  # [downstream blocks, columns]
+    indicator = torch.zeros(downstream.shape[1], -(-upstream.shape[0] // BLOCK_ROWS), device=device)
+    indicator[torch.arange(downstream.shape[1], device=device), feeds.to(device) // BLOCK_ROWS] = 1.0
+    return block_norms(upstream.to(device))[:, None] * (by_block @ indicator).sqrt().T
 
 
 def _module(layer: int, kind: str) -> str:
@@ -118,10 +125,11 @@ def signal_path_table(weights: Mapping[str, torch.Tensor], n_heads: int,
     for up, down in _pairs(names):
         kind = up.split(".", 2)[2]
         feeds = source_rows(kind, weights[up].shape[0], weights[down].shape[1], n_heads)
-        kappa = conductance(weights[up], weights[down], feeds)
+        # the products run where the weights lie; the graph itself - a few hundred thousand edges - is built on the CPU
+        kappa = conductance(weights[up], weights[down], feeds).cpu()
         a, b = torch.nonzero(kappa > 0, as_tuple=True)
-        heads.append(a + offsets[up])
-        tails.append(b + offsets[down])
+        heads.append(a + int(offsets[up]))
+        tails.append(b + int(offsets[down]))
         kappas.append(kappa[a, b])
     heads, tails, kappas = torch.cat(heads), torch.cat(tails), torch.cat(kappas)
     # undirected: an edge stays if it is among the strongest of either end

@@ -14,7 +14,7 @@ budget.py): the share of the precision range spent, 0 = everything coarse, 1 = e
 Invariants:
 - Invariant: every precision-share policy at the same share spends the same share of weights.
 - Invariant: Random is reproducible per question from its seed and differs between questions.
-- Invariant: a question never sees its own mask through its topic's mean (leave-one-out).
+- Invariant: a question never sees its own scores through its topic's mean (leave-one-out).
 - Invariant: the per-block control lifts the top share f of the blocks (ceil(fN), ties aside), at f = 0 the top one.
 """
 
@@ -45,7 +45,7 @@ def _rng(seed: int, i: int, precision_share: float, salt: int = 0) -> np.random.
 
 
 class TopicMeans:
-    """Mean mask of every topic, summed once; a question's own topic mean leaves the question out."""
+    """Mean scores of every topic, summed once; a question's own topic mean leaves the question out."""
 
     def __init__(self, scores: np.ndarray, domains: tuple[str, ...]):
         self.scores = scores
@@ -61,7 +61,7 @@ class TopicMeans:
 
 
 def topic_masks(scores: np.ndarray, domains: tuple[str, ...], index: int, topic: str) -> np.ndarray:
-    """Mean mask of a topic's questions; the question itself is left out when it belongs to that topic."""
+    """Mean scores of a topic's questions; the question itself is left out when it belongs to that topic."""
     return TopicMeans(scores, domains).mean(index, topic)
 
 
@@ -228,9 +228,9 @@ class ZoneStrength(Protocol):
 
 @dataclass(frozen=True)
 class QueryGraphZones:
-    """The zones of the question's own mask - the address read from the query itself."""
+    """The zones of the question's own scores - the address read from the query itself."""
 
-    scores: np.ndarray  # [questions, n_blocks], background subtracted
+    scores: np.ndarray  # [questions, n_blocks], in excess of the background
     surface: Surface
     weights: np.ndarray  # block sizes in weights
 

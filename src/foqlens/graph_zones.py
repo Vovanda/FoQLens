@@ -47,10 +47,10 @@ class GraphZones:
     radii: np.ndarray  # [n] base radii, in the metric's units
 
 
-def _neighbour_mean(field: np.ndarray, table: np.ndarray) -> np.ndarray:
+def _neighbour_mean(scores: np.ndarray, table: np.ndarray) -> np.ndarray:
     """Every block's value averaged with its neighbours': one step of smoothing on the graph."""
     real = table != PAD
-    summed = field + np.where(real, field[np.where(real, table, 0)], 0.0).sum(axis=1)
+    summed = scores + np.where(real, scores[np.where(real, table, 0)], 0.0).sum(axis=1)
     return summed / (1 + real.sum(axis=1))
 
 
@@ -77,11 +77,11 @@ def mass_radius(distances: np.ndarray, weights: np.ndarray, mass: float) -> floa
     return float(distances[order[min(np.searchsorted(held, mass), len(order) - 1)]])
 
 
-def find_graph_zones(field: np.ndarray, metric: BlockMetric, table: np.ndarray, weights: np.ndarray,
+def find_graph_zones(scores: np.ndarray, metric: BlockMetric, table: np.ndarray, weights: np.ndarray,
                     max_zones: int = MAX_ZONES, peak_quantile: float = PEAK_QUANTILE) -> GraphZones:
-    """The zones of a mask `field` [n_blocks] in `metric`, found on its neighbour `table`, strongest first."""
+    """The zones of a question's `scores` [n_blocks] in `metric`, found on its neighbour `table`, strongest first."""
     table = np.asarray(table)
-    smooth = _neighbour_mean(np.asarray(field, dtype=np.float64), table)
+    smooth = _neighbour_mean(np.asarray(scores, dtype=np.float64), table)
     around = np.where(table != PAD, smooth[np.where(table != PAD, table, 0)], -np.inf).max(axis=1)
     tops = np.flatnonzero((smooth >= around) & (smooth > np.quantile(smooth, peak_quantile)))
     tops = tops[np.argsort(-smooth[tops], kind="stable")]

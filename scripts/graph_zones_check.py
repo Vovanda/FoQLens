@@ -61,11 +61,11 @@ def main() -> None:
     print(f"graph: {n_parts} component(s), the largest {np.bincount(parts).max()} blocks; width along it "
           f"{width:.3f} (M1 diameter {metric.diameter():.3f}) in {time.perf_counter() - clock:.1f} s", flush=True)
 
-    fields = masks - masks.mean(axis=0)  # background subtracted, as Bench.masks' callers do
+    excess = masks - masks.mean(axis=0)  # background subtracted, as Bench.masks' callers do
     weights = np.ones(masks.shape[1])
-    for q in range(min(args.questions, len(fields))):
+    for q in range(min(args.questions, len(excess))):
         clock = time.perf_counter()
-        zones = gz.find_graph_zones(fields[q], along, table_np, weights)
+        zones = gz.find_graph_zones(excess[q], along, table_np, weights)
         lifts = gz.zone_lifts(zones, gz.EqualReach(FOCUS_AREA, width).radii(zones), along)
         covered = int((lifts.max(axis=0) > 0).sum()) if len(lifts) else 0
         print(f"q{q}: {len(zones.centers)} zones, radii {np.round(zones.radii, 3).tolist()}; "

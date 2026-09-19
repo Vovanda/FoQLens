@@ -22,7 +22,7 @@ import numpy as np
 
 from foqlens.quant import LADDER, Level
 
-PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field (graph_zones.find_graph_zones)
+PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed scores (graph_zones.find_graph_zones)
 MAX_ZONES = 16  # the zones of one question at most, strongest first
 # The rungs a zone can lift a block to by default: the read depths D2 ... D8, the ladder of
 # docs/quantization-filter.md (rule 2: g = 1 is the top rung, D8). The kernel reads depths and ZERO only, and a

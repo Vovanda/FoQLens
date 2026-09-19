@@ -157,31 +157,31 @@ class Inputs:
         return self.calibration.mean(axis=0)
 
     @property
-    def fields(self) -> np.ndarray:
-        """The scores against the calibration's background: a zone grows where a question stands out."""
+    def excess(self) -> np.ndarray:
+        """The scores in excess of the calibration's background: a zone grows where a question stands out."""
         return self.scores - self.background
 
 
 def _per_block(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
-    return per_block_layout("per-block", inputs.fields, knobs, ladder)
+    return per_block_layout("per-block", inputs.excess, knobs, ladder)
 
 
 def _static(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     space = Space.build(inputs.calibration, graph, k)
-    return zone_layout("static", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
+    return zone_layout("static", "query", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
                        reach=reach)
 
 
 def _topic(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     space = Space.build(inputs.calibration, graph, k)
-    return zone_layout("topic", "topic", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
+    return zone_layout("topic", "topic", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
                        domains=inputs.domains, reach=reach)
 
 
 def _medium(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph: str, k: int, reach: str):
     space = Space.build(inputs.calibration, graph, k)
     surface = space.surface("harmonic", activity=inputs.scores, background=inputs.background)
-    return zone_layout("medium", "query", inputs.fields, space, surface, inputs.block_weights, knobs, ladder,
+    return zone_layout("medium", "query", inputs.excess, space, surface, inputs.block_weights, knobs, ladder,
                        reach=reach)
 
 
@@ -189,7 +189,7 @@ def _signal_path(inputs: Inputs, knobs: Knobs, ladder: tuple[Level, ...], graph:
     if inputs.model_weights is None or inputs.n_heads is None:
         raise ValueError("the signal's path needs the model's weights and its number of heads")
     space = Space.signal_path(inputs.model_weights, inputs.n_heads, k)
-    return zone_layout("signal-path", "query", inputs.fields, space, space.surface(), inputs.block_weights, knobs, ladder,
+    return zone_layout("signal-path", "query", inputs.excess, space, space.surface(), inputs.block_weights, knobs, ladder,
                        reach=reach)
 
 

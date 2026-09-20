@@ -8,6 +8,8 @@ What a trace holds for one question:
 
 - `state[layer]`: the state entering that layer, [tokens, model] - every formula over the input of a layer is
   computable from it, not only the ones thought of when the trace was written;
+- `injected[name]`: the norm of what the coarse reading would inject, per token, [tokens, blocks] - the state
+  through W(ceiling) - W(base), exactly, not the bound the norms give;
 - `response[name]`: the norm of what a block put out, per token, [tokens, blocks] - the network's own answer about
   which of its blocks this question uses, which the input alone does not give;
 - `static[name]`: what does not depend on the question - the norm of a block's rows, the weights it holds and the
@@ -51,6 +53,7 @@ class Trace:
     tokens: list[int] = field(default_factory=list)
     state: dict[int, np.ndarray] = field(default_factory=dict)
     response: dict[str, np.ndarray] = field(default_factory=dict)
+    injected: dict[str, np.ndarray] = field(default_factory=dict)
     static: dict[str, BlockStatic] = field(default_factory=dict)
 
     def layers(self) -> list[int]:
@@ -93,6 +96,7 @@ class Tracer:
         self.ctl, self.base, self.ceiling = ctl, base, ceiling
         self.trace = Trace()
         self._handles: list = []
+        self._differences: dict[str, torch.Tensor] = {}
 
     def statics(self) -> None:
         """The part of a trace that does not depend on the question; read once, before any pass."""
@@ -125,7 +129,25 @@ class Tracer:
         return hook
 
     def _response(self, name: str):
-        def hook(module: MixedPrecisionLinear, _args, out: torch.Tensor) -> None:
+        def hook(module: MixedPrecisionLinear, args, out: torch.Tensor) -> None:
             self.trace.response[name] = block_response(module, out).cpu().numpy()
+            # what the coarse reading actually injects, exactly: the state through the difference of the two
+            # readings, not the bound ||W_high - W_low|| * ||x|| that Cauchy-Schwarz gives
+            difference = self._difference(name, module)
+            injected = torch.nn.functional.linear(args[0].reshape(-1, module.in_features), difference)
+            self.trace.injected[name] = block_response(module, injected).cpu().numpy()
 
         return hook
+
+    def _difference(self, name: str, module: MixedPrecisionLinear) -> torch.Tensor:
+        """W(ceiling) - W(base) of the module, read once and kept: the error the rungs themselves make."""
+        if name not in self._differences:
+            copy = module.refined
+            device = copy.blocks.device
+            at = {level: kquant_unpack(copy, torch.full((module.n_blocks,), int(DEPTH_BY_CODE[int(level)]),
+                                                        dtype=torch.uint8, device=device))
+                  for level in (self.base, self.ceiling)}
+            self._differences[name] = (at[self.ceiling] - at[self.base]).to(module.weight.dtype
+                                                                            if module.weight is not None
+                                                                            else torch.bfloat16)
+        return self._differences[name]

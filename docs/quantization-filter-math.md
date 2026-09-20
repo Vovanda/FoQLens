@@ -174,7 +174,7 @@ knob. The expansion $h$ itself is not measured.
 
 ## 8. The oracles: a field of importance and how it is read into a map
 
-An oracle builds the map of one question knowing its answer. It is impossible at inference - each one costs from tens
+There are four oracles: the sweep by trying, the gradient of the answer, the error energy, the reference. Each builds the map of one question knowing its answer. It is impossible at inference - each one costs from tens
 to thousands of passes over the network - and it is here as a ceiling: it shows which layout exists for this question
 at all and what it costs. The code: [group_oracle.py](../src/foqlens/group_oracle.py),
 [scoring.py](../src/foqlens/scoring.py), [error_energy.py](../src/foqlens/error_energy.py), and the reading of a field
@@ -218,7 +218,7 @@ $$s^{\text{energy}}_g = \sum_{b \in g} \mathbb{E}_t \big\lVert (W_\top - W_\bot)
 
 The D4 variant measures what is left over an already raised network.
 
-**The pooled field.** Every field is brought to unit mass a question and averaged:
+**The pooled field is not a fifth oracle but a summary.** It measures nothing of its own: the four fields are brought to unit mass a question and averaged so that their scales become comparable.
 
 $$s^{\text{pooled}}_g = \frac{1}{|O|} \sum_{o \in O} \frac{\max(s^o_g, 0)}{\sum_{g'} \max(s^o_{g'}, 0)}.$$
 

@@ -8,22 +8,22 @@
   "rim": 0.0,
   "questions": 25,
   "bits_a_weight": {
-    "mean": null,
-    "median": null,
-    "p90": null
+    "mean": 4.277251834869385,
+    "median": 4.271334171295166,
+    "p90": 4.319009399414062
   },
   "gpu": {
-    "samples": 2,
+    "samples": 6,
     "started": "2026-09-20T21:23",
-    "wall_s": 1.1455094814300537,
-    "utilization_mean": 7.5,
-    "utilization_median": 7.5,
-    "memory_reserved_peak_mib": 12117.0,
-    "temperature_mean_c": 45.0,
-    "temperature_peak_c": 45.0,
-    "power_mean_w": 158.67000000000002,
-    "power_peak_w": 168.43,
-    "memory_allocated_peak_mib": 11108.037109375
+    "wall_s": 5.5844926834106445,
+    "utilization_mean": 16.666666666666668,
+    "utilization_median": 11.0,
+    "memory_reserved_peak_mib": 12519.0,
+    "temperature_mean_c": 45.333333333333336,
+    "temperature_peak_c": 49.0,
+    "power_mean_w": 147.345,
+    "power_peak_w": 181.66,
+    "memory_allocated_peak_mib": 11180.52001953125
   },
   "pacer": {
     "share": 0.9,

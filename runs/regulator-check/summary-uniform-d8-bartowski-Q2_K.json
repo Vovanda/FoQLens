@@ -6,31 +6,31 @@
   "floor": "D2",
   "ceiling": "D8",
   "rim": 0.0,
-  "questions": 3,
+  "questions": 25,
   "bits_a_weight": {
     "mean": null,
     "median": null,
     "p90": null
   },
   "gpu": {
-    "samples": 1,
-    "started": "2026-09-20T09:03",
-    "wall_s": 1.0694446563720703,
-    "utilization_mean": 53.0,
-    "utilization_median": 53.0,
-    "memory_reserved_peak_mib": 11793.0,
-    "temperature_mean_c": 47.0,
-    "temperature_peak_c": 47.0,
-    "power_mean_w": 133.91,
-    "power_peak_w": 133.91,
-    "memory_allocated_peak_mib": 10937.01171875
+    "samples": 2,
+    "started": "2026-09-20T21:23",
+    "wall_s": 1.1455094814300537,
+    "utilization_mean": 7.5,
+    "utilization_median": 7.5,
+    "memory_reserved_peak_mib": 12117.0,
+    "temperature_mean_c": 45.0,
+    "temperature_peak_c": 45.0,
+    "power_mean_w": 158.67000000000002,
+    "power_peak_w": 168.43,
+    "memory_allocated_peak_mib": 11108.037109375
   },
   "pacer": {
     "share": 0.9,
     "cooling_breaks": 0,
     "cooling_break_s": 0.0,
     "temperature_ceiling_c": 80.0,
-    "temperature_peak_c": 47.0,
+    "temperature_peak_c": 46.0,
     "thermal_pause_s": 0.0
   }
 }

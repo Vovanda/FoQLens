@@ -17,6 +17,14 @@ runs/**/raw/
 *.npz
 *.safetensors
 
+# what an experiment stands on is kept, not left in a working tree: the oracles' fields over the groups are megabytes
+# and they are the material its numbers were read from. A tree can be removed and take everything ignored with it -
+# that is how the fields of E005 were lost on 21.09. The masks over the blocks stay out, they are tens of megabytes
+# each; what a reader needs of them is the manifest beside them.
+!runs/oracles/**/unified-fields-*.npz
+!runs/oracles/**/precision-fields-*.npz
+!runs/oracles/**/group-oracle-*.npz
+
 # model cache, if HF_HOME points inside the repo
 hf-cache/
 # cut models (scripts/cut_model.py), if FOQLENS_HOME points inside the repo

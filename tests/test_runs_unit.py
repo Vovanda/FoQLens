@@ -32,6 +32,17 @@ def test_agreement_counts_what_the_exact_match_and_the_judge_say_against_the_rea
     assert got == {"c": {"read": 3, "exact_match": pytest.approx(2 / 3), "judge": 1.0}}
 
 
+def test_two_runs_are_compared_reply_against_reply_on_the_layouts_both_hold(tmp_path):
+    def reply(i: str, text: str, level: str = "d2") -> dict:
+        return {"corpus": "c", "id": i, "level": level, "prompt": "short-0", "reply": text}
+
+    write_jsonl(tmp_path / "left/d2/c.jsonl", [reply("1", "Rome"), reply("2", "Paris"), reply("3", "Bonn")])
+    write_jsonl(tmp_path / "left/d4/c.jsonl", [reply("1", "Rome", "d4")])  # only the left run holds d4
+    write_jsonl(tmp_path / "right/d2/c.jsonl", [reply("1", "Rome"), reply("2", "Lyon")])  # 3 is unanswered here
+    assert RunFiles.replies_of_two_runs(tmp_path / "left", tmp_path / "right") == [
+        {"level": "d2", "answered": 2, "differ": 1}]
+
+
 def test_accepted_is_the_reasoning_judges_verdict_where_it_gave_one_and_the_one_token_judges_elsewhere(tmp_path):
     write_jsonl(tmp_path / "answers/bf16/c.jsonl", [answer("1", 1.0, 0.9), answer("2", 0.0, 0.1)])
     write_jsonl(tmp_path / "answers/d2/c.jsonl",

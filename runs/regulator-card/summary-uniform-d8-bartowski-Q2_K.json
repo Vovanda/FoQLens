@@ -1,0 +1,36 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "base": "bartowski-Q2_K",
+  "approach": "layerwise",
+  "source": "activity",
+  "floor": "D2",
+  "ceiling": "D8",
+  "rim": 0.0,
+  "questions": 752,
+  "bits_a_weight": {
+    "mean": null,
+    "median": null,
+    "p90": null
+  },
+  "gpu": {
+    "samples": 41,
+    "started": "2026-09-20T21:27",
+    "wall_s": 43.99762678146362,
+    "utilization_mean": 79.1219512195122,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 17491.0,
+    "temperature_mean_c": 61.63414634146341,
+    "temperature_peak_c": 65.0,
+    "power_mean_w": 315.44463414634146,
+    "power_peak_w": 398.07,
+    "memory_allocated_peak_mib": 15300.2822265625
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 62.0,
+    "thermal_pause_s": 0.0
+  }
+}

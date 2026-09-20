@@ -23,7 +23,9 @@ Invariants:
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from collections.abc import Callable
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -43,16 +45,36 @@ def to_groups(scores: np.ndarray, groups: np.ndarray, n_groups: int) -> np.ndarr
     return out
 
 
-def field(values: np.ndarray, share: float = 0.99) -> np.ndarray:
-    """An oracle as a field: one method, the same for every one of them.
+class Oracle(ABC):
+    """An oracle of the bench, from outside.
 
-    The contract is the field, and it is one contract: a matrix [questions, groups] in 0 ... 1, the questions and the
-    groups in an order given from outside and the same for all of them, a larger number meaning a group this question
-    needs more. Whatever the oracle measured and in whatever units - an answer swept group by group, an energy of the
-    error, a gradient - ends inside it. Only under one contract do the rungs lay out over the fields at all, and only
-    then is one analysis written once and run over all of them.
+    The contract is the field and it is one for all of them: a matrix [questions, groups] in 0 ... 1, the questions
+    and the groups in an order given from outside and shared by every oracle, a larger number meaning a group this
+    question needs more. Whatever was measured and in whatever units - an answer swept group by group, an energy of
+    the error, a gradient - lives inside the oracle and never leaves it. Only under one contract do the rungs lay
+    out over the fields at all, and only then is one analysis written once and run over all of them.
+
+    What the number becomes in rungs belongs to a reading strategy, not to the oracle.
     """
-    return unit_field(values, unit_scale(values, share))
+
+    name: str
+
+    @abstractmethod
+    def field(self) -> np.ndarray:
+        """[questions, groups] in 0 ... 1."""
+
+
+@dataclass(frozen=True)
+class Kept(Oracle):
+    """An oracle read from what it has already written down: its values carried onto the contract by the scale of
+    their own quantile, so that one outlying group of one question does not set the scale for everybody."""
+
+    name: str
+    values: np.ndarray  # [questions, groups] in the oracle's own units
+    share: float = 0.99
+
+    def field(self) -> np.ndarray:
+        return unit_field(self.values, unit_scale(self.values, self.share))
 
 
 def unit_scale(values: np.ndarray, share: float = 0.99) -> float:

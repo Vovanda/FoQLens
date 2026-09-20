@@ -3,7 +3,16 @@
 import numpy as np
 import pytest
 
-from foqlens.oracle_overlay import block_group_ids, bootstrap, field, overlay, to_groups, unit_field, unit_scale
+from foqlens.oracle_overlay import (
+    Kept,
+    Oracle,
+    block_group_ids,
+    bootstrap,
+    overlay,
+    to_groups,
+    unit_field,
+    unit_scale,
+)
 
 
 def test_a_field_on_its_own_scale_lands_in_the_unit_range_and_keeps_its_order():
@@ -34,10 +43,11 @@ def test_agreement_puts_out_what_one_oracle_holds_low_and_the_soft_overlay_does_
         overlay([alone, alone], "median")
 
 
-def test_one_method_makes_a_field_of_every_oracle_whatever_it_measured():
-    nats = np.array([[0.0, 0.4, 2.0], [0.1, 0.2, 0.3]])  # an oracle that swept the answer
-    energy = np.array([[0.0, 4e5, 9e7], [1e3, 2e3, 3e3]])  # another, in the energy of the error
-    made = [field(values) for values in (nats, energy)]
+def test_every_oracle_answers_the_same_contract_whatever_it_measured():
+    nats = Kept("swept", np.array([[0.0, 0.4, 2.0], [0.1, 0.2, 0.3]]))  # an oracle that swept the answer
+    energy = Kept("energy", np.array([[0.0, 4e5, 9e7], [1e3, 2e3, 3e3]]))  # another, in the energy of the error
+    assert isinstance(nats, Oracle) and isinstance(energy, Oracle)
+    made = [oracle.field() for oracle in (nats, energy)]
     for one in made:  # the same kind of thing, in the same layout, whatever was inside
         assert one.shape == (2, 3) and (0.0 <= one).all() and (one <= 1.0).all()
     assert np.array_equal(np.argsort(made[0], axis=1), np.argsort(made[1], axis=1))  # both keep their own order

@@ -1,8 +1,16 @@
 # E005 - The precision map of a query: results
 
-Runs of 2026-09-19..20. The configuration the final numbers were read at: the base bartowski Q2_K, the rungs D2 / D4 /
-D6 / D8, the small corpus, an oracle tolerance of 0.03 nats or 0.2 of what the top rung itself spends, whichever is
-larger, and the scale of the rungs D4 0.8, D6 0.9, D8 1.0.
+Runs of 2026-09-19..20.
+
+**The configuration the final numbers were read at.** The base bartowski Q2_K, the rungs D2 / D4 / D6 / D8, the small
+corpus. A map is built like this: the field of importance is taken in its own units, the cost of a group at a rung is
+its importance times the share of the base's error that rung leaves (measured: D4 leaves 0.53, D6 leaves 0.055), and a
+group reads the coarsest rung whose cost fits the question's threshold. There is one threshold a question, searched by
+the answer by bisection; the tolerance is 0.03 nats or 0.2 of what the top rung itself spends, whichever is larger.
+
+**What these numbers do not hold.** The scale of the rungs with the bounds 0.8 / 0.9 / 1.0, set on 20.09, was not used
+here: it works in another build of the maps, where a field is first laid on 0 ... 1. No run was made with it, and the
+cost of a map under it is unknown.
 
 ## The sample
 
@@ -72,9 +80,11 @@ precision.
 
 ## The settings were set by hand
 
-The scale of the rungs (D4 0.8, D6 0.9), the tolerance (0.03 plus a share of 0.2) and the intervals were set by hand,
-without a sweep. The effect holds at these coarse values, so it is not an artefact of fitting; sweeping the intervals
-is about how much more can be taken off the 0.523 bytes.
+The tolerance (0.03 nats plus a share of 0.2) was set by hand, without a sweep; the rungs' coefficients are measured
+from the energies. The effect holds at these values, so it is not an artefact of fitting.
+
+What is not measured yet: the cost of a map under the scale with the bounds 0.8 / 0.9 / 1.0, which makes the upper
+rungs dearer and should give coarser and cheaper maps. That is a run of its own.
 
 ## What it means for the mechanism
 
@@ -86,3 +96,13 @@ There is no cheap predictor of such a map yet. A bridge from the address is not 
 the answers. The layer-wise regulator (variant B) predicts no map in advance - it decides the layout as the pass runs;
 on the `activity` source it goes level with the uniform D4, and the votes along the signal's path are not wired in as a
 source yet.
+
+## What comes next: E006
+
+The oracles are brought to one shape - every one of them returns a field in 0 ... 1 on its own scale, and one shared
+rule reads a field into rungs. Their maps then become comparable directly, which they are not today: the units are
+each their own, and the bringing together is done only inside the pooled field.
+
+On comparable maps the intersections are counted: where the maps of different oracles raise the same groups, where
+they part, and what a layout built on their agreement gives. Antinodes have so far been counted only as a statistic of
+agreeing peaks; no answers were ever run on a layout built from them.

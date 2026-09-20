@@ -1,0 +1,42 @@
+{
+  "arc_challenge_closed": {
+    "questions": 10,
+    "within_tolerance": 0.0,
+    "low_better": 0.0,
+    "gap_median": 0.6022394634783268,
+    "high_median": 0.1843383088707924,
+    "low_median": 0.7853122651576996
+  },
+  "arc_easy_closed": {
+    "questions": 15,
+    "within_tolerance": 0.0,
+    "low_better": 0.0,
+    "gap_median": 1.0156659036874771,
+    "high_median": 0.1758326292037964,
+    "low_median": 1.1730846166610718
+  },
+  "nq_open": {
+    "questions": 11,
+    "within_tolerance": 0.18181818181818182,
+    "low_better": 0.0,
+    "gap_median": 1.3545862883329391,
+    "high_median": 0.0038862796500325203,
+    "low_median": 1.4961591958999634
+  },
+  "squad_v2": {
+    "questions": 68,
+    "within_tolerance": 0.38235294117647056,
+    "low_better": 0.17647058823529413,
+    "gap_median": 0.2750936159864068,
+    "high_median": 0.0324565889313817,
+    "low_median": 0.45274412631988525
+  },
+  "triviaqa": {
+    "questions": 46,
+    "within_tolerance": 0.30434782608695654,
+    "low_better": 0.08695652173913043,
+    "gap_median": 0.7662625723460224,
+    "high_median": 0.000356774908141233,
+    "low_median": 0.9086906313896179
+  }
+}

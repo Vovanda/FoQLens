@@ -7,18 +7,24 @@ Throttle (gpu_share.py): below a share of 1 the GPU rests after it.
 
 from __future__ import annotations
 
+import logging
 import multiprocessing
 from collections.abc import Callable, Iterator, Sequence
 from concurrent.futures import Executor, Future, ProcessPoolExecutor
 from functools import partial
 
 import numpy as np
+import torch
 
 from foqlens.evaluate import QualityMetric, Question
 from foqlens.gpu_share import FULL, Pacer
 from foqlens.layouts import LayoutPolicy
 from foqlens.precision import Controller
 from foqlens.progress import Progress
+
+LOG = logging.getLogger(__name__)
+# a long loop logs at INFO every tenth of its steps - its pace visible without a line a batch; every step goes to DEBUG
+PROGRESS_SHARE = 0.1
 
 BatchScorer = Callable[[list[str]], list[np.ndarray]]
 
@@ -52,20 +58,70 @@ def token_batches(lengths: Sequence[int], max_tokens: int, max_batch: int) -> li
 
 def compute_masks(
     score: BatchScorer, prompts: list[str], batch_size: int, throttle: Pacer = FULL, groups: list[np.ndarray] | None = None,
+    lengths: Sequence[int] | None = None,
 ) -> np.ndarray:
     """Mask vectors of all prompts: [len(prompts), n_blocks], in the prompts' order.
 
     `groups` are the batches of prompt indices (token_batches); without them, batch_size prompts in order.
+    A batch the GPU has no memory for is halved until it fits (_scored): a budget of batch_size of the run's longest
+    prompts is measured on short questions, and a run with long passages must not die on it. The halves are read as
+    batches of their own; bf16 masks move slightly with the batch, so a halved batch is not bit for bit the whole one.
+    Once a batch has run out, later batches are cut before they are tried to the padded tokens that held (`lengths`,
+    the prompts' tokens; counted in prompts without them): the longest go first, and a budget that failed on them fails
+    again on the next.
     """
     groups = list(batches(len(prompts), batch_size)) if groups is None else groups
-    parts = []
+    lengths = np.ones(len(prompts), dtype=np.int64) if lengths is None else np.asarray(lengths)
+    progress = Progress(len(groups), "mask batch")
+    milestone = max(1, round(len(groups) * PROGRESS_SHARE))
+    parts, fits = [], None  # fits: the padded tokens a batch held once one ran out of memory
     for idx in groups:
-        with throttle.batch():
-            parts.append(np.stack(score([prompts[i] for i in idx])))
-    stacked = np.concatenate(parts)
+        for chunk in _within(idx, lengths, fits):
+            got, fell = _scored(score, prompts, chunk, throttle)
+            parts += got
+            if fell:
+                held = min(len(i) * int(lengths[i].max()) for i, _ in got)
+                fits = held if fits is None else min(fits, held)
+        line = progress.step(f"{len(idx)} prompts")
+        LOG.debug(line)
+        if progress.done % milestone == 0 or progress.done == progress.total:
+            LOG.info(line, extra={"loop": "mask batch", "done": progress.done, "total": progress.total})
+    order = np.concatenate([idx for idx, _ in parts])
+    stacked = np.concatenate([masks for _, masks in parts])
     out = np.empty_like(stacked)
-    out[np.concatenate(groups)] = stacked
+    out[order] = stacked
     return out
+
+
+def _within(idx: np.ndarray, lengths: np.ndarray, fits: int | None) -> list[np.ndarray]:
+    """A batch cut into parts of at most `fits` padded tokens - what a batch held once one ran out of memory - so a
+    later batch is not tried whole only to fail the same way; the batch whole while nothing has run out."""
+    longest = int(lengths[idx].max())
+    if fits is None or len(idx) * longest <= fits:
+        return [idx]
+    size = max(1, fits // longest)
+    return [idx[i:i + size] for i in range(0, len(idx), size)]
+
+
+def _scored(score: BatchScorer, prompts: list[str], idx: np.ndarray,
+            throttle: Pacer) -> tuple[list[tuple[np.ndarray, np.ndarray]], bool]:
+    """The masks of one batch as (indices, masks) parts - the whole batch, or its halves when it runs out of memory -
+    and whether it ran out."""
+    try:
+        with throttle.batch():
+            return [(idx, np.stack(score([prompts[i] for i in idx])))], False
+    except torch.OutOfMemoryError:
+        if len(idx) == 1:
+            raise
+    # Out of the except block: a live exception holds the failed pass's frames and every tensor in them, so the halves
+    # are read only after it is gone and its memory is back.
+    torch.cuda.empty_cache()
+    LOG.warning("a batch of %d prompts ran out of GPU memory; read as two halves", len(idx),
+                extra={"batch": len(idx)})
+    half = len(idx) // 2
+    first, _ = _scored(score, prompts, idx[:half], throttle)
+    second, _ = _scored(score, prompts, idx[half:], throttle)
+    return first + second, True
 
 
 def policy_layouts(policy: LayoutPolicy, groups: list[np.ndarray]) -> list[np.ndarray]:

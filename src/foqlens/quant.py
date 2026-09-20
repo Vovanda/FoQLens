@@ -22,19 +22,25 @@ import torch.nn.functional as F
 class Level(IntEnum):
     """Precision level of a block. The value is its code in the module's level array.
 
-    ZERO is the limit of precision: the block is not read at all and its output is zero. It gives
-    the step 3 sweep polar regions - kept blocks against removed ones - instead of bf16 against nf4.
-    D2 ... D8 are read depths of one RefinedWeight: depth 1 ... 4, the base and 0 ... 3 refinements of 2 bits.
+    The codes follow the ladder (LADDER): ZERO < D2 < D4 < D6 < D8 < BF16, the code of a rung is its
+    place on the ladder, so comparing two rungs compares their precision and the largest code of a set
+    is its deepest read. ZERO is the limit of precision: the block is not read at all and its output is
+    zero. D2 ... D8 are read depths of one RefinedWeight: depth 1 ... 4, the base and 0 ... 3 refinements of
+    2 bits. BF16 is the weight as stored, the top rung. INT8 and NF4 are quantizers of their own, not read
+    depths of the stored copy: they sit after the ladder and have no rung.
+
+    Invariant: LADDER[i] has code i, and the bits grow strictly along the ladder.
+    Invariant: the members are declared in code order 0, 1, ...: arrays indexed by code are built by iterating Level.
     """
 
-    BF16 = 0
-    INT8 = 1
-    NF4 = 2
-    ZERO = 3
-    D2 = 4
-    D4 = 5
-    D6 = 6
-    D8 = 7
+    ZERO = 0
+    D2 = 1
+    D4 = 2
+    D6 = 3
+    D8 = 4
+    BF16 = 5
+    INT8 = 6
+    NF4 = 7
 
     @property
     def bits(self) -> int:
@@ -43,7 +49,18 @@ class Level(IntEnum):
     @property
     def depth(self) -> int:
         """The depth of the RefinedWeight this level reads; 0 for a level that is not a read depth."""
-        return self - Level.ZERO if self > Level.ZERO else 0
+        return int(self) if Level.D2 <= self <= Level.D8 else 0
+
+    @property
+    def rung(self) -> int:
+        """The level's place on the ladder; a quantizer off the ladder has none."""
+        if self not in LADDER:
+            raise ValueError(f"{self.name} is not a rung of the ladder")
+        return LADDER.index(self)
+
+
+# Every level the bench can read a block at, coarse first - the ladder of docs/quantization-filter.md and of site/field.js.
+LADDER = (Level.ZERO, Level.D2, Level.D4, Level.D6, Level.D8, Level.BF16)
 
 
 NF4_BLOCKSIZE = 64

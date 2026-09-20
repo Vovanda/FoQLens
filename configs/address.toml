@@ -1,0 +1,13 @@
+# Is a mask source an address (foqlens.address, scripts/address_signals.py).
+corpus = "configs/small-corpus.toml"
+sources = ["pooled", "neuron_activity", "head_energy", "hybrid", "gradient", "gradient_magnitude"]
+# A third of E2B's 35 layers: the address has to cost a fraction of the pass it steers.
+working_layers = [12]
+base_level = "d2"
+base = "bartowski-Q2_K"
+
+# The corpora with a two-example wrapper beside their frozen 0-shot one: the question stays, the prompt changes.
+[two_shot]
+triviaqa = "short-2a"
+nq_open = "short-2a"
+squad_v2 = "passage-2a"

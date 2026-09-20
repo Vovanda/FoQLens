@@ -204,7 +204,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
   <section id="roadmap">
     <div class="wrap">
       <h2>Where the work is</h2>
-      <p class="lede">The data and the baseline are built; now the variants of the filter.</p>
+      <p class="lede">The ceiling is measured: a map built for the query holds knowledge at half the memory where a uniform rung loses it. What is missing is a map read at inference.</p>
       <div class="scroller">
         <table>
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
@@ -213,10 +213,11 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
             <tr><td class="num">2</td><td><b><a href="docs.html#corpus">A corpus of what the model knows</a></b> - selected by its own answers in three regimes and frozen: 20,640 questions, 18,576 E2B-it knows and 2,064 it does not</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
             <tr><td class="num">3</td><td><b><a href="docs.html#e003-results">Uniform quantization on the corpus</a></b> - the answers at D8, D6, D4 and D2 over a base calibrated with an imatrix: D8 keeps 97.5% of the full model's knowledge, D6 96.2%, D4 90.8%, D2 76.7% (51.4% over the bench's own base, <a href="docs.html#e002-results">E002</a>), so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4 (<a href="docs.html#e001-results">E001</a>)</td><td><span class="tag tag--done">done</span><span class="when">2026-09-15 → 09-19</span></td></tr>
             <tr><td class="num">4</td><td><b><a href="docs.html#filter">The filter</a></b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
-            <tr><td class="num">5</td><td><b><a href="docs.html#hypotheses">The address</a></b> - topics separate in the model, the mask is concentrated, zones of related topics overlap</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">6</td><td><b><a href="docs.html#hypotheses">Precision follows meaning</a></b> - how much of what the model knows the zones keep, against uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">7</td><td><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">8</td><td><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">5</td><td><b><a href="docs.html#e004-results">The address of a query</a></b> - which signal identifies the query rather than its wording: the hybrid of neuron activity and head energy reads a paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision give the same address as a full pass; the depth of the reading cannot be chosen from the query</td><td><span class="tag tag--done">done</span><span class="when">2026-09-19</span></td></tr>
+            <tr><td class="num">6</td><td><b><a href="docs.html#e005-results">The precision map of a query</a></b> - over 103 questions only the top rung answers, a map built for the query holds 0.816 of the right answers at 0.523 bytes of the whole network, where the uniform D4 at 0.558 holds none and the uniform D6 at 0.775 holds 0.039; a common map that knows no question holds 0.544 at the same price. The maps are built by oracles that look at the answer - a ceiling, not a mechanism</td><td><span class="tag tag--done">done</span><span class="when">2026-09-20</span></td></tr>
+            <tr><td class="num">7</td><td><b><a href="docs.html#hypotheses">A map read at inference</a></b> - the same gain without looking at the answer: from the address of a query, or decided as the pass runs. Neither does it yet</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-20</span></td></tr>
+            <tr><td class="num">8</td><td><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">9</td><td><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
           </tbody>
         </table>
       </div>

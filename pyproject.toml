@@ -13,11 +13,13 @@ dependencies = [
     "pyarrow>=25.0.1",
     "duckdb>=1.5.5",
     "gguf",
+    "python-json-logger>=4.2.0",
 ]
 
 [dependency-groups]
 dev = [
     "ninja>=1.13.2",
+    "pyflakes>=3.4.0",
     "pytest",
 ]
 eval = ["lm-eval"]

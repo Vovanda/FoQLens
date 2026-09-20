@@ -106,6 +106,11 @@ def test_batches_hold_every_row_once_within_the_token_budget(monkeypatch):
         assert len(b) <= 3 and (len(b) * longest <= 400 or len(b) == 1)
 
 
+def test_a_layout_already_answered_whole_asks_for_no_batches():
+    asking = Asking("triviaqa", "rev", "m", Level.BF16, setup_named("triviaqa", "bare"))
+    assert asking.batches(PLAIN, Lengths(), []) == []  # a resumed run reaches this, and the tokenizer refuses []
+
+
 def test_the_cut_answers_are_the_ones_that_never_stopped():
     answers = [answering.Answer(corpus="triviaqa", id=i, revision="rev", model="m", level="d2", prompt="short-0",
                                 reply="r", answer="a", reasoning=None, exact_match=0.0, f1=0.0, tokens=1, stopped=s)

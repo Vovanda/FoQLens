@@ -1,0 +1,25 @@
+{
+  "questions": 150,
+  "target": "common",
+  "blocks": 14708,
+  "address": {
+    "rank": 0.15231498064247767,
+    "rank_on_excess": -0.07544380041274708,
+    "questions": 86
+  },
+  "votes-0.25": {
+    "rank": -0.15112733852077395,
+    "rank_on_excess": 0.032195693925755886,
+    "questions": 86
+  },
+  "votes-0.5": {
+    "rank": -0.19074244410504398,
+    "rank_on_excess": 0.037148831793172216,
+    "questions": 86
+  },
+  "votes-1": {
+    "rank": -0.21999053016763664,
+    "rank_on_excess": 0.04627256118840295,
+    "questions": 86
+  }
+}

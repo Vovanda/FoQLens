@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site/site.css?v=45">
 <link rel="stylesheet" href="site/docs.css?v=45">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
@@ -34,6 +35,12 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <h2>The idea</h2>
         <ul>
           <li><a href="#filter" data-id="filter">The quantization filter and its zones</a></li>
+          <li><a href="#glossary" data-id="glossary">The glossary</a></li>
+          <li><a href="#filter-math" data-id="filter-math">The mathematics of the quantization filter</a></li>
+          <li><a href="#strategies" data-id="strategies">Zone strategies</a></li>
+          <li><a href="#refocustensors" data-id="refocustensors">The .refocustensors model format</a></li>
+          <li><a href="#kernels" data-id="kernels">The kernel that reads the copy</a></li>
+          <li><a href="#performance" data-id="performance">Performance of the bench</a></li>
           <li><a href="#problem" data-id="problem">Problem statement</a></li>
           <li><a href="#goals" data-id="goals">Goals</a></li>
           <li><a href="#plan" data-id="plan">Plan</a></li>
@@ -44,6 +51,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <li><a href="#corpus" data-id="corpus">The corpus</a></li>
           <li><a href="#invariants" data-id="invariants">Invariants</a></li>
           <li><a href="#data" data-id="data">Data sources</a></li>
+          <li><a href="#runs" data-id="runs">The data of the runs</a></li>
         </ul>
         <h2>Around it</h2>
         <ul>
@@ -62,6 +70,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <li><a href="#e001-results" data-id="e001-results">E001 - uniform quantization on the corpus</a></li>
           <li><a href="#e002-results" data-id="e002-results">E002 - uniform quantization with a working base precision D2</a></li>
           <li><a href="#e003-results" data-id="e003-results">E003 - the ladder over a calibrated base</a></li>
+          <li><a href="#e004-results" data-id="e004-results">E004 - the address of a query</a></li>
+          <li><a href="#e005-results" data-id="e005-results">E005 - the precision map of a query</a></li>
         </ul>
       </div></div>
   </aside>
@@ -92,6 +102,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <h3>The idea</h3>
       <ul>
         <li><a href="#filter">The quantization filter and its zones</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/quantization-filter.md">docs/quantization-filter.md</a></span></li>
+        <li><a href="#glossary">The glossary</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/glossary.md">docs/glossary.md</a></span></li>
+        <li><a href="#filter-math">The mathematics of the quantization filter</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/quantization-filter-math.md">docs/quantization-filter-math.md</a></span></li>
+        <li><a href="#layerwise">The layer-wise regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/layerwise-regulator.md">docs/layerwise-regulator.md</a></span></li>
         <li><a href="#strategies">Zone strategies</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/zone-strategies.md">docs/zone-strategies.md</a></span></li>
         <li><a href="#refocustensors">The .refocustensors model format</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/refocustensors.md">docs/refocustensors.md</a></span></li>
         <li><a href="#kernels">The kernel that reads the copy</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/kernels.md">docs/kernels.md</a></span></li>
@@ -125,6 +138,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <li><a href="#e001-results">E001 - uniform quantization on the corpus</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E001-uniform-quantization/results.md">experiments/E001-uniform-quantization/results.md</a></span></li>
         <li><a href="#e002-results">E002 - uniform quantization with a working base precision D2</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E002-base-precision-d2/results.md">experiments/E002-base-precision-d2/results.md</a></span></li>
         <li><a href="#e003-results">E003 - the ladder over a calibrated base</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E003-calibrated-base/results.md">experiments/E003-calibrated-base/results.md</a></span></li>
+        <li><a href="#e004-results">E004 - the address of a query</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E004-question-address/results.md">experiments/E004-question-address/results.md</a></span></li>
+        <li><a href="#e005-results">E005 - the precision map of a query</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E005-precision-map/results.md">experiments/E005-precision-map/results.md</a></span></li>
       </ul>
     </main>
 
@@ -139,6 +154,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script src="site/panel.js?v=45"></script>
 <script>
 /* ==== THE SHELF ==== */
@@ -148,6 +164,9 @@ const REPO = "https://github.com/Vovanda/FoQLens/blob/main/";
 const SHELF = [
   { group: "The idea", docs: [
     ["filter", "docs/quantization-filter.md", "The quantization filter and its zones"],
+    ["glossary", "docs/glossary.md", "The glossary"],
+    ["filter-math", "docs/quantization-filter-math.md", "The mathematics of the quantization filter"],
+    ["layerwise", "docs/layerwise-regulator.md", "The layer-wise regulator"],
     ["strategies", "docs/zone-strategies.md", "Zone strategies"],
     ["refocustensors", "docs/refocustensors.md", "The .refocustensors model format"],
     ["kernels", "docs/kernels.md", "The kernel that reads the copy"],
@@ -177,6 +196,8 @@ const SHELF = [
     ["e001-results", "experiments/E001-uniform-quantization/results.md", "E001 - uniform quantization on the corpus"],
     ["e002-results", "experiments/E002-base-precision-d2/results.md", "E002 - uniform quantization with a working base precision D2"],
     ["e003-results", "experiments/E003-calibrated-base/results.md", "E003 - the ladder over a calibrated base"],
+    ["e004-results", "experiments/E004-question-address/results.md", "E004 - the address of a query"],
+    ["e005-results", "experiments/E005-precision-map/results.md", "E005 - the precision map of a query"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
@@ -227,6 +248,48 @@ function resolveLink(href, fromPath) {
   return target ? `#${target.id}` : REPO + base.join("/") + hash;
 }
 
+/* ==== MATH ==== */
+// Formulas are written as on GitHub: $...$ in a line, $$...$$ on their own. marked would read their
+// underscores and backslashes as markup, so they are taken out before it and set by KaTeX after it;
+// code keeps its dollars - a model's garbage output quoted in backticks is not a formula.
+const CODE = /(```[\s\S]*?```|`[^`\n]*`)/;
+const FORMULA = /\$\$([\s\S]+?)\$\$|\$([^\s$](?:[^$\n]*?[^\s$])?)\$/g;
+
+function extractMath(text) {
+  const formulas = [];
+  const kept = text.split(CODE).map((part, i) => (i % 2 ? part : part.replace(FORMULA, (_, display, inline) => {
+    formulas.push({ tex: display ?? inline, display: display !== undefined });
+    return `@@MATH${formulas.length - 1}@@`;
+  })));
+  return { text: kept.join(""), formulas };
+}
+
+function renderMath(html, formulas) {
+  return html.replace(/@@MATH(\d+)@@/g, (_, i) => {
+    const { tex, display } = formulas[Number(i)];
+    if (typeof katex === "undefined") return display ? `$$${tex}$$` : `$${tex}$`;  // the CDN is down: the source stays readable
+    return katex.renderToString(tex, { displayMode: display, throwOnError: false });
+  });
+}
+
+/* ==== ANCHORS ==== */
+// A heading gets the id GitHub gives it, so the same "#section" link works in the repository and here;
+// on this page the hash names the document, so a link to a section scrolls instead of navigating.
+function slug(text) {
+  return text.trim().toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s/g, "-");
+}
+
+function anchorSections(body) {
+  for (const heading of body.querySelectorAll("h1, h2, h3, h4, h5, h6")) heading.id = slug(heading.textContent);
+  for (const link of body.querySelectorAll('a[href^="#"]')) {
+    const section = decodeURIComponent(link.getAttribute("href").slice(1));
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      doc.querySelector(`[id="${CSS.escape(section)}"]`)?.scrollIntoView();
+    });
+  }
+}
+
 async function show(id) {
   const entry = BY_ID.get(ALIASES[id] ?? id) ?? BY_ID.get(DEFAULT_DOC);
   markCurrent(entry.id);
@@ -243,8 +306,10 @@ async function show(id) {
     return;
   }
   const body = document.createElement("div");
-  body.innerHTML = marked.parse(stripFrontMatter(text));
-  for (const link of body.querySelectorAll("a[href]")) {
+  const { text: markdown, formulas } = extractMath(stripFrontMatter(text));
+  body.innerHTML = renderMath(marked.parse(markdown), formulas);
+  anchorSections(body);
+  for (const link of body.querySelectorAll("a[href]:not([href^='#'])")) {
     const resolved = resolveLink(link.getAttribute("href"), entry.path);
     if (resolved) link.setAttribute("href", resolved);
   }

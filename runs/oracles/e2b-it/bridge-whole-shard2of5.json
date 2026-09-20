@@ -1,0 +1,78 @@
+{
+  "target": "common",
+  "bits_asked": 2.7751512593217953,
+  "questions_fitted": 150,
+  "questions_read": 151,
+  "address": {
+    "read": "every layer at bf16"
+  },
+  "bridges": {
+    "direct": {
+      "shift": -0.21881348062106554,
+      "groups_on_the_target_level_fitted": 0.7154285714285714,
+      "bits_a_weight": 2.788876184938457,
+      "groups_on_the_target_level": 0.7175023651844844,
+      "rungs_off_median": 0.0
+    },
+    "nearest": {
+      "shift": -0.1249999999990905,
+      "groups_on_the_target_level_fitted": 0.8156190476190476,
+      "bits_a_weight": 2.858422392995619,
+      "groups_on_the_target_level": 0.7835383159886471,
+      "rungs_off_median": 0.0
+    },
+    "product": {
+      "shift": -0.08536725567773829,
+      "groups_on_the_target_level_fitted": 0.7141904761904762,
+      "bits_a_weight": 2.810149866235788,
+      "groups_on_the_target_level": 0.7089877010406812,
+      "rungs_off_median": 0.0
+    },
+    "ridge": {
+      "shift": -0.14130031912372942,
+      "groups_on_the_target_level_fitted": 0.8292380952380952,
+      "bits_a_weight": 2.8458315046167524,
+      "groups_on_the_target_level": 0.7917691579943236,
+      "rungs_off_median": 0.0
+    },
+    "static": {
+      "shift": -0.1555555555560204,
+      "groups_on_the_target_level_fitted": 0.6914285714285714,
+      "bits_a_weight": 2.742085268045589,
+      "groups_on_the_target_level": 0.697445600756859,
+      "rungs_off_median": 0.0
+    },
+    "topic": {
+      "shift": -0.10294117647117673,
+      "groups_on_the_target_level_fitted": 0.8472380952380952,
+      "bits_a_weight": 2.8078296092743185,
+      "groups_on_the_target_level": 0.8359508041627247,
+      "rungs_off_median": 0.0
+    },
+    "zones-own": {
+      "shift": -0.06713158440561529,
+      "groups_on_the_target_level_fitted": 0.7529523809523809,
+      "bits_a_weight": 2.789748377916745,
+      "groups_on_the_target_level": 0.7592242194891201,
+      "rungs_off_median": 0.0
+    },
+    "zones-top": {
+      "shift": -0.33333333333303017,
+      "groups_on_the_target_level_fitted": 0.7502857142857143,
+      "bits_a_weight": 2.902155043483852,
+      "groups_on_the_target_level": 0.75600756859035,
+      "rungs_off_median": 0.0
+    }
+  },
+  "product_fitted_on": 71,
+  "kept": [
+    "direct",
+    "nearest",
+    "product",
+    "ridge",
+    "static",
+    "topic",
+    "zones-own",
+    "zones-top"
+  ]
+}

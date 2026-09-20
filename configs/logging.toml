@@ -1,0 +1,40 @@
+# Where the bench's log goes (logging.config.dictConfig, read by foqlens.runlog.setup). Modules log to their own
+# loggers under "foqlens" and never know the sinks; a new sink - Loki (python-logging-loki), Elastic, OTLP, syslog -
+# is one more handler here, and no code changes.
+#
+# The file sink is JSON Lines, one event a line: what Grafana Alloy / Promtail ship to Loki and Filebeat to Elastic,
+# and what `| json` in LogQL parses. Every event carries timestamp (ISO 8601 with the zone), level, logger, message,
+# the run's context (run, script - low-cardinality, the labels to filter runs by) and its own fields (a stage and its
+# seconds, a loop's done/total/rate/left). `filename` is set by runlog.setup beside the run's output.
+version = 1
+disable_existing_loggers = false
+
+[formatters.text]
+format = "%(asctime)s %(levelname)s %(name)s %(message)s"
+datefmt = "%H:%M:%S"
+
+[formatters.json]
+"()" = "pythonjsonlogger.json.JsonFormatter"
+format = "%(levelname)s %(name)s %(message)s"
+timestamp = true
+rename_fields = { levelname = "level", name = "logger" }
+
+[filters.run]
+"()" = "foqlens.runlog.RunContext"
+
+[handlers.console]
+class = "logging.StreamHandler"
+stream = "ext://sys.stderr"
+formatter = "text"
+filters = ["run"]
+
+[handlers.file]
+class = "logging.FileHandler"
+formatter = "json"
+encoding = "utf-8"
+filters = ["run"]
+
+[loggers.foqlens]
+level = "INFO"
+handlers = ["console", "file"]
+propagate = false

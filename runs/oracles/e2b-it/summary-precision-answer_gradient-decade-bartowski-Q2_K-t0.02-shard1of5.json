@@ -1,0 +1,3148 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "base": "bartowski-Q2_K",
+  "precision": "runs/oracles/e2b-it/map-series.npz",
+  "high": "D8",
+  "corpus": {
+    "share": 0.05,
+    "calibration_share": 0.2,
+    "floor": 50,
+    "unknown_share": 0.05,
+    "seed": 0,
+    "shards": 5
+  },
+  "questions": [
+    {
+      "corpus": "triviaqa",
+      "id": "tc_1516",
+      "unknown": false,
+      "bytes": 1440374784
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "tc_2145",
+      "unknown": false,
+      "bytes": 1119805440
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "tc_2806",
+      "unknown": false,
+      "bytes": 925360128
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_1329",
+      "unknown": false,
+      "bytes": 1004593152
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_3523",
+      "unknown": false,
+      "bytes": 1091297280
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_4151",
+      "unknown": false,
+      "bytes": 1249566720
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_4550",
+      "unknown": false,
+      "bytes": 1205919744
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_6073",
+      "unknown": false,
+      "bytes": 932831232
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_6193",
+      "unknown": false,
+      "bytes": 911400960
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "dpql_743",
+      "unknown": false,
+      "bytes": 1157455872
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "dpql_5750",
+      "unknown": false,
+      "bytes": 1141825536
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "wh_399",
+      "unknown": false,
+      "bytes": 1119805440
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "wh_2190",
+      "unknown": false,
+      "bytes": 1187143680
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "bb_14",
+      "unknown": false,
+      "bytes": 1389453312
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "bb_4028",
+      "unknown": false,
+      "bytes": 1399775232
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "bb_4861",
+      "unknown": false,
+      "bytes": 1028087808
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qw_6220",
+      "unknown": false,
+      "bytes": 1270603776
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qw_8802",
+      "unknown": false,
+      "bytes": 1249173504
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qw_10894",
+      "unknown": false,
+      "bytes": 1192157184
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "jp_1011",
+      "unknown": false,
+      "bytes": 1379524608
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "jp_1227",
+      "unknown": false,
+      "bytes": 1094737920
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "jp_1395",
+      "unknown": false,
+      "bytes": 1307271168
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_2281",
+      "unknown": false,
+      "bytes": 925360128
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_2480",
+      "unknown": false,
+      "bytes": 1106042880
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_5218",
+      "unknown": false,
+      "bytes": 1141825536
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_5546",
+      "unknown": false,
+      "bytes": 1062395904
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_6666",
+      "unknown": false,
+      "bytes": 1134354432
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_7796",
+      "unknown": false,
+      "bytes": 1199628288
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_9341",
+      "unknown": false,
+      "bytes": 1170726912
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_9481",
+      "unknown": false,
+      "bytes": 1345413120
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_10251",
+      "unknown": false,
+      "bytes": 1033297920
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_10640",
+      "unknown": false,
+      "bytes": 1054531584
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_14658",
+      "unknown": false,
+      "bytes": 1272471552
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_18559",
+      "unknown": false,
+      "bytes": 882302976
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_23424",
+      "unknown": false,
+      "bytes": 1120002048
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "sfq_25250",
+      "unknown": false,
+      "bytes": 1121574912
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "odql_5844",
+      "unknown": false,
+      "bytes": 1026023424
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "odql_7949",
+      "unknown": false,
+      "bytes": 1156177920
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qf_1235",
+      "unknown": false,
+      "bytes": 1105256448
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qf_2820",
+      "unknown": false,
+      "bytes": 1213587456
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qg_675",
+      "unknown": false,
+      "bytes": 1243668480
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qg_2063",
+      "unknown": false,
+      "bytes": 1103683584
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qg_4367",
+      "unknown": false,
+      "bytes": 1199628288
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "tc_664",
+      "unknown": true,
+      "bytes": 1154605056
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "qb_406",
+      "unknown": true,
+      "bytes": 1220665344
+    },
+    {
+      "corpus": "triviaqa",
+      "id": "dpql_5159",
+      "unknown": true,
+      "bytes": 1012260864
+    },
+    {
+      "corpus": "nq_open",
+      "id": "365",
+      "unknown": false,
+      "bytes": 1369694208
+    },
+    {
+      "corpus": "nq_open",
+      "id": "426",
+      "unknown": false,
+      "bytes": 1112530944
+    },
+    {
+      "corpus": "nq_open",
+      "id": "990",
+      "unknown": false,
+      "bytes": 1298817024
+    },
+    {
+      "corpus": "nq_open",
+      "id": "1314",
+      "unknown": false,
+      "bytes": 1249173504
+    },
+    {
+      "corpus": "nq_open",
+      "id": "1958",
+      "unknown": false,
+      "bytes": 1157357568
+    },
+    {
+      "corpus": "nq_open",
+      "id": "2063",
+      "unknown": false,
+      "bytes": 1398202368
+    },
+    {
+      "corpus": "nq_open",
+      "id": "2125",
+      "unknown": false,
+      "bytes": 1318084608
+    },
+    {
+      "corpus": "nq_open",
+      "id": "2769",
+      "unknown": false,
+      "bytes": 1351114752
+    },
+    {
+      "corpus": "nq_open",
+      "id": "2885",
+      "unknown": false,
+      "bytes": 1249763328
+    },
+    {
+      "corpus": "nq_open",
+      "id": "3026",
+      "unknown": false,
+      "bytes": 1288101888
+    },
+    {
+      "corpus": "nq_open",
+      "id": "3087",
+      "unknown": false,
+      "bytes": 1084612608
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "56e1ddfce3433e14004231d6",
+      "unknown": false,
+      "bytes": 1060823040
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "56e1efa0e3433e140042321b",
+      "unknown": false,
+      "bytes": 1023172608
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5706094b52bb8914006897e1",
+      "unknown": false,
+      "bytes": 1091985408
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "570960cf200fba1400367f03",
+      "unknown": false,
+      "bytes": 1146642432
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "570d2556fed7b91900d45c4b",
+      "unknown": false,
+      "bytes": 1015898112
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "570d26efb3d812140066d490",
+      "unknown": false,
+      "bytes": 1087660032
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5a638d2768151a001a922371",
+      "unknown": false,
+      "bytes": 971268096
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57113ba6b654c5140001fc22",
+      "unknown": false,
+      "bytes": 1037721600
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57113c6da58dae1900cd6d34",
+      "unknown": false,
+      "bytes": 929882112
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "571a484210f8ca1400304fbf",
+      "unknown": false,
+      "bytes": 1073995776
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5725ca4389a1e219009abeb7",
+      "unknown": false,
+      "bytes": 1039196160
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572695285951b619008f774e",
+      "unknown": false,
+      "bytes": 1097490432
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57269cc3dd62a815002e8b15",
+      "unknown": false,
+      "bytes": 1044799488
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572a07c11d046914007796d8",
+      "unknown": false,
+      "bytes": 1068097536
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57265c10f1498d1400e8dd37",
+      "unknown": false,
+      "bytes": 1068097536
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5725d7e438643c19005acdfc",
+      "unknown": false,
+      "bytes": 1050992640
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5725dd7d89a1e219009abfec",
+      "unknown": false,
+      "bytes": 1025040384
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5725f00938643c19005aced9",
+      "unknown": false,
+      "bytes": 1056104448
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5725f5b1271a42140099d373",
+      "unknown": false,
+      "bytes": 1137500160
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5725d52f89a1e219009abf79",
+      "unknown": false,
+      "bytes": 973037568
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57263c78ec44d21400f3dc7c",
+      "unknown": false,
+      "bytes": 1016094720
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5726431aec44d21400f3dd15",
+      "unknown": false,
+      "bytes": 1066328064
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5726534d708984140094c26f",
+      "unknown": false,
+      "bytes": 1099849728
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5a2ed136a83784001a7d24db",
+      "unknown": false,
+      "bytes": 1052073984
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57265700dd62a815002e820f",
+      "unknown": false,
+      "bytes": 1023172608
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57265d08708984140094c39b",
+      "unknown": false,
+      "bytes": 1225777152
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572677e7708984140094c724",
+      "unknown": false,
+      "bytes": 1057087488
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57268882f1498d1400e8e309",
+      "unknown": false,
+      "bytes": 1039196160
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5726e5c95951b619008f81cb",
+      "unknown": false,
+      "bytes": 1090412544
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5726ea985951b619008f8264",
+      "unknown": false,
+      "bytes": 1120493568
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5728151b4b864d1900164429",
+      "unknown": false,
+      "bytes": 981786624
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5728fd3c3f37b31900477f2b",
+      "unknown": false,
+      "bytes": 1122164736
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57273cca708984140094db36",
+      "unknown": false,
+      "bytes": 1048141824
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572754fff1498d1400e8f661",
+      "unknown": false,
+      "bytes": 1094836224
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57274ca8dd62a815002e9aa7",
+      "unknown": false,
+      "bytes": 1046470656
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5727c69d3acd2414000dec13",
+      "unknown": false,
+      "bytes": 1131896832
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57280fd3ff5b5019007d9c26",
+      "unknown": false,
+      "bytes": 1025236992
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572821274b864d1900164510",
+      "unknown": false,
+      "bytes": 1001644032
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5727f05b4b864d1900164069",
+      "unknown": false,
+      "bytes": 1003216896
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572a1c943f37b319004786e1",
+      "unknown": false,
+      "bytes": 1178001408
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad400f0604f3c001a3ffcf3",
+      "unknown": false,
+      "bytes": 1074978816
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57287e512ca10214002da3fb",
+      "unknown": false,
+      "bytes": 1189404672
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57287fec4b864d1900164a3f",
+      "unknown": false,
+      "bytes": 1085005824
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57288428ff5b5019007da290",
+      "unknown": false,
+      "bytes": 1237573632
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572a14af3f37b319004786c1",
+      "unknown": false,
+      "bytes": 1039196160
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad4d10e5b96ef001a10a1a2",
+      "unknown": false,
+      "bytes": 1138188288
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572a0b0b6aef0514001551f6",
+      "unknown": false,
+      "bytes": 1037524992
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572a0ce11d046914007796ff",
+      "unknown": false,
+      "bytes": 1109975040
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57293d116aef051400154bc8",
+      "unknown": false,
+      "bytes": 1064165376
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572995d46aef051400154fe8",
+      "unknown": false,
+      "bytes": 1114693632
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57299c2c6aef051400155020",
+      "unknown": false,
+      "bytes": 1096605696
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57300a25a23a5019007fcc9b",
+      "unknown": false,
+      "bytes": 1199235072
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad02e6777cf76001a686d47",
+      "unknown": false,
+      "bytes": 1169743872
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572fc043a23a5019007fc95e",
+      "unknown": false,
+      "bytes": 1059151872
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "572fd73e947a6a140053cd35",
+      "unknown": false,
+      "bytes": 1008820224
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57300200b2c2fd140056872a",
+      "unknown": false,
+      "bytes": 1078517760
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5730208fa23a5019007fcdef",
+      "unknown": false,
+      "bytes": 977264640
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57302e45947a6a140053d22f",
+      "unknown": false,
+      "bytes": 1089724416
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57302e45947a6a140053d232",
+      "unknown": false,
+      "bytes": 1003413504
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5733a5f54776f41900660f47",
+      "unknown": false,
+      "bytes": 1031921664
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5733a6ac4776f41900660f58",
+      "unknown": false,
+      "bytes": 1267458048
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "57376828c3c5551400e51ebc",
+      "unknown": false,
+      "bytes": 987389952
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5737a0acc3c5551400e51f4b",
+      "unknown": false,
+      "bytes": 1017765888
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad25b9ed7d075001a428e6f",
+      "unknown": true,
+      "bytes": 1116463104
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5a836273e60761001a2eb640",
+      "unknown": true,
+      "bytes": 1012162560
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad4abe25b96ef001a109d66",
+      "unknown": true,
+      "bytes": 1035460608
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad2a901d7d075001a429e2c",
+      "unknown": true,
+      "bytes": 1067016192
+    },
+    {
+      "corpus": "squad_v2",
+      "id": "5ad2bb5fd7d075001a42a081",
+      "unknown": true,
+      "bytes": 1091002368
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_7024465",
+      "unknown": false,
+      "bytes": 1428185088
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_SC_400052",
+      "unknown": false,
+      "bytes": 1433001984
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_400443",
+      "unknown": false,
+      "bytes": 1462198272
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_7085295",
+      "unknown": false,
+      "bytes": 1409507328
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_7085278",
+      "unknown": false,
+      "bytes": 1434771456
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_7123358",
+      "unknown": false,
+      "bytes": 1449025536
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_SC_409666",
+      "unknown": false,
+      "bytes": 1373036544
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_7212888",
+      "unknown": false,
+      "bytes": 1309532160
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_SC_408663",
+      "unknown": false,
+      "bytes": 1427103744
+    },
+    {
+      "corpus": "arc_challenge_closed",
+      "id": "Mercury_SC_400130",
+      "unknown": true,
+      "bytes": 1423958016
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "NCEOGA_2013_8_36",
+      "unknown": false,
+      "bytes": 1457971200
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_7170905",
+      "unknown": false,
+      "bytes": 1406951424
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_7251720",
+      "unknown": false,
+      "bytes": 1441456128
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "NYSEDREGENTS_2012_4_10",
+      "unknown": false,
+      "bytes": 1480777728
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "NYSEDREGENTS_2008_8_16",
+      "unknown": false,
+      "bytes": 1181343744
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_7010973",
+      "unknown": false,
+      "bytes": 1482055680
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_SC_401648",
+      "unknown": false,
+      "bytes": 1387683840
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_7228113",
+      "unknown": false,
+      "bytes": 1494540288
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "NYSEDREGENTS_2012_8_40",
+      "unknown": false,
+      "bytes": 1431724032
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "MSA_2012_5_34",
+      "unknown": false,
+      "bytes": 1344724992
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "NYSEDREGENTS_2012_8_14",
+      "unknown": false,
+      "bytes": 1346396160
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "VASoL_2009_5_12",
+      "unknown": false,
+      "bytes": 1430446080
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_7220483",
+      "unknown": true,
+      "bytes": 1142513664
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "Mercury_SC_405200",
+      "unknown": true,
+      "bytes": 1418158080
+    },
+    {
+      "corpus": "arc_easy_closed",
+      "id": "MEA_2013_5_11",
+      "unknown": true,
+      "bytes": 1261953024
+    }
+  ],
+  "bytes": {
+    "per_question_mean": 1162421534.72,
+    "uniform": {
+      "d2": 710074368,
+      "d4": 1158340608,
+      "d6": 1608376320,
+      "d8": 2074140672
+    }
+  },
+  "by_layer": [
+    {
+      "layer": 0,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0466666666666666,
+      "above_min": 0.04666666666666667
+    },
+    {
+      "layer": 0,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0466666666666666,
+      "above_min": 0.04666666666666667
+    },
+    {
+      "layer": 0,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0466666666666666,
+      "above_min": 0.04666666666666667
+    },
+    {
+      "layer": 0,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0466666666666666,
+      "above_min": 0.04666666666666667
+    },
+    {
+      "layer": 0,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.76,
+      "above_min": 0.6866666666666666
+    },
+    {
+      "layer": 0,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.76,
+      "above_min": 0.6866666666666666
+    },
+    {
+      "layer": 0,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.76,
+      "above_min": 0.6866666666666666
+    },
+    {
+      "layer": 0,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.76,
+      "above_min": 0.6866666666666666
+    },
+    {
+      "layer": 0,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.76,
+      "above_min": 0.6866666666666666
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.02,
+      "above_min": 0.02
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.02,
+      "above_min": 0.02
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.02,
+      "above_min": 0.02
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.02,
+      "above_min": 0.02
+    },
+    {
+      "layer": 1,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.4933333333333334,
+      "above_min": 0.44666666666666666
+    },
+    {
+      "layer": 1,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.4933333333333334,
+      "above_min": 0.44666666666666666
+    },
+    {
+      "layer": 1,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.4933333333333334,
+      "above_min": 0.44666666666666666
+    },
+    {
+      "layer": 1,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.4933333333333334,
+      "above_min": 0.44666666666666666
+    },
+    {
+      "layer": 1,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.4933333333333334,
+      "above_min": 0.44666666666666666
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0066666666666666,
+      "above_min": 0.006666666666666667
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0066666666666666,
+      "above_min": 0.006666666666666667
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0066666666666666,
+      "above_min": 0.006666666666666667
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0066666666666666,
+      "above_min": 0.006666666666666667
+    },
+    {
+      "layer": 2,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.72,
+      "above_min": 0.6533333333333333
+    },
+    {
+      "layer": 2,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.72,
+      "above_min": 0.6533333333333333
+    },
+    {
+      "layer": 2,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.72,
+      "above_min": 0.6533333333333333
+    },
+    {
+      "layer": 2,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.72,
+      "above_min": 0.6533333333333333
+    },
+    {
+      "layer": 2,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.72,
+      "above_min": 0.6533333333333333
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02
+    },
+    {
+      "layer": 3,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.84
+    },
+    {
+      "layer": 3,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.84
+    },
+    {
+      "layer": 3,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.84
+    },
+    {
+      "layer": 3,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.84
+    },
+    {
+      "layer": 3,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.84
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.1133333333333333,
+      "above_min": 0.11333333333333333
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.k_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.1133333333333333,
+      "above_min": 0.11333333333333333
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.v_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.1133333333333333,
+      "above_min": 0.11333333333333333
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1133333333333333,
+      "above_min": 0.11333333333333333
+    },
+    {
+      "layer": 4,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.8333333333333334
+    },
+    {
+      "layer": 4,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.8333333333333334
+    },
+    {
+      "layer": 4,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.8333333333333334
+    },
+    {
+      "layer": 4,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.8333333333333334
+    },
+    {
+      "layer": 4,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.0933333333333333,
+      "above_min": 0.8333333333333334
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02666666666666667
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02666666666666667
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02666666666666667
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0266666666666666,
+      "above_min": 0.02666666666666667
+    },
+    {
+      "layer": 5,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.473333333333333,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 5,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.473333333333333,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 5,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.473333333333333,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 5,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.473333333333333,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 5,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.473333333333333,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.1333333333333333,
+      "above_min": 0.12666666666666668
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.1333333333333333,
+      "above_min": 0.12666666666666668
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.1333333333333333,
+      "above_min": 0.12666666666666668
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1333333333333333,
+      "above_min": 0.12666666666666668
+    },
+    {
+      "layer": 6,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.68,
+      "above_min": 0.94
+    },
+    {
+      "layer": 6,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.68,
+      "above_min": 0.94
+    },
+    {
+      "layer": 6,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.68,
+      "above_min": 0.94
+    },
+    {
+      "layer": 6,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.68,
+      "above_min": 0.94
+    },
+    {
+      "layer": 6,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.68,
+      "above_min": 0.94
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.2066666666666668,
+      "above_min": 0.2
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.2066666666666668,
+      "above_min": 0.2
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.2066666666666668,
+      "above_min": 0.2
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2066666666666668,
+      "above_min": 0.2
+    },
+    {
+      "layer": 7,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.6733333333333333,
+      "above_min": 0.94
+    },
+    {
+      "layer": 7,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.6733333333333333,
+      "above_min": 0.94
+    },
+    {
+      "layer": 7,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.6733333333333333,
+      "above_min": 0.94
+    },
+    {
+      "layer": 7,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.6733333333333333,
+      "above_min": 0.94
+    },
+    {
+      "layer": 7,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.6733333333333333,
+      "above_min": 0.94
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.2133333333333334,
+      "above_min": 0.21333333333333335
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.2133333333333334,
+      "above_min": 0.21333333333333335
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.2133333333333334,
+      "above_min": 0.21333333333333335
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2133333333333334,
+      "above_min": 0.21333333333333335
+    },
+    {
+      "layer": 8,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.8466666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 8,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.8466666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 8,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.8466666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 8,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.8466666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 8,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.8466666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.86,
+      "above_min": 0.7133333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.k_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.86,
+      "above_min": 0.7133333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.v_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.86,
+      "above_min": 0.7133333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.86,
+      "above_min": 0.7133333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.6933333333333334,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.6933333333333334,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.6933333333333334,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.6933333333333334,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 9,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.6933333333333334,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.48,
+      "above_min": 0.4666666666666667
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.48,
+      "above_min": 0.4666666666666667
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.48,
+      "above_min": 0.4666666666666667
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.48,
+      "above_min": 0.4666666666666667
+    },
+    {
+      "layer": 10,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.58,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 10,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.58,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 10,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.58,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 10,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.58,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 10,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.58,
+      "above_min": 0.9066666666666666
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.6066666666666667,
+      "above_min": 0.58
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.6066666666666667,
+      "above_min": 0.58
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.6066666666666667,
+      "above_min": 0.58
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.6066666666666667,
+      "above_min": 0.58
+    },
+    {
+      "layer": 11,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.7,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 11,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.7,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 11,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.7,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 11,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.7,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 11,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.7,
+      "above_min": 0.9533333333333334
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.7266666666666666,
+      "above_min": 0.68
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7266666666666666,
+      "above_min": 0.68
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7266666666666666,
+      "above_min": 0.68
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7266666666666666,
+      "above_min": 0.68
+    },
+    {
+      "layer": 12,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.986666666666667,
+      "above_min": 0.9733333333333334
+    },
+    {
+      "layer": 12,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.986666666666667,
+      "above_min": 0.9733333333333334
+    },
+    {
+      "layer": 12,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.986666666666667,
+      "above_min": 0.9733333333333334
+    },
+    {
+      "layer": 12,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.986666666666667,
+      "above_min": 0.9733333333333334
+    },
+    {
+      "layer": 12,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.986666666666667,
+      "above_min": 0.9733333333333334
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.7133333333333334,
+      "above_min": 0.7
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7133333333333334,
+      "above_min": 0.7
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7133333333333334,
+      "above_min": 0.7
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7133333333333334,
+      "above_min": 0.7
+    },
+    {
+      "layer": 13,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.7666666666666666,
+      "above_min": 0.8733333333333333
+    },
+    {
+      "layer": 13,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.7666666666666666,
+      "above_min": 0.8733333333333333
+    },
+    {
+      "layer": 13,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.7666666666666666,
+      "above_min": 0.8733333333333333
+    },
+    {
+      "layer": 13,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.7666666666666666,
+      "above_min": 0.8733333333333333
+    },
+    {
+      "layer": 13,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.7666666666666666,
+      "above_min": 0.8733333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.6733333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.k_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.6733333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.v_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.6733333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.6733333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.06,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 2.06,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.06,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.06,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 14,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.06,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 15,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 15,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 15,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.5,
+      "above_min": 0.8133333333333334
+    },
+    {
+      "layer": 15,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.5,
+      "above_min": 0.8133333333333334
+    },
+    {
+      "layer": 15,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.5,
+      "above_min": 0.8133333333333334
+    },
+    {
+      "layer": 15,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.5,
+      "above_min": 0.8133333333333334
+    },
+    {
+      "layer": 15,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.5,
+      "above_min": 0.8133333333333334
+    },
+    {
+      "layer": 16,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 16,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 16,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.9533333333333334,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 16,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.9533333333333334,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 16,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.9533333333333334,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 16,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.9533333333333334,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 16,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.9533333333333334,
+      "above_min": 0.7333333333333333
+    },
+    {
+      "layer": 17,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 17,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 17,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.5533333333333332,
+      "above_min": 0.3933333333333333
+    },
+    {
+      "layer": 17,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.5533333333333332,
+      "above_min": 0.3933333333333333
+    },
+    {
+      "layer": 17,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.5533333333333332,
+      "above_min": 0.3933333333333333
+    },
+    {
+      "layer": 17,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.5533333333333332,
+      "above_min": 0.3933333333333333
+    },
+    {
+      "layer": 17,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.5533333333333332,
+      "above_min": 0.3933333333333333
+    },
+    {
+      "layer": 18,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 18,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 18,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 18,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 18,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 18,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 18,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7666666666666666,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 19,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.1466666666666667,
+      "above_min": 0.14666666666666667
+    },
+    {
+      "layer": 19,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1466666666666667,
+      "above_min": 0.14666666666666667
+    },
+    {
+      "layer": 19,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.02,
+      "above_min": 0.7666666666666667
+    },
+    {
+      "layer": 19,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.02,
+      "above_min": 0.7666666666666667
+    },
+    {
+      "layer": 19,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.02,
+      "above_min": 0.7666666666666667
+    },
+    {
+      "layer": 19,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.02,
+      "above_min": 0.7666666666666667
+    },
+    {
+      "layer": 19,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.02,
+      "above_min": 0.7666666666666667
+    },
+    {
+      "layer": 20,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 20,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 20,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.94,
+      "above_min": 0.7533333333333333
+    },
+    {
+      "layer": 20,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.94,
+      "above_min": 0.7533333333333333
+    },
+    {
+      "layer": 20,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.94,
+      "above_min": 0.7533333333333333
+    },
+    {
+      "layer": 20,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.94,
+      "above_min": 0.7533333333333333
+    },
+    {
+      "layer": 20,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.94,
+      "above_min": 0.7533333333333333
+    },
+    {
+      "layer": 21,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 21,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 21,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.78,
+      "above_min": 0.64
+    },
+    {
+      "layer": 21,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.78,
+      "above_min": 0.64
+    },
+    {
+      "layer": 21,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.78,
+      "above_min": 0.64
+    },
+    {
+      "layer": 21,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.78,
+      "above_min": 0.64
+    },
+    {
+      "layer": 21,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.78,
+      "above_min": 0.64
+    },
+    {
+      "layer": 22,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 22,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 22,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.08,
+      "above_min": 0.8466666666666667
+    },
+    {
+      "layer": 22,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.08,
+      "above_min": 0.8466666666666667
+    },
+    {
+      "layer": 22,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.08,
+      "above_min": 0.8466666666666667
+    },
+    {
+      "layer": 22,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.08,
+      "above_min": 0.8466666666666667
+    },
+    {
+      "layer": 22,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.08,
+      "above_min": 0.8466666666666667
+    },
+    {
+      "layer": 23,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 23,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 23,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.56,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 23,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.56,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 23,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.56,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 23,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.56,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 23,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.56,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 24,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.1666666666666667,
+      "above_min": 0.16666666666666666
+    },
+    {
+      "layer": 24,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1666666666666667,
+      "above_min": 0.16666666666666666
+    },
+    {
+      "layer": 24,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.526666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 24,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.526666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 24,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.526666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 24,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.526666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 24,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.526666666666667,
+      "above_min": 0.9666666666666667
+    },
+    {
+      "layer": 25,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 25,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 25,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.033333333333333,
+      "above_min": 0.6
+    },
+    {
+      "layer": 25,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.033333333333333,
+      "above_min": 0.6
+    },
+    {
+      "layer": 25,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.033333333333333,
+      "above_min": 0.6
+    },
+    {
+      "layer": 25,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.033333333333333,
+      "above_min": 0.6
+    },
+    {
+      "layer": 25,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.033333333333333,
+      "above_min": 0.6
+    },
+    {
+      "layer": 26,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 26,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 26,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.9466666666666668,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 26,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.9466666666666668,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 26,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.9466666666666668,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 26,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.9466666666666668,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 26,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.9466666666666668,
+      "above_min": 0.5533333333333333
+    },
+    {
+      "layer": 27,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 27,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 27,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.9333333333333333,
+      "above_min": 0.5466666666666666
+    },
+    {
+      "layer": 27,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.9333333333333333,
+      "above_min": 0.5466666666666666
+    },
+    {
+      "layer": 27,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.9333333333333333,
+      "above_min": 0.5466666666666666
+    },
+    {
+      "layer": 27,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.9333333333333333,
+      "above_min": 0.5466666666666666
+    },
+    {
+      "layer": 27,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.9333333333333333,
+      "above_min": 0.5466666666666666
+    },
+    {
+      "layer": 28,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 28,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 28,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.013333333333333,
+      "above_min": 0.56
+    },
+    {
+      "layer": 28,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.013333333333333,
+      "above_min": 0.56
+    },
+    {
+      "layer": 28,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.013333333333333,
+      "above_min": 0.56
+    },
+    {
+      "layer": 28,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.013333333333333,
+      "above_min": 0.56
+    },
+    {
+      "layer": 28,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.013333333333333,
+      "above_min": 0.56
+    },
+    {
+      "layer": 29,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.04,
+      "above_min": 0.02666666666666667
+    },
+    {
+      "layer": 29,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.04,
+      "above_min": 0.02666666666666667
+    },
+    {
+      "layer": 29,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.8333333333333333,
+      "above_min": 0.5333333333333333
+    },
+    {
+      "layer": 29,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.8333333333333333,
+      "above_min": 0.5333333333333333
+    },
+    {
+      "layer": 29,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.8333333333333333,
+      "above_min": 0.5333333333333333
+    },
+    {
+      "layer": 29,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.8333333333333333,
+      "above_min": 0.5333333333333333
+    },
+    {
+      "layer": 29,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.8333333333333333,
+      "above_min": 0.5333333333333333
+    },
+    {
+      "layer": 30,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 30,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 30,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.7466666666666666,
+      "above_min": 0.49333333333333335
+    },
+    {
+      "layer": 30,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.7466666666666666,
+      "above_min": 0.49333333333333335
+    },
+    {
+      "layer": 30,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7466666666666666,
+      "above_min": 0.49333333333333335
+    },
+    {
+      "layer": 30,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7466666666666666,
+      "above_min": 0.49333333333333335
+    },
+    {
+      "layer": 30,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7466666666666666,
+      "above_min": 0.49333333333333335
+    },
+    {
+      "layer": 31,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 31,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 31,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.7066666666666668,
+      "above_min": 0.46
+    },
+    {
+      "layer": 31,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.7066666666666668,
+      "above_min": 0.46
+    },
+    {
+      "layer": 31,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7066666666666668,
+      "above_min": 0.46
+    },
+    {
+      "layer": 31,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.7066666666666668,
+      "above_min": 0.46
+    },
+    {
+      "layer": 31,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.7066666666666668,
+      "above_min": 0.46
+    },
+    {
+      "layer": 32,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 32,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 32,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.8133333333333332,
+      "above_min": 0.54
+    },
+    {
+      "layer": 32,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.8133333333333332,
+      "above_min": 0.54
+    },
+    {
+      "layer": 32,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.8133333333333332,
+      "above_min": 0.54
+    },
+    {
+      "layer": 32,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.8133333333333332,
+      "above_min": 0.54
+    },
+    {
+      "layer": 32,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.8133333333333332,
+      "above_min": 0.54
+    },
+    {
+      "layer": 33,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 33,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 33,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.1,
+      "above_min": 0.6666666666666666
+    },
+    {
+      "layer": 33,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.1,
+      "above_min": 0.6666666666666666
+    },
+    {
+      "layer": 33,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.1,
+      "above_min": 0.6666666666666666
+    },
+    {
+      "layer": 33,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.1,
+      "above_min": 0.6666666666666666
+    },
+    {
+      "layer": 33,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.1,
+      "above_min": 0.6666666666666666
+    },
+    {
+      "layer": 34,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.1,
+      "above_min": 0.1
+    },
+    {
+      "layer": 34,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1,
+      "above_min": 0.1
+    },
+    {
+      "layer": 34,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.5533333333333332,
+      "above_min": 0.78
+    },
+    {
+      "layer": 34,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 2.5533333333333332,
+      "above_min": 0.78
+    },
+    {
+      "layer": 34,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.5533333333333332,
+      "above_min": 0.78
+    },
+    {
+      "layer": 34,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 2.5533333333333332,
+      "above_min": 0.78
+    },
+    {
+      "layer": 34,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 2.5533333333333332,
+      "above_min": 0.78
+    }
+  ],
+  "gpu": {
+    "samples": 28,
+    "started": "2026-09-20T14:11",
+    "wall_s": 29.298951625823975,
+    "utilization_mean": 75.46428571428571,
+    "utilization_median": 100.0,
+    "memory_reserved_peak_mib": 18356.0,
+    "temperature_mean_c": 58.0,
+    "temperature_peak_c": 64.0,
+    "power_mean_w": 241.61464285714288,
+    "power_peak_w": 395.46,
+    "memory_allocated_peak_mib": 15050.93115234375
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 58.0,
+    "thermal_pause_s": 0.0
+  }
+}

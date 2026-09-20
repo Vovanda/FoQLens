@@ -40,13 +40,12 @@ from foqlens.gguf_weights import PUBLISHED, GgufWeights
 from foqlens.judging import ModelJudge, NotJudged
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
-from foqlens.prompt_variants import SETUPS, WRITTEN_TOKENS, examples_for, needs_train, setup_named
+from foqlens.prompt_variants import SETUPS, TRAIN_POOL, WRITTEN_TOKENS, examples_for, needs_train, setup_named
 from foqlens.quant import Level
 from foqlens.schedule import Schedule
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 LEVELS = {level_label(level): level for level in (Level.BF16, Level.D8, Level.D6, Level.D4, Level.D2)}
-TRAIN_POOL = 2000
 # The setups frozen by the prompt tuning (runs/reference/prompt-tuning/e2b-it, 2026-09-14): where the
 # setups tie within the noise of the tuning share, the one without examples, so that no answer hangs on
 # the examples that happened to be drawn. TriviaQA short-0 EM 0.38 (best 0.40); NQ-open short-0 - the

@@ -1,0 +1,23 @@
+{
+  "gpu": {
+    "samples": 66,
+    "started": "2026-09-20T03:33",
+    "wall_s": 71.07215142250061,
+    "utilization_mean": 28.59090909090909,
+    "utilization_median": 22.5,
+    "memory_reserved_peak_mib": 15904.0,
+    "temperature_mean_c": 52.95454545454545,
+    "temperature_peak_c": 62.0,
+    "power_mean_w": 170.9419696969697,
+    "power_peak_w": 397.61,
+    "memory_allocated_peak_mib": 13027.3662109375
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 62.0,
+    "thermal_pause_s": 0.0
+  }
+}

@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from foqlens.kernels import launch, load
-from foqlens.quant import SCALE_GROUP, RefinedWeight
+from foqlens.quant import RefinedWeight
 
 pytestmark = pytest.mark.gpu
 

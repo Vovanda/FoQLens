@@ -49,6 +49,14 @@ def test_same_batch_gives_identical_masks_and_scores(e2b_eager):
     assert np.array_equal(letter_logprobs_batch(model, tokenizer, PROMPTS, ids), letter_logprobs_batch(model, tokenizer, PROMPTS, ids))
 
 
+def test_the_magnitude_form_of_taylor_is_never_below_the_signed_one(e2b_eager):
+    model, tokenizer, ctl = e2b_eager
+    for got in GradientScorer(model, ctl.modules).score_batch(model, tokenizer, TEXTS):
+        signed, magnitude = got["gradient"][0], got["gradient_magnitude"][0]
+        assert magnitude.shape == signed.shape and np.all(magnitude >= signed - 1e-4 * np.abs(signed).max())
+        assert np.any(magnitude > signed * 1.01)  # somewhere the terms of a block do cancel (#17)
+
+
 def test_padding_positions_never_enter_a_mask(e2b_eager):
     model, tokenizer, ctl = e2b_eager
     batched = BlockScorer(ctl.modules).score_batch(model, tokenizer, TEXTS)
@@ -71,6 +79,25 @@ def test_batched_masks_point_the_same_way_as_alone(e2b_eager):
         assert cosine(ggot["gradient"][0], galone["gradient"][0]) >= MASK_COSINE
         for mode in ("norm", "attention"):  # discrete picks: one center of four may swap on a near-tie
             assert len(set(got[mode][1]) & set(alone[mode][1])) >= blocks.top_k - 1, mode
+    assert all(p.grad is None for p in model.parameters())
+
+
+ANSWERS = ["glucose", "2x", "the Nile"]
+
+
+def test_answer_gradients_cover_every_block_and_batched_point_as_alone(e2b_eager):
+    model, tokenizer, ctl = e2b_eager
+    grads = GradientScorer(model, ctl.modules)
+    batched, losses = grads.answer_batch(model, tokenizer, TEXTS, ANSWERS)
+    for form in ("gradient", "gradient_magnitude"):
+        assert batched[form].shape == (len(TEXTS), grads.n_blocks) and np.isfinite(batched[form]).all(), form
+    assert losses.shape == (len(TEXTS),) and np.all(losses > 0)
+    signed, magnitude = batched["gradient"], batched["gradient_magnitude"]
+    assert np.all(magnitude >= signed - 1e-4 * np.abs(signed).max())
+    for b, (text, answer) in enumerate(zip(TEXTS, ANSWERS)):
+        alone, alone_loss = grads.answer_batch(model, tokenizer, [text], [answer])
+        assert cosine(signed[b], alone["gradient"][0]) >= MASK_COSINE, b
+        assert abs(losses[b] - alone_loss[0]) <= LOGPROB_ATOL, b
     assert all(p.grad is None for p in model.parameters())
 
 

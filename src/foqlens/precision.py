@@ -35,7 +35,8 @@ Invariants (each one has a test):
 - Invariant: a layout read by the kernel gives the unpacked output within a bf16 step of the largest output, and a
   token's output does not depend on the other tokens of the batch; a baked level and bf16 never go to the kernel.
 - Invariant: a layout read by the kernel on an input past KERNEL_MAX_TOKENS is bit-exact with F.linear over the weight
-  read block by block to its depth in torch, and a sample of a per-sample layout reads its own layout.
+  read block by block to its depth in torch, and a sample of a per-sample layout reads its own layout - also when the
+  batch holds fewer levels than samples and the copy is unpacked once per level instead of once per sample.
 """
 
 from __future__ import annotations
@@ -140,6 +141,14 @@ class MixedPrecisionLinear(nn.Module):
         """Kinds of quantized copies of the weight that are held, in the order they were first needed."""
         return tuple(self._packed)
 
+    @property
+    def refined(self) -> _DepthReader | None:
+        """The refined copy every read depth shares, built on the first need as a read of a depth builds it (from the
+        model's file, or quantized from bf16); None for a module that reads a baked level and holds no copy."""
+        if RefinedWeight not in self._packed and self._native is Level.BF16 and self.weight is not None:
+            self._materialize(DEEPEST)
+        return self._packed.get(RefinedWeight)
+
     def _materialize(self, level: Level) -> None:
         """Quantize the weight into the level's storage on its first use; bf16, ZERO and a baked level need no copy."""
         kind = STORAGE.get(level)
@@ -225,6 +234,14 @@ class MixedPrecisionLinear(nn.Module):
         self._packed = {RefinedWeight: self._packed[RefinedWeight]}
         self.weight = None
         self.readable = self.RESIDENT
+
+    def read_weight(self, level: Level) -> torch.Tensor:
+        """The dense weight every block reads at `level` (a read depth), in the weight's dtype - for a signal that needs
+        what a level costs a block (its quantization error), not for the forward pass."""
+        if not level.depth:
+            raise ValueError(f"{level.name} is not a read depth of the refined copy")
+        self._materialize(level)
+        return self._packed[RefinedWeight].dequantize(self.weight.dtype, level.depth)
 
     def bake(self, level: Level) -> None:
         """Read one depth at the cost of bf16: the weight read to it replaces the bf16 weight and every copy.
@@ -334,14 +351,30 @@ class MixedPrecisionLinear(nn.Module):
 
     def _unpacked_forward(self, x: torch.Tensor) -> torch.Tensor:
         """A long input times the copy unpacked by the kernel, every block to its depth, in one GEMM; under per-sample
-        layouts one unpacking and one GEMM per sample."""
+        layouts one unpacking and one GEMM per sample, or per level in use when there are fewer levels than samples."""
         copy = self._packed[RefinedWeight]
         if self._depths.ndim == 1:
             return F.linear(x, kquant_unpack(copy, self._depths), self.bias)
         depths = self._depths[self._samples]
         if x.shape[0] != depths.shape[0]:
             raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {depths.shape[0]}")
+        if len(self._used) < depths.shape[0]:
+            return self._per_level_forward(x, copy)
         return torch.stack([F.linear(sample, kquant_unpack(copy, d), self.bias) for sample, d in zip(x, depths)])
+
+    def _per_level_forward(self, x: torch.Tensor, copy: KRefinedWeight) -> torch.Tensor:
+        """Per-sample layouts over few levels - many variants of one prompt: the whole batch times the copy unpacked
+        once per level, every sample's rows selected from its own level (a row depends only on its block's level)."""
+        table = _depth_table(self._device)
+        outputs = [F.linear(x, kquant_unpack(copy, table[torch.full((self.n_blocks,), int(level), device=self._device)]),
+                            self.bias) for level in self._used]
+        if self._rows is None:
+            return outputs[0]
+        rows = self._rows[self._samples]
+        out = outputs[0]
+        for level, output in zip(self._used[1:], outputs[1:]):
+            out = torch.where(rows == int(level), output, out)
+        return out
 
     def _outputs_at(self, levels: tuple[Level, ...], x: torch.Tensor) -> dict[Level, torch.Tensor]:
         """output_at for every level; several read depths come from one accumulation of the refined copy."""

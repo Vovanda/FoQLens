@@ -5,28 +5,38 @@ anything with a name, a batch size and a score_batch (MaskSource): Bench.masks d
 scorer is behind it, so a new score is a new source class. The bench runs at a share of the GPU
 (gpu_share.py): that share of the VRAM, and rest after every batch.
 
-Invariant: masks are always computed with every block at bf16.
+The address sources of #18 are registered by name in ADDRESS_SOURCES with their batch and whether they can read the
+first layers only; a new source is one more entry, and every script that lists sources takes it from there.
+
+Invariant: masks are computed with every block at one level - bf16 unless a working address asks for its base.
+Invariant: every name of ADDRESS_SOURCES builds a source of that name.
 """
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from enum import Enum
-from functools import cached_property, partial
+from functools import cached_property
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 import numpy as np
 import torch
 
 from foqlens import model as fm
 from foqlens import refocustensors
+from foqlens.activity import HeadEnergyScorer, HybridScorer, NeuronActivityScorer
+from foqlens.error_energy import ErrorEnergyScorer
 from foqlens.gpu_monitor import gpu_temperature
 from foqlens.gpu_share import FULL, Cooldown, Pacer, ThermalGuard, Throttle
 from foqlens.precision import Controller, install
 from foqlens.quality import compute_masks, token_batches
 from foqlens.quant import Level
 from foqlens.scoring import BlockScorer, GradientScorer
+from foqlens.runlog import stage
+
+LOG = logging.getLogger(__name__)
 
 MASK_SOURCES = ("pooled", "gradient")  # the names of Bench.sources, in order
 # Mask passes are batched by tokens (quality.token_batches): a batch holds at most as many padded tokens as
@@ -73,6 +83,68 @@ class GradientMask:
         return [r["gradient"][0] for r in self.scorer.score_batch(model, tokenizer, texts)]
 
 
+@dataclass(frozen=True)
+class GradientMagnitudeMask:
+    """The same backward pass summed as |gradient x activation|: terms of opposite sign do not cancel (issue #17)."""
+
+    scorer: GradientScorer
+    batch_size: int
+    name: str = "gradient_magnitude"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return [r["gradient_magnitude"][0] for r in self.scorer.score_batch(model, tokenizer, texts)]
+
+
+@dataclass(frozen=True)
+class NeuronActivityMask:
+    """Source 2 of #18: phi(gate) * up per group of neurons, on their gate and up blocks - forward only."""
+
+    scorer: NeuronActivityScorer
+    batch_size: int
+    name: str = "neuron_activity"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
+@dataclass(frozen=True)
+class HeadEnergyMask:
+    """Source 3 of #18: every head's output energy at the input of o_proj, on its q_proj blocks - forward only."""
+
+    scorer: HeadEnergyScorer
+    batch_size: int
+    name: str = "head_energy"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
+@dataclass(frozen=True)
+class HybridMask:
+    """Neuron activity and head energy in one forward pass, each at length 1 per question, summed (activity.HybridScorer):
+    the MLP's gate and up blocks and the attention's q blocks in one address."""
+
+    scorer: HybridScorer
+    batch_size: int
+    name: str = "hybrid"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
+@dataclass(frozen=True)
+class ErrorEnergyMask:
+    """An oracle of the sensitivity (error_energy.py): the energy of the D2-D8 quantization error in every block's output,
+    on the question's inputs at full precision - a reference of the bench, never a signal at inference."""
+
+    scorer: ErrorEnergyScorer
+    batch_size: int
+    name: str = "error_energy"
+
+    def score_batch(self, model, tokenizer, texts: list[str]) -> list[np.ndarray]:
+        return list(self.scorer.score_batch(model, tokenizer, texts))
+
+
 class ModelSource(Enum):
     """Where the bench takes its model from: the cut .refocustensors folder, read to the source (FILE) or only to its
     depths with no source weight of a controlled module loaded (RESIDENT - D2 ... D8, no bf16, so no masks), or the
@@ -99,19 +171,20 @@ class Bench:
         directory = directory or refocustensors.model_directory(model_id)
         if source is not ModelSource.CHECKPOINT and not (directory / refocustensors.FILE).exists():
             raise FileNotFoundError(f"no cut model in {directory}: run scripts/cut_model.py, or load the checkpoint")
-        if source is ModelSource.FILE:
-            model, tokenizer, copy = refocustensors.load(directory, attn_implementation=attn_implementation,
-                                                         gpu_share=gpu_share)
-            ctl = install(model, copy=copy)
-        elif source is ModelSource.RESIDENT:
-            model, tokenizer, ctl = refocustensors.load_resident(directory, attn_implementation=attn_implementation,
-                                                                 gpu_share=gpu_share)
-        else:
-            model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
-            ctl = install(model)
+        with stage(LOG, f"load {model_id} from {source.name.lower()} {directory.name}"):
+            if source is ModelSource.FILE:
+                model, tokenizer, copy = refocustensors.load(directory, attn_implementation=attn_implementation,
+                                                             gpu_share=gpu_share)
+                ctl = install(model, copy=copy)
+            elif source is ModelSource.RESIDENT:
+                model, tokenizer, ctl = refocustensors.load_resident(directory, attn_implementation=attn_implementation,
+                                                                     gpu_share=gpu_share)
+            else:
+                model, tokenizer = fm.load(model_id, attn_implementation=attn_implementation, gpu_share=gpu_share)
+                ctl = install(model)
         # the share paces the batches, the hourly break rests the card, the guard keeps it under its
         # ceiling whatever the share
-        log = partial(print, flush=True)
+        log = LOG.info
         pacer = ThermalGuard(Cooldown(Throttle(gpu_share), log=log), gpu_temperature, log=log)
         return cls(model, tokenizer, ctl, pacer)
 
@@ -127,21 +200,72 @@ class Bench:
         """The standard mask sources, named as MASK_SOURCES."""
         return [PooledMask(self.pooled, pooled_batch), GradientMask(self.gradient, gradient_batch)]
 
-    def masks(self, prompts: list[str], sources: list[MaskSource]) -> dict[str, np.ndarray]:
-        """Raw masks of every prompt from every source: {source name: [prompts, n_blocks]}."""
-        self.ctl.set_all(Level.BF16)
+    def source(self, name: str, batch_size: int | None = None, layers: set[int] | None = None) -> MaskSource:
+        """A mask source of #18 by its name (ADDRESS_SOURCES), at its own batch unless `batch_size` is given; `layers`
+        limits a source that can read the first layers only - the first N of a working address."""
+        if name not in ADDRESS_SOURCES:
+            raise ValueError(f"unknown mask source {name!r}, expected one of {sorted(ADDRESS_SOURCES)}")
+        spec = ADDRESS_SOURCES[name]
+        if layers is not None and not spec.reads_layers:
+            raise ValueError(f"{name} reads every layer; only {sorted(n for n, s in ADDRESS_SOURCES.items() if s.reads_layers)} read the first ones")
+        return spec.make(self, batch_size or spec.batch, layers)
+
+    @property
+    def n_heads(self) -> int:
+        return self.model.config.get_text_config(decoder=True).num_attention_heads
+
+    def masks(self, prompts: list[str], sources: list[MaskSource], level: Level = Level.BF16) -> dict[str, np.ndarray]:
+        """Raw masks of every prompt from every source, the model read at `level`: {source name: [prompts, n_blocks]}.
+        bf16 is the reference; a working address reads at the base precision."""
+        self.ctl.set_all(level)
         lengths = [len(ids) for ids in self.tokenizer(prompts)["input_ids"]]  # the tokens encode() pads to
         longest = max(lengths, default=1)
-        masks = {
-            src.name: compute_masks(
-                lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts), prompts, src.batch_size,
-                self.throttle, groups=token_batches(lengths, src.batch_size * longest, src.batch_size * MAX_BATCH_FACTOR),
-            )
-            for src in sources
-        }
+        masks = {}
+        for src in sources:
+            with stage(LOG, f"masks {src.name} of {len(prompts)} prompts at {level.name}"):
+                masks[src.name] = compute_masks(
+                    lambda texts, src=src: src.score_batch(self.model, self.tokenizer, texts), prompts, src.batch_size,
+                    self.throttle,
+                    groups=token_batches(lengths, src.batch_size * longest, src.batch_size * MAX_BATCH_FACTOR),
+                    lengths=lengths,
+                )
         # the backward pass leaves a fragmented cache behind; evaluation starts from a clean one
         torch.cuda.empty_cache()
         return masks
+
+
+@dataclass(frozen=True)
+class AddressSource:
+    """How a mask source of #18 is built on a bench: make(bench, batch size, layers or None), its own batch, and whether
+    it can read the first layers only (a forward source) or needs the whole pass (a backward one)."""
+
+    make: Callable[[Bench, int, set[int] | None], MaskSource]
+    batch: int
+    reads_layers: bool
+
+
+ADDRESS_SOURCES: dict[str, AddressSource] = {
+    "pooled": AddressSource(lambda b, n, _: PooledMask(b.pooled, n), POOLED_BATCH, False),
+    "neuron_activity": AddressSource(
+        lambda b, n, layers: NeuronActivityMask(NeuronActivityScorer(b.ctl.modules, layers), n), POOLED_BATCH, True),
+    "head_energy": AddressSource(
+        lambda b, n, layers: HeadEnergyMask(HeadEnergyScorer(b.ctl.modules, b.n_heads, layers), n), POOLED_BATCH, True),
+    "hybrid": AddressSource(
+        lambda b, n, layers: HybridMask(HybridScorer((NeuronActivityScorer(b.ctl.modules, layers),
+                                                     HeadEnergyScorer(b.ctl.modules, b.n_heads, layers))), n),
+        POOLED_BATCH, True),
+    "gradient": AddressSource(lambda b, n, _: GradientMask(b.gradient, n), GRADIENT_BATCH, False),
+    "error_energy": AddressSource(lambda b, n, _: ErrorEnergyMask(ErrorEnergyScorer(b.ctl.modules), n), POOLED_BATCH, False),
+    # the upper rung: where D4 still falls short of D8 on the question's inputs
+    "error_energy_d4": AddressSource(
+        lambda b, n, _: ErrorEnergyMask(ErrorEnergyScorer(b.ctl.modules, Level.D4, Level.D8), n, "error_energy_d4"),
+        POOLED_BATCH, False),
+    # the rung under D8: with D2 and D4 it gives how much each rung cuts a group's error (foqlens.precision_field)
+    "error_energy_d6": AddressSource(
+        lambda b, n, _: ErrorEnergyMask(ErrorEnergyScorer(b.ctl.modules, Level.D6, Level.D8), n, "error_energy_d6"),
+        POOLED_BATCH, False),
+    "gradient_magnitude": AddressSource(lambda b, n, _: GradientMagnitudeMask(b.gradient, n), GRADIENT_BATCH, False),
+}
 
 
 def subtract_background(masks: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

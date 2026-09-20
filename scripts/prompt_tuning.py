@@ -27,13 +27,12 @@ from foqlens.io import answers_path, append_answers, read_answers, write_json
 from foqlens.judging import ModelJudge
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
-from foqlens.prompt_variants import SETUPS, agreement, examples_for, needs_train, setup_summary
+from foqlens.prompt_variants import SETUPS, TRAIN_POOL, agreement, examples_for, needs_train, setup_summary
 from foqlens.quant import Level
 from foqlens.selection import tuning_sample
 
 MODELS = {"e2b-it": fm.E2B_IT, "e4b-it": fm.E4B_IT}
 LEVEL = Level.BF16  # the setup is chosen on the full model, one for every model afterwards
-TRAIN_POOL = 2000   # the first records of a train split to draw examples from
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

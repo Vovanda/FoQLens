@@ -1,0 +1,1 @@
+{"level": "INFO", "logger": "foqlens.pipeline", "message": "start load google/gemma-4-E2B-it from file gemma-4-E2B-it@3e22461f-bartowski-Q2_K", "stage": "load google/gemma-4-E2B-it from file gemma-4-E2B-it@3e22461f-bartowski-Q2_K", "run": "20260919-232043", "script": "group_oracle", "timestamp": "2026-09-19T17:20:43.904107+00:00"}

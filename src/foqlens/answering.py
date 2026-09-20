@@ -4,7 +4,8 @@ One step shared by every run that collects answers - choosing the prompt, stage 
 an answer line means the same thing whichever run wrote it. Answers written earlier are read again by
 the present judge the same way (`rejudge`): the reply stays, the verdicts are taken anew.
 
-Invariant: a batch is written at the Asking's level and judged at bf16; the level is set again before every batch.
+Invariant: a batch is written at the Asking's reading - its level, or every question's own layout - and judged at bf16;
+the reading is set again before every batch.
 Invariant: one Answer per row, in the rows' order.
 Invariant: rejudging changes only the judge's fields of an answer.
 """
@@ -12,6 +13,7 @@ Invariant: rejudging changes only the judge's fields of an answer.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from typing import Protocol
 
 from foqlens.corpora import Row
 from foqlens.extractive import exact_match, token_f1
@@ -38,9 +40,34 @@ def level_label(level: Level) -> str:
     return level.name.lower()
 
 
+class Reading(Protocol):
+    """How the weights are read for a batch: one level for all, or a layout of every question's own."""
+
+    label: str  # what answer lines name the level by
+
+    def apply(self, ctl, corpus: str, rows: list[Row]) -> None:
+        """Set the controller for this batch, one row of the batch per sample."""
+        ...
+
+
+@dataclass(frozen=True)
+class UniformReading:
+    """Every block at one level - the uniform ladder."""
+
+    level: Level
+
+    @property
+    def label(self) -> str:
+        return level_label(self.level)
+
+    def apply(self, ctl, corpus: str, rows: list[Row]) -> None:
+        ctl.set_all(self.level)
+
+
 @dataclass(frozen=True)
 class Asking:
-    """How a corpus is asked in a run: its setup and examples, the model and the level it is read at."""
+    """How a corpus is asked in a run: its setup and examples, the model and how its weights are read - the level, or
+    `reading` where each question has a layout of its own (regulator.RegulatedReading)."""
 
     corpus: str
     revision: str        # the corpus's pinned revision
@@ -48,25 +75,37 @@ class Asking:
     level: Level
     setup: Variant
     examples: tuple = ()
+    reading: Reading | None = None
+
+    @property
+    def read(self) -> Reading:
+        return UniformReading(self.level) if self.reading is None else self.reading
 
     def prompts(self, fmt: PromptFormat, rows: list[Row]) -> list[str]:
         return [fmt.render(self.setup.messages(r.context, r.question, self.examples)) for r in rows]
 
     def batches(self, fmt: PromptFormat, tokenizer, rows: list[Row], max_tokens: int | None = None) -> list[list[Row]]:
-        """The rows in batches by prompt length: at most BATCH prompts and `max_tokens` (BATCH_TOKENS) padded tokens each."""
+        """The rows in batches by prompt length: at most BATCH prompts and `max_tokens` (BATCH_TOKENS) padded tokens each.
+
+        No rows is no batches: a run that resumes over a layout whose file it already holds whole asks for nothing here,
+        and the tokenizer raises IndexError on an empty call instead of returning an empty encoding.
+        """
+        if not rows:
+            return []
         lengths = [len(ids) for ids in tokenizer(self.prompts(fmt, rows))["input_ids"]]
         return [[rows[i] for i in idx.tolist()] for idx in token_batches(lengths, max_tokens or BATCH_TOKENS, BATCH)]
 
     def answer(self, model, tokenizer, ctl, fmt: PromptFormat, judge, rows: list[Row], pacer: Pacer = FULL,
                decoder: Decoder = DYNAMIC) -> list[Answer]:
-        ctl.set_all(self.level)
+        reading = self.read
+        reading.apply(ctl, self.corpus, rows)
         with pacer.batch():
             written = generate_replies(model, tokenizer, self.prompts(fmt, rows), self.setup.max_new_tokens, self.setup.stop,
                                        decoder)
         parts = [self.setup.extract(w.text) for w in written]
         verdicts = judge_answers(judge, rows, [a for _, a in parts], pacer)
         return [with_verdict(Answer(corpus=self.corpus, id=r.id, revision=self.revision, model=self.model,
-                                    level=level_label(self.level), prompt=self.setup.name, reply=w.text, answer=a,
+                                    level=reading.label, prompt=self.setup.name, reply=w.text, answer=a,
                                     reasoning=reasoning, exact_match=exact_match(a, list(r.answers)),
                                     f1=token_f1(a, list(r.answers)), tokens=w.tokens, stopped=w.stopped), v)
                 for r, w, (reasoning, a), v in zip(rows, written, parts, verdicts, strict=True)]

@@ -41,6 +41,22 @@ def test_accepted_is_the_reasoning_judges_verdict_where_it_gave_one_and_the_one_
     assert [(r["id"], r["accepted"]) for r in rows] == [("1", True), ("2", False), ("3", False), ("4", True)]
 
 
+def test_a_reply_is_the_same_answer_through_a_capital_a_full_stop_and_a_double_space(tmp_path):
+    write_jsonl(tmp_path / "answers/top/c.jsonl",
+                [{"corpus": "c", "id": i, "level": "top", "reply": r}
+                 for i, r in (("1", "water tower"), ("2", "water tower"), ("3", "water tower"),
+                              ("4", "commutative ring R"))])
+    write_jsonl(tmp_path / "answers/map/c.jsonl",
+                [{"corpus": "c", "id": i, "level": "map", "reply": r}
+                 for i, r in (("1", "Water tower"), ("2", "water tower."), ("3", "water  tower"),
+                              ("4", "commutative ring"))])
+    got = RunFiles(tmp_path / "answers").same_reply("top")[0]
+    assert got["same"] == pytest.approx(3 / 4)  # only the answer that lost the R differs
+    assert got["same_word_for_word"] == pytest.approx(0.0)  # word for word, the layout is charged for all four
+    assert got["one_inside_the_other"] == pytest.approx(1.0)  # the truncation is the reference's own opening
+    assert 0.9 < got["likeness"] <= 1.0  # and by likeness all four stand next to the reference
+
+
 def test_a_slice_reads_the_files_as_they_are_when_asked(tmp_path):
     path = tmp_path / "answers/bf16/c.jsonl"
     write_jsonl(path, [answer("1", 1.0, 0.9)])

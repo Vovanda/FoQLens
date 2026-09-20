@@ -27,3 +27,4 @@ hf-cache/
 
 # browser artefacts from smoke runs
 .playwright-mcp/
+.idea/

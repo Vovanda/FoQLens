@@ -18,3 +18,5 @@ Status: `planned` - preregistration in progress; `fixed` - preregistration commi
 | [E001](E001-uniform-quantization/_index.md) | Uniform quantization on the corpus: the share of knowledge each level keeps | 2026-09-15 | H6 | done |
 | [E002](E002-base-precision-d2/_index.md) | Uniform quantization with a working base precision D2: the k-quant ladder D8-D2, the baseline of the filter | 2026-09-17 | - | done |
 | [E003](E003-calibrated-base/_index.md) | The ladder over a calibrated base: our refinements over bartowski's imatrix Q2_K, read from the model file, on tensor cores | 2026-09-18 | - | done |
+| [E004](E004-question-address/_index.md) | The address of a query: which signal identifies the query rather than its wording, and how cheaply it can be read | 2026-09-19 | H4 | done |
+| [E005](E005-precision-map/_index.md) | The precision map of a query: does a layout built for one question hold knowledge more cheaply than a uniform rung | 2026-09-20 | H3, H4 | done |

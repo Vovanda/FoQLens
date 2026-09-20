@@ -47,6 +47,7 @@ SHORT_TOKENS = 32     # a few words; beyond this the model is explaining itself
 # An -it model writes its solution in markdown steps: at 256 tokens 13 of 16 ARC replies ran out before
 # their answer line (smoke 2026-09-14).
 WRITTEN_TOKENS = 512
+TRAIN_POOL = 2000  # the first records of a train split that few-shot examples are drawn from
 
 # Worked ARC-Challenge solutions, written and checked against the dataset's answer (train split, allenai/ai2_arc).
 WORKED = (

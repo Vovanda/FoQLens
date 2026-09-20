@@ -85,6 +85,38 @@ class RunFiles:
             from verdicts v join frozen f using (corpus, id) join c using (corpus)
             where f.part = ? group by {keys} order by {keys}""", [part])
 
+    # A reply read as the same answer: one case, one spacing, no punctuation at either end. Read by hand on the maps
+    # of 20.09, two of six disagreements were a capital letter and a full stop - measured word for word, a layout is
+    # charged for how it set the answer out rather than for what it answered.
+    SAME_FORM = r"lower(trim(regexp_replace(regexp_replace({}, '\s+', ' ', 'g'), '^[^\w]+|[^\w]+$', '', 'g')))"
+
+    def same_reply(self, reference: str) -> list[dict]:
+        """Per level, how far its reply is the reference level's on the same question - what a precision field is
+        measured by (Volodya 20.09: no judge, the question is whether the layout answers as the whole network does).
+
+        Four readings of one comparison, loosest last: word for word; the same answer set out differently (one case,
+        one spacing, no punctuation at either end); one answer inside the other, which is what a truncation or an
+        addition looks like; and how close the two strings are (Jaro-Winkler), averaged over the questions.
+        """
+        mine, theirs = self.SAME_FORM.format("a.reply"), self.SAME_FORM.format("r.reply")
+        return self.query(rf"""
+            select a.level, count(*) n,
+                   avg(({mine} = {theirs})::int) same,
+                   avg((a.reply = r.reply)::int) same_word_for_word,
+                   avg((contains({mine}, {theirs}) or contains({theirs}, {mine}))::int) one_inside_the_other,
+                   avg(jaro_winkler_similarity({mine}, {theirs})) likeness
+            from answers a join answers r using (corpus, id)
+            where r.level = ? and a.level != r.level group by a.level order by same desc""", [reference])
+
+    def same_reply_by_corpus(self, reference: str) -> list[dict]:
+        """As same_reply, per level and corpus."""
+        return self.query(rf"""
+            select a.level, a.corpus, count(*) n,
+                   avg(({self.SAME_FORM.format('a.reply')} = {self.SAME_FORM.format('r.reply')})::int) same
+            from answers a join answers r using (corpus, id)
+            where r.level = ? and a.level != r.level group by a.level, a.corpus order by a.level, a.corpus""",
+                          [reference])
+
     def agreement_with_readings(self, level: str) -> dict[str, dict[str, float]]:
         """Per corpus: how many answers Claude read, and how often the exact match and the judge agree with the reading."""
         known = ", ".join(f"'{reading}'" for reading in sorted(KNOWING))

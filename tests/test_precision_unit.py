@@ -20,6 +20,14 @@ DEVICE = "cuda"
 BF16_TOL = {"atol": 2e-2, "rtol": 2e-2}
 
 
+B, N, Z = Level.BF16, Level.NF4, Level.ZERO
+
+
+def codes(*rows) -> np.ndarray:
+    """A layout by level names: one row of levels, or several rows for per-sample layouts."""
+    return np.array(rows if isinstance(rows[0], list) else list(rows), dtype=np.uint8)
+
+
 def make_linear(out_features: int = 200, in_features: int = 256, seed: int = 0) -> nn.Linear:
     torch.manual_seed(seed)
     linear = nn.Linear(in_features, out_features, bias=False, device=DEVICE, dtype=torch.bfloat16)
@@ -68,11 +76,11 @@ def test_zero_level_removes_the_block_and_costs_no_bits():
 def test_packed_copies_exist_only_for_levels_in_use():
     mixed = MixedPrecisionLinear(make_linear(), block_rows=64)
     assert mixed.storages == ()
-    mixed.set_levels(np.array([[0, 3, 0, 3], [3, 0, 3, 0]], dtype=np.uint8))
+    mixed.set_levels(codes([B, Z, B, Z], [Z, B, Z, B]))
     assert mixed.storages == ()  # a bf16 / ZERO bench holds no quantized copy
     mixed.set_levels(Level.NF4)
     assert mixed.storages == (Nf4Weight,)
-    mixed.set_levels(np.array([0, 1, 2, 3], dtype=np.uint8))
+    mixed.set_levels(codes(B, Level.INT8, Level.NF4, Z))
     assert mixed.storages == (Nf4Weight, Int8Weight)
     mixed.set_levels(np.array([Level.D2, Level.D8, Level.D4, Level.ZERO], dtype=np.uint8))
     assert mixed.storages == (Nf4Weight, Int8Weight, RefinedWeight)  # one refined copy serves every depth
@@ -101,7 +109,7 @@ def test_depth_levels_switch_only_their_block_and_cost_their_bits():
     mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
     x = make_input()
     before = mixed(x)
-    mixed.set_levels(np.array([0, Level.D4, 0, 0], dtype=np.uint8))
+    mixed.set_levels(codes(B, Level.D4, B, B))
     after = mixed(x)
     assert torch.equal(after[..., :64], before[..., :64]) and torch.equal(after[..., 128:], before[..., 128:])
     assert not torch.equal(after[..., 64:128], before[..., 64:128])
@@ -276,7 +284,7 @@ def test_switching_one_block_changes_only_its_rows():
 def test_per_sample_layouts_match_running_each_sample_alone():
     mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
     x = make_input(batch=3)
-    layouts = np.array([[0, 0, 0, 0], [2, 0, 2, 0], [1, 2, 0, 2]], dtype=np.uint8)
+    layouts = codes([B, B, B, B], [N, B, N, B], [Level.INT8, N, B, N])
     mixed.set_levels(layouts)
     batched = mixed(x)
     for b in range(3):
@@ -286,7 +294,7 @@ def test_per_sample_layouts_match_running_each_sample_alone():
 
 def test_per_sample_layouts_reject_a_wrong_batch():
     mixed = MixedPrecisionLinear(make_linear(), block_rows=64)
-    mixed.set_levels(np.array([[0, 2, 0, 2], [2, 0, 2, 0]], dtype=np.uint8))
+    mixed.set_levels(codes([B, N, B, N], [N, B, N, B]))
     with pytest.raises(ValueError):
         mixed(make_input(batch=3))
 
@@ -311,7 +319,7 @@ def test_last_block_may_be_partial():
     mixed = MixedPrecisionLinear(make_linear(out_features=200), block_rows=64)
     assert mixed.n_blocks == 4
     assert mixed.block_sizes().tolist() == [64, 64, 64, 8]
-    mixed.set_levels(np.array([0, 0, 0, 1], dtype=np.uint8))
+    mixed.set_levels(codes(B, B, B, Level.INT8))
     assert mixed(make_input()).shape[-1] == 200
 
 
@@ -335,10 +343,10 @@ def test_layout_across_modules_and_per_sample_mean_bits():
     big = MixedPrecisionLinear(make_linear(out_features=192), block_rows=64)
     ctl = Controller({"layers.0.small": small, "layers.1.big": big})
     assert ctl.n_blocks == 4
-    ctl.set_layout(np.array([[0, 0, 0, 0], [2, 2, 2, 2]], dtype=np.uint8))
+    ctl.set_layout(codes([B, B, B, B], [N, N, N, N]))
     assert ctl.mean_bits().tolist() == [16.0, 4.0]
-    ctl.set_layout(np.array([2, 0, 0, 0], dtype=np.uint8))
-    assert ctl.layout() == {"layers.0.small": [2], "layers.1.big": [0, 0, 0]}
+    ctl.set_layout(codes(N, B, B, B))
+    assert ctl.layout() == {"layers.0.small": [int(N)], "layers.1.big": [int(B)] * 3}
     with pytest.raises(ValueError):
         ctl.set_layout(np.zeros(5, dtype=np.uint8))
 
@@ -346,7 +354,7 @@ def test_layout_across_modules_and_per_sample_mean_bits():
 def test_layout_reports_actual_levels():
     ctl = Controller({"layers.0.a": MixedPrecisionLinear(make_linear(), block_rows=64)})
     ctl.set_blocks("layers.0.a", [0, 2], Level.NF4)
-    assert ctl.layout() == {"layers.0.a": [2, 0, 2, 0]}
+    assert ctl.layout() == {"layers.0.a": [int(N), int(B), int(N), int(B)]}
     with pytest.raises(KeyError):
         ctl.set_layer(5, Level.NF4)
 

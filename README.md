@@ -146,7 +146,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
   - `model`, `quant`, `kquant`, `refinements`, `precision` - loading, quantizers, the k-quant copy with refinements (`refinements`), the per-block precision controller; `refocustensors`, `safetensors_io`, `tail_cost` - the model file, its reading and writing tensor by tensor, the cost of its exact tail; `gguf_weights` - a published GGUF's weights for comparison;
   - `scoring`, `pipeline` - mask sources (a new score is a new `MaskSource`);
   - `evaluate`, `quality` - quality metrics (a new metric is a new `QualityMetric`) and evaluation;
-  - `budget`, `layouts`, `weight_map`, `zones`, `neighbours` - from masks to layouts: zone sources, fields and level rules as replaceable parts;
+  - `budget`, `layouts`, `zones`, `graph_zones`, `metric`, `coupling`, `activity`, `projection`, `strategies`, `regulator`, `neighbours` - from masks to layouts: the block graph and its metrics, zone sources, reach and level rules as replaceable parts, and the regulator that checks a layout against what the kernel reads;
   - `gpu_share`, `gpu_monitor` - the share of the GPU a run takes, and its utilization.
 - [`scripts/`](scripts/) - model download and one script per run; they only wire the bench together.
 - [`tests/`](tests/) - unit tests and bench health tests.

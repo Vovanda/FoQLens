@@ -26,6 +26,13 @@ We write high-performance code and hold it to the usual engineering principles -
 - **Tests for every behavior**, including performance-critical rewrites: a batched or cached path must match the reference path within the stated tolerance.
 - **Invariants are written down.** Every module states its invariants in its docstring as `Invariant: ...`, exact or approximate with the measured bound, and each has a test. bf16 inference is not batch-invariant (token states move up to ~2% with the batch size), so exact claims are made only where they hold - same inputs in the same batch, per-sample layouts against the same batch - and comparisons between configurations always run on the same batches.
 - No magic numbers in code: named constants with a reason, or a parameter.
+- **Every run logs, structured.** A module logs to `logging.getLogger(__name__)` under `foqlens` and never knows the
+  sinks; a script calls `foqlens.runlog.setup` once, and where the events go - stderr, a JSON Lines file beside the run
+  for Loki or Elastic, a server - is `configs/logging.toml` (dictConfig), not code. INFO for stages (`runlog.stage`:
+  start, end, seconds) and a loop's progress (`foqlens.progress`: a line every step where steps are few, every tenth
+  where they are many); DEBUG for the rest of the steps and details; WARNING for a failure the code recovers from;
+  ERROR with the traceback for every exception that ends a stage. Fields go in `extra`, not inside the words. No
+  `print` for the course of a run.
 
 ## The site (`index.html`, `docs.html`, `site/*`)
 

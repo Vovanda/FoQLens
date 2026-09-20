@@ -1,0 +1,404 @@
+{
+  "reference": "everything-d8-bartowski-Q2_K",
+  "layouts": [
+    {
+      "level": "precision-together-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.96,
+      "same_but_spacing": 0.96,
+      "bytes": {
+        "per_question_mean": 1550304870.4,
+        "of_uniform_d8": 0.7474444194303905,
+        "of_uniform_d4": 1.3383842884320258,
+        "of_uniform_d2": 2.1832992997150407
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 1.0,
+        "arc_easy_closed": 0.9333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.9558823529411765,
+        "triviaqa": 0.9565217391304348
+      }
+    },
+    {
+      "level": "precision-lift_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.9,
+      "same_but_spacing": 0.9,
+      "bytes": {
+        "per_question_mean": 1111881482.24,
+        "of_uniform_d8": 0.5360685016450032,
+        "of_uniform_d4": 0.9598916541135368,
+        "of_uniform_d2": 1.5658662421116996
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 1.0,
+        "arc_easy_closed": 0.9333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.8913043478260869
+      }
+    },
+    {
+      "level": "precision-lift-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.9,
+      "same_but_spacing": 0.9,
+      "bytes": {
+        "per_question_mean": 1101199769.6,
+        "of_uniform_d8": 0.5309185555568721,
+        "of_uniform_d4": 0.950670089604594,
+        "of_uniform_d2": 1.5508231520898947
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 1.0,
+        "arc_easy_closed": 0.9333333333333333,
+        "nq_open": 0.9090909090909091,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-answer_gradient_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.8066666666666666,
+      "same_but_spacing": 0.8066666666666666,
+      "bytes": {
+        "per_question_mean": 1067035197.44,
+        "of_uniform_d8": 0.5144468800233816,
+        "of_uniform_d4": 0.9211756801674694,
+        "of_uniform_d2": 1.5027090760161055
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.3333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.9117647058823529,
+        "triviaqa": 0.9347826086956522
+      }
+    },
+    {
+      "level": "precision-error_energy_d4_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7933333333333333,
+      "same_but_spacing": 0.7933333333333333,
+      "bytes": {
+        "per_question_mean": 1381031280.64,
+        "of_uniform_d8": 0.6658329877444301,
+        "of_uniform_d4": 1.1922497330249862,
+        "of_uniform_d2": 1.9449107626991544
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.3333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.8970588235294118,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-error_energy_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7866666666666666,
+      "same_but_spacing": 0.7866666666666666,
+      "bytes": {
+        "per_question_mean": 1275146731.52,
+        "of_uniform_d8": 0.6147831479002018,
+        "of_uniform_d4": 1.1008391855670832,
+        "of_uniform_d2": 1.795793214042617
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.2,
+        "nq_open": 1.0,
+        "squad_v2": 0.8970588235294118,
+        "triviaqa": 0.9347826086956522
+      }
+    },
+    {
+      "level": "precision-answer_quant_gap_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7866666666666666,
+      "same_but_spacing": 0.7866666666666666,
+      "bytes": {
+        "per_question_mean": 1070604943.36,
+        "of_uniform_d8": 0.5161679522573868,
+        "of_uniform_d4": 0.9242574558518801,
+        "of_uniform_d2": 1.5077363605948384
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.3333333333333333,
+        "nq_open": 0.9090909090909091,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.9565217391304348
+      }
+    },
+    {
+      "level": "precision-error_energy_d4-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7866666666666666,
+      "same_but_spacing": 0.7866666666666666,
+      "bytes": {
+        "per_question_mean": 1415501250.56,
+        "of_uniform_d8": 0.6824519038986377,
+        "of_uniform_d4": 1.222007793548752,
+        "of_uniform_d2": 1.9934549314136065
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.3333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.8823529411764706,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-error_energy-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7866666666666666,
+      "same_but_spacing": 0.7866666666666666,
+      "bytes": {
+        "per_question_mean": 1336796446.72,
+        "of_uniform_d8": 0.6445061633312401,
+        "of_uniform_d4": 1.1540616270270654,
+        "of_uniform_d2": 1.8826147048304664
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.3333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.8970588235294118,
+        "triviaqa": 0.8913043478260869
+      }
+    },
+    {
+      "level": "precision-reference-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.78,
+      "same_but_spacing": 0.78,
+      "bytes": {
+        "per_question_mean": 1225252864.0,
+        "of_uniform_d8": 0.5907279484657828,
+        "of_uniform_d4": 1.057765613618201,
+        "of_uniform_d2": 1.7255275210835381
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.4666666666666667,
+        "nq_open": 1.0,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.8695652173913043
+      }
+    },
+    {
+      "level": "precision-answer_quant_gap-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7733333333333333,
+      "same_but_spacing": 0.7733333333333333,
+      "bytes": {
+        "per_question_mean": 1216266567.68,
+        "of_uniform_d8": 0.58639540899953,
+        "of_uniform_d4": 1.0500077086825226,
+        "of_uniform_d2": 1.712872091279318
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.13333333333333333,
+        "nq_open": 1.0,
+        "squad_v2": 0.8823529411764706,
+        "triviaqa": 0.9347826086956522
+      }
+    },
+    {
+      "level": "precision-drop_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7666666666666667,
+      "same_but_spacing": 0.7666666666666667,
+      "bytes": {
+        "per_question_mean": 1054445076.48,
+        "of_uniform_d8": 0.5083768380392668,
+        "of_uniform_d4": 0.9103065792544502,
+        "of_uniform_d2": 1.4849783684629496
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.2,
+        "nq_open": 1.0,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-drop-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7666666666666667,
+      "same_but_spacing": 0.7666666666666667,
+      "bytes": {
+        "per_question_mean": 1078249062.4,
+        "of_uniform_d8": 0.5198533913132773,
+        "of_uniform_d4": 0.9308566538660105,
+        "of_uniform_d2": 1.5185015978495369
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.2,
+        "nq_open": 1.0,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-pooled-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.76,
+      "same_but_spacing": 0.76,
+      "bytes": {
+        "per_question_mean": 1072143073.28,
+        "of_uniform_d8": 0.5169095267999257,
+        "of_uniform_d4": 0.9255853294577755,
+        "of_uniform_d2": 1.5099025138730258
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.2,
+        "nq_open": 0.9090909090909091,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-answer_gradient-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.76,
+      "same_but_spacing": 0.76,
+      "bytes": {
+        "per_question_mean": 1172859453.44,
+        "of_uniform_d8": 0.5654676509038631,
+        "of_uniform_d4": 1.0125341763378808,
+        "of_uniform_d2": 1.6517417136792072
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.2,
+        "nq_open": 0.9090909090909091,
+        "squad_v2": 0.8529411764705882,
+        "triviaqa": 0.9347826086956522
+      }
+    },
+    {
+      "level": "everything-d6-bartowski-Q2_K",
+      "n": 150,
+      "same": 0.7533333333333333,
+      "same_but_spacing": 0.7533333333333333,
+      "bytes": {
+        "per_question_mean": 1608376320.0,
+        "of_uniform_d8": 0.7754422550564594,
+        "of_uniform_d4": 1.3885175991343646,
+        "of_uniform_d2": 2.2650815076316064
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.2,
+        "nq_open": 0.9090909090909091,
+        "squad_v2": 0.8235294117647058,
+        "triviaqa": 0.9565217391304348
+      }
+    },
+    {
+      "level": "precision-middle-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.7466666666666667,
+      "same_but_spacing": 0.7466666666666667,
+      "bytes": {
+        "per_question_mean": 1180620226.56,
+        "of_uniform_d8": 0.5692093320852637,
+        "of_uniform_d4": 1.0192340822778096,
+        "of_uniform_d2": 1.6626712352472917
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.06666666666666667,
+        "nq_open": 1.0,
+        "squad_v2": 0.8529411764705882,
+        "triviaqa": 0.9130434782608695
+      }
+    },
+    {
+      "level": "precision-pooled_per_weight-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.74,
+      "same_but_spacing": 0.74,
+      "bytes": {
+        "per_question_mean": 979467304.96,
+        "of_uniform_d8": 0.47222800178521357,
+        "of_uniform_d4": 0.8455779743845431,
+        "of_uniform_d2": 1.3793869333979396
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.13333333333333333,
+        "nq_open": 0.8181818181818182,
+        "squad_v2": 0.8676470588235294,
+        "triviaqa": 0.8913043478260869
+      }
+    },
+    {
+      "level": "everything-d4-bartowski-Q2_K",
+      "n": 150,
+      "same": 0.6,
+      "same_but_spacing": 0.6,
+      "bytes": {
+        "per_question_mean": 1158340608.0,
+        "of_uniform_d8": 0.55846771804685,
+        "of_uniform_d4": 1.0,
+        "of_uniform_d2": 1.6312947772816946
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.0,
+        "nq_open": 0.5454545454545454,
+        "squad_v2": 0.7058823529411765,
+        "triviaqa": 0.782608695652174
+      }
+    },
+    {
+      "level": "precision-common-bartowski-Q2_K-t0.02",
+      "n": 150,
+      "same": 0.5266666666666666,
+      "same_but_spacing": 0.5333333333333333,
+      "bytes": {
+        "per_question_mean": 889201950.72,
+        "of_uniform_d8": 0.4287086033863763,
+        "of_uniform_d4": 0.7676515392612395,
+        "of_uniform_d2": 1.2522659467691137
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.06666666666666667,
+        "nq_open": 0.8181818181818182,
+        "squad_v2": 0.5882352941176471,
+        "triviaqa": 0.6304347826086957
+      }
+    },
+    {
+      "level": "everything-d2-bartowski-Q2_K",
+      "n": 150,
+      "same": 0.36,
+      "same_but_spacing": 0.36,
+      "bytes": {
+        "per_question_mean": 710074368.0,
+        "of_uniform_d8": 0.3423462919298079,
+        "of_uniform_d4": 0.6130099929985361,
+        "of_uniform_d2": 1.0
+      },
+      "by_corpus": {
+        "arc_challenge_closed": 0.0,
+        "arc_easy_closed": 0.0,
+        "nq_open": 0.2727272727272727,
+        "squad_v2": 0.45588235294117646,
+        "triviaqa": 0.43478260869565216
+      }
+    }
+  ]
+}

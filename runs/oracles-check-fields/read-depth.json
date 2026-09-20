@@ -1,0 +1,76 @@
+{
+  "questions": 3,
+  "target": "error_energy",
+  "cuts": {
+    "0.1": {
+      "layers_read": 4,
+      "groups_read": 8,
+      "rest": {
+        "questions": 1,
+        "rank": 0.7379744562204029,
+        "rank_on_excess": NaN
+      },
+      "next_layer": {
+        "questions": 1,
+        "rank": 0.9999999999999999,
+        "rank_on_excess": NaN
+      }
+    },
+    "0.2": {
+      "layers_read": 7,
+      "groups_read": 14,
+      "rest": {
+        "questions": 1,
+        "rank": 0.7487724016355373,
+        "rank_on_excess": NaN
+      },
+      "next_layer": {
+        "questions": 0,
+        "rank": null,
+        "rank_on_excess": null
+      }
+    },
+    "0.3": {
+      "layers_read": 10,
+      "groups_read": 20,
+      "rest": {
+        "questions": 1,
+        "rank": 0.7814761657746858,
+        "rank_on_excess": NaN
+      },
+      "next_layer": {
+        "questions": 1,
+        "rank": 0.9999999999999999,
+        "rank_on_excess": NaN
+      }
+    },
+    "0.5": {
+      "layers_read": 18,
+      "groups_read": 36,
+      "rest": {
+        "questions": 1,
+        "rank": 0.7909239790705938,
+        "rank_on_excess": NaN
+      },
+      "next_layer": {
+        "questions": 1,
+        "rank": 0.9999999999999999,
+        "rank_on_excess": NaN
+      }
+    },
+    "0.7": {
+      "layers_read": 24,
+      "groups_read": 48,
+      "rest": {
+        "questions": 1,
+        "rank": 0.8311140418853309,
+        "rank_on_excess": NaN
+      },
+      "next_layer": {
+        "questions": 1,
+        "rank": 0.9999999999999999,
+        "rank_on_excess": NaN
+      }
+    }
+  }
+}

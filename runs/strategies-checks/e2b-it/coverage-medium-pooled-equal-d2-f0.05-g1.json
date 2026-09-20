@@ -1,0 +1,2839 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "base": "bartowski-Q2_K",
+  "mechanism": "medium",
+  "source": "pooled",
+  "graph": "mutual-nicdm",
+  "k": 16,
+  "floor": "d2",
+  "focus_area": 0.05,
+  "focus_strength": 1.0,
+  "combine": "sum",
+  "reach": "equal",
+  "corpus": {
+    "share": 0.002,
+    "calibration_share": 0.004,
+    "floor": 8,
+    "unknown_share": 0.01,
+    "seed": 0
+  },
+  "questions": {
+    "triviaqa": [
+      "qb_815",
+      "dpql_2956",
+      "bb_8050",
+      "qw_7714",
+      "odql_5844",
+      "odql_12761",
+      "bt_2624",
+      "qg_3798"
+    ]
+  },
+  "unknown": {
+    "triviaqa": [
+      "dpql_3437",
+      "odql_8669",
+      "qg_2310",
+      "sfq_11249",
+      "sfq_24876"
+    ]
+  },
+  "calibration": 16,
+  "bytes": {
+    "per_question_mean": 712847675.0769231,
+    "per_step_mean": null,
+    "uniform": {
+      "d2": 710074368,
+      "d4": 1158340608,
+      "d6": 1608376320,
+      "d8": 2074140672
+    }
+  },
+  "coverage": {
+    "run": {
+      "lifted_share": {
+        "median": 0.006103137751512593,
+        "p90": 0.008482833825805544,
+        "max": 0.008890882228788519
+      },
+      "over_half": 0,
+      "questions": 13,
+      "bytes": {
+        "median": 712957952.0,
+        "p90": 714339942.4,
+        "max": 715431936.0
+      },
+      "bytes_to_uniform": {
+        "d2": {
+          "median": 1.0040609605556132,
+          "p90": 1.0060072220491698,
+          "max": 1.0075450801232133
+        },
+        "d4": {
+          "median": 0.6154994024002999,
+          "p90": 0.6166924801448384,
+          "max": 0.6176352025120404
+        },
+        "d6": {
+          "median": 0.4432780706445616,
+          "p90": 0.4441373163215932,
+          "max": 0.44481625792650314
+        },
+        "d8": {
+          "median": 0.3437365467176953,
+          "p90": 0.3444028421231402,
+          "max": 0.34492932213230326
+        }
+      },
+      "zones": {
+        "median": 16.0,
+        "p90": 16.0,
+        "max": 16.0
+      }
+    },
+    "questions": [
+      {
+        "corpus": "triviaqa",
+        "id": "qb_815",
+        "unknown": false,
+        "lifted_share": 0.006103137751512593,
+        "bytes": 713097216,
+        "zone_shares": [
+          7.914731954411143e-05,
+          7.035317292809905e-05,
+          9.67356127761362e-05,
+          0.00010552975939214858,
+          8.794146616012383e-05,
+          9.67356127761362e-05,
+          9.67356127761362e-05,
+          0.0008442380751371887,
+          2.6382439848037146e-05,
+          0.000897002954833263,
+          3.517658646404953e-05,
+          0.0008442380751371887,
+          6.155902631208668e-05,
+          0.0004748839172646686,
+          0.0015829463908822287,
+          0.0007035317292809906
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "dpql_2956",
+        "unknown": false,
+        "lifted_share": 0.0020842127479949344,
+        "bytes": 711254016,
+        "zone_shares": [
+          9.67356127761362e-05,
+          8.794146616012383e-05,
+          0.00011432390600816097,
+          0.0001407063458561981,
+          7.914731954411143e-05,
+          8.794146616012383e-05,
+          0.0001407063458561981,
+          9.67356127761362e-05,
+          0.00013191219924018574,
+          0.0005804136766568173,
+          8.794146616012383e-05,
+          7.035317292809905e-05,
+          0.00010552975939214858,
+          0.00010552975939214858,
+          0.00010552975939214858,
+          5.276487969607429e-05
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "bb_8050",
+        "unknown": false,
+        "lifted_share": 0.00649887434923315,
+        "bytes": 713232384,
+        "zone_shares": [
+          0.0005804136766568173,
+          0.0006331785563528915,
+          0.00021105951878429716,
+          7.035317292809905e-05,
+          0.000527648796960743,
+          7.914731954411143e-05,
+          6.155902631208668e-05,
+          0.0008618263683692135,
+          7.035317292809905e-05,
+          9.67356127761362e-05,
+          0.0006859434360489658,
+          8.794146616012383e-05,
+          0.0009497678345293373,
+          0.000598001969888842,
+          0.000527648796960743,
+          0.0005628253834247924
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "qw_7714",
+        "unknown": false,
+        "lifted_share": 0.0022600956803151824,
+        "bytes": 711299072,
+        "zone_shares": [
+          0.00011432390600816097,
+          0.00011432390600816097,
+          7.914731954411143e-05,
+          9.67356127761362e-05,
+          0.00010552975939214858,
+          0.0001495004924722105,
+          0.0001407063458561981,
+          9.67356127761362e-05,
+          0.00013191219924018574,
+          0.0006331785563528915,
+          0.00011432390600816097,
+          0.0001495004924722105,
+          8.794146616012383e-05,
+          0.0001495004924722105,
+          5.276487969607429e-05,
+          4.397073308006191e-05
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "odql_5844",
+        "unknown": false,
+        "lifted_share": 0.007061699732657943,
+        "bytes": 714072064,
+        "zone_shares": [
+          0.0006331785563528915,
+          5.276487969607429e-05,
+          7.914731954411143e-05,
+          0.00013191219924018574,
+          0.0009145912480652878,
+          2.6382439848037146e-05,
+          0.00013191219924018574,
+          0.0009497678345293373,
+          9.67356127761362e-05,
+          3.517658646404953e-05,
+          0.0015477698044181793,
+          7.914731954411143e-05,
+          0.00021105951878429716,
+          0.0004748839172646686,
+          6.155902631208668e-05,
+          0.001635711270578303
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "odql_12761",
+        "unknown": false,
+        "lifted_share": 0.0038694245110454484,
+        "bytes": 712056832,
+        "zone_shares": [
+          8.794146616012383e-05,
+          7.914731954411143e-05,
+          0.0008794146616012382,
+          5.276487969607429e-05,
+          7.035317292809905e-05,
+          2.6382439848037146e-05,
+          0.00036935415787252003,
+          7.914731954411143e-05,
+          0.0005804136766568173,
+          0.00011432390600816097,
+          0.00010552975939214858,
+          0.0006859434360489658,
+          5.276487969607429e-05,
+          6.155902631208668e-05,
+          0.0005804136766568173,
+          4.397073308006191e-05
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "bt_2624",
+        "unknown": false,
+        "lifted_share": 0.008890882228788519,
+        "bytes": 715431936,
+        "zone_shares": [
+          0.0009321795412973125,
+          0.001635711270578303,
+          0.00010552975939214858,
+          0.00021105951878429716,
+          0.0010025327142254117,
+          0.0008442380751371887,
+          0.0006155902631208667,
+          0.002743773744195863,
+          0.00011432390600816097,
+          0.0003341775714084705,
+          0.00042211903756859433
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "qg_3798",
+        "unknown": false,
+        "lifted_share": 0.0028141269171239624,
+        "bytes": 711573504,
+        "zone_shares": [
+          9.67356127761362e-05,
+          5.276487969607429e-05,
+          9.67356127761362e-05,
+          0.00011432390600816097,
+          0.00012311805262417335,
+          0.0005804136766568173,
+          6.155902631208668e-05,
+          0.00011432390600816097,
+          0.00010552975939214858,
+          5.276487969607429e-05,
+          7.914731954411143e-05,
+          7.035317292809905e-05,
+          0.0005804136766568173,
+          2.6382439848037146e-05,
+          0.0005804136766568173,
+          7.914731954411143e-05
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "dpql_3437",
+        "unknown": true,
+        "lifted_share": 0.0067714928943295345,
+        "bytes": 712957952,
+        "zone_shares": [
+          7.914731954411143e-05,
+          9.67356127761362e-05,
+          0.0010025327142254117,
+          0.0013191219924018572,
+          0.000897002954833263,
+          0.0006331785563528915,
+          0.0005804136766568173,
+          0.00021105951878429716,
+          0.0005804136766568173,
+          0.0004748839172646686,
+          0.00021105951878429716,
+          0.0006859434360489658
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "sfq_11249",
+        "unknown": true,
+        "lifted_share": 0.00690340509356972,
+        "bytes": 714383360,
+        "zone_shares": [
+          7.914731954411143e-05,
+          8.794146616012383e-05,
+          8.794146616012383e-05,
+          0.0008794146616012382,
+          0.00010552975939214858,
+          3.517658646404953e-05,
+          0.0005804136766568173,
+          0.0006859434360489658,
+          5.276487969607429e-05,
+          0.0020050654284508233,
+          0.0007387083157450401,
+          8.794146616012383e-05,
+          0.00021105951878429716,
+          0.00021105951878429716,
+          0.00021105951878429716,
+          0.0008442380751371887
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "sfq_24876",
+        "unknown": true,
+        "lifted_share": 0.008838117349092444,
+        "bytes": 714166272,
+        "zone_shares": [
+          0.0013191219924018572,
+          0.001635711270578303,
+          0.0011080624736175603,
+          7.914731954411143e-05,
+          0.0010025327142254117,
+          0.0008442380751371887,
+          0.0002638243984803715,
+          0.0007562966089770649,
+          0.00042211903756859433,
+          0.0007738849022090896,
+          0.0007387083157450401
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "odql_8669",
+        "unknown": true,
+        "lifted_share": 0.0046872801463346,
+        "bytes": 712298496,
+        "zone_shares": [
+          0.0008794146616012382,
+          7.914731954411143e-05,
+          0.0005804136766568173,
+          0.0008442380751371887,
+          0.0010025327142254117,
+          0.00021105951878429716,
+          0.00021105951878429716,
+          8.794146616012383e-05,
+          0.00042211903756859433,
+          0.00036935415787252003
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      },
+      {
+        "corpus": "triviaqa",
+        "id": "qg_2310",
+        "unknown": true,
+        "lifted_share": 0.0022688898269311946,
+        "bytes": 711196672,
+        "zone_shares": [
+          8.794146616012383e-05,
+          0.00011432390600816097,
+          6.155902631208668e-05,
+          9.67356127761362e-05,
+          0.0006859434360489658,
+          8.794146616012383e-05,
+          0.0001407063458561981,
+          0.0001407063458561981,
+          9.67356127761362e-05,
+          0.00012311805262417335,
+          0.00012311805262417335,
+          3.517658646404953e-05,
+          0.00013191219924018574,
+          0.0001495004924722105,
+          8.794146616012383e-05,
+          0.00010552975939214858
+        ],
+        "zone_ceilings": [
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8",
+          "D8"
+        ]
+      }
+    ]
+  },
+  "by_layer": [
+    {
+      "layer": 0,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.28125,
+      "above_min": 0.18028846153846154
+    },
+    {
+      "layer": 0,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.4038461538461537,
+      "above_min": 0.25
+    },
+    {
+      "layer": 0,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.3846153846153846,
+      "above_min": 0.15384615384615385
+    },
+    {
+      "layer": 0,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 0,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 0,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 0,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0128205128205128,
+      "above_min": 0.01282051282051282
+    },
+    {
+      "layer": 0,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 0,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0352564102564104,
+      "above_min": 0.022435897435897436
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0769230769230769,
+      "above_min": 0.07692307692307693
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0384615384615385,
+      "above_min": 0.038461538461538464
+    },
+    {
+      "layer": 1,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 1,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 1,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 1,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 1,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 1,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 2,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 2,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 2,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 2,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.060897435897436,
+      "above_min": 0.041666666666666664
+    },
+    {
+      "layer": 2,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 2,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 3,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0416666666666667,
+      "above_min": 0.028846153846153848
+    },
+    {
+      "layer": 3,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 3,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0416666666666667,
+      "above_min": 0.022435897435897436
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0012019230769231,
+      "above_min": 0.001201923076923077
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.k_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.v_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 4,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 4,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 4,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 4,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 4,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 4,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1025641025641026,
+      "above_min": 0.05448717948717949
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0216346153846154,
+      "above_min": 0.01201923076923077
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 5,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 5,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 5,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 5,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 5,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 5,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2467948717948718,
+      "above_min": 0.19230769230769232
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0408653846153846,
+      "above_min": 0.03365384615384615
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 6,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 6,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 6,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 6,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 6,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 6,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0264423076923077,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0769230769230769,
+      "above_min": 0.038461538461538464
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 7,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 7,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0024038461538463,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 7,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0040064102564104,
+      "above_min": 0.002403846153846154
+    },
+    {
+      "layer": 7,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 7,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 7,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0737179487179487,
+      "above_min": 0.05448717948717949
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 8,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 8,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 8,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0024038461538463,
+      "above_min": 0.002403846153846154
+    },
+    {
+      "layer": 8,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 8,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.3076923076923077,
+      "above_min": 0.15384615384615385
+    },
+    {
+      "layer": 8,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0384615384615385,
+      "above_min": 0.02564102564102564
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.007211538461538462
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.k_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.v_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 9,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0288461538461537,
+      "above_min": 0.028846153846153848
+    },
+    {
+      "layer": 9,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0040064102564104,
+      "above_min": 0.004006410256410256
+    },
+    {
+      "layer": 9,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 9,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 9,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 9,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 10,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0288461538461537,
+      "above_min": 0.022435897435897436
+    },
+    {
+      "layer": 10,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0024038461538463,
+      "above_min": 0.002403846153846154
+    },
+    {
+      "layer": 10,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 10,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 10,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 10,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 11,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 11,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 11,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0040064102564104,
+      "above_min": 0.004006410256410256
+    },
+    {
+      "layer": 11,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 11,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 11,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0416666666666667,
+      "above_min": 0.035256410256410256
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0216346153846154,
+      "above_min": 0.016826923076923076
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.2307692307692308,
+      "above_min": 0.07692307692307693
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 12,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 12,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0056089743589745,
+      "above_min": 0.004006410256410256
+    },
+    {
+      "layer": 12,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.013621794871795,
+      "above_min": 0.010416666666666666
+    },
+    {
+      "layer": 12,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.016025641025641,
+      "above_min": 0.016025641025641024
+    },
+    {
+      "layer": 12,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 12,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.169871794871795,
+      "above_min": 0.14102564102564102
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.k_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.v_proj",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 13,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 13,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0080128205128205,
+      "above_min": 0.008012820512820512
+    },
+    {
+      "layer": 13,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.013621794871795,
+      "above_min": 0.008814102564102564
+    },
+    {
+      "layer": 13,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0224358974358974,
+      "above_min": 0.022435897435897436
+    },
+    {
+      "layer": 13,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.9615384615384615,
+      "above_min": 0.38461538461538464
+    },
+    {
+      "layer": 13,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2756410256410255,
+      "above_min": 0.20833333333333334
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.014423076923076924
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.k_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.v_proj",
+      "blocks": 8,
+      "min_depth": 1,
+      "mean_depth": 1.0288461538461537,
+      "above_min": 0.028846153846153848
+    },
+    {
+      "layer": 14,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 14,
+      "kind": "mlp.gate_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 14,
+      "kind": "mlp.up_proj",
+      "blocks": 96,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 14,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 14,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 14,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 15,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 15,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 15,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 15,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 15,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 15,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 15,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 16,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0745192307692308,
+      "above_min": 0.06490384615384616
+    },
+    {
+      "layer": 16,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 16,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 16,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0052083333333333,
+      "above_min": 0.004407051282051282
+    },
+    {
+      "layer": 16,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 16,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 16,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2115384615384615,
+      "above_min": 0.16025641025641027
+    },
+    {
+      "layer": 17,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.1081730769230769,
+      "above_min": 0.09615384615384616
+    },
+    {
+      "layer": 17,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0128205128205128,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 17,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 17,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 17,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 17,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 17,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1025641025641026,
+      "above_min": 0.07051282051282051
+    },
+    {
+      "layer": 18,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0360576923076923,
+      "above_min": 0.036057692307692304
+    },
+    {
+      "layer": 18,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 18,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 18,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 18,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0192307692307692,
+      "above_min": 0.01282051282051282
+    },
+    {
+      "layer": 18,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 18,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1378205128205128,
+      "above_min": 0.09294871794871795
+    },
+    {
+      "layer": 19,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0745192307692308,
+      "above_min": 0.054086538461538464
+    },
+    {
+      "layer": 19,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 19,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.002003205128205,
+      "above_min": 0.002003205128205128
+    },
+    {
+      "layer": 19,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 19,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 19,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 19,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1153846153846154,
+      "above_min": 0.07051282051282051
+    },
+    {
+      "layer": 20,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0168269230769231,
+      "above_min": 0.01201923076923077
+    },
+    {
+      "layer": 20,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 20,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 20,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 20,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 20,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 20,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.060897435897436,
+      "above_min": 0.038461538461538464
+    },
+    {
+      "layer": 21,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.03125,
+      "above_min": 0.019230769230769232
+    },
+    {
+      "layer": 21,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 21,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 21,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0012019230769231,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 21,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 21,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 21,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 22,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0144230769230769,
+      "above_min": 0.014423076923076924
+    },
+    {
+      "layer": 22,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 22,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 22,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0024038461538463,
+      "above_min": 0.002403846153846154
+    },
+    {
+      "layer": 22,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 22,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 22,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 23,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0072115384615385,
+      "above_min": 0.007211538461538462
+    },
+    {
+      "layer": 23,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 23,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 23,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0024038461538463,
+      "above_min": 0.002403846153846154
+    },
+    {
+      "layer": 23,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 23,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 23,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 24,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 24,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 24,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.001602564102564,
+      "above_min": 0.0016025641025641025
+    },
+    {
+      "layer": 24,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 24,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 24,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 24,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2211538461538463,
+      "above_min": 0.18269230769230768
+    },
+    {
+      "layer": 25,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0216346153846154,
+      "above_min": 0.016826923076923076
+    },
+    {
+      "layer": 25,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 25,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 25,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.003605769230769231
+    },
+    {
+      "layer": 25,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 25,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 25,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.294871794871795,
+      "above_min": 0.16025641025641027
+    },
+    {
+      "layer": 26,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 26,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 26,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0012019230769231,
+      "above_min": 0.001201923076923077
+    },
+    {
+      "layer": 26,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 26,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 26,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 26,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.4423076923076923,
+      "above_min": 0.2532051282051282
+    },
+    {
+      "layer": 27,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0048076923076923,
+      "above_min": 0.004807692307692308
+    },
+    {
+      "layer": 27,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 27,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 27,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0012019230769231,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 27,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 27,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 27,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.4743589743589745,
+      "above_min": 0.3333333333333333
+    },
+    {
+      "layer": 28,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0120192307692308,
+      "above_min": 0.01201923076923077
+    },
+    {
+      "layer": 28,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 28,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 28,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0040064102564104,
+      "above_min": 0.002403846153846154
+    },
+    {
+      "layer": 28,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 28,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 28,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2371794871794872,
+      "above_min": 0.1858974358974359
+    },
+    {
+      "layer": 29,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0408653846153846,
+      "above_min": 0.03245192307692308
+    },
+    {
+      "layer": 29,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0416666666666667,
+      "above_min": 0.028846153846153848
+    },
+    {
+      "layer": 29,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 29,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.002003205128205,
+      "above_min": 0.002003205128205128
+    },
+    {
+      "layer": 29,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0064102564102564,
+      "above_min": 0.00641025641025641
+    },
+    {
+      "layer": 29,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 29,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.3173076923076923,
+      "above_min": 0.18269230769230768
+    },
+    {
+      "layer": 30,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0480769230769231,
+      "above_min": 0.03365384615384615
+    },
+    {
+      "layer": 30,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 30,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 30,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0012019230769231,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 30,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 30,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 30,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.580128205128205,
+      "above_min": 0.3173076923076923
+    },
+    {
+      "layer": 31,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0697115384615385,
+      "above_min": 0.0625
+    },
+    {
+      "layer": 31,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.1346153846153846,
+      "above_min": 0.07692307692307693
+    },
+    {
+      "layer": 31,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 31,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 31,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 31,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 31,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.3461538461538463,
+      "above_min": 0.1794871794871795
+    },
+    {
+      "layer": 32,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0168269230769231,
+      "above_min": 0.016826923076923076
+    },
+    {
+      "layer": 32,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 32,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 32,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 32,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 32,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 32,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.3525641025641026,
+      "above_min": 0.24358974358974358
+    },
+    {
+      "layer": 33,
+      "kind": "self_attn.q_proj",
+      "blocks": 32,
+      "min_depth": 1,
+      "mean_depth": 1.0144230769230769,
+      "above_min": 0.014423076923076924
+    },
+    {
+      "layer": 33,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 33,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.000400641025641,
+      "above_min": 0.00040064102564102563
+    },
+    {
+      "layer": 33,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 33,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0032051282051282,
+      "above_min": 0.003205128205128205
+    },
+    {
+      "layer": 33,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 33,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.2467948717948718,
+      "above_min": 0.1762820512820513
+    },
+    {
+      "layer": 34,
+      "kind": "self_attn.q_proj",
+      "blocks": 64,
+      "min_depth": 1,
+      "mean_depth": 1.0204326923076923,
+      "above_min": 0.015625
+    },
+    {
+      "layer": 34,
+      "kind": "self_attn.o_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 34,
+      "kind": "mlp.gate_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0008012820512822,
+      "above_min": 0.0008012820512820513
+    },
+    {
+      "layer": 34,
+      "kind": "mlp.up_proj",
+      "blocks": 192,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 34,
+      "kind": "mlp.down_proj",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0096153846153846,
+      "above_min": 0.009615384615384616
+    },
+    {
+      "layer": 34,
+      "kind": "per_layer_input_gate",
+      "blocks": 4,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    },
+    {
+      "layer": 34,
+      "kind": "per_layer_projection",
+      "blocks": 24,
+      "min_depth": 1,
+      "mean_depth": 1.0,
+      "above_min": 0.0
+    }
+  ],
+  "gpu": {
+    "samples": 1,
+    "started": "2026-09-19T20:02",
+    "wall_s": 0.08201885223388672,
+    "utilization_mean": 1.0,
+    "utilization_median": 1.0,
+    "memory_reserved_peak_mib": 12516.0,
+    "temperature_mean_c": 46.0,
+    "temperature_peak_c": 46.0,
+    "power_mean_w": 109.01,
+    "power_peak_w": 109.01,
+    "memory_allocated_peak_mib": 10880.4853515625
+  },
+  "pacer": {
+    "share": 0.9,
+    "cooling_breaks": 0,
+    "cooling_break_s": 0.0,
+    "temperature_ceiling_c": 80.0,
+    "temperature_peak_c": 46.0,
+    "thermal_pause_s": 0.0
+  }
+}

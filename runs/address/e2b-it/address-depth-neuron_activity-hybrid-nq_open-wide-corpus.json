@@ -1,0 +1,409 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "config": "configs\\address-depth.toml",
+  "check": {
+    "corpus": "configs/small-corpus.toml",
+    "corpora": [
+      "nq_open"
+    ],
+    "sources": [
+      "neuron_activity",
+      "hybrid"
+    ],
+    "depths": [
+      1,
+      2,
+      4,
+      6,
+      8,
+      12,
+      18,
+      24
+    ],
+    "ridges": [
+      0.01,
+      0.1,
+      1.0
+    ],
+    "base_level": "d2",
+    "base": "bartowski-Q2_K"
+  },
+  "corpus": {
+    "share": 0.123,
+    "calibration_share": 0.6,
+    "floor": 50,
+    "unknown_share": 0.05,
+    "seed": 0
+  },
+  "sources": {
+    "neuron_activity": {
+      "nq_open": {
+        "0.01": {
+          "1": {
+            "identified": 0.69,
+            "chance": 0.01,
+            "own_cos": 0.4102184457444218,
+            "other_cos": -0.00279305898468891,
+            "zoned_weight_share": 0.9805825242718447
+          },
+          "2": {
+            "identified": 0.735,
+            "chance": 0.01,
+            "own_cos": 0.38738960907792297,
+            "other_cos": -0.002793209447040665,
+            "zoned_weight_share": 0.9611650485436893
+          },
+          "4": {
+            "identified": 0.75,
+            "chance": 0.01,
+            "own_cos": 0.33503761677163296,
+            "other_cos": -0.0026752072941974825,
+            "zoned_weight_share": 0.9223300970873787
+          },
+          "6": {
+            "identified": 0.64,
+            "chance": 0.01,
+            "own_cos": 0.27431955704009026,
+            "other_cos": -0.002071559671121922,
+            "zoned_weight_share": 0.8796960742929506
+          },
+          "8": {
+            "identified": 0.7,
+            "chance": 0.01,
+            "own_cos": 0.31704525267022293,
+            "other_cos": -0.0022777807816567264,
+            "zoned_weight_share": 0.8408611228366399
+          },
+          "12": {
+            "identified": 0.72,
+            "chance": 0.01,
+            "own_cos": 0.33279869208515306,
+            "other_cos": -0.002346991552496726,
+            "zoned_weight_share": 0.7593921485859012
+          },
+          "18": {
+            "identified": 0.785,
+            "chance": 0.01,
+            "own_cos": 0.35945412922004244,
+            "other_cos": -0.0021072717687902432,
+            "zoned_weight_share": 0.5947657239341494
+          },
+          "24": {
+            "identified": 0.6799999999999999,
+            "chance": 0.01,
+            "own_cos": 0.3626795228394377,
+            "other_cos": -0.001195216799547637,
+            "zoned_weight_share": 0.38623891937526383
+          }
+        },
+        "0.1": {
+          "1": {
+            "identified": 0.7,
+            "chance": 0.01,
+            "own_cos": 0.41945288179468043,
+            "other_cos": -0.002834771931828737,
+            "zoned_weight_share": 0.9805825242718447
+          },
+          "2": {
+            "identified": 0.75,
+            "chance": 0.01,
+            "own_cos": 0.4133247856690123,
+            "other_cos": -0.002933082141517419,
+            "zoned_weight_share": 0.9611650485436893
+          },
+          "4": {
+            "identified": 0.81,
+            "chance": 0.01,
+            "own_cos": 0.40644717988396684,
+            "other_cos": -0.0030929694542441545,
+            "zoned_weight_share": 0.9223300970873787
+          },
+          "6": {
+            "identified": 0.79,
+            "chance": 0.01,
+            "own_cos": 0.3766526546838168,
+            "other_cos": -0.00254588017843682,
+            "zoned_weight_share": 0.8796960742929506
+          },
+          "8": {
+            "identified": 0.79,
+            "chance": 0.01,
+            "own_cos": 0.384882484615245,
+            "other_cos": -0.0025567466103926413,
+            "zoned_weight_share": 0.8408611228366399
+          },
+          "12": {
+            "identified": 0.775,
+            "chance": 0.01,
+            "own_cos": 0.37890382404948736,
+            "other_cos": -0.0025181735272240286,
+            "zoned_weight_share": 0.7593921485859012
+          },
+          "18": {
+            "identified": 0.79,
+            "chance": 0.01,
+            "own_cos": 0.3795739670225535,
+            "other_cos": -0.0021225711602102597,
+            "zoned_weight_share": 0.5947657239341494
+          },
+          "24": {
+            "identified": 0.705,
+            "chance": 0.01,
+            "own_cos": 0.37164470468055233,
+            "other_cos": -0.001148129763298441,
+            "zoned_weight_share": 0.38623891937526383
+          }
+        },
+        "1.0": {
+          "1": {
+            "identified": 0.69,
+            "chance": 0.01,
+            "own_cos": 0.44940701601120453,
+            "other_cos": -0.002850598766970942,
+            "zoned_weight_share": 0.9805825242718447
+          },
+          "2": {
+            "identified": 0.7949999999999999,
+            "chance": 0.01,
+            "own_cos": 0.47487388712804923,
+            "other_cos": -0.0031355993762346387,
+            "zoned_weight_share": 0.9611650485436893
+          },
+          "4": {
+            "identified": 0.835,
+            "chance": 0.01,
+            "own_cos": 0.4770830335943912,
+            "other_cos": -0.003385207911878947,
+            "zoned_weight_share": 0.9223300970873787
+          },
+          "6": {
+            "identified": 0.7649999999999999,
+            "chance": 0.01,
+            "own_cos": 0.46238082971149425,
+            "other_cos": -0.002723797808851397,
+            "zoned_weight_share": 0.8796960742929506
+          },
+          "8": {
+            "identified": 0.7949999999999999,
+            "chance": 0.01,
+            "own_cos": 0.4612074672453794,
+            "other_cos": -0.0026164756390745477,
+            "zoned_weight_share": 0.8408611228366399
+          },
+          "12": {
+            "identified": 0.79,
+            "chance": 0.01,
+            "own_cos": 0.451439159604726,
+            "other_cos": -0.0025929045846464897,
+            "zoned_weight_share": 0.7593921485859012
+          },
+          "18": {
+            "identified": 0.825,
+            "chance": 0.01,
+            "own_cos": 0.4359886010879455,
+            "other_cos": -0.0020175140828953353,
+            "zoned_weight_share": 0.5947657239341494
+          },
+          "24": {
+            "identified": 0.7250000000000001,
+            "chance": 0.01,
+            "own_cos": 0.40890597265059797,
+            "other_cos": -0.0008313041990518562,
+            "zoned_weight_share": 0.38623891937526383
+          }
+        }
+      }
+    },
+    "hybrid": {
+      "nq_open": {
+        "0.01": {
+          "1": {
+            "identified": 0.745,
+            "chance": 0.01,
+            "own_cos": 0.4155483573930015,
+            "other_cos": -0.0029484407966410132,
+            "zoned_weight_share": 0.9805825242718447
+          },
+          "2": {
+            "identified": 0.815,
+            "chance": 0.01,
+            "own_cos": 0.3898708477891587,
+            "other_cos": -0.002894239331501535,
+            "zoned_weight_share": 0.9611650485436893
+          },
+          "4": {
+            "identified": 0.77,
+            "chance": 0.01,
+            "own_cos": 0.3293642867813049,
+            "other_cos": -0.0027039650919637778,
+            "zoned_weight_share": 0.9223300970873787
+          },
+          "6": {
+            "identified": 0.685,
+            "chance": 0.01,
+            "own_cos": 0.30520817130989303,
+            "other_cos": -0.0022019063595580574,
+            "zoned_weight_share": 0.8796960742929506
+          },
+          "8": {
+            "identified": 0.8049999999999999,
+            "chance": 0.01,
+            "own_cos": 0.347896339322842,
+            "other_cos": -0.0024114529243594992,
+            "zoned_weight_share": 0.8408611228366399
+          },
+          "12": {
+            "identified": 0.81,
+            "chance": 0.01,
+            "own_cos": 0.37035871280252436,
+            "other_cos": -0.0025518226791366922,
+            "zoned_weight_share": 0.7593921485859012
+          },
+          "18": {
+            "identified": 0.86,
+            "chance": 0.01,
+            "own_cos": 0.4064732762908736,
+            "other_cos": -0.002351133682445139,
+            "zoned_weight_share": 0.5947657239341494
+          },
+          "24": {
+            "identified": 0.815,
+            "chance": 0.01,
+            "own_cos": 0.4171403715616723,
+            "other_cos": -0.001667797372132571,
+            "zoned_weight_share": 0.38623891937526383
+          }
+        },
+        "0.1": {
+          "1": {
+            "identified": 0.74,
+            "chance": 0.01,
+            "own_cos": 0.42229174849070866,
+            "other_cos": -0.0029458637226709417,
+            "zoned_weight_share": 0.9805825242718447
+          },
+          "2": {
+            "identified": 0.8049999999999999,
+            "chance": 0.01,
+            "own_cos": 0.4181037564411811,
+            "other_cos": -0.0030162069591817635,
+            "zoned_weight_share": 0.9611650485436893
+          },
+          "4": {
+            "identified": 0.875,
+            "chance": 0.01,
+            "own_cos": 0.4109142936303378,
+            "other_cos": -0.00317841564652257,
+            "zoned_weight_share": 0.9223300970873787
+          },
+          "6": {
+            "identified": 0.86,
+            "chance": 0.01,
+            "own_cos": 0.40596635458397434,
+            "other_cos": -0.002725605209265751,
+            "zoned_weight_share": 0.8796960742929506
+          },
+          "8": {
+            "identified": 0.86,
+            "chance": 0.01,
+            "own_cos": 0.41486210355463854,
+            "other_cos": -0.0026806205818212326,
+            "zoned_weight_share": 0.8408611228366399
+          },
+          "12": {
+            "identified": 0.855,
+            "chance": 0.01,
+            "own_cos": 0.41371857323613076,
+            "other_cos": -0.0027238254674640605,
+            "zoned_weight_share": 0.7593921485859012
+          },
+          "18": {
+            "identified": 0.87,
+            "chance": 0.01,
+            "own_cos": 0.42479228021322407,
+            "other_cos": -0.0023759741724887224,
+            "zoned_weight_share": 0.5947657239341494
+          },
+          "24": {
+            "identified": 0.8200000000000001,
+            "chance": 0.01,
+            "own_cos": 0.42566370483489235,
+            "other_cos": -0.0016417725243448975,
+            "zoned_weight_share": 0.38623891937526383
+          }
+        },
+        "1.0": {
+          "1": {
+            "identified": 0.735,
+            "chance": 0.01,
+            "own_cos": 0.44546418196902804,
+            "other_cos": -0.0029013931326992643,
+            "zoned_weight_share": 0.9805825242718447
+          },
+          "2": {
+            "identified": 0.8300000000000001,
+            "chance": 0.01,
+            "own_cos": 0.4764529810853891,
+            "other_cos": -0.0032230891213379546,
+            "zoned_weight_share": 0.9611650485436893
+          },
+          "4": {
+            "identified": 0.875,
+            "chance": 0.01,
+            "own_cos": 0.4834889072446981,
+            "other_cos": -0.003475408293799671,
+            "zoned_weight_share": 0.9223300970873787
+          },
+          "6": {
+            "identified": 0.87,
+            "chance": 0.01,
+            "own_cos": 0.493677304695675,
+            "other_cos": -0.0028476022005943552,
+            "zoned_weight_share": 0.8796960742929506
+          },
+          "8": {
+            "identified": 0.87,
+            "chance": 0.01,
+            "own_cos": 0.4945166910578642,
+            "other_cos": -0.0027342230161962818,
+            "zoned_weight_share": 0.8408611228366399
+          },
+          "12": {
+            "identified": 0.88,
+            "chance": 0.01,
+            "own_cos": 0.4894135548930441,
+            "other_cos": -0.0028113731705604285,
+            "zoned_weight_share": 0.7593921485859012
+          },
+          "18": {
+            "identified": 0.88,
+            "chance": 0.01,
+            "own_cos": 0.4812382827745176,
+            "other_cos": -0.002335252774890271,
+            "zoned_weight_share": 0.5947657239341494
+          },
+          "24": {
+            "identified": 0.825,
+            "chance": 0.01,
+            "own_cos": 0.46428970524162483,
+            "other_cos": -0.0014254293148733776,
+            "zoned_weight_share": 0.38623891937526383
+          }
+        }
+      }
+    }
+  },
+  "gpu": {
+    "samples": 182,
+    "started": "2026-09-19T17:17",
+    "wall_s": 198.1717357635498,
+    "utilization_mean": 6.197802197802198,
+    "utilization_median": 0.0,
+    "memory_reserved_peak_mib": 14102.0,
+    "temperature_mean_c": 47.68681318681319,
+    "temperature_peak_c": 55.0,
+    "power_mean_w": 122.0506043956044,
+    "power_peak_w": 231.41,
+    "memory_allocated_peak_mib": 12453.251953125
+  }
+}

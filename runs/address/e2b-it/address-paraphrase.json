@@ -1,0 +1,58 @@
+{
+  "model": "google/gemma-4-E2B-it@3e22461f",
+  "config": "configs\\address-paraphrase.toml",
+  "questions": 60,
+  "bag_of_tokens": {
+    "identified": 0.7166666666666667,
+    "chance": 0.016666666666666666,
+    "own_cos": 0.3407449089253108,
+    "other_cos": -0.005042617475504678
+  },
+  "sources": {
+    "pooled": {
+      "identified": 0.30833333333333335,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.40031667287752953,
+      "other_cos": -0.0028296415529938486
+    },
+    "neuron_activity": {
+      "identified": 0.8916666666666666,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.5438699058093607,
+      "other_cos": -0.007420123961763634
+    },
+    "head_energy": {
+      "identified": 0.6916666666666667,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.5322889877183337,
+      "other_cos": -0.007221479341964714
+    },
+    "hybrid": {
+      "identified": 0.9166666666666666,
+      "chance": 0.016666666666666666,
+      "own_cos": 0.5445064120162697,
+      "other_cos": -0.0072056834267078115
+    }
+  },
+  "agreement": {
+    "pooled~neuron_activity": 0.28081815206556404,
+    "pooled~head_energy": 0.231844650001579,
+    "pooled~hybrid": 0.2591660553813028,
+    "neuron_activity~head_energy": 0.730103251511092,
+    "neuron_activity~hybrid": 0.9608941494972766,
+    "head_energy~hybrid": 0.7368835903875725
+  },
+  "gpu": {
+    "samples": 8,
+    "started": "2026-09-19T17:05",
+    "wall_s": 8.452419996261597,
+    "utilization_mean": 43.875,
+    "utilization_median": 43.0,
+    "memory_reserved_peak_mib": 13194.0,
+    "temperature_mean_c": 53.875,
+    "temperature_peak_c": 56.0,
+    "power_mean_w": 181.56875000000002,
+    "power_peak_w": 222.47,
+    "memory_allocated_peak_mib": 10884.20751953125
+  }
+}

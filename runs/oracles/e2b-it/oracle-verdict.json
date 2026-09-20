@@ -1,0 +1,655 @@
+{
+  "reference": "everything-d8-bartowski-Q2_K",
+  "layouts": {
+    "lift": {
+      "base": {
+        "questions": 87,
+        "same_as_top": 0.9425287356321839,
+        "questions_the_top_answers": 79,
+        "same_where_the_top_is_right": 0.9493670886075949,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 148,
+        "same_as_top": 0.7837837837837838,
+        "questions_the_top_answers": 91,
+        "same_where_the_top_is_right": 0.8681318681318682,
+        "bytes_of_uniform_top": 0.4178414821328669
+      },
+      "top": {
+        "questions": 66,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 16,
+        "same_where_the_top_is_right": 1.0,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 148,
+          "same_where_the_top_is_right": 0.24175824175824176,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 148,
+          "same_where_the_top_is_right": 0.7252747252747253,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 148,
+          "same_where_the_top_is_right": 0.9230769230769231,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "drop": {
+      "base": {
+        "questions": 84,
+        "same_as_top": 0.9404761904761905,
+        "questions_the_top_answers": 77,
+        "same_where_the_top_is_right": 0.948051948051948,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 189,
+        "same_as_top": 0.6455026455026455,
+        "questions_the_top_answers": 98,
+        "same_where_the_top_is_right": 0.8163265306122449,
+        "bytes_of_uniform_top": 0.5031047832450726
+      },
+      "top": {
+        "questions": 28,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 11,
+        "same_where_the_top_is_right": 1.0,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 189,
+          "same_where_the_top_is_right": 0.24489795918367346,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 189,
+          "same_where_the_top_is_right": 0.6530612244897959,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 189,
+          "same_where_the_top_is_right": 0.8775510204081632,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "answer_gradient": {
+      "base": {
+        "questions": 86,
+        "same_as_top": 0.9418604651162791,
+        "questions_the_top_answers": 78,
+        "same_where_the_top_is_right": 0.9487179487179487,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 215,
+        "same_as_top": 0.6930232558139535,
+        "questions_the_top_answers": 108,
+        "same_where_the_top_is_right": 0.8611111111111112,
+        "bytes_of_uniform_top": 0.6545963415981665
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 215,
+          "same_where_the_top_is_right": 0.21296296296296297,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 215,
+          "same_where_the_top_is_right": 0.6388888888888888,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 215,
+          "same_where_the_top_is_right": 0.8796296296296297,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "answer_quant_gap": {
+      "base": {
+        "questions": 87,
+        "same_as_top": 0.9425287356321839,
+        "questions_the_top_answers": 79,
+        "same_where_the_top_is_right": 0.9493670886075949,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 214,
+        "same_as_top": 0.7102803738317757,
+        "questions_the_top_answers": 107,
+        "same_where_the_top_is_right": 0.8598130841121495,
+        "bytes_of_uniform_top": 0.677056997751725
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 214,
+          "same_where_the_top_is_right": 0.205607476635514,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 214,
+          "same_where_the_top_is_right": 0.6355140186915887,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 214,
+          "same_where_the_top_is_right": 0.8785046728971962,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "error_energy": {
+      "base": {
+        "questions": 81,
+        "same_as_top": 0.9382716049382716,
+        "questions_the_top_answers": 73,
+        "same_where_the_top_is_right": 0.9452054794520548,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 220,
+        "same_as_top": 0.7454545454545455,
+        "questions_the_top_answers": 113,
+        "same_where_the_top_is_right": 0.911504424778761,
+        "bytes_of_uniform_top": 0.7416360124821326
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 220,
+          "same_where_the_top_is_right": 0.24778761061946902,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 220,
+          "same_where_the_top_is_right": 0.6548672566371682,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 220,
+          "same_where_the_top_is_right": 0.8849557522123894,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "error_energy_d4": {
+      "base": {
+        "questions": 83,
+        "same_as_top": 0.9518072289156626,
+        "questions_the_top_answers": 75,
+        "same_where_the_top_is_right": 0.96,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 218,
+        "same_as_top": 0.7339449541284404,
+        "questions_the_top_answers": 111,
+        "same_where_the_top_is_right": 0.8738738738738738,
+        "bytes_of_uniform_top": 0.805684427454213
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.22522522522522523,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.6396396396396397,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.8828828828828829,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "pooled": {
+      "base": {
+        "questions": 83,
+        "same_as_top": 0.9397590361445783,
+        "questions_the_top_answers": 76,
+        "same_where_the_top_is_right": 0.9473684210526315,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 218,
+        "same_as_top": 0.7064220183486238,
+        "questions_the_top_answers": 110,
+        "same_where_the_top_is_right": 0.8636363636363636,
+        "bytes_of_uniform_top": 0.5763797856634976
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.22727272727272727,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.6454545454545455,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.8818181818181818,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "lift_per_weight": {
+      "base": {
+        "questions": 87,
+        "same_as_top": 0.9425287356321839,
+        "questions_the_top_answers": 79,
+        "same_where_the_top_is_right": 0.9493670886075949,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 143,
+        "same_as_top": 0.7972027972027972,
+        "questions_the_top_answers": 90,
+        "same_where_the_top_is_right": 0.8777777777777778,
+        "bytes_of_uniform_top": 0.40411529889828884
+      },
+      "top": {
+        "questions": 71,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 17,
+        "same_where_the_top_is_right": 1.0,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 143,
+          "same_where_the_top_is_right": 0.24444444444444444,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 143,
+          "same_where_the_top_is_right": 0.7333333333333333,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 143,
+          "same_where_the_top_is_right": 0.9222222222222223,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "drop_per_weight": {
+      "base": {
+        "questions": 83,
+        "same_as_top": 0.9397590361445783,
+        "questions_the_top_answers": 75,
+        "same_where_the_top_is_right": 0.9466666666666667,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 189,
+        "same_as_top": 0.6455026455026455,
+        "questions_the_top_answers": 99,
+        "same_where_the_top_is_right": 0.8181818181818182,
+        "bytes_of_uniform_top": 0.4807265460487732
+      },
+      "top": {
+        "questions": 29,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 12,
+        "same_where_the_top_is_right": 1.0,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 189,
+          "same_where_the_top_is_right": 0.25252525252525254,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 189,
+          "same_where_the_top_is_right": 0.6565656565656566,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 189,
+          "same_where_the_top_is_right": 0.8787878787878788,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "answer_gradient_per_weight": {
+      "base": {
+        "questions": 85,
+        "same_as_top": 0.9411764705882353,
+        "questions_the_top_answers": 77,
+        "same_where_the_top_is_right": 0.948051948051948,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 216,
+        "same_as_top": 0.7361111111111112,
+        "questions_the_top_answers": 109,
+        "same_where_the_top_is_right": 0.8807339449541285,
+        "bytes_of_uniform_top": 0.5820840568758149
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 216,
+          "same_where_the_top_is_right": 0.22018348623853212,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 216,
+          "same_where_the_top_is_right": 0.6422018348623854,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 216,
+          "same_where_the_top_is_right": 0.8807339449541285,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "answer_quant_gap_per_weight": {
+      "base": {
+        "questions": 86,
+        "same_as_top": 0.9418604651162791,
+        "questions_the_top_answers": 78,
+        "same_where_the_top_is_right": 0.9487179487179487,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 215,
+        "same_as_top": 0.7255813953488373,
+        "questions_the_top_answers": 108,
+        "same_where_the_top_is_right": 0.8611111111111112,
+        "bytes_of_uniform_top": 0.5843015471452611
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 215,
+          "same_where_the_top_is_right": 0.21296296296296297,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 215,
+          "same_where_the_top_is_right": 0.6388888888888888,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 215,
+          "same_where_the_top_is_right": 0.8796296296296297,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "error_energy_per_weight": {
+      "base": {
+        "questions": 82,
+        "same_as_top": 0.9512195121951219,
+        "questions_the_top_answers": 74,
+        "same_where_the_top_is_right": 0.9594594594594594,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 218,
+        "same_as_top": 0.7339449541284404,
+        "questions_the_top_answers": 112,
+        "same_where_the_top_is_right": 0.875,
+        "bytes_of_uniform_top": 0.6900115911333429
+      },
+      "top": {
+        "questions": 1,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 0,
+        "same_where_the_top_is_right": null,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.23214285714285715,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.6428571428571429,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 218,
+          "same_where_the_top_is_right": 0.8839285714285714,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "error_energy_d4_per_weight": {
+      "base": {
+        "questions": 87,
+        "same_as_top": 0.9425287356321839,
+        "questions_the_top_answers": 79,
+        "same_where_the_top_is_right": 0.9493670886075949,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 212,
+        "same_as_top": 0.7264150943396226,
+        "questions_the_top_answers": 107,
+        "same_where_the_top_is_right": 0.897196261682243,
+        "bytes_of_uniform_top": 0.7805222442629075
+      },
+      "top": {
+        "questions": 2,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 0,
+        "same_where_the_top_is_right": null,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 212,
+          "same_where_the_top_is_right": 0.205607476635514,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 212,
+          "same_where_the_top_is_right": 0.6355140186915887,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 212,
+          "same_where_the_top_is_right": 0.8785046728971962,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "pooled_per_weight": {
+      "base": {
+        "questions": 85,
+        "same_as_top": 0.9411764705882353,
+        "questions_the_top_answers": 77,
+        "same_where_the_top_is_right": 0.948051948051948,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 216,
+        "same_as_top": 0.6666666666666666,
+        "questions_the_top_answers": 109,
+        "same_where_the_top_is_right": 0.8348623853211009,
+        "bytes_of_uniform_top": 0.5176533394420286
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 216,
+          "same_where_the_top_is_right": 0.22018348623853212,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 216,
+          "same_where_the_top_is_right": 0.6422018348623854,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 216,
+          "same_where_the_top_is_right": 0.8807339449541285,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "common": {
+      "base": {
+        "questions": 131,
+        "same_as_top": 0.7709923664122137,
+        "questions_the_top_answers": 110,
+        "same_where_the_top_is_right": 0.8181818181818182,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 170,
+        "same_as_top": 0.27647058823529413,
+        "questions_the_top_answers": 76,
+        "same_where_the_top_is_right": 0.3815789473684211,
+        "bytes_of_uniform_top": 0.491559011367145
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 170,
+          "same_where_the_top_is_right": 0.09210526315789473,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 170,
+          "same_where_the_top_is_right": 0.5394736842105263,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 170,
+          "same_where_the_top_is_right": 0.8421052631578947,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "middle": {
+      "base": {
+        "questions": 90,
+        "same_as_top": 0.9444444444444444,
+        "questions_the_top_answers": 80,
+        "same_where_the_top_is_right": 0.95,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 211,
+        "same_as_top": 0.6729857819905213,
+        "questions_the_top_answers": 106,
+        "same_where_the_top_is_right": 0.8301886792452831,
+        "bytes_of_uniform_top": 0.6560022376752795
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 211,
+          "same_where_the_top_is_right": 0.19811320754716982,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 211,
+          "same_where_the_top_is_right": 0.6320754716981132,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 211,
+          "same_where_the_top_is_right": 0.8773584905660378,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "together": {
+      "base": {
+        "questions": 74,
+        "same_as_top": 0.9459459459459459,
+        "questions_the_top_answers": 67,
+        "same_where_the_top_is_right": 0.9552238805970149,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 144,
+        "same_as_top": 0.9097222222222222,
+        "questions_the_top_answers": 96,
+        "same_where_the_top_is_right": 0.96875,
+        "bytes_of_uniform_top": 0.7922098995093295
+      },
+      "top": {
+        "questions": 83,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 23,
+        "same_where_the_top_is_right": 1.0,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 144,
+          "same_where_the_top_is_right": 0.34375,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 144,
+          "same_where_the_top_is_right": 0.75,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 144,
+          "same_where_the_top_is_right": 0.9375,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    },
+    "reference": {
+      "base": {
+        "questions": 59,
+        "same_as_top": 0.9661016949152542,
+        "questions_the_top_answers": 57,
+        "same_where_the_top_is_right": 0.9649122807017544,
+        "bytes_of_uniform_top": 0.3423462919298079
+      },
+      "map": {
+        "questions": 221,
+        "same_as_top": 0.7239819004524887,
+        "questions_the_top_answers": 119,
+        "same_where_the_top_is_right": 0.8571428571428571,
+        "bytes_of_uniform_top": 0.6078415645684904
+      },
+      "top": {
+        "questions": 21,
+        "same_as_top": 1.0,
+        "questions_the_top_answers": 10,
+        "same_where_the_top_is_right": 1.0,
+        "bytes_of_uniform_top": 1.0
+      },
+      "uniform_on_the_mapped": {
+        "everything-d2-bartowski-Q2_K": {
+          "questions": 221,
+          "same_where_the_top_is_right": 0.31092436974789917,
+          "bytes_of_uniform_top": 0.3423462919298079
+        },
+        "everything-d4-bartowski-Q2_K": {
+          "questions": 221,
+          "same_where_the_top_is_right": 0.6470588235294118,
+          "bytes_of_uniform_top": 0.55846771804685
+        },
+        "everything-d6-bartowski-Q2_K": {
+          "questions": 221,
+          "same_where_the_top_is_right": 0.8739495798319328,
+          "bytes_of_uniform_top": 0.7754422550564594
+        }
+      }
+    }
+  }
+}

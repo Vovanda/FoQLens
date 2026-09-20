@@ -1,0 +1,187 @@
+"""Expert zones on the block graph, and how far they reach (issues #4, #19).
+
+The surface the zones live on is a graph (owner, 2026-09-16): every block linked to its nearest blocks
+in a metric (metric.neighbour_table), or to the blocks its signal flows to (coupling). The space is an input and
+no picture is drawn:
+
+- a peak is a block whose smoothed mask is at least that of every neighbour and above PEAK_QUANTILE;
+- its hill is the connected region of the graph standing above half its height, and a weaker top inside
+  a stronger hill is not a zone;
+- a zone's own radius is the smallest radius at which the blocks around the peak hold as much weight as its
+  hill - the width of the peak at half height, found from the query (#4).
+
+A zone is a center and a radius, and its figure is every block within the radius by the distances of
+the layout's metric - the geodesic along the graph (metric.geodesic), or its resistive form - so the
+figure is arbitrary and follows the graph, not a ball cut across the space. A zone lifts the blocks it
+reaches by rule 4 of docs/quantization-filter.md, from 1 at its center to 0 at its reach times the last
+stop. How far it reaches is replaceable (Reach): EqualReach sends every zone a share f of the width of the
+network, R = f D (rule 1, #19); ProportionalReach splits the same share by the zones' own radii; LogReach takes the radius
+at which a ball growing exponentially covers the share f of the network.
+
+Invariants:
+- Invariant: one zone per hill - a weaker top inside a stronger zone's hill is not a zone.
+- Invariant: the blocks within a zone's radius hold at least its hill's weight, and no smaller radius does.
+- Invariant: a lift is 1 at a zone's center and 0 at and beyond its reach times the last stop; a reach of 0
+  lifts the center alone (rule 1: f = 0 is the center only).
+- Invariant: the reach at f = 1 lifts every block - the whole network.
+- Invariant: lifts do not decrease as f grows.
+- Invariant: ProportionalReach keeps the zones' mean reach at f D and their ratio to one another.
+- Invariant: LogReach keeps the ends of f and grows with it; a ball of |B|^(R/D) blocks at its reach holds 1 + f (|B| - 1).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Protocol
+
+import numpy as np
+import torch
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import connected_components
+
+from foqlens.metric import PAD, BlockMetric
+from foqlens.zones import MAX_ZONES, PEAK_QUANTILE, check_focus_area
+
+
+@dataclass(frozen=True)
+class GraphZones:
+    centers: np.ndarray  # [n] block indices
+    radii: np.ndarray  # [n] base radii, in the metric's units
+
+
+def _neighbour_mean(scores: np.ndarray, table: np.ndarray) -> np.ndarray:
+    """Every block's value averaged with its neighbours': one step of smoothing on the graph."""
+    real = table != PAD
+    summed = scores + np.where(real, scores[np.where(real, table, 0)], 0.0).sum(axis=1)
+    return summed / (1 + real.sum(axis=1))
+
+
+def block_graph(table: np.ndarray) -> csr_matrix:
+    heads = np.repeat(np.arange(len(table)), table.shape[1])
+    tails = table.ravel()
+    keep = tails != PAD
+    return csr_matrix((np.ones(keep.sum()), (heads[keep], tails[keep])), shape=(len(table), len(table)))
+
+
+def _hill(graph: csr_matrix, above: np.ndarray, top: int) -> np.ndarray:
+    """The blocks above the threshold connected to `top` through blocks above it."""
+    inside = np.flatnonzero(above)
+    _, labels = connected_components(graph[inside][:, inside], directed=False)
+    hill = np.zeros(len(above), dtype=bool)
+    hill[inside[labels == labels[np.searchsorted(inside, top)]]] = True
+    return hill
+
+
+def mass_radius(distances: np.ndarray, weights: np.ndarray, mass: float) -> float:
+    """The smallest radius at which the blocks within it of one center (`distances`) hold `mass` of weight."""
+    order = np.argsort(distances, kind="stable")
+    held = np.cumsum(weights[order])
+    return float(distances[order[min(np.searchsorted(held, mass), len(order) - 1)]])
+
+
+def find_graph_zones(scores: np.ndarray, metric: BlockMetric, table: np.ndarray, weights: np.ndarray,
+                    max_zones: int = MAX_ZONES, peak_quantile: float = PEAK_QUANTILE) -> GraphZones:
+    """The zones of a question's `scores` [n_blocks] in `metric`, found on its neighbour `table`, strongest first."""
+    table = np.asarray(table)
+    smooth = _neighbour_mean(np.asarray(scores, dtype=np.float64), table)
+    around = np.where(table != PAD, smooth[np.where(table != PAD, table, 0)], -np.inf).max(axis=1)
+    tops = np.flatnonzero((smooth >= around) & (smooth > np.quantile(smooth, peak_quantile)))
+    tops = tops[np.argsort(-smooth[tops], kind="stable")]
+    base = np.median(smooth)
+    graph = block_graph(table)
+    claimed = np.zeros(len(smooth), dtype=bool)
+    centers, radii = [], []
+    for top in tops:
+        if claimed[top] or len(centers) == max_zones:
+            continue
+        hill = _hill(graph, smooth >= base + (smooth[top] - base) / 2, int(top))
+        claimed |= hill
+        d = metric.distances(torch.tensor([int(top)]))[0].cpu().numpy()
+        centers.append(int(top))
+        radii.append(mass_radius(d, weights, float(weights[hill].sum())))
+    return GraphZones(centers=np.asarray(centers, dtype=np.int64), radii=np.asarray(radii, dtype=float))
+
+
+class Reach(Protocol):
+    def radii(self, zones: GraphZones) -> np.ndarray:
+        """How far every zone reaches, before the profile's last stop: [n]; inf is everywhere, 0 is nowhere."""
+        ...
+
+
+@dataclass(frozen=True)
+class EqualReach:
+    """Rule 1: every zone reaches f times the width of the network - 0 at f = 0, the whole width at 1."""
+
+    focus_area: float
+    width: float  # the width of the network along the metric (metric.sweep_width), fixed per metric so f means one thing
+
+    def __post_init__(self) -> None:
+        check_focus_area(self.focus_area)
+
+    def radii(self, zones: GraphZones) -> np.ndarray:
+        # f = 1 is the whole network by definition: the width is measured by sweeps and may fall short of the diameter
+        reach = np.inf if self.focus_area == 1.0 else self.focus_area * self.width
+        return np.full(len(zones.radii), reach)
+
+
+@dataclass(frozen=True)
+class ProportionalReach:
+    """The same share f of the network, split between a question's zones by their own width: R_i = f D r_i / mean(r).
+
+    r_i is a zone's own radius, found from the query - the radius around its center that holds its hill above half
+    height (find_graph_zones). The zones' mean reach is f D, so f keeps its meaning; a narrow peak reaches less than a
+    spread one. One zone, or zones of one width, reach f D exactly - EqualReach. Derivation: the session note
+    knobs-from-the-query.md (a change of rule 1 for the owner to decide; this class stands beside EqualReach).
+    """
+
+    focus_area: float
+    width: float
+
+    def __post_init__(self) -> None:
+        check_focus_area(self.focus_area)
+
+    def radii(self, zones: GraphZones) -> np.ndarray:
+        if self.focus_area == 1.0:
+            return np.full(len(zones.radii), np.inf)
+        own = np.asarray(zones.radii, dtype=float)
+        mean = own.mean() if len(own) else 0.0
+        share = own / mean if mean > 0 else np.ones_like(own)  # hills of one block each: no width to split by
+        return self.focus_area * self.width * share
+
+
+@dataclass(frozen=True)
+class LogReach:
+    """f as the share of the network a zone covers where a ball grows exponentially (Volodya 19.09): a ball of R holds
+    |B|^(R/D) blocks - one at R = 0, all at R = D - so it covers the share f at
+    R = D log(1 + f (|B| - 1)) / log |B|. The map is one per graph, whatever the query, so the memory still follows
+    the query. Derivation: docs/quantization-filter-math.md, section 8."""
+
+    focus_area: float
+    width: float
+    blocks: int  # |B|: the blocks of the graph
+
+    def __post_init__(self) -> None:
+        check_focus_area(self.focus_area)
+        if self.blocks < 2:
+            raise ValueError(f"a log reach needs a graph of two blocks at least, not {self.blocks}")
+
+    def radii(self, zones: GraphZones) -> np.ndarray:
+        if self.focus_area == 1.0:
+            return np.full(len(zones.radii), np.inf)
+        reach = self.width * np.log1p(self.focus_area * (self.blocks - 1)) / np.log(self.blocks)
+        return np.full(len(zones.radii), reach)
+
+
+def zone_lifts(zones: GraphZones, radii: np.ndarray, metric: BlockMetric, last_stop: float = 1.0) -> np.ndarray:
+    """Every zone's lift of every block by rule 4: max(0, 1 - d / (R s_last)), [n_zones, n_blocks]."""
+    if len(zones.centers) == 0:
+        return np.zeros((0, metric.n_blocks))
+    d = metric.distances(torch.as_tensor(zones.centers)).cpu().numpy()
+    reach = (np.asarray(radii, dtype=float) * last_stop)[:, None]
+    with np.errstate(divide="ignore", invalid="ignore"):
+        lifts = np.clip(1.0 - d / reach, 0.0, None)
+    # rule 1: f = 0 is the center only - a zone that reaches nowhere lifts its own center and nothing around it
+    lifts[np.broadcast_to(reach == 0, lifts.shape)] = 0.0
+    lifts[np.arange(len(zones.centers)), zones.centers] = 1.0
+    lifts[np.broadcast_to(np.isinf(reach), lifts.shape)] = 1.0
+    return lifts

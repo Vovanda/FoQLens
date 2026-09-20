@@ -1,57 +1,36 @@
-"""Expert zones: the peaks of a query's mask on the weight map, and the layout they give (docs/quantization-filter.md).
+"""The rules that turn a zone's lift into levels (docs/quantization-filter.md, rules 2-6), on any metric.
 
-A mask is a field over the weight map. It is rasterized on a GRID x GRID grid and smoothed (sum and
-count smoothed apart, so empty cells take their neighbours' value); every hill of the smoothed field
-standing above PEAK_QUANTILE is one zone, with a center at its top and a base radius - the radius of
-the disc with the area of the hill above half height.
-
-The focus area f in [0, 1] sets every radius, R = r f / (1 - f): at 0 the zones shrink to their
-centers (a hard edge), at 0.5 they are as found, at 1 they cover the whole map (no mask).
-
-The layout (docs/quantization-filter.md) has no budget: precision_lift gives every
-block how far it is lifted over the floor, 1 at a zone's center and 0 at its reach, and
-levels_from_lift turns that into levels between a floor and a ceiling along the profile's stops.
-Memory is what the layout costs, not what it was given.
+Where zones come from and how far they reach is graph_zones (the block graph of #4, the reach of #19); this module is
+what the rules do with a lift: the ceiling of a zone from the focus strength g (rule 2), the profile of stops from
+the ceiling down to the base precision (rule 3), levels from one lift (levels_from_lift, rule 6) or from the lifts of
+zones of their own strength added in rungs (levels_from_rungs, #19). None of it looks at a coordinate or a picture.
+Memory is what a layout costs, not what it was given.
 
 Invariants:
 - Invariant: a focus area outside [0, 1] (NaN included) is refused where it enters.
-- Invariant: one zone per hill - a weaker top inside a stronger zone's half-height area is not a zone.
-- Invariant: random zones keep the number and the radii of the zones they control; only the centers move.
-- Invariant: precision_lift is 0 outside every zone's reach and 1 at a center; combining lifts never
-  lowers a block below the strongest single lift.
-- Invariant: levels_from_lift gives the floor at lift 0 and the ceiling at lift 1, never below the
-  floor, and a block one stop further out is at most one level lower.
+- Invariant: levels_from_lift gives the floor at lift 0 and the ceiling at lift 1, never below the floor, and a block
+  one stop further out is at most one level lower.
+- Invariant: levels_from_rungs with one ceiling for all is levels_from_lift on the even profile, rule 5 "sum" or "max",
+  and no block rises past the highest ceiling of the zones that reach it.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 
 import numpy as np
-from scipy import ndimage
 
-from foqlens.quant import Level
+from foqlens.quant import LADDER, Level
 
-GRID = 64
-SMOOTH_CELLS = 1.5  # gaussian sigma of the smoothing, in grid cells
-PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed field
-MAX_ZONES = 16
-# The ladder of the graded layout: every level a block can be read at, coarse first. What a model can
-# actually carry is a choice of the run, not of the layout - a floor of D4 leaves D2 out of the rings.
-READ_LEVELS = (Level.D2, Level.D4, Level.D6, Level.D8)
-# A stop past 1 puts a ring outside the zone's radius. On a 2D map a ring out to 1.5 covers 1.25 of
-# the zone's area; further than that it is a second zone, and the size belongs to the focus area.
-MAX_STOP = 1.5
+PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed scores (graph_zones.find_graph_zones)
+MAX_ZONES = 16  # the zones of one question at most, strongest first
+# The rungs a zone can lift a block to by default: the read depths D2 ... D8, the ladder of
+# docs/quantization-filter.md (rule 2: g = 1 is the top rung, D8). The kernel reads depths and ZERO only, and a
+# model cut to D8 holds nothing above it; a run that reads its source weights passes a ladder with BF16 on top,
+# and a run on a copy cut shorter passes regulator.kernel_ladder.
+READ_LEVELS = tuple(lv for lv in LADDER if lv.depth)
+# The ring past the zone's edge behind an empty floor (docs, the profile of a zone: "D2:1.5" at a ZERO base).
 HALO_STOP = 1.5
-PLACES_TRIED = 40  # landings a moved figure tries before taking the one that costs what the original did
-EPS = 1e-12
-
-
-@dataclass(frozen=True)
-class Zones:
-    centers: np.ndarray  # [n, dims] on the weight map
-    radii: np.ndarray  # [n] base radii, weight map units
 
 
 def check_focus_area(focus_area: float) -> float:
@@ -59,116 +38,6 @@ def check_focus_area(focus_area: float) -> float:
     if not 0.0 <= focus_area <= 1.0:
         raise ValueError(f"focus area {focus_area} outside [0, 1]")
     return focus_area
-
-
-def _smoothed(coords: np.ndarray, field: np.ndarray, grid: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """The field on the grid, smoothed as sum / count so that empty cells take their neighbours' value."""
-    lo, hi = coords.min(axis=0), coords.max(axis=0)
-    cell = np.maximum(hi - lo, np.finfo(float).eps) / (grid - 1)
-    idx = np.clip(np.round((coords - lo) / cell).astype(int), 0, grid - 1)
-    total = np.zeros((grid, grid))
-    count = np.zeros((grid, grid))
-    np.add.at(total, (idx[:, 0], idx[:, 1]), field)
-    np.add.at(count, (idx[:, 0], idx[:, 1]), 1.0)
-    smooth = ndimage.gaussian_filter(total, SMOOTH_CELLS) / np.maximum(ndimage.gaussian_filter(count, SMOOTH_CELLS), EPS)
-    return smooth, lo, cell
-
-
-def find_zones(field: np.ndarray, coords: np.ndarray, grid: int = GRID) -> Zones:
-    """The zones of a mask `field` [n_blocks] over the weight map `coords` [n_blocks, 2], strongest first."""
-    smooth, lo, cell = _smoothed(coords, field, grid)
-    tops = np.argwhere((smooth == ndimage.maximum_filter(smooth, size=3)) & (smooth > np.quantile(smooth, PEAK_QUANTILE)))
-    tops = tops[np.argsort(-smooth[tuple(tops.T)], kind="stable")]
-    base = np.median(smooth)
-    claimed = np.zeros_like(smooth, dtype=bool)
-    centers, radii = [], []
-    for top in tops:
-        if claimed[tuple(top)] or len(centers) == MAX_ZONES:
-            continue
-        regions, _ = ndimage.label(smooth >= base + (smooth[tuple(top)] - base) / 2)
-        hill = regions == regions[tuple(top)]
-        claimed |= hill
-        centers.append(lo + top * cell)
-        radii.append(np.sqrt(hill.sum() * float(np.prod(cell)) / np.pi))
-    dims = coords.shape[1]
-    return Zones(centers=np.asarray(centers, dtype=float).reshape(-1, dims), radii=np.asarray(radii, dtype=float))
-
-
-def random_zones(zones: Zones, coords: np.ndarray, rng: np.random.Generator) -> Zones:
-    """The same number of zones with the same radii, centered on random blocks of the weight map."""
-    at = rng.choice(len(coords), size=len(zones.radii), replace=False)
-    return Zones(centers=coords[at].copy(), radii=zones.radii.copy())
-
-
-def moved_zones(zones: Zones, coords: np.ndarray, rng: np.random.Generator,
-                weights: np.ndarray | None = None, reach: float = 1.0) -> Zones:
-    """The same zones somewhere else on the map: turned around their own center and put down elsewhere.
-
-    The honest control for a layout whose memory is a result. Random centers of the same radii
-    (random_zones) spend more, because a query's zones overlap each other and scattered ones do not -
-    a control that costs more and answers worse says nothing about the address. Moving the zones as
-    one rigid figure keeps their count, their radii and every distance between them, and changes only
-    where they sit, so what is compared is the place and nothing else.
-
-    With `weights` the landing is chosen so that the figure covers about as much weight as it did
-    where it came from - blocks are not spread evenly over the map, and a query's zones sit where they
-    are sparse, so a plain landing costs a fifth more.
-
-    Invariant: the moved figure keeps the pairwise distances of the original, up to floating point.
-    """
-    if len(zones.radii) == 0:
-        return zones
-    shifted = zones.centers - zones.centers.mean(axis=0)
-    if coords.shape[1] == 2:  # a rotation exists on the plane the weight map is drawn on
-        angle = rng.uniform(0, 2 * np.pi)
-        turn = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-        shifted = shifted @ turn.T
-    if weights is None:
-        return Zones(centers=shifted + coords[rng.integers(len(coords))], radii=zones.radii.copy())
-    # Blocks do not lie evenly on the map, so the same figure covers more of them in some places than
-    # in others - and a query's zones sit where they are sparse. Of PLACES_TRIED landings the one whose
-    # covered weight is closest to the original is taken, so the control spends what the layout spends.
-    want = _covered(zones, coords, weights, reach)
-    best, distance = None, np.inf
-    for _ in range(PLACES_TRIED):
-        moved = Zones(centers=shifted + coords[rng.integers(len(coords))], radii=zones.radii.copy())
-        gap = abs(_covered(moved, coords, weights, reach) - want)
-        if gap < distance:
-            best, distance = moved, gap
-    return best
-
-
-def _covered(zones: Zones, coords: np.ndarray, weights: np.ndarray, reach: float) -> float:
-    """The weight of the blocks the zones reach, as a share of all weight."""
-    if len(zones.radii) == 0:
-        return 0.0
-    inside = (np.linalg.norm(coords[:, None, :] - zones.centers[None], axis=-1) <= zones.radii * reach).any(axis=1)
-    return float(weights[inside].sum() / weights.sum())
-
-
-def precision_lift(
-    coords: np.ndarray, zones: Zones, focus_area: float, reach: float = 1.0, combine: str = "sum",
-) -> np.ndarray:
-    """How far every block is lifted over the floor, 0 ... 1 (docs/quantization-filter.md, rules 1, 4 and 5).
-
-    One zone lifts a block by 1 - d / (R reach), clipped at 0, so the lift is 1 at its center and
-    fades to 0 at `reach` radii - the outermost stop of the profile. Zones that cover the same block
-    combine by `combine`: "sum" adds their lifts, capped at 1; "max"
-    takes the strongest alone.
-    """
-    check_focus_area(focus_area)
-    if len(zones.radii) == 0 or focus_area == 0.0 or reach <= 0.0:
-        return np.zeros(len(coords))
-    if focus_area == 1.0:
-        return np.ones(len(coords))
-    radii = zones.radii * (focus_area / (1.0 - focus_area)) * reach
-    d = np.linalg.norm(coords[:, None, :] - zones.centers[None], axis=-1)
-    lifts = np.clip(1.0 - d / radii, 0.0, None)
-    if combine == "sum":
-        return np.minimum(lifts.sum(axis=1), 1.0)
-    if combine == "max":
-        return lifts.max(axis=1)
-    raise ValueError(f"unknown combine {combine!r}, expected 'sum' or 'max'")
 
 
 def levels_from_lift(lift: np.ndarray, floor: Level, ceiling: Level, stops: Sequence[tuple[Level, float]]) -> np.ndarray:
@@ -189,8 +58,52 @@ def levels_from_lift(lift: np.ndarray, floor: Level, ceiling: Level, stops: Sequ
     return codes
 
 
+def zone_ceilings(strengths: np.ndarray, focus_strength: float, floor: Level, ladder: Sequence[Level] = READ_LEVELS) -> list[Level]:
+    """The ceiling of every zone from its own strength s in [0, 1]: kappa_i = gamma + floor(g s_i (m - gamma)) (#19).
+
+    With every strength 1 this is rule 2 as it is: one ceiling for all zones.
+    """
+    strengths = np.asarray(strengths, dtype=float)
+    if ((strengths < 0) | (strengths > 1) | np.isnan(strengths)).any():
+        raise ValueError("a zone strength outside [0, 1]")
+    return [ceiling_of(focus_strength * float(s), floor, ladder) for s in strengths]
+
+
+def levels_from_rungs(lifts: np.ndarray, ceilings: Sequence[Level], floor: Level, combine: str = "sum",
+                      ladder: Sequence[Level] = READ_LEVELS) -> np.ndarray:
+    """Level codes [n_blocks] from every zone's lift [n_zones, n_blocks] and its own ceiling, on the even profile (#19).
+
+    Rungs are counted on the run's ladder from the floor up: the floor is rung 0, kappa_i the rung of zone i's
+    ceiling. The even profile is linear in rungs: a zone with lift l > 0 reads a block at min(kappa, 1 +
+    floor(l kappa)) - what levels_from_lift gives on even_stops without a halo. Zones with different
+    ceilings add in rungs, r = sum_i l_i kappa_i, the level being min(kappa*, 1 + floor(r)) where r > 0 and
+    kappa* is the highest ceiling among the zones that reach the block - a zone never lifts a block past its
+    own ceiling, however strong a neighbour is. With one ceiling for all this is rule 5 "sum" exactly. "max"
+    takes the highest level any zone gives alone.
+    """
+    lifts = np.clip(np.asarray(lifts, dtype=float), 0.0, 1.0)
+    rungs = [floor, *(lv for lv in ladder if lv > floor)]
+    kappa = np.array([rungs.index(c) for c in ceilings], dtype=np.int64)
+    if len(kappa) != len(lifts):
+        raise ValueError(f"{len(kappa)} ceilings for {len(lifts)} zones")
+    if len(kappa) == 0:
+        return np.full(lifts.shape[1], int(floor), dtype=np.uint8)
+    reaching = (lifts > 0) & (kappa[:, None] > 0)
+    if combine == "sum":
+        r = (lifts * kappa[:, None]).sum(axis=0)
+        cap = np.where(reaching, kappa[:, None], 0).max(axis=0)
+        rung = np.where(r > 0, np.minimum(cap, 1 + np.floor(r).astype(np.int64)), 0)
+    elif combine == "max":
+        alone = np.where(reaching, np.minimum(kappa[:, None], 1 + np.floor(lifts * kappa[:, None]).astype(np.int64)), 0)
+        rung = alone.max(axis=0)
+    else:
+        raise ValueError(f"unknown combine {combine!r}, expected 'sum' or 'max'")
+    return np.asarray([int(lv) for lv in rungs], dtype=np.uint8)[rung]
+
+
 def check_stops(stops: Sequence[tuple[Level, float]], floor: Level, ceiling: Level) -> None:
-    """Refuse a profile that is not a falloff from the ceiling down to the floor."""
+    """Refuse a profile that is not a falloff from the ceiling down to the floor: stops above 0, strictly growing
+    (docs: a stop above 1 is a ring past the zone's edge, as many as there are such stops)."""
     if not stops:
         raise ValueError("a profile needs at least one stop")
     if stops[0][0] is not ceiling:
@@ -203,8 +116,8 @@ def check_stops(stops: Sequence[tuple[Level, float]], floor: Level, ceiling: Lev
     for level, stop in stops:
         if level < floor:
             raise ValueError(f"the profile reads {level.name} below the floor {floor.name}")
-        if not 0.0 < stop <= MAX_STOP:
-            raise ValueError(f"stop {stop} outside (0, {MAX_STOP}]")
+        if not stop > 0.0:
+            raise ValueError(f"stop {stop} is not above 0")
 
 
 def even_stops(floor: Level, ceiling: Level, ladder: Sequence[Level] = READ_LEVELS, halo: bool = False) -> tuple[tuple[Level, float], ...]:

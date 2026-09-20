@@ -1,29 +1,38 @@
-"""Step 3 layout policies: which blocks each question reads sharp.
+"""Layout policies: the level of every block for each question.
 
 Every policy answers one question - the level of every block for a given set of questions - so
 the evaluation loop does not know how a layout is made. A new way to allocate precision is a new
-class with the same interface. Policies take a precision share (see budget.py): the share of the
-precision range spent, 0 = everything coarse, 1 = everything sharp.
+class with the same interface.
 
-A zone layout is made of three parts behind their own interfaces - the zones of a question
-(ZoneSource), the field they make over the weight map (Field), and how the field becomes levels
-(LevelRule) - so a new kind of zones, profile or rule is a new class, not a branch.
+A zone layout on the block graph (GraphZoneLayout) is made of parts behind their own interfaces - the zones of a
+question (GraphZoneSource), the surface they reach along (metric.Surface), how far they reach (graph_zones.Reach),
+how strong each is (ZoneStrength) - so a new kind of zones, reach or strength is a new class, not a branch. The
+per-block control (QuantileLevels) takes the same knobs with no zones; AttentionLevel holds rule 6 over any policy, and
+WorkingLayers keeps the layers the address is read from at their default level - the filter acts after them.
+GivenLevels reads layouts an oracle made elsewhere, so an oracle's answers go through the same regulator.
+The policies of the first bench (Uniform, Directed, TopicMask, Random, ShuffledLevels) take a precision share (see
+budget.py): the share of the precision range spent, 0 = everything coarse, 1 = everything sharp.
 
 Invariants:
-- Invariant: every policy at the same precision share spends the same share of weights.
+- Invariant: every precision-share policy at the same share spends the same share of weights.
 - Invariant: Random is reproducible per question from its seed and differs between questions.
-- Invariant: a question never sees its own mask through its topic's mean (leave-one-out).
+- Invariant: a question never sees its own scores through its topic's mean (leave-one-out).
+- Invariant: the per-block control lifts the top share f of the blocks (ceil(fN), ties aside), at f = 0 the top one.
+- Invariant: the working layers read their default level whatever the policy lays there; every other block keeps the
+  policy's level.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import ClassVar, Protocol
+from dataclasses import dataclass, field
+from typing import ClassVar, Protocol, runtime_checkable
 
 import numpy as np
 
-from foqlens import zones
+from foqlens import graph_zones, zones
 from foqlens import budget as bg
+from foqlens.metric import Surface
+from foqlens.projection import Projection
 from foqlens.quant import Level
 
 
@@ -40,7 +49,7 @@ def _rng(seed: int, i: int, precision_share: float, salt: int = 0) -> np.random.
 
 
 class TopicMeans:
-    """Mean mask of every topic, summed once; a question's own topic mean leaves the question out."""
+    """Mean scores of every topic, summed once; a question's own topic mean leaves the question out."""
 
     def __init__(self, scores: np.ndarray, domains: tuple[str, ...]):
         self.scores = scores
@@ -56,7 +65,7 @@ class TopicMeans:
 
 
 def topic_masks(scores: np.ndarray, domains: tuple[str, ...], index: int, topic: str) -> np.ndarray:
-    """Mean mask of a topic's questions; the question itself is left out when it belongs to that topic."""
+    """Mean scores of a topic's questions; the question itself is left out when it belongs to that topic."""
     return TopicMeans(scores, domains).mean(index, topic)
 
 
@@ -71,6 +80,21 @@ class Uniform:
 
     def levels(self, indices: np.ndarray) -> np.ndarray:
         return np.full((len(indices), self.n_blocks), int(self.level), dtype=np.uint8)
+
+
+@dataclass(frozen=True)
+class GivenLevels:
+    """Every question's levels as an oracle laid them (a minimal mask of foqlens.group_oracle): read, never made."""
+
+    label: str
+    codes: np.ndarray  # uint8 [questions, n_blocks], in the order of the questions laid out
+
+    @property
+    def name(self) -> str:
+        return self.label
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        return self.codes[np.asarray(indices)]
 
 
 @dataclass(frozen=True)
@@ -180,170 +204,6 @@ class Random:
         )
 
 
-class TopicZones:
-    """The expert zones of every question's own and paired topic mask on the weight map, found once each."""
-
-    def __init__(self, means: TopicMeans, partner: dict, coords: np.ndarray):
-        self.means = means
-        self.partner = partner
-        self.coords = coords
-        self._cache: dict[tuple[int, str], zones.Zones] = {}
-
-    def _find(self, index: int, topic: str) -> zones.Zones:
-        key = (index, topic)
-        if key not in self._cache:
-            self._cache[key] = zones.find_zones(self.means.mean(index, topic), self.coords)
-        return self._cache[key]
-
-    def own(self, index: int) -> zones.Zones:
-        """The zones of the question's own topic, the question itself left out."""
-        return self._find(index, self.means.domains[index])
-
-    def other(self, index: int) -> zones.Zones:
-        """The zones of the question's paired topic."""
-        return self._find(index, self.partner[self.means.domains[index]])
-
-
-# --- Zone layouts, made of three replaceable parts: which zones, what field they make, how it becomes levels.
-
-
-class ZoneSource(Protocol):
-    def zones(self, index: int) -> zones.Zones:
-        """The expert zones of question `index`."""
-        ...
-
-
-class Field(Protocol):
-    def field(self, coords: np.ndarray, zones_: zones.Zones) -> np.ndarray:
-        """A value per block [n_blocks] from the zones on the weight map; higher is sharper."""
-        ...
-
-
-class LevelRule(Protocol):
-    def levels(self, field: np.ndarray, index: int) -> np.ndarray:
-        """Level codes [n_blocks] of question `index` from its field."""
-        ...
-
-
-@dataclass(frozen=True)
-class OwnZones:
-    """The zones of the question's own topic (leave-one-out)."""
-
-    topics: TopicZones
-
-    def zones(self, index: int) -> zones.Zones:
-        return self.topics.own(index)
-
-
-@dataclass(frozen=True)
-class OtherZones:
-    """The zones of the question's paired topic."""
-
-    topics: TopicZones
-
-    def zones(self, index: int) -> zones.Zones:
-        return self.topics.other(index)
-
-
-@dataclass(frozen=True)
-class RandomZones:
-    """As many zones with the same radii as the own ones, around random blocks - the same centers for every field."""
-
-    topics: TopicZones
-    seed: int = 0
-
-    def zones(self, index: int) -> zones.Zones:
-        return zones.random_zones(self.topics.own(index), self.topics.coords, _rng(self.seed, index, 0.0, salt=3))
-
-
-@dataclass(frozen=True)
-class MovedZones:
-    """The query's own zones, carried elsewhere on the map as one rigid figure (zones.moved_zones).
-
-    The control for a layout whose memory is a result: same count, same radii, same distances between
-    the zones, another place. What it tests is the address alone.
-    """
-
-    topics: TopicZones
-    weights: np.ndarray | None = None   # block sizes: with them the landing is matched by cost
-    reach: float = 1.0
-    seed: int = 0
-
-    def zones(self, index: int) -> zones.Zones:
-        return zones.moved_zones(self.topics.own(index), self.topics.coords, _rng(self.seed, index, 0.0, salt=7),
-                                 self.weights, self.reach)
-
-
-@dataclass(frozen=True)
-class FixedZones:
-    """One set of zones for every question (the backbone's)."""
-
-    fixed: zones.Zones
-
-    def zones(self, index: int) -> zones.Zones:
-        return self.fixed
-
-
-@dataclass(frozen=True)
-class ZoneLayout:
-    """Levels from expert zones (docs/quantization-filter.md): zones of a question -> a field -> levels.
-
-    Each part is replaced by a new class with the same interface; the layout does not know which.
-    """
-
-    name: str
-    source: ZoneSource
-    field: Field
-    rule: LevelRule
-    coords: np.ndarray
-
-    def levels(self, indices: np.ndarray) -> np.ndarray:
-        return np.stack([self.rule.levels(self.field.field(self.coords, self.source.zones(int(i))), int(i)) for i in indices])
-
-
-@dataclass(frozen=True)
-class LiftField:
-    """The field of the graded layout: how far every block is lifted over the floor (zones.precision_lift)."""
-
-    focus_area: float
-    reach: float = 1.0
-    combine: str = "sum"
-
-    def __post_init__(self) -> None:
-        zones.check_focus_area(self.focus_area)
-
-    def field(self, coords: np.ndarray, zones_: zones.Zones) -> np.ndarray:
-        return zones.precision_lift(coords, zones_, self.focus_area, self.reach, self.combine)
-
-
-@dataclass(frozen=True)
-class GradedLevels:
-    """The rule of the graded layout: the lift becomes levels along a profile (zones.levels_from_lift)."""
-
-    floor: Level
-    stops: tuple[tuple[Level, float], ...]
-
-    def levels(self, field: np.ndarray, index: int) -> np.ndarray:
-        return zones.levels_from_lift(field, self.floor, self.stops[0][0], self.stops) if self.stops             else np.full(len(field), int(self.floor), dtype=np.uint8)
-
-
-def graded_zone_layout(
-    name: str, source: ZoneSource, focus_area: float, focus_strength: float, coords: np.ndarray,
-    floor: Level = Level.D4, combine: str = "sum", halo: bool = False,
-    stops: tuple[tuple[Level, float], ...] | None = None,
-) -> ZoneLayout:
-    """The graded zone layout (docs/quantization-filter.md): a floor everywhere, zones graded up to a ceiling.
-
-    The ceiling is focus_strength of the way from the floor to the top of the ladder; the profile is
-    even by default, with the lowest rung pushed past the edge when `halo` is on. There is no budget:
-    what the layout costs is what its zones ask for.
-    """
-    ceiling = zones.ceiling_of(focus_strength, floor)
-    profile = stops if stops is not None else zones.even_stops(floor, ceiling, halo=halo)
-    reach = profile[-1][1] if profile else 1.0
-    return ZoneLayout(name, source, LiftField(focus_area, reach, combine), GradedLevels(floor, profile), coords)
-
-
 @dataclass(frozen=True)
 class ShuffledLevels:
     """The levels of another policy, shuffled over the blocks: the same memory with no mask at all.
@@ -368,3 +228,272 @@ class ShuffledLevels:
             for group in groups:
                 out[row, group] = levels[row, rng.permutation(group)]
         return out
+
+
+# --- Zones on the block graph (#4, #19): the zones of a question, how far they reach, how strong each is.
+
+
+@runtime_checkable
+class Zoned(Protocol):
+    def zone_cover(self, index: int) -> tuple[np.ndarray, list[Level]]:
+        """Every zone of question `index`: its lift over every block [zones, n_blocks] and its own ceiling."""
+        ...
+
+
+class GraphZoneSource(Protocol):
+    def zones(self, index: int) -> graph_zones.GraphZones:
+        """The expert zones of question `index` on the block graph."""
+        ...
+
+
+class ZoneStrength(Protocol):
+    def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
+        """Every zone's own strength in [0, 1]: how far its ceiling rises of the way g allows."""
+        ...
+
+
+class QueryGraphZones:
+    """The zones of the question's own scores - the address read from the query itself, found once per question: they
+    do not depend on f, g or the reach, so every layout of a sweep that shares this source reuses them."""
+
+    def __init__(self, scores: np.ndarray, surface: Surface, weights: np.ndarray):
+        self.scores, self.surface, self.weights = scores, surface, weights  # scores in excess of the background
+        self._cache: dict[int, graph_zones.GraphZones] = {}
+
+    def zones(self, index: int) -> graph_zones.GraphZones:
+        if index not in self._cache:
+            self._cache[index] = graph_zones.find_graph_zones(self.scores[index], self.surface.metric(index),
+                                                              self.surface.table, self.weights)
+        return self._cache[index]
+
+
+class TopicGraphZones:
+    """The zones of the question's own topic mean (leave-one-out), found once per question."""
+
+    def __init__(self, means: TopicMeans, surface: Surface, weights: np.ndarray):
+        self.means, self.surface, self.weights = means, surface, weights
+        self._cache: dict[int, graph_zones.GraphZones] = {}
+
+    def zones(self, index: int) -> graph_zones.GraphZones:
+        if index not in self._cache:
+            mean = self.means.mean(index, self.means.domains[index])
+            self._cache[index] = graph_zones.find_graph_zones(mean, self.surface.metric(index), self.surface.table, self.weights)
+        return self._cache[index]
+
+
+@dataclass(frozen=True)
+class EqualStrength:
+    """Every zone at full strength: rule 2 as it is, one ceiling for all zones."""
+
+    def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
+        return np.ones(len(zones_.centers))
+
+
+# The share of calibration zone centers whose projected score stays below the strength scale Z: the top 1% saturate
+# at full strength instead of one outlier pressing every other zone down, as a normalisation by the maximum would (#19).
+STRENGTH_QUANTILE = 0.99
+# The lift of a block at the per-block threshold: above 0, so it reads the first rung over the floor - any positive
+# lift below 1 / (rungs above the floor) does, and the share lifted is then the top f of the blocks, ties aside.
+THRESHOLD_LIFT = 1e-6
+
+
+@dataclass(frozen=True)
+class ProjectedStrength:
+    """A zone's strength from the heads (#19): s_i = clip(sigma(A)[c_i] / Z, 0, 1).
+
+    signals [questions, units] are the heads' energies (source 3 of #18), clipped at 0; sigma is the fitted
+    projection of #18 onto every block (projection.Projection.apply, centred as it was fitted), read at the
+    zone's center; `scale` Z is fixed on calibration (strength_scale) so strengths compare across questions.
+    """
+
+    signals: np.ndarray
+    projection: Projection
+    scale: float
+
+    def strengths(self, index: int, zones_: graph_zones.GraphZones) -> np.ndarray:
+        a = np.clip(np.asarray(self.signals[index : index + 1], dtype=float), 0.0, None)
+        sigma = self.projection.apply(a)[0].cpu().numpy()
+        return np.clip(sigma[zones_.centers] / self.scale, 0.0, 1.0)
+
+
+def strength_scale(projection: Projection, signals: np.ndarray, centers: list[np.ndarray],
+                   quantile: float = STRENGTH_QUANTILE) -> float:
+    """Z: the `quantile` of the projected scores at the zone centers of calibration questions (signals [q, units],
+    centers[q] their zones' centers)."""
+    sigma = projection.apply(np.clip(np.asarray(signals, dtype=float), 0.0, None)).cpu().numpy()
+    at_centers = np.concatenate([sigma[q, c] for q, c in enumerate(centers) if len(c)])
+    return float(np.quantile(at_centers, quantile))
+
+
+@dataclass(frozen=True)
+class GraphZoneLayout:
+    """Levels from zones on the block graph: zones -> how far each reaches -> lifts -> levels in rungs (#19).
+
+    Every part is a class behind its own interface - the zones (GraphZoneSource), the surface they
+    reach along (metric.Surface: the graph's fixed distances, or its medium per question), the reach
+    (graph_zones.Reach), the strength of a zone (ZoneStrength) - and the knobs mean the same whichever
+    source the zones come from: f is the reach, g the ceiling. The level map is the even profile without a
+    halo (zones.levels_from_rungs), on `ladder` - the rungs the run's model reads (regulator.kernel_ladder).
+    """
+
+    name: str
+    source: GraphZoneSource
+    reach: graph_zones.Reach
+    surface: Surface
+    floor: Level
+    focus_strength: float
+    strength: ZoneStrength = EqualStrength()
+    combine: str = "sum"
+    ladder: tuple[Level, ...] = zones.READ_LEVELS
+    _covers: dict = field(default_factory=dict, compare=False, repr=False)  # question -> (lifts, ceilings)
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        rows = []
+        for i in indices:
+            lifts, ceilings = self.zone_cover(int(i))
+            rows.append(zones.levels_from_rungs(lifts, ceilings, self.floor, self.combine, self.ladder))
+        return np.stack(rows)
+
+    def zone_cover(self, index: int) -> tuple[np.ndarray, list[Level]]:
+        """Every zone of question `index`: its lift over every block [zones, n_blocks] and its own ceiling (#19); built
+        once per question, as both the levels and the coverage read it."""
+        if index not in self._covers:
+            found = self.source.zones(index)
+            lifts = graph_zones.zone_lifts(found, self.reach.radii(found), self.surface.metric(index))
+            ceilings = zones.zone_ceilings(self.strength.strengths(index, found), self.focus_strength, self.floor,
+                                           self.ladder)
+            self._covers[index] = (lifts, ceilings)
+        return self._covers[index]
+
+
+@dataclass(frozen=True)
+class AttentionLevel:
+    """Rule 6 of docs/quantization-filter.md over any policy: a q_proj or k_proj block never reads ZERO.
+
+    A zero row of q_proj or k_proj flattens attention - a distortion, not emptiness - so where a policy leaves
+    such a block at ZERO (a ZERO base outside the zones) it reads the attention level A instead. Every other
+    block, and every attention block the policy lifted, keeps the policy's level.
+    """
+
+    policy: LayoutPolicy
+    blocks: np.ndarray  # bool [n_blocks]: the blocks of q_proj and k_proj
+    level: Level  # A: the lowest non-zero rung by default (docs)
+
+    @property
+    def name(self) -> str:
+        return self.policy.name
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        codes = np.asarray(self.policy.levels(indices), dtype=np.uint8)
+        return np.where(self.blocks[None] & (codes == int(Level.ZERO)), np.uint8(int(self.level)), codes)
+
+
+@dataclass(frozen=True)
+class WorkingLayers:
+    """The working layers over any policy (Volodya 19.09): the filter acts after the layers the address is read from,
+    and those read at the default level - the useful quality the address needs, whatever the base of the zones. At a
+    ZERO base they would otherwise be empty and the address could not be read at all.
+    """
+
+    policy: LayoutPolicy
+    blocks: np.ndarray  # bool [n_blocks]: the blocks of the working layers
+    level: Level  # the default level of the working layers
+
+    @property
+    def name(self) -> str:
+        return self.policy.name
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        codes = np.asarray(self.policy.levels(indices), dtype=np.uint8)
+        return np.where(self.blocks[None], np.uint8(int(self.level)), codes)
+
+
+# Every rung of the ladder divides the variance of a block's error by 16 (docs/quantization-filter-math.md, section 2),
+# so the next rung of the same block pays 16 times less per byte and needs a 16 times higher sensitivity.
+RUNG_GAIN = 16.0
+PRICE_STEPS = 60  # bisection steps of the price in log space: 2^-60 of the range, far below one block's bits
+
+
+def knapsack_levels(sensitivity: np.ndarray, price: float, floor: Level, ladder: tuple[Level, ...]) -> np.ndarray:
+    """The best levels at a price of memory (section 9): a block rises one rung above the floor for every k with
+    sensitivity >= price 16^(k-1), up to the top of the ladder. sensitivity [questions, n_blocks] per weight."""
+    above = [lv for lv in ladder if lv > floor]
+    rungs = np.zeros(np.shape(sensitivity), dtype=np.int64)
+    for k in range(len(above)):
+        rungs += np.asarray(sensitivity) >= price * RUNG_GAIN ** k
+    codes = np.array([int(floor)] + [int(lv) for lv in above], dtype=np.uint8)
+    return codes[rungs]
+
+
+def knapsack_price(sensitivity: np.ndarray, weights: np.ndarray, floor: Level, ladder: tuple[Level, ...],
+                   budget_bits: float) -> float:
+    """The one price of memory at which questions spend `budget_bits` per weight on average (rule 7's bits), found on
+    the given (calibration) sensitivities: the more a block is worth per weight, the sooner it rises."""
+    per_code = np.array([lv.bits for lv in Level], dtype=float)
+
+    def bits(price: float) -> float:
+        codes = knapsack_levels(sensitivity, price, floor, ladder)
+        return float((per_code[codes] @ weights / weights.sum()).mean())
+
+    positive = np.asarray(sensitivity)[np.asarray(sensitivity) > 0]
+    if not len(positive):
+        return float("inf")
+    lo, hi = np.log(positive.min()) - np.log(RUNG_GAIN) * len(ladder), np.log(positive.max()) + 1.0
+    for _ in range(PRICE_STEPS):
+        mid = (lo + hi) / 2
+        lo, hi = (lo, mid) if bits(float(np.exp(mid))) <= budget_bits else (mid, hi)
+    return float(np.exp(hi))
+
+
+@dataclass(frozen=True)
+class KnapsackLevels:
+    """The best allocation of section 9 for every question: a block's level from its own sensitivity per weight
+    against one price of memory for all questions, so the layout is the question's and its memory follows it.
+
+    sensitivity is how much the answer needs a block - the gradient's Taylor score as the oracle, the working address
+    as its forward estimate - divided by the block's weights; the price is fixed once on calibration questions for a
+    budget of mean bits per weight (knapsack_price).
+    """
+
+    name: str
+    sensitivity: np.ndarray  # [questions, n_blocks] per weight, >= 0
+    price: float
+    floor: Level
+    ladder: tuple[Level, ...] = zones.READ_LEVELS
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        return knapsack_levels(self.sensitivity[np.asarray(indices)], self.price, self.floor, self.ladder)
+
+
+@dataclass(frozen=True)
+class QuantileLevels:
+    """The per-block regulator (#19) - the control the zones must beat, not a mechanism.
+
+    The top share f of blocks by the question's own score rise over the floor, graded by score up to the
+    ceiling of g; the level map is the zones' own even profile, so what differs is only that there are no
+    zones. It spends the same share of blocks whatever the question - a preset budget - and knows no
+    connectedness.
+    """
+
+    name: str
+    scores: np.ndarray  # [questions, n_blocks]
+    focus_area: float
+    focus_strength: float
+    floor: Level
+    ladder: tuple[Level, ...] = zones.READ_LEVELS
+
+    def __post_init__(self) -> None:
+        zones.check_focus_area(self.focus_area)
+
+    def levels(self, indices: np.ndarray) -> np.ndarray:
+        ceiling = zones.ceiling_of(self.focus_strength, self.floor, self.ladder)
+        rows = []
+        for i in indices:
+            s = np.asarray(self.scores[int(i)], dtype=float)
+            threshold = np.quantile(s, 1.0 - self.focus_area)
+            span = s.max() - threshold
+            graded = (s - threshold) / span if span > 0 else np.ones_like(s)
+            # a block at the threshold reads the first rung: the top share f is lifted, at f = 0 the top block alone
+            lift = np.where(s >= threshold, THRESHOLD_LIFT + (1.0 - THRESHOLD_LIFT) * graded, 0.0)
+            rows.append(zones.levels_from_rungs(lift[None], [ceiling], self.floor, ladder=self.ladder))
+        return np.stack(rows)

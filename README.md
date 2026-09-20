@@ -86,6 +86,10 @@ the bench's own k-quant base the same ladder keeps 98.8%, 96.8%, 91.0% and 51.4%
 the answer only in the weights 13.0% (E002). On the first measurement naive rounding made D2 incoherent
 ([E001](experiments/E001-uniform-quantization/results.md)).
 
+**A layout built for the query holds knowledge more cheaply than a uniform rung.** Over 103 questions only the top rung answers, a map built for the query gives 0.816 of the right answers at 0.523 bytes of the whole model; the uniform D4 at 0.558 bytes gives 0.000 and the uniform D6 at 0.775 gives 0.039. A common map that knows no query gives 0.544 at the same price: the gap to 0.816 is what knowing the query is worth ([E005](experiments/E005-precision-map/results.md)). The maps are built by oracles that look at the answer - a ceiling, not a mechanism.
+
+**The address of a query is cheap to read.** The hybrid of neuron activity and head energy reads a paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision give the same address as a full pass ([E004](experiments/E004-question-address/results.md)). The depth of the reading cannot be chosen from the query.
+
 **The premise of the main hypothesis came up on its own.** On the questions the full model does not know, the
 coarser model answers where the precise one refuses: in E001 on HotpotQA bf16 says the passages hold no answer in
 12.1% of them, D4 in 4.6%, and the accepted answers rise from 13.4% to 25.2%. Coarsening removes the caution and adds
@@ -131,6 +135,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
 - [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones come out of it.
 - [`docs/quantization-filter.md`](docs/quantization-filter.md) - the quantization filter and its zones: how precision is laid out over the weights.
+- [`docs/glossary.md`](docs/glossary.md) - the terms of the project: block, group, rung, field, map, oracle, zone, regulator.
 - [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.
 - [`experiments/`](experiments/_index.md) - one folder per experiment (`E0NN-slug`): its preregistration, card and results; raw summaries in `runs/E0NN-slug/`.

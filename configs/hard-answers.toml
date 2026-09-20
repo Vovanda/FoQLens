@@ -1,0 +1,5 @@
+# The answers at the precision fields (plan ideal-models): every field's layout and the reference's, and the uniform
+# rungs, generated beside every block at D8 in the same batches - does a layout answer as the whole network does, and
+# at what bytes.
+group_oracle = "runs/oracles/hard-e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus-triviaqa+nq_open+squad_v2+arc_easy_closed+arc_challenge_closed.npz"
+precision = "runs/oracles/hard-e2b-it/precision-fields-bartowski-Q2_K-small-corpus-triviaqa+nq_open+squad_v2+arc_easy_closed+arc_challenge_closed.npz"

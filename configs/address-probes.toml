@@ -1,0 +1,26 @@
+# Do hard questions read deeper than trivial ones under the silhouette rule (Volodya 19.09): two sets written for it,
+# trivial questions and hard solvable ones (proofs and the like). Both are asked in ARC-Challenge's closed wrapper
+# ("Solve the question step by step..."), as its questions are - it fits a trivial question and a proof alike, and
+# ARC-Challenge is in the calibration, so the projection meets the form it was fitted on and only the question differs;
+# the trivial set's choices are not shown, as ARC-closed shows none. The projection is the one of address-adaptive - the
+# hybrid, depths 1 to 10 predicting the address from layer 10 on - fitted on the calibration questions of the four
+# corpora together; the rule as there, under the default cap of 0.3.
+corpus = "configs/small-corpus.toml"
+corpora = ["triviaqa", "nq_open", "squad_v2", "arc_challenge_closed"]
+probe_corpus = "arc_challenge_closed"
+source = "hybrid"
+depths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+ridge = 0.1
+base_level = "d2"
+silhouette = 147
+tolerance = 0.2
+patience = 2
+cap_share = 0.3
+base = "bartowski-Q2_K"
+
+[probes]
+trivial = "prompts/probes/trivial.jsonl"
+hard = "prompts/probes/hard.jsonl"
+
+[corpus_overrides]
+nq_open = "configs/wide-corpus.toml"

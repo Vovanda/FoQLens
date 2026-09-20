@@ -1,0 +1,23 @@
+# The gradient oracle (plan ideal-models): gradient x activation for the loss of the reference answer, with every
+# block at D8 - the top the oracles by trying compare to. The batch and the length cap are first guesses to be set from
+# the peak memory the check run logs (the old whole-prompt gradient ran out of memory at 21.3 GiB).
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+level = "d8"
+batch_tokens = 4096
+max_tokens = 4096
+# the calibration only prices a knapsack's memory, and the price is swept anyway: 500 questions of the ~3700 hold its
+# mean bits, at a seventh of the cost (Volodya 19.09 23:35)
+calibration_questions = 500
+# the same backward pass gives the gradient x the D2-D8 quantization gap (plan ideal-models, night item 6): the loss's
+# first-order change when a block is read at D2 instead of D8 - the drop oracle's first order, per block
+gap_low = "d2"
+gap_high = "d8"
+# the likelihood is read on the model's own reply at full precision (E001's bf16 answers of the whole corpus): the
+# dataset's first reference is its spelling - TriviaQA's capitals, NQ's first of several - and cost 15-28 nats at D8
+# on questions the model knows (20.09 night)
+replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"
+# math attention in the backward pass (scoring.GRADIENT_BACKENDS): the masks must be deterministic (Volodya 20.09 02:45);
+# it keeps a [heads, seq, seq] matrix a layer, so the longest prompts (91 of ~313 in shard 1) run out of memory and keep
+# no mask, counted; the efficient backend fits them but its backward is not bit-deterministic
+attention = "math"

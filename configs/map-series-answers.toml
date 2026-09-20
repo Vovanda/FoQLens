@@ -1,0 +1,5 @@
+# The answers at the maps rebuilt on the bench's scale of what a rung is worth (scripts/map_series.py): every
+# oracle field laid on 0 ... 1 three ways - against its peak, by rank, in the logarithm - and cut by the scale, beside
+# the uniform rungs in the same batches.
+group_oracle = "runs/oracles/e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus-triviaqa+nq_open+squad_v2+arc_challenge_closed+arc_easy_closed-shard*of5.npz"
+precision = "runs/oracles/e2b-it/map-series.npz"

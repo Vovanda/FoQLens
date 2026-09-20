@@ -1,0 +1,6 @@
+# Does a mask source find the meaning or the words: TriviaQA questions against paraphrases Claude wrote (names kept,
+# the other words changed), beside the same test on their bags of tokens.
+corpus = "triviaqa"
+paraphrases = "prompts/paraphrases/triviaqa.jsonl"
+sources = ["pooled", "neuron_activity", "head_energy", "hybrid"]
+base = "bartowski-Q2_K"

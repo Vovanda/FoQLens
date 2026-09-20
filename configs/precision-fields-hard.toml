@@ -1,0 +1,28 @@
+# The precision fields of the hard batch - the questions only the top rung answers (Volodya 20.09 15:15).
+# The same reading as the full run, over the oracle and the masks of that batch alone.
+# (Volodya 20.09 03:10): every oracle's field of importance read into a level a group - D8, D6,
+# D4, D2 - at the largest threshold that keeps the model's own reply within the tolerance of every block at D8, and the
+# reference measured group by group, rung by rung. The questions, target and groups are the oracle by trying's.
+group_oracle = "runs/oracles/hard-e2b-it/group-oracle-d2d8-bartowski-Q2_K-small-corpus-triviaqa+nq_open+squad_v2+arc_easy_closed+arc_challenge_closed.npz"
+tolerance = 0.03
+# and the same tolerance as a share of what the top rung itself spends on the question (Volodya 20.09):
+# flat nats are unreachable where the top rung answers at 0.15 nats, and the oracle then raises everything
+tolerance_share = 0.2
+# 15 thresholds a batch beside every block at D8: ~210 thresholds a field are settled in two rounds
+probes = 15
+batch_tokens = 32768
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"
+# the rungs' error energies, coarsest first: how much D4 and D6 cut each group's D2 error on the same questions
+energies = [
+    "runs/masks-hard/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus-hard-103.npz",
+    "runs/masks-hard/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-hard-103.npz",
+    "runs/masks-hard/e2b-it/error_energy_d6-file-bartowski-Q2_K-small-corpus-hard-103.npz",
+]
+
+[fields]
+answer_gradient = "runs/masks-hard/e2b-it/answer_gradient-d8-file-bartowski-Q2_K-small-corpus-hard-103.npz"
+answer_quant_gap = "runs/masks-hard/e2b-it/answer_quant_gap_d2d8-d8-file-bartowski-Q2_K-small-corpus-hard-103.npz"
+error_energy = "runs/masks-hard/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus-hard-103.npz"
+error_energy_d4 = "runs/masks-hard/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-hard-103.npz"

@@ -1,0 +1,16 @@
+# The layer-wise regulator over the whole small corpus (docs/layerwise-regulator.md, variant B): every layer is
+# decided while the pass runs, from the state entering it, and the answers are compared with the whole network's and
+# with the uniform rungs at the bytes they cost. Strategy runs go over the 5% (Volodya 20.09), not over a part of it.
+approach = "layerwise"
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+floor = "d2"
+ceiling = "d8"
+source = "activity"
+# the price of memory of section 9, over the score per weight: a run per price, from the one that lifts little to the
+# one that lifts much; the bytes each spends are measured, not set
+# measured on a smoke of three questions 20.09: 1e-4 reads everything at the top, 1e2 everything at the base,
+# and around 1 the pass spends about 4 bits a weight - where the oracles' maps stand (0.43-0.58 of D8's bytes)
+prices = [0.5, 1.0, 2.0]
+rim = 0.0
+uniform = ["d2", "d4", "d8"]

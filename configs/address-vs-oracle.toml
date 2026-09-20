@@ -1,0 +1,6 @@
+# Does the address stand for the sensitivity (Volodya 19.09: the peaks of the address are where the ceiling belongs,
+# the rest does not correlate and falls to the base - an intuition to check). The hybrid address against the oracle,
+# the gradient's Taylor score on the bf16 checkpoint, both on the small corpus; the top 1, 5 and 10% of blocks.
+estimate = "runs/masks/e2b-it/hybrid-file-bartowski-Q2_K-small-corpus.npz"
+oracle = "runs/masks/e2b-it/gradient-checkpoint-own-small-corpus.npz"
+shares = [0.01, 0.05, 0.1]

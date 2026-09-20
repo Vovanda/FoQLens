@@ -1,0 +1,30 @@
+{"id": "t01", "question": "What is 2 + 2?", "choices": ["3", "4", "5", "22"], "answer": "4"}
+{"id": "t02", "question": "In weightlessness, which is heavier: a kilogram of feathers or a kilogram of iron?", "choices": ["The iron", "The feathers", "They have the same mass", "Neither has mass in space"], "answer": "They have the same mass"}
+{"id": "t03", "question": "Why is the sky blue?", "choices": ["Air scatters blue light more than red light", "The sky reflects the ocean", "The Sun is blue", "Clouds absorb red light"], "answer": "Air scatters blue light more than red light"}
+{"id": "t04", "question": "How many legs does a cat have?", "choices": ["2", "4", "6", "8"], "answer": "4"}
+{"id": "t05", "question": "What colour is grass?", "choices": ["Blue", "Red", "Green", "Purple"], "answer": "Green"}
+{"id": "t06", "question": "What is 10 minus 3?", "choices": ["6", "7", "8", "13"], "answer": "7"}
+{"id": "t07", "question": "Which is bigger, an elephant or a mouse?", "choices": ["The mouse", "The elephant", "They are the same size", "It depends on the day"], "answer": "The elephant"}
+{"id": "t08", "question": "What do bees make?", "choices": ["Milk", "Honey", "Silk", "Wool"], "answer": "Honey"}
+{"id": "t09", "question": "How many days are in a week?", "choices": ["5", "6", "7", "10"], "answer": "7"}
+{"id": "t10", "question": "What is frozen water called?", "choices": ["Steam", "Ice", "Sand", "Glass"], "answer": "Ice"}
+{"id": "t11", "question": "Which animal barks?", "choices": ["A cat", "A cow", "A dog", "A fish"], "answer": "A dog"}
+{"id": "t12", "question": "What is 3 times 3?", "choices": ["6", "8", "9", "12"], "answer": "9"}
+{"id": "t13", "question": "Where does the Sun rise?", "choices": ["In the north", "In the east", "In the west", "In the south"], "answer": "In the east"}
+{"id": "t14", "question": "What do you use to see?", "choices": ["Your ears", "Your eyes", "Your nose", "Your hands"], "answer": "Your eyes"}
+{"id": "t15", "question": "How many wheels does a bicycle have?", "choices": ["1", "2", "3", "4"], "answer": "2"}
+{"id": "t16", "question": "Which is hotter, fire or ice?", "choices": ["Ice", "Fire", "They are equally hot", "Neither is hot"], "answer": "Fire"}
+{"id": "t17", "question": "What is the opposite of up?", "choices": ["Left", "Down", "Right", "Over"], "answer": "Down"}
+{"id": "t18", "question": "What falls from clouds when it rains?", "choices": ["Sand", "Water", "Leaves", "Stones"], "answer": "Water"}
+{"id": "t19", "question": "What is 1 + 1?", "choices": ["1", "2", "3", "11"], "answer": "2"}
+{"id": "t20", "question": "Which season is the coldest?", "choices": ["Summer", "Spring", "Autumn", "Winter"], "answer": "Winter"}
+{"id": "t21", "question": "What do fish live in?", "choices": ["Trees", "Water", "Sand", "Air"], "answer": "Water"}
+{"id": "t22", "question": "How many hours are in a day?", "choices": ["12", "24", "36", "60"], "answer": "24"}
+{"id": "t23", "question": "What shape is a ball?", "choices": ["A square", "A triangle", "A sphere", "A cube"], "answer": "A sphere"}
+{"id": "t24", "question": "Which is heavier on Earth: a kilogram of feathers or a kilogram of iron?", "choices": ["The iron", "The feathers", "They weigh the same", "It depends on the colour"], "answer": "They weigh the same"}
+{"id": "t25", "question": "What is 5 + 5?", "choices": ["9", "10", "11", "55"], "answer": "10"}
+{"id": "t26", "question": "What colour is snow?", "choices": ["Black", "White", "Green", "Orange"], "answer": "White"}
+{"id": "t27", "question": "Which do we breathe to live?", "choices": ["Air", "Sand", "Oil", "Stone"], "answer": "Air"}
+{"id": "t28", "question": "How many months are in a year?", "choices": ["10", "11", "12", "13"], "answer": "12"}
+{"id": "t29", "question": "What sound does a cow make?", "choices": ["Woof", "Moo", "Meow", "Quack"], "answer": "Moo"}
+{"id": "t30", "question": "Is the Moon bigger or smaller than the Earth?", "choices": ["Bigger", "Smaller", "The same size", "It has no size"], "answer": "Smaller"}

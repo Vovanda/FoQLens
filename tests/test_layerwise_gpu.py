@@ -2,6 +2,7 @@
 
 from functools import partial
 
+import numpy as np
 import pytest
 import torch
 from torch import nn
@@ -82,6 +83,37 @@ def test_the_pass_never_waits_for_the_card():
         made(state)
     finally:
         torch.cuda.set_sync_debug_mode("default")
+
+
+def test_a_captured_step_decides_the_layout_again_at_every_replay():
+    """The point of keeping the layout on the card: a step is captured with the decision inside it, and a replay runs
+    the decision again instead of freezing the layout it was captured on. Nothing of Python runs at a replay, so the
+    proof is that two states replayed through the same graph leave two layouts, each the one the eager path gives."""
+    made = module()
+    regulator = LayerwiseRegulator(Controller({NAME: made}), Activity(), price=1e-3)
+    state = torch.empty(1, SHORT, IN, device=DEVICE, dtype=torch.bfloat16)  # the only buffer the captured step reads
+
+    def step() -> None:
+        regulator.decide(NAME, state)
+        made(state)
+
+    state.fill_(1.0)
+    warmup = torch.cuda.Stream()
+    warmup.wait_stream(torch.cuda.current_stream())
+    with torch.cuda.stream(warmup):  # the first run allocates and loads the kernel; a capture may do neither
+        step()
+    torch.cuda.current_stream().wait_stream(warmup)
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        step()
+    decided = {}
+    for name, value in (("loud", 1.0), ("quiet", 0.02)):
+        state.fill_(value)
+        graph.replay()
+        torch.cuda.synchronize()
+        decided[name] = made.levels
+        assert np.array_equal(decided[name], regulator.levels_for(NAME, state).cpu().numpy()), name
+    assert not np.array_equal(decided["loud"], decided["quiet"])  # a frozen layout would give one answer twice
 
 
 def test_the_pass_reads_the_layout_the_regulator_decided_on_the_card():

@@ -142,10 +142,12 @@ class MixedPrecisionLinear(nn.Module):
     def levels(self) -> np.ndarray:
         """Level code per block: [n_blocks], or [batch, n_blocks] for per-sample layouts. A copy.
 
-        A layout set on the device is read back here and nowhere else: the pass itself never waits for the card.
+        A layout set on the device is read back here and nowhere else: the pass itself never waits for the card. It is
+        read afresh every time and never kept - a replayed graph decides it again without any Python running, so a
+        kept copy would answer for the layout of some earlier step.
         """
         if self._levels is None:
-            self._levels = self._codes.to("cpu", torch.uint8).numpy()
+            return self._codes.to("cpu", torch.uint8).numpy()
         return self._levels.copy()
 
     @property

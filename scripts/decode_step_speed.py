@@ -38,8 +38,9 @@ def step_ms(bench: Bench, batch: int, steps: int, graphed: bool = True,
             regulator: LayerwiseRegulator | None = None) -> float:
     """Milliseconds of one step at the controller's current layout: replayed from a graph, or launched from Python.
 
-    A regulator decides the layout inside the step, so its step is never captured: what it is compared against is the
-    same reading launched from Python, not the replayed one.
+    A regulator decides the layout inside the step from the state entering every layer. Its decision is a chain of
+    kernels over tensors on the card, so the step is captured with the decision inside it and the layout is decided
+    again at every replay; the same step launched from Python is what the capture is measured against.
     """
     tokenizer, model = bench.tokenizer, bench.model
     enc = fm.encode_left(tokenizer, [PROMPT] * batch, model.device)
@@ -106,11 +107,13 @@ def main() -> None:
     if args.layerwise_price is not None:
         precision.KERNEL = True
         bench.ctl.set_layout(mixed)
-        arms = {"mixed kernel from Python": None,
-                f"layer-wise p{args.layerwise_price:g} from Python":
-                    LayerwiseRegulator(bench.ctl, Activity(), price=args.layerwise_price)}
-        for name, regulator in arms.items():
-            times = [step_ms(bench, batch, args.steps, graphed=False, regulator=regulator) for batch in args.batches]
+        price = args.layerwise_price
+        arms = [("mixed kernel from Python", False, None),
+                (f"layer-wise p{price:g} from Python", False, LayerwiseRegulator(bench.ctl, Activity(), price=price)),
+                (f"layer-wise p{price:g} graphed", True, LayerwiseRegulator(bench.ctl, Activity(), price=price))]
+        for name, graphed, regulator in arms:
+            bench.ctl.set_layout(mixed)  # a regulator leaves its own layout behind; every arm starts from this one
+            times = [step_ms(bench, batch, args.steps, graphed=graphed, regulator=regulator) for batch in args.batches]
             print(f"{name} | " + " | ".join(f"{t:.2f}" for t in times), flush=True)
     bench.ctl.set_all(Level.BF16)
 

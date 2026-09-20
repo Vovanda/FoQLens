@@ -6,7 +6,7 @@ title: The mathematics of the quantization filter
 
 The whole mechanism in one derivation, from a block of weights to the zones of a query: what the object is, what precision costs, where the address comes from, how far two blocks are from each other, how zones are built, why they approximate the best use of the memory, and what a batch pays. Each step rests on the one before it. The rules this page derives are in [quantization-filter.md](quantization-filter.md); the strategies of source, metric and reach are in [zone-strategies.md](zone-strategies.md); the format the levels are read from is in [refocustensors.md](refocustensors.md). Sections marked *new* are derived here first; the rest is gathered from those pages, the code of the bench and the measurements of 2026-09-19. *Proved* means derived from the definitions or the code; *measured* is a number from a run; *hypothesis* is not checked.
 
-Order: [0 the task](#0-the-task-before-any-mechanism) → [1 the object](#1-the-object) → [2 the error of a level](#2-the-error-of-a-level) → [3 what a coarse block costs](#3-what-a-coarse-block-costs-the-output-new) → [4 the address](#4-the-address-signal-background-excess) → [5 the working address](#5-the-working-address-from-the-first-layers-to-the-rest) → [6 the depth of the reading](#6-the-depth-of-the-reading-closed) → [7 distance](#7-the-distance-between-blocks) → [8 the shape of a map](#9-the-shape-of-a-map) → [10 the best allocation](#10-the-best-allocation-knapsack-and-lagrangian-new) → [11 the batch](#11-the-batch) → [12 the score in the pass](#12-the-score-in-the-pass-what-is-computable-forward-new) → [13 known and open](#13-what-is-known-and-what-is-being-worked-out).
+Order: [0 the task](#0-the-task-before-any-mechanism) → [1 the object](#1-the-object) → [2 the error of a level](#2-the-error-of-a-level) → [3 what a coarse block costs](#3-what-a-coarse-block-costs-the-output-new) → [4 the address](#4-the-address-signal-background-excess) → [5 the working address](#5-the-working-address-from-the-first-layers-to-the-rest) → [6 the depth of the reading](#6-the-depth-of-the-reading-closed) → [7 distance](#7-the-distance-between-blocks) → [8 the shape of a map](#9-the-shape-of-a-map) → [10 the best allocation](#10-the-best-allocation-knapsack-and-lagrangian-new) → [11 the batch](#11-the-batch) → [12 known and open](#12-what-is-known-and-what-is-being-worked-out).
 
 ## 0. The task, before any mechanism
 
@@ -317,41 +317,7 @@ $$C(S) = \sum_b w_b \cdot \text{bits}\big(\max_{q \in S} \ell_q(b)\big) / 8.$$
 
 Sharing a batch's cost between its questions (the Shapley value) and a budget between the requests of a pool are game theory, for the stage of serving many requests.
 
-## 12. The score in the pass: what is computable forward (new)
-
-A regulator acts while the pass runs, so its score may use only what the pass has already produced. Written exactly,
-what the coarse reading of a block does is inject a vector into the residual stream:
-
-$$\delta_b = (W_{\text{high}} - W_{\text{low}})_b\, x,$$
-
-with $x$ the state entering the block's module on this query and the difference taken over the block's rows - our
-refinement planes themselves, not a noise model. What reaches the answer is $\delta_b$ carried forward, so the score
-splits into two factors, and only one of them is forward:
-
-$$\text{damage}_b = \underbrace{\lVert \delta_b \rVert}_{\text{exact, in the pass}} \cdot
-\underbrace{s_b}_{\text{how much of that direction survives to the answer}}.$$
-
-**The first factor costs one small matmul** and is exact. Cauchy-Schwarz bounds it by the product we have been
-scoring with, $\lVert \delta_b \rVert \le \lVert (W_{\text{high}} - W_{\text{low}})_b \rVert \cdot \lVert x \rVert$,
-whose right-hand side is the block's response times the norm of the rung's own error. The bound is loose exactly
-where the error's directions miss the state's.
-
-**The injected vector is diluted** by what already flows: what moves the answer is the relative perturbation
-$\lVert \delta_b \rVert / \lVert x \rVert$, and the norm of the stream grows with the depth, which is why an
-unnormalized response points at the end of the network while the oracles' mass sits early.
-
-**The second factor is the half the forward pass does not hold** - it is the gradient's side, the same $g$ missing
-from the address ([section 4](#4-the-address-signal-background-excess)). Nothing multiplied by a forward quantity
-restores it.
-
-*Measured, one hard question, 2026-09-21, provisional.* Fitting $\log$ of an oracle's field on $\log$ of the factors
-(response, the rung's error norm, the stream, the activity score) recovers this shape rather than contradicting it:
-the error-energy oracle asks for the response and the error norm at nearly equal powers (1.69 and 1.68) and for the
-stream with a minus (-1.52), and is described at $\rho = 0.95$. The oracles of direct measurement, lift and drop, are
-not described by any of the four (0.35-0.36): their signal is the surviving half. One question is an observation, not
-a result; the sample of 50 hard and 50 ordinary questions is what these numbers are to be read on.
-
-## 13. What is known and what is being worked out
+## 12. What is known and what is being worked out
 
 The numbers of the runs are in the results of the experiments: the address in
 [E004](../experiments/E004-question-address/results.md), the query's map in

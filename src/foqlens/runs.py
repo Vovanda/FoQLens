@@ -117,6 +117,23 @@ class RunFiles:
             where r.level = ? and a.level != r.level group by a.level, a.corpus order by a.level, a.corpus""",
                           [reference])
 
+    @staticmethod
+    def replies_of_two_runs(left: Path, right: Path) -> list[dict]:
+        """Per level, the questions two runs of the same layouts both answered and how many of the replies differ.
+
+        A rewrite of the reading path - the layout moved onto the card, a step captured in a graph - is held to this:
+        the same layout over the same questions writes the same replies, or the rewrite changed what the model reads.
+        """
+        con = duckdb.connect()
+        for view, folder in (("l", left), ("r", right)):
+            con.execute(f"create view {view} as select level, corpus, id, prompt, reply from "
+                        f"read_json_auto('{folder.as_posix()}/*/*.jsonl', union_by_name=true)")
+        relation = con.execute("""select l.level, count(*) answered,
+                   count(*) filter (where l.reply is distinct from r.reply) differ
+            from l join r using (level, corpus, id, prompt) group by l.level order by l.level""")
+        columns = [d[0] for d in relation.description]
+        return [dict(zip(columns, row)) for row in relation.fetchall()]
+
     def agreement_with_readings(self, level: str) -> dict[str, dict[str, float]]:
         """Per corpus: how many answers Claude read, and how often the exact match and the judge agree with the reading."""
         known = ", ".join(f"'{reading}'" for reading in sorted(KNOWING))

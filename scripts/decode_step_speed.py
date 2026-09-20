@@ -5,8 +5,13 @@ depth then multiplies a weight unpacked once, a mixed one picks every block's ro
 levels). The prompts are the same short question for every row; the step is replayed after its capture and timed on
 the device.
 
+With --layerwise-price the same mixed reading is timed twice more, both launched from Python instead of replayed: as
+it is, and with the layer-wise regulator deciding the layout inside the step. The three numbers say what the graph is
+worth and what the regulator costs on top of giving it up.
+
     uv run python scripts/decode_step_speed.py
     uv run python scripts/decode_step_speed.py --batches 1 8 --steps 20   # smoke check
+    uv run python scripts/decode_step_speed.py --batches 32 --steps 20 --layerwise-price 1
 """
 
 from __future__ import annotations
@@ -17,8 +22,9 @@ import numpy as np
 import torch
 
 from foqlens import model as fm
-from foqlens import precision
+from foqlens import precision, refocustensors
 from foqlens.graph_decode import GraphedStep, StaticRun
+from foqlens.layerwise import Activity, LayerwiseRegulator
 from foqlens.pipeline import Bench
 from foqlens.quant import Level
 
@@ -28,13 +34,20 @@ DEPTH_LEVELS = np.array([Level.D8, Level.D6, Level.D4, Level.D2], dtype=np.uint8
 NEVER = -1  # no token id is negative: no row stops
 
 
-def step_ms(bench: Bench, batch: int, steps: int) -> float:
-    """Milliseconds of one replayed step at the controller's current layout."""
+def step_ms(bench: Bench, batch: int, steps: int, graphed: bool = True,
+            regulator: LayerwiseRegulator | None = None) -> float:
+    """Milliseconds of one step at the controller's current layout: replayed from a graph, or launched from Python.
+
+    A regulator decides the layout inside the step, so its step is never captured: what it is compared against is the
+    same reading launched from Python, not the replayed one.
+    """
     tokenizer, model = bench.tokenizer, bench.model
     enc = fm.encode_left(tokenizer, [PROMPT] * batch, model.device)
     stop = torch.tensor([NEVER], device=model.device)
     run = StaticRun(model, enc["input_ids"], enc["attention_mask"], WARMUP + steps + 1, stop)
-    step = GraphedStep(run)
+    if regulator is not None:
+        regulator.attach(model)  # after the prefill: what is timed is the decoding step
+    step = GraphedStep(run) if graphed else run.advance
     try:
         for _ in range(WARMUP):
             step()
@@ -46,7 +59,10 @@ def step_ms(bench: Bench, batch: int, steps: int) -> float:
         torch.cuda.synchronize()
         return start.elapsed_time(end) / steps
     finally:
-        step.release()
+        if graphed:
+            step.release()
+        if regulator is not None:
+            regulator.detach()
 
 
 def main() -> None:
@@ -57,10 +73,16 @@ def main() -> None:
     parser.add_argument("--kernel-max-tokens", type=int, default=precision.KERNEL_MAX_TOKENS,
                         help="tokens of a step up to which a layout is read by the kernel; past it, one unpacking by the "
                         "kernel and a GEMM - to choose precision.KERNEL_MAX_TOKENS on the whole model")
+    parser.add_argument("--base", default=None,
+                        help="the cut folder of a copy on a published file's base, as the runs name it "
+                        "(bartowski-Q2_K); without it, the model's own cut folder")
+    parser.add_argument("--layerwise-price", type=float, default=None,
+                        help="also time the layer-wise regulator at this price (foqlens.layerwise) against the same "
+                        "mixed reading launched from Python: what the regulator costs, apart from the graph it gives up")
     args = parser.parse_args()
     precision.KERNEL_MAX_TOKENS = args.kernel_max_tokens  # read at every forward
 
-    bench = Bench.load(args.model)
+    bench = Bench.load(args.model, directory=refocustensors.model_directory(args.model, args.base))
     mixed = np.random.default_rng(0).choice(DEPTH_LEVELS, size=bench.ctl.n_blocks)
     readings = {
         "bf16": (Level.BF16, False),
@@ -81,6 +103,15 @@ def main() -> None:
             raise RuntimeError(f"{name}: {sum(through_kernel)} of {len(through_kernel)} modules read by the kernel")
         times = [step_ms(bench, batch, args.steps) for batch in args.batches]
         print(f"{name} | " + " | ".join(f"{t:.2f}" for t in times), flush=True)
+    if args.layerwise_price is not None:
+        precision.KERNEL = True
+        bench.ctl.set_layout(mixed)
+        arms = {"mixed kernel from Python": None,
+                f"layer-wise p{args.layerwise_price:g} from Python":
+                    LayerwiseRegulator(bench.ctl, Activity(), price=args.layerwise_price)}
+        for name, regulator in arms.items():
+            times = [step_ms(bench, batch, args.steps, graphed=False, regulator=regulator) for batch in args.batches]
+            print(f"{name} | " + " | ".join(f"{t:.2f}" for t in times), flush=True)
     bench.ctl.set_all(Level.BF16)
 
 

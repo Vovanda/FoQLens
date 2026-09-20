@@ -214,6 +214,19 @@ def test_depth_caps_keep_the_reads_within_them_and_free_the_deeper_depths():
     assert ctl.stored_bits() == pytest.approx(expected)
 
 
+def test_a_ladder_set_on_the_card_is_refused_when_a_block_stores_less_than_it():
+    mixed = MixedPrecisionLinear(make_linear(out_features=200, in_features=256), block_rows=64)
+    mixed.set_levels(Level.D2)
+    mixed.drop_bf16()
+    mixed.set_caps(np.array([4, 2, 1, 1]))
+    on_card = torch.full((mixed.n_blocks,), int(Level.D2), dtype=torch.uint8, device=DEVICE)
+    mixed.set_levels_on_device(on_card, (Level.D2,))  # the whole ladder is within every cap
+    assert np.array_equal(mixed.levels, np.full(mixed.n_blocks, int(Level.D2), dtype=np.uint8))
+    # which block carries which code is on the card, so a ladder reaching D8 is refused even where the codes do not
+    with pytest.raises(ValueError, match="deeper than a block"):
+        mixed.set_levels_on_device(on_card, (Level.D2, Level.D8))
+
+
 def test_reading_several_depths_at_once_is_exact_against_separate_reads():
     import torch.nn.functional as F
 

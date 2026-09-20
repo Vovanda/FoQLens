@@ -5,6 +5,7 @@ import pytest
 import torch
 
 from foqlens.layerwise import Activity, LayerwiseRegulator, block_weights, row_norms
+from foqlens.layouts import knapsack_levels
 from foqlens.precision import Controller
 from foqlens.quant import Level
 
@@ -51,6 +52,51 @@ def test_the_rim_holds_a_band_one_rung_over_the_base():
     assert (plain == D2).all()
     blocks = with_rim.shape[1]
     assert (with_rim == D4).sum() == round(0.5 * blocks) and (with_rim == D2).sum() == blocks - (with_rim == D4).sum()
+
+
+def test_the_levels_on_the_card_are_the_ones_the_knapsack_gives():
+    regulator = a_regulator(price=1e-3)
+    read = regulator.ctl.modules[NAME]
+    x = torch.stack([torch.full((3, read.weight.shape[1]), 1.0),
+                     torch.full((3, read.weight.shape[1]), 0.05)]).to(torch.bfloat16)
+    codes = regulator.levels_for(NAME, x)
+    reduced = (Activity().scores(read, x, row_norms(read)) / block_weights(read)).numpy()
+    wanted = knapsack_levels(reduced, 1e-3, Level.D2, (Level.D2, Level.D4, Level.D6, Level.D8))
+    assert np.array_equal(codes.numpy(), wanted)
+
+
+def test_a_score_that_lands_on_a_threshold_rises_where_the_host_rule_raises_it():
+    """The edge of a rung: a price equal to a block's own score per weight. The thresholds are float64 on the card as
+    they are on the host, so the block lands on the same rung and not one below."""
+    read = module(NAME)
+    x = torch.ones(1, 3, read.weight.shape[1], dtype=torch.bfloat16)
+    reduced = (Activity().scores(read, x, row_norms(read)) / block_weights(read)).numpy()
+    for price in (float(reduced.max()), float(reduced.max()) / 16.0):
+        regulator = LayerwiseRegulator(Controller({NAME: read}), Activity(), price=price)
+        wanted = knapsack_levels(reduced, price, Level.D2, (Level.D2, Level.D4, Level.D6, Level.D8))
+        assert np.array_equal(regulator.levels_for(NAME, x).numpy(), wanted), price
+
+
+def test_the_rim_takes_the_loudest_of_the_blocks_left_at_the_base():
+    regulator = a_regulator(price=1e30, rim=0.5)  # every block rests at the base, so the rim chooses among them all
+    read = regulator.ctl.modules[NAME]
+    x = torch.ones(1, 3, read.weight.shape[1], dtype=torch.bfloat16)
+    reduced = (Activity().scores(read, x, row_norms(read)) / block_weights(read)).numpy()[0]
+    width = round(0.5 * read.n_blocks)
+    risen = np.flatnonzero(regulator.levels_for(NAME, x).numpy()[0] == D4)
+    assert sorted(risen.tolist()) == sorted(np.argsort(-reduced)[:width].tolist())
+
+
+def test_a_layout_set_on_the_card_builds_the_tables_one_from_the_host_builds():
+    made = module(NAME)
+    codes = torch.tensor([D2, D8] * (made.n_blocks // 2) + [D2] * (made.n_blocks % 2), dtype=torch.uint8)
+    made.set_levels_on_device(codes, (Level.D2, Level.D4, Level.D6, Level.D8))
+    rows, depths = made._row_layout(), made._depths
+    assert np.array_equal(made.levels, codes.numpy())  # read back on demand, outside the pass
+    made.set_levels(codes.numpy())  # the pass over the two layouts is read on the card (test_layerwise_gpu)
+    assert torch.equal(rows, made._row_layout()) and torch.equal(depths, made._depths)
+    made.set_levels(np.full(made.n_blocks, D4, dtype=np.uint8))
+    assert np.array_equal(made.levels, np.full(made.n_blocks, D4))  # the codes left on the card are not the layout
 
 
 def test_the_layout_read_back_holds_what_the_hooks_wrote():

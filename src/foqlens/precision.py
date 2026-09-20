@@ -5,8 +5,10 @@ original bf16 weight and, for the levels some layout has used, a packed int8 or 
 is set per block of block_rows output rows, either one layout for the whole batch or one layout
 per sample of the batch.
 
-Hot-path rule: levels live on the CPU as a numpy array, so forward never synchronizes with the
-GPU to find out what to compute. A mixed layout computes the output once per level in use and
+Hot-path rule: forward never synchronizes with the GPU to find out what to compute. A layout set from the host
+(`set_levels`) lives on the CPU as a numpy array; one decided inside a pass (`set_levels_on_device`, foqlens.layerwise)
+stays on the card and is read back only when someone asks for it. A mixed layout computes the output once per level in
+use and
 selects rows with torch.where. A layout of depths and ZERO over a k-quant copy is read by the kernel instead
 (kernels/kquant.py), every block of rows straight from the copy's bytes to its depth; an input longer than
 KERNEL_MAX_TOKENS - a prefill - multiplies in one GEMM by the copy the kernel unpacks, every block to its depth.
@@ -27,7 +29,9 @@ Invariants (each one has a test):
   reads every depth exactly as a module built from bf16 reads it after drop_bf16, and refuses a depth its copy does
   not hold.
 - Invariant: with depth caps a block stores only the depths up to its cap, reads within its cap
-  exactly as before, and a read deeper than its cap is refused when set.
+  exactly as before, and a read deeper than its cap is refused when set. A layout set on the card names its ladder
+  instead of its blocks, so it is refused as a whole when any level of that ladder is deeper than some block stores.
+- Invariant: the same codes through `set_levels_on_device` and through `set_levels` give the same output of forward.
 - Invariant: a baked level is bit-exact with reading the same depth from the refined copy; afterwards
   the module holds that weight alone and reads that level alone - bf16 is refused when set.
 - Invariant: a weight baked from another source (bake_weight) is read as given at its level, bit-exact
@@ -128,12 +132,20 @@ class MixedPrecisionLinear(nn.Module):
         self._packed: dict[type, Int8Weight | Nf4Weight | RefinedWeight] = {}
         self.readable: frozenset[Level] = frozenset(Level)
         self._caps = np.full(self.n_blocks, MAX_DEPTH, dtype=np.uint8)  # the depth every block stores
+        self._shallowest_cap = MAX_DEPTH  # the depth every block is sure to store; a layout on the card is held to it
         self._samples = slice(None)  # the samples of a per-sample layout the next forwards read
+        self._codes: torch.Tensor | None = None  # the layout on the card, when it was set there
+        self._shape: tuple[int, ...] = (self.n_blocks,)
         self.set_levels(Level.BF16)
 
     @property
     def levels(self) -> np.ndarray:
-        """Level code per block: [n_blocks], or [batch, n_blocks] for per-sample layouts. A copy."""
+        """Level code per block: [n_blocks], or [batch, n_blocks] for per-sample layouts. A copy.
+
+        A layout set on the device is read back here and nowhere else: the pass itself never waits for the card.
+        """
+        if self._levels is None:
+            self._levels = self._codes.to("cpu", torch.uint8).numpy()
         return self._levels.copy()
 
     @property
@@ -172,11 +184,38 @@ class MixedPrecisionLinear(nn.Module):
         if (DEPTH_BY_CODE[arr] > self._caps).any():
             raise ValueError("a block is read deeper than the depth it stores")
         self._levels = arr.copy()
+        self._shape = arr.shape
         self._used = used
         for level in self._used:
             self._materialize(level)
-        self._rows = None if len(self._used) == 1 else self._row_codes(arr, codes)
-        self._depths = self._block_depths(arr, codes) if self._kernel_reads() else None
+        self._codes = torch.as_tensor(arr, device=self._device) if codes is None else codes
+        self._rows = None  # built on the first read that needs it (_row_layout)
+        self._depths = self._block_depths(self._codes) if self._kernel_reads() else None
+
+    def set_levels_on_device(self, codes: torch.Tensor, used: tuple[Level, ...]) -> None:
+        """Levels that stay on the card: `codes` [n_blocks] or [batch, n_blocks] of level codes, and the levels the
+        layout may hold, named by the caller instead of read off the card.
+
+        A hot path decides a layout inside the pass (foqlens.layerwise), and reading the codes back to name the levels
+        used would stop the pipeline at every module. The caller states the ladder once; every level of it is
+        materialized whether or not this layout reaches it, and the checks that read values are left to `set_levels`.
+
+        Invariant: the same codes through this and through `set_levels` give the same output of `forward`.
+        """
+        if codes.ndim not in (1, 2) or codes.shape[-1] != self.n_blocks:
+            raise ValueError(f"levels of shape {tuple(codes.shape)} for {self.n_blocks} blocks")
+        if not self.readable.issuperset(used):
+            raise ValueError(f"levels {[lv.name for lv in used if lv not in self.readable]} are not held by this module")
+        # which block holds which code is on the card, so the depth a block stores is held against the whole ladder:
+        # the caller may lay any of its levels on any block
+        if max((int(DEPTH_BY_CODE[int(level)]) for level in used), default=0) > self._shallowest_cap:
+            raise ValueError("a level of the ladder is read deeper than a block of this module stores")
+        self._levels, self._shape, self._used = None, tuple(codes.shape), tuple(used)
+        for level in self._used:
+            self._materialize(level)
+        self._codes = codes
+        self._rows = None  # a layout the kernel reads never needs the row codes, and this one is set every pass
+        self._depths = self._block_depths(codes) if self._kernel_reads() else None
 
     def _kernel_reads(self) -> bool:
         """Whether the layout is read by the kernel: a k-quant copy on a base it reads, every level a depth or ZERO,
@@ -186,19 +225,27 @@ class MixedPrecisionLinear(nn.Module):
                 and isinstance(copy, KRefinedWeight) and kernel_reads_format(copy.fmt)
                 and all(level is Level.ZERO or level.depth for level in self._used))
 
-    def _block_depths(self, arr: np.ndarray, codes: torch.Tensor | None = None) -> torch.Tensor:
+    def _block_depths(self, codes: torch.Tensor) -> torch.Tensor:
         """The depth every block is read to on the device, [n_blocks] or [batch, n_blocks]; ZERO is 0."""
-        blocks = torch.as_tensor(arr, device=self._device) if codes is None else codes
-        return _depth_table(self._device)[blocks.long()]
+        return _depth_table(self._device)[codes.long()]
 
-    def _row_codes(self, arr: np.ndarray, codes: torch.Tensor | None = None) -> torch.Tensor:
+    def _row_layout(self) -> torch.Tensor | None:
+        """The level code per output row of the current layout, or None where one level covers the module.
+
+        Built on the first read that needs it and kept until the next layout is set: a layout the kernel reads never
+        asks for it, and a regulator sets a layout in front of every layer of every pass (foqlens.layerwise).
+        """
+        if self._rows is None and len(self._used) > 1:
+            self._rows = self._row_codes(self._codes)
+        return self._rows
+
+    def _row_codes(self, codes: torch.Tensor) -> torch.Tensor:
         """Level code per output row on the GPU: [out] or [batch, 1, out], broadcast over tokens.
 
         Blocks are expanded to rows on the device: one small copy of block codes, not of row codes.
         """
-        blocks = torch.as_tensor(arr, device=self._device) if codes is None else codes
-        rows = blocks.repeat_interleave(self.block_rows, dim=-1)[..., : self.out_features]
-        return rows if arr.ndim == 1 else rows.unsqueeze(1)
+        rows = codes.repeat_interleave(self.block_rows, dim=-1)[..., : self.out_features]
+        return rows if codes.ndim == 1 else rows.unsqueeze(1)
 
     def block_sizes(self) -> np.ndarray:
         """Number of rows in every block; the last one may be partial."""
@@ -287,11 +334,12 @@ class MixedPrecisionLinear(nn.Module):
         full = self._packed[RefinedWeight]
         if not isinstance(full, RefinedWeight):
             raise ValueError("depth caps are set once, from the full refined copy")
-        if (DEPTH_BY_CODE[self._levels] > caps).any():
+        if (DEPTH_BY_CODE[self.levels] > caps).any():
             raise ValueError("the current layout reads a block deeper than its new cap")
         block_caps = torch.as_tensor(caps, device=self._device)
         self._packed[RefinedWeight] = CappedRefinedWeight.from_full(full, block_caps, self.block_rows)
         self._caps = caps.copy()
+        self._shallowest_cap = int(caps.min())
 
     @property
     def caps(self) -> np.ndarray:
@@ -323,11 +371,11 @@ class MixedPrecisionLinear(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self._depths is not None:
             return self._kernel_forward(x) if x.numel() // x.shape[-1] <= KERNEL_MAX_TOKENS else self._unpacked_forward(x)
-        if self._rows is None:
+        rows = self._row_layout()
+        if rows is None:
             return self.output_at(self._used[0], x)
-        rows = self._rows
-        if self._levels.ndim == 2:
-            read = range(*self._samples.indices(self._levels.shape[0]))
+        if len(self._shape) == 2:
+            read = range(*self._samples.indices(self._shape[0]))
             if x.shape[0] != len(read):
                 raise ValueError(f"batch of {x.shape[0]} for per-sample layouts of {len(read)}")
             rows = rows[self._samples]
@@ -368,7 +416,7 @@ class MixedPrecisionLinear(nn.Module):
         table = _depth_table(self._device)
         outputs = [F.linear(x, kquant_unpack(copy, table[torch.full((self.n_blocks,), int(level), device=self._device)]),
                             self.bias) for level in self._used]
-        if self._rows is None:
+        if self._row_layout() is None:
             return outputs[0]
         rows = self._rows[self._samples]
         out = outputs[0]

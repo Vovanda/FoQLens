@@ -14,6 +14,9 @@ The sources of a score, in the order of what they can tell (docs/layerwise-regul
   It is the only source that looks ahead per question; it needs the coupling table (foqlens.coupling).
 
 Invariants:
+- Invariant: the pass never waits for the card - the scores, the knapsack, the levels and the count of what was read
+  all stay on the device, and the only read back to the host is the batch's bits a weight at the end.
+- Invariant: the levels the hooks write are the ones layouts.knapsack_levels gives for the same scores and price.
 - Invariant: a layer's levels are written before that layer runs and never after it.
 - Invariant: with the price at zero every block reads the ceiling, and with the price above every score the base.
 - Invariant: the rim never puts a block above one rung over the base.
@@ -30,7 +33,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from foqlens.layouts import knapsack_levels
+from foqlens.layouts import RUNG_GAIN
 from foqlens.precision import Controller, MixedPrecisionLinear
 from foqlens.quant import Level
 
@@ -101,13 +104,16 @@ class LayerwiseRegulator:
     _norms: dict[str, torch.Tensor] = field(default_factory=dict)
     _weights: dict[str, torch.Tensor] = field(default_factory=dict)
     _handles: list = field(default_factory=list)
-    levels_set: dict[str, np.ndarray] = field(default_factory=dict)
+    levels_set: dict[str, torch.Tensor] = field(default_factory=dict)
     # the layout is decided again at every token; what is counted is the first pass over a batch - the prompt's.
-    # The tables the count reads sit on the host from the start: the hook must not wait for the card to answer
-    _held: dict[str, np.ndarray] = field(default_factory=dict)
-    _bits: np.ndarray | None = None
+    # Both the levels and the count stay on the card: the hook must never wait for it to answer
+    _held: dict[str, torch.Tensor] = field(default_factory=dict)
+    _bits: torch.Tensor | None = None
+    _used: tuple[Level, ...] = ()
+    _thresholds: torch.Tensor | None = None
+    _codes_table: torch.Tensor | None = None
     _total: float = 0.0
-    _spent: np.ndarray | None = None
+    _spent: torch.Tensor | None = None
     _counted: set[str] = field(default_factory=set)
     _counting: bool = False
 
@@ -115,28 +121,50 @@ class LayerwiseRegulator:
         for name, module in self.ctl.modules.items():
             self._norms[name] = row_norms(module)
             self._weights[name] = block_weights(module)
-            self._held[name] = self._weights[name].cpu().numpy()
-        self._bits = np.zeros(int(Level.BF16) + 1)
+            self._held[name] = self._weights[name]
+        device = next(iter(self._weights.values())).device if self._weights else torch.device("cpu")
+        # the rule of the knapsack as two tables on the card: a block rises a rung for every RUNG_GAIN it stands over
+        # the price, and the rung it lands on is read out of the codes (layouts.knapsack_levels, the same rule)
+        self._used = tuple(lv for lv in self.ladder if self.base <= lv <= self.ceiling)
+        above = [lv for lv in self._used if lv > self.base]
+        # float64, as the thresholds of layouts.knapsack_levels are: a score that lands on a threshold must rise on the
+        # card exactly where it rises on the host, and rounding the threshold to float32 would move that edge
+        self._thresholds = torch.tensor([self.price * RUNG_GAIN ** k for k in range(len(above))],
+                                        dtype=torch.float64, device=device)
+        self._codes_table = torch.tensor([int(self.base)] + [int(lv) for lv in above],
+                                         dtype=torch.uint8, device=device)
+        self._bits = torch.zeros(int(Level.BF16) + 1, device=device)
         for level in self.ladder:
             self._bits[int(level)] = level.bits
-        self._total = float(sum(held.sum() for held in self._held.values()))
+        self._total = float(sum(float(held.sum()) for held in self._held.values()))
 
     def layer_of(self, name: str) -> int:
         return int(name.split(".")[1])
 
-    def levels_for(self, name: str, x: torch.Tensor) -> np.ndarray:
-        """The levels of one module's blocks from the state `x` entering its layer: [batch, blocks], a layout per
-        sample - the questions of a batch are read each by its own."""
+    def levels_for(self, name: str, x: torch.Tensor) -> torch.Tensor:
+        """The levels of one module's blocks from the state `x` entering its layer: [batch, blocks] of level codes on
+        the card, a layout per sample - the questions of a batch are read each by its own.
+
+        Nothing here leaves the device: the hook runs in front of every layer of every pass, and a read back to the
+        host would stop the pipeline at each of them. It is not what holds the card down, though - over the 5% the
+        pass kept it at 17.6% with the layout on the card against 16.2% with the knapsack on the host, where a uniform
+        rung keeps it at 81% (runs/regulator-card, runs/regulator/e2b-it, 20.09). The difference left between them is
+        that a rung's step is replayed from a captured graph while a decided layout leaves every launch to Python;
+        what each of the two costs is measured by scripts/decode_step_speed.py --layerwise-price.
+        """
         module = self.ctl.modules[name]
-        reduced = (self.source.scores(module, x, self._norms[name]) / self._weights[name]).cpu().numpy()
-        above = tuple(lv for lv in self.ladder if self.base <= lv <= self.ceiling)
-        codes = knapsack_levels(reduced, self.price, self.base, above)
+        reduced = self.source.scores(module, x, self._norms[name]) / self._weights[name]
+        rungs = (reduced[..., None] >= self._thresholds).sum(dim=-1)
+        codes = self._codes_table[rungs]
         if self.rim > 0:  # the band under the risen part, held one rung over the base
-            width = max(int(round(self.rim * codes.shape[1])), 0)
-            rung = int(above[1]) if len(above) > 1 else int(self.base)
-            for row, score in zip(codes, reduced):
-                resting = np.flatnonzero(row <= int(self.base))
-                row[resting[np.argsort(-score[resting])][:width]] = rung
+            width = max(int(round(self.rim * codes.shape[-1])), 0)
+            rung = self._codes_table[1] if len(self._codes_table) > 1 else self._codes_table[0]
+            resting = codes <= int(self.base)
+            # stable, so that blocks of an equal score enter the band in their own order and a pass is reproducible
+            order = torch.where(resting, reduced, torch.full_like(reduced, -float("inf"))).argsort(
+                dim=-1, descending=True, stable=True)
+            chosen = torch.zeros_like(codes, dtype=torch.bool).scatter_(-1, order[..., :width], True)
+            codes = torch.where(chosen & resting, rung, codes)
         return codes
 
     def attach(self, model: nn.Module) -> LayerwiseRegulator:
@@ -148,11 +176,11 @@ class LayerwiseRegulator:
             self._handles.append(layer.register_forward_pre_hook(self._before(number)))
         return self
 
-    def decide(self, name: str, state: torch.Tensor) -> np.ndarray:
+    def decide(self, name: str, state: torch.Tensor) -> torch.Tensor:
         """Read one module's levels from the state entering its layer and write them, before the layer runs."""
         codes = self.levels_for(name, state)
         self.levels_set[name] = codes
-        self.ctl.modules[name].set_levels(codes)
+        self.ctl.modules[name].set_levels_on_device(codes, self._used)
         if self._counting:
             self._spend(name, codes)
         return codes
@@ -169,14 +197,17 @@ class LayerwiseRegulator:
         """Count what the next pass over a batch of `batch` questions reads - the pass over their prompts. The layout
         is decided again at every token of the generation, so the count ends by itself the moment a module is decided
         a second time: by then the prompt's pass has been through every module once."""
-        self._spent, self._counted, self._counting = np.zeros(batch), set(), True
+        self._spent = torch.zeros(batch, device=self._bits.device)
+        self._counted, self._counting = set(), True
 
-    def _spend(self, name: str, codes: np.ndarray) -> None:
+    def _spend(self, name: str, codes: torch.Tensor) -> None:
+        """Add what one module read to the running count, on the card: the sum comes back to the host once, at the end
+        of the batch (`bits_a_weight`), so that counting costs the pass nothing."""
         if name in self._counted:  # a module decided twice: the prompt's pass is over and the generation has begun
             self._counting = False
             return
         self._counted.add(name)
-        self._spent = self._spent + np.atleast_1d((self._bits[codes] * self._held[name]).sum(axis=-1))
+        self._spent = self._spent + (self._bits[codes.long()] * self._held[name]).sum(dim=-1).reshape(-1)
 
     def bits_a_weight(self) -> np.ndarray:
         """What the counted pass read, in bits a weight, per question of the batch: [batch]."""
@@ -185,7 +216,7 @@ class LayerwiseRegulator:
             return np.zeros(0)
         if len(self._counted) < len(self.ctl.modules):  # a pass that did not reach every module cannot be divided
             raise RuntimeError(f"the counted pass read {len(self._counted)} of {len(self.ctl.modules)} modules")
-        return self._spent / self._total
+        return (self._spent / self._total).cpu().numpy()
 
     def detach(self) -> None:
         for handle in self._handles:
@@ -201,7 +232,7 @@ class LayerwiseRegulator:
         rows = []
         for name, module in self.ctl.modules.items():
             written = self.levels_set.get(name)
-            rows.append(np.atleast_2d(written) if written is not None
+            rows.append(np.atleast_2d(written.to("cpu", torch.uint8).numpy()) if written is not None
                         else np.full((1, module.n_blocks), int(self.base), dtype=np.uint8))
         width = max(row.shape[0] for row in rows)
         return np.concatenate([np.repeat(row, width // row.shape[0], axis=0) for row in rows], axis=1)

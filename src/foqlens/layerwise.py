@@ -13,9 +13,17 @@ The sources of a score, in the order of what they can tell (docs/layerwise-regul
 - `votes`: a block's score is the activity of the blocks that feed it, weighted by the coupling of the signal's path.
   It is the only source that looks ahead per question; it needs the coupling table (foqlens.coupling).
 
+When a layout is decided again and when the one in place is kept is not the regulator's own business: it asks the
+inertia it is given (foqlens.inertia), whose condition is outside it and independent of what it decides. The default
+is a decision in front of every layer at every token; the address of the query is not read before `address_layers`
+layers have run, and until then nothing is raised at all.
+
 Invariants:
 - Invariant: the pass never waits for the card - the scores, the knapsack, the levels and the count of what was read
   all stay on the device, and the only read back to the host is the batch's bits a weight at the end.
+- Invariant: under the densest inertia every module is decided at every visit; a module whose layout is held carries
+  the one it was given, and the state it was not read on changes nothing.
+- Invariant: below `address_layers` every block reads the base, whatever the price.
 - Invariant: the levels the hooks write are the ones layouts.knapsack_levels gives for the same scores and price.
 - Invariant: a layer's levels are written before that layer runs and never after it.
 - Invariant: with the price at zero every block reads the ceiling, and with the price above every score the base.
@@ -33,6 +41,7 @@ import numpy as np
 import torch
 from torch import nn
 
+from foqlens.inertia import EVERY_LAYER, Inertia
 from foqlens.layouts import RUNG_GAIN
 from foqlens.precision import Controller, MixedPrecisionLinear
 from foqlens.quant import Level
@@ -72,15 +81,22 @@ def block_weights(module: MixedPrecisionLinear) -> torch.Tensor:
 
 @dataclass
 class Activity:
-    """The floor source: what enters a block, through the norms of the block's own rows."""
+    """The floor source: what enters a block, through the norms of the block's own rows.
+
+    It tells the blocks of one module apart by their weights alone - the state gives one number to all of them - so a
+    question moves the threshold of a module and never the order of its blocks.
+    """
 
     name: str = "activity"
 
-    def scores(self, module: MixedPrecisionLinear, x: torch.Tensor, norms: torch.Tensor) -> torch.Tensor:
-        """[batch, blocks]: one score per sample, so every question of a batch gets a layout of its own."""
-        # the same vector reaches every block of a module: between them this is the rows alone
-        through = x.float().square().sum(dim=-1).mean(dim=-1) if x.dim() == 3 else x.float().square().sum(dim=-1)
-        return through[:, None] * norms.square()[None, :]
+    def prepare(self, module: MixedPrecisionLinear, norms: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
+        """The static half of the score, already per weight of the block: read once for the run, not at every layer."""
+        return norms.square() / weights
+
+    def scores(self, module: MixedPrecisionLinear, x: torch.Tensor, static: torch.Tensor) -> torch.Tensor:
+        """[batch, blocks] per weight: one score per sample, so every question of a batch gets a layout of its own."""
+        through = (x * x).sum(dim=-1, dtype=torch.float32)
+        return (through.mean(dim=-1) if through.dim() == 2 else through)[:, None] * static[None, :]
 
 
 SOURCES: dict[str, Callable[[], object]] = {"activity": Activity}
@@ -100,9 +116,17 @@ class LayerwiseRegulator:
     base: Level = Level.D2
     ceiling: Level = Level.D8
     rim: float = 0.0
+    # The layers the address of the query is read from (E004: the hybrid at 6 identifies a paraphrase 0.917, and the
+    # address of the rest of the network follows from it). The regulator hangs in front of every layer from the first,
+    # and until the address is there it raises nothing: those layers are read at the base.
+    address_layers: int = 0
+    inertia: Inertia = EVERY_LAYER  # when a layout is decided again and when the one in place is kept
     ladder: tuple[Level, ...] = (Level.D2, Level.D4, Level.D6, Level.D8)
     _norms: dict[str, torch.Tensor] = field(default_factory=dict)
     _weights: dict[str, torch.Tensor] = field(default_factory=dict)
+    _static: dict[str, torch.Tensor] = field(default_factory=dict)
+    _base_codes: dict[str, torch.Tensor] = field(default_factory=dict)
+    _visits: dict[str, int] = field(default_factory=dict)
     _handles: list = field(default_factory=list)
     levels_set: dict[str, torch.Tensor] = field(default_factory=dict)
     # the layout is decided again at every token; what is counted is the first pass over a batch - the prompt's.
@@ -122,6 +146,10 @@ class LayerwiseRegulator:
             self._norms[name] = row_norms(module)
             self._weights[name] = block_weights(module)
             self._held[name] = self._weights[name]
+            self._static[name] = self.source.prepare(module, self._norms[name], self._weights[name])
+            self._base_codes[name] = torch.full((module.n_blocks,), int(self.base), dtype=torch.uint8,
+                                                device=self._weights[name].device)
+            self._visits[name] = 0
         device = next(iter(self._weights.values())).device if self._weights else torch.device("cpu")
         # the rule of the knapsack as two tables on the card: a block rises a rung for every RUNG_GAIN it stands over
         # the price, and the rung it lands on is read out of the codes (layouts.knapsack_levels, the same rule)
@@ -153,7 +181,9 @@ class LayerwiseRegulator:
         what each of the two costs is measured by scripts/decode_step_speed.py --layerwise-price.
         """
         module = self.ctl.modules[name]
-        reduced = self.source.scores(module, x, self._norms[name]) / self._weights[name]
+        if self.layer_of(name) < self.address_layers:  # the address is not read yet: nothing is raised here
+            return self._base_codes[name]  # one layout for the batch: at the base every question reads the same
+        reduced = self.source.scores(module, x, self._static[name])
         rungs = (reduced[..., None] >= self._thresholds).sum(dim=-1)
         codes = self._codes_table[rungs]
         if self.rim > 0:  # the band under the risen part, held one rung over the base
@@ -177,10 +207,20 @@ class LayerwiseRegulator:
         return self
 
     def decide(self, name: str, state: torch.Tensor) -> torch.Tensor:
-        """Read one module's levels from the state entering its layer and write them, before the layer runs."""
-        codes = self.levels_for(name, state)
-        self.levels_set[name] = codes
-        self.ctl.modules[name].set_levels_on_device(codes, self._used)
+        """Read one module's levels from the state entering its layer and write them, before the layer runs.
+
+        Whether it is read again here or the layout in place is kept, the inertia says (foqlens.inertia) - the
+        condition sits outside the regulator and is asked, never inferred. What the module reads is counted either
+        way: a layout that was kept is read as much as one just decided.
+        """
+        visit = self._visits[name]
+        self._visits[name] = visit + 1
+        if name in self.levels_set and self.inertia.holds(self.layer_of(name), visit):
+            codes = self.levels_set[name]
+        else:
+            codes = self.levels_for(name, state)
+            self.levels_set[name] = codes
+            self.ctl.modules[name].set_levels_on_device(codes, self._used)
         if self._counting:
             self._spend(name, codes)
         return codes
@@ -199,6 +239,7 @@ class LayerwiseRegulator:
         a second time: by then the prompt's pass has been through every module once."""
         self._spent = torch.zeros(batch, device=self._bits.device)
         self._counted, self._counting = set(), True
+        self._visits = dict.fromkeys(self._visits, 0)  # a batch is a pass of its own: the inertia starts over with it
 
     def _spend(self, name: str, codes: torch.Tensor) -> None:
         """Add what one module read to the running count, on the card: the sum comes back to the host once, at the end

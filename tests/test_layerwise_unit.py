@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import torch
 
+from foqlens.inertia import EVERY_LAYER, BySchedule
 from foqlens.layerwise import Activity, LayerwiseRegulator, block_weights, row_norms
 from foqlens.layouts import knapsack_levels
 from foqlens.precision import Controller
@@ -22,6 +23,12 @@ def a_regulator(price: float, rim: float = 0.0) -> LayerwiseRegulator:
 
 def a_state(regulator: LayerwiseRegulator, batch: int = 2) -> torch.Tensor:
     return torch.ones(batch, 3, regulator.ctl.modules[NAME].weight.shape[1], dtype=torch.bfloat16)
+
+
+def reduced_scores(read, x: torch.Tensor) -> np.ndarray:
+    """The source's own score per weight - what the knapsack reads, on the host."""
+    source = Activity()
+    return source.scores(read, x, source.prepare(read, row_norms(read), block_weights(read))).numpy()
 
 
 def test_a_blocks_norms_and_weights_are_read_from_the_module():
@@ -60,7 +67,7 @@ def test_the_levels_on_the_card_are_the_ones_the_knapsack_gives():
     x = torch.stack([torch.full((3, read.weight.shape[1]), 1.0),
                      torch.full((3, read.weight.shape[1]), 0.05)]).to(torch.bfloat16)
     codes = regulator.levels_for(NAME, x)
-    reduced = (Activity().scores(read, x, row_norms(read)) / block_weights(read)).numpy()
+    reduced = reduced_scores(read, x)
     wanted = knapsack_levels(reduced, 1e-3, Level.D2, (Level.D2, Level.D4, Level.D6, Level.D8))
     assert np.array_equal(codes.numpy(), wanted)
 
@@ -70,7 +77,7 @@ def test_a_score_that_lands_on_a_threshold_rises_where_the_host_rule_raises_it()
     they are on the host, so the block lands on the same rung and not one below."""
     read = module(NAME)
     x = torch.ones(1, 3, read.weight.shape[1], dtype=torch.bfloat16)
-    reduced = (Activity().scores(read, x, row_norms(read)) / block_weights(read)).numpy()
+    reduced = reduced_scores(read, x)
     for price in (float(reduced.max()), float(reduced.max()) / 16.0):
         regulator = LayerwiseRegulator(Controller({NAME: read}), Activity(), price=price)
         wanted = knapsack_levels(reduced, price, Level.D2, (Level.D2, Level.D4, Level.D6, Level.D8))
@@ -81,7 +88,7 @@ def test_the_rim_takes_the_loudest_of_the_blocks_left_at_the_base():
     regulator = a_regulator(price=1e30, rim=0.5)  # every block rests at the base, so the rim chooses among them all
     read = regulator.ctl.modules[NAME]
     x = torch.ones(1, 3, read.weight.shape[1], dtype=torch.bfloat16)
-    reduced = (Activity().scores(read, x, row_norms(read)) / block_weights(read)).numpy()[0]
+    reduced = reduced_scores(read, x)[0]
     width = round(0.5 * read.n_blocks)
     risen = np.flatnonzero(regulator.levels_for(NAME, x).numpy()[0] == D4)
     assert sorted(risen.tolist()) == sorted(np.argsort(-reduced)[:width].tolist())
@@ -97,6 +104,38 @@ def test_a_layout_set_on_the_card_builds_the_tables_one_from_the_host_builds():
     assert torch.equal(rows, made._row_layout()) and torch.equal(depths, made._depths)
     made.set_levels(np.full(made.n_blocks, D4, dtype=np.uint8))
     assert np.array_equal(made.levels, np.full(made.n_blocks, D4))  # the codes left on the card are not the layout
+
+
+def test_the_densest_inertia_holds_nothing_and_a_first_visit_is_always_a_decision():
+    assert not any(EVERY_LAYER.holds(layer, visit) for layer in range(4) for visit in range(4))
+    every_other = BySchedule(layers=2)
+    assert [every_other.holds(layer, visit=1) for layer in range(4)] == [False, True, False, True]
+    assert not any(every_other.holds(layer, visit=0) for layer in range(4))  # nothing is in place to keep yet
+    every_other_token = BySchedule(visits=2)
+    assert [every_other_token.holds(0, visit) for visit in range(4)] == [False, True, False, True]
+    with pytest.raises(ValueError):
+        BySchedule(layers=0)
+
+
+def test_a_module_the_inertia_holds_keeps_its_layout_and_is_counted_all_the_same():
+    ctl = Controller({NAME: module(NAME)})
+    regulator = LayerwiseRegulator(ctl, Activity(), price=1e-3, inertia=BySchedule(visits=2))
+    inp = ctl.modules[NAME].weight.shape[1]
+    loud = torch.full((1, 3, inp), 1.0).to(torch.bfloat16)
+    quiet = torch.full((1, 3, inp), 0.01).to(torch.bfloat16)
+    first = regulator.decide(NAME, loud).clone()
+    held = regulator.decide(NAME, quiet)  # the second visit is held: the quiet state decides nothing
+    assert torch.equal(held, first) and torch.equal(ctl.modules[NAME]._codes, first)
+    decided = regulator.decide(NAME, quiet)  # the third visit decides again, now on the quiet state
+    assert not torch.equal(decided, first)
+
+
+def test_below_the_address_layers_nothing_is_raised():
+    ctl = Controller({NAME: module(NAME), "layers.9.mlp.gate_proj": module("layers.9.mlp.gate_proj")})
+    regulator = LayerwiseRegulator(ctl, Activity(), price=0.0, address_layers=6)  # price 0 would lift everything
+    x = torch.ones(1, 3, ctl.modules[NAME].weight.shape[1], dtype=torch.bfloat16)
+    assert (regulator.levels_for(NAME, x).numpy() == D2).all()  # layer 0: the address is not read yet
+    assert (regulator.levels_for("layers.9.mlp.gate_proj", x).numpy() == D8).all()
 
 
 def test_the_layout_read_back_holds_what_the_hooks_wrote():

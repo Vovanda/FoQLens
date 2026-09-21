@@ -16,11 +16,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from foqlens import config, refocustensors, runlog
+from foqlens import config, refocustensors, runlog, sample
 from foqlens import model as fm
 from foqlens.gpu_share import default_share
 from foqlens.group_oracle import joined_answer
-from foqlens.io import Checkpoint, plan_of, save_npz_atomic
+from foqlens.io import Checkpoint, plan_of, read_wordings, save_npz_atomic
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
@@ -49,6 +49,11 @@ def main(argv: list[str] | None = None) -> list[Path]:
                         help="a json list of [corpus, id]: read these questions of the draw and no others")
     parser.add_argument("--also", type=Path, default=None,
                         help="a json list of [corpus, id]: lay these questions out on top of the share")
+    parser.add_argument("--wordings", type=Path, default=None,
+                        help="a folder of {'id', 'paraphrase'} files, one per corpus: ask these questions in those "
+                             "words instead of their own, and read no others")
+    parser.add_argument("--wordings-pattern", default="e006-*.jsonl",
+                        help="how the files of --wordings are named, the corpus in place of the star")
     parser.add_argument("--out", type=Path, default=Path("runs/masks/e2b-it"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     args = parser.parse_args(argv)
@@ -64,6 +69,10 @@ def main(argv: list[str] | None = None) -> list[Path]:
                                args.shard)
     fmt = fm.prompt_format(MODEL, bench.tokenizer)
     pairs = found.laid + found.calibration
+    if args.wordings:  # the same questions asked in other words, as the oracle by trying was asked them
+        wordings = read_wordings(args.wordings, args.wordings_pattern)
+        pairs = sample.in_other_words(pairs, wordings, keep_rest=True)  # the draw is numbered by place
+        LOG.info("%d of %d questions reworded from %s", len(pairs), len(wordings), args.wordings)
     prompts = found.prompts(fmt, pairs)
     answers = [joined_answer(p, t) if t.strip() else "" for p, t in zip(prompts, targets(pairs, check.replies))]
     lengths = np.array([len(ids) for ids in bench.tokenizer([p + a for p, a in zip(prompts, answers)])["input_ids"]])

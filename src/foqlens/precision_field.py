@@ -2,7 +2,7 @@
 level a group is read at - 1.0 is D8, 0.75 D6, 0.5 D4, 0.2 D2 - its peak at D8 and falling from it. Reading the field is
 the layout; the question is whether the answer on it is the answer of every block at D8.
 
-An oracle gives a field of importance s_g - what reading group g coarse costs the answer. The field of precision is
+An oracle gives its field s_g - what reading group g coarse costs the answer. The field of precision is
 read from it with one threshold a question:
 
 - the cost of a group at a rung r is c_g(r) = s_g * e_g(r), where e_g(r) is how much the rung cuts the group's error

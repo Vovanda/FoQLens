@@ -1,22 +1,34 @@
-"""The oracles' block scores at the granularity of the groups the oracles by trying read, brought to one shape and laid
-over one another - read from their kept files, never from the model.
+"""The oracles' scores at the granularity of the groups, brought to one scale and laid over one another - read
+from their kept files, never from the model.
 
-- block_group_ids: every block's group (a layer's attention or the rest of the layer) from its layer and module kind.
-- to_groups: blocks' scores summed over a group, so a block oracle meets the oracles by trying at their granularity.
-- field: the one method that makes an oracle a field, the same for every one of them - its values divided by a scale
-  of its own (unit_scale) and cut into 0 ... 1 (unit_field). What is negative reads 0, a group that gains from a
-  coarse reading being no group to raise, and what stands above the scale reads 1. The contract of the matrix -
-  [questions, groups], one order of questions and of groups for all the oracles - is what lets the rungs lay out
-  over the fields and one analysis serve all of them.
-- overlay: several unit fields as one. `product` is agreement: a group stays high only where every oracle holds it
-  high, and one oracle near zero puts it out; the n-th root brings the product back onto the scale of a single field,
-  so overlays of two oracles and of four are read by the same rule. `mean` is the soft one, where a single high
-  oracle carries a group against the others. `least` is the severest agreement - the lowest oracle alone.
+The scale is the whole point. An oracle measures in its own units and an experiment has to compare them, add them
+and read them all at one band, so every one of them is carried onto the same quantity: what a group demands.
+
+- what each oracle measures, and why they may all be divided by the same threshold:
+
+  | oracle | its own units | what a group's value is |
+  | --- | --- | --- |
+  | lift | nats | how much the answer's likelihood improves if this group alone is read at the top |
+  | drop | nats | how much it worsens if this group alone falls to the base |
+  | answer_gradient | nats a weight | the gradient of the answer's likelihood by this group's weights |
+  | answer_quant_gap | nats | that gradient against the D2-D8 gap: the first order of dropping the group |
+  | error_energy | squared output | the energy a rung's error puts into this group's output |
+  | pooled | none | the others, each scaled to unit mass over the groups, averaged |
+
+  Every one of them is a loss the answer takes when this group is read coarsely - in nats, in energy, in the first
+  order of nats. The question's threshold is a loss of the same kind: what the answer may lose in all. So the ratio
+  of the two is a pure number in every case, and it is the same pure number regardless of which oracle measured it:
+  the share of the allowance this group would spend.
+
+- demand: that ratio, folded into 0 ... 1. Nothing else in this module invents a scale.
+- block_group_ids, to_groups: a block oracle's scores summed into the groups the oracles by trying read.
+- overlay: several fields as one - `product` is agreement, `mean` the soft one, `least` the severest.
 - bootstrap: an interval of a statistic of the questions by resampling them.
 
 Invariants:
 - Invariant: to_groups keeps the sum of the scores; a NaN score adds nothing.
-- Invariant: unit_field lands in 0 ... 1 and keeps the order of the values it is given.
+- Invariant: levels_of over a demand field gives back the map the threshold search itself wrote, group for group -
+  the check that the scale carries what the map was built from (tests/test_oracle_overlay_unit.py).
 - Invariant: an overlay of one field is that field; an overlay of fields in 0 ... 1 stays in 0 ... 1.
 - Invariant: least <= product <= mean everywhere - the usual order of those means.
 """
@@ -62,37 +74,33 @@ class Oracle(ABC):
     @abstractmethod
     def field(self) -> np.ndarray:
         """[questions, groups] in 0 ... 1."""
+def demand(values: np.ndarray, thresholds: np.ndarray) -> np.ndarray:
+    """An oracle's values as what a group demands, in 0 ... 1 and on one scale for every oracle and every question.
 
+    A group's value over its question's threshold says how much of the answer's whole allowance reading it coarsely
+    would spend: below 1 the group fits at the base, above it asks for a sharper rung, and the further above the
+    sharper. That ratio is already free of the oracle's units and of how unsure the model was of the question, so it
+    is the thing every oracle can be compared on - but it runs to infinity, and a field is 0 ... 1.
 
+    So it is folded: demand = d / (1 + d) for d the ratio. Nothing is lost, the fold keeps the order, and the bounds
+    of a reading fold with it - a rung whose error is a share r of the base's is taken while demand stays below
+    1 / (1 + r). They are the same numbers for every oracle and every question.
+    """
+    values = np.maximum(np.asarray(values, dtype=float), 0.0)
+    thresholds = np.asarray(thresholds, dtype=float)[:, None]
+    ratio = np.divide(values, thresholds, out=np.full(values.shape, np.inf), where=thresholds > 0)
+    return np.nan_to_num(ratio / (1.0 + ratio), nan=1.0, posinf=1.0)
 @dataclass(frozen=True)
 class Kept(Oracle):
-    """An oracle read from what it has already written down: its values carried onto the contract by the scale of
-    their own quantile, so that one outlying group of one question does not set the scale for everybody."""
+    """An oracle read from what it has already written down: its values and the thresholds of the questions they
+    were measured against, carried onto the contract by `demand`."""
 
     name: str
     values: np.ndarray  # [questions, groups] in the oracle's own units
-    share: float = 0.99
+    thresholds: np.ndarray  # [questions] what the answer may lose in all, in those same units
 
     def field(self) -> np.ndarray:
-        return unit_field(self.values, unit_scale(self.values, self.share))
-
-
-def unit_scale(values: np.ndarray, share: float = 0.99) -> float:
-    """The scale of an oracle's own units: the `share` quantile of what it gives over the questions it was read on.
-
-    A quantile and not the maximum: one question with an outlying group would otherwise set the scale for all of them
-    and press every other field towards zero.
-    """
-    positive = np.asarray(values, dtype=float)
-    positive = positive[np.isfinite(positive) & (positive > 0)]
-    return float(np.quantile(positive, share)) if positive.size else 1.0
-
-
-def unit_field(values: np.ndarray, scale: float) -> np.ndarray:
-    """An oracle's importance on one scale, 0 ... 1: its own units divided by its own `scale`, cut at both ends."""
-    if scale <= 0:
-        raise ValueError(f"a scale of {scale}: an oracle's scale is positive")
-    return np.clip(np.nan_to_num(np.asarray(values, dtype=float), nan=0.0) / scale, 0.0, 1.0)
+        return demand(self.values, self.thresholds)
 
 
 def overlay(fields: list[np.ndarray], how: str = "product") -> np.ndarray:

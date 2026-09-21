@@ -1,5 +1,5 @@
 """The precision fields of the oracles on the small corpus (config.PrecisionFields; foqlens.precision_field): every
-oracle's field of importance - the lift and the drop by trying, the block oracles' scores summed into groups - read at
+oracle's field - the lift and the drop by trying, the block oracles' scores summed into groups - read at
 the question's threshold into a level a group, and the reference measured: every group alone at D6, D4 and D2 under
 every block at D8, then raised by whole rungs until the whole holds. The ratios of the rungs come from the error
 energies of D2, D4 and D6 on the same questions. Deterministic: the same questions in the same batches.
@@ -17,12 +17,12 @@ from pathlib import Path
 
 import numpy as np
 
-from foqlens import config, refocustensors, runlog
+from foqlens import config, refocustensors, runlog, sample
 from foqlens import model as fm
 from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.group_oracle import RUN_FIELDS, block_groups, joined_answer
-from foqlens.io import Checkpoint, plan_of, read_npz_parts, save_npz_atomic, write_json
+from foqlens.io import Checkpoint, plan_of, read_npz_parts, read_wordings, save_npz_atomic, write_json
 from foqlens.oracle_overlay import block_group_ids, to_groups
 from foqlens.pipeline import Bench
 from foqlens.precision_field import RUNGS, find_threshold, measure_field, rung_costs, rung_ratios
@@ -64,6 +64,14 @@ def main(argv: list[str] | None = None) -> Path:
                         help="a json list of [corpus, id]: read these questions of the draw and no others")
     parser.add_argument("--also", type=Path, default=None,
                         help="a json list of [corpus, id]: lay these questions out on top of the share")
+    parser.add_argument("--wordings", type=Path, default=None,
+                        help="a folder of {'id', 'paraphrase'} files, one per corpus: ask these questions in those "
+                             "words instead of their own, and read no others")
+    parser.add_argument("--wordings-pattern", default="e006-*.jsonl",
+                        help="how the files of --wordings are named, the corpus in place of the star")
+    parser.add_argument("--tolerance-from", type=Path, default=None,
+                        help="a fields file of the questions these are a rewording of: every question takes the "
+                             "tolerance its original had, so the two are measured at the same allowance")
     parser.add_argument("--out", type=Path, default=Path("runs/oracles/e2b-it"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     args = parser.parse_args(argv)
@@ -94,6 +102,10 @@ def main(argv: list[str] | None = None) -> Path:
         wanted = {tuple(pair) for pair in json.loads(args.only.read_text(encoding="utf-8"))}
         laid = [(c, r) for c, r in laid if (c, r.id) in wanted]
         LOG.info("%d of %d questions named by %s", len(laid), len(wanted), args.only)
+    if args.wordings:  # the same questions asked in other words, as the oracle under these fields was asked them
+        wordings = read_wordings(args.wordings, args.wordings_pattern)
+        laid = sample.in_other_words(laid, wordings)
+        LOG.info("%d of %d questions reworded from %s", len(laid), len(wordings), args.wordings)
     prompts = found.prompts(fmt, laid)
     texts = targets(laid, check.replies)
     keys = [(c, r.id) for c, r in laid]
@@ -131,6 +143,21 @@ def main(argv: list[str] | None = None) -> Path:
     if (kept := checkpoint.load()) is not None:  # a stopped or crashed pass goes on from its last saved question
         arrays, first = {k: kept[k] for k in arrays}, int(kept["done"])
         LOG.info("resumed after %d of %d questions from %s", first, len(laid), checkpoint.path)
+    borrowed = None
+    if args.tolerance_from:  # the originals' allowance, question by question and field by field
+        kept = np.load(args.tolerance_from, allow_pickle=True)
+        at = {k: i for i, k in enumerate(zip(kept["corpus"].tolist(), kept["ids"].tolist()))}
+        borrowed = {}
+        for s in sources:
+            key = f"target_{s}"
+            if key not in kept.files:
+                continue
+            losses = np.asarray(kept[key])  # the model's own loss on the original, what its allowance was set by
+            for (corpus_name, row_id), i in at.items():
+                if not np.isnan(losses[i]):
+                    borrowed[(corpus_name, row_id, s)] = max(check.tolerance,
+                                                             check.tolerance_share * abs(float(losses[i])))
+        LOG.info("%d allowances taken from %s", len(borrowed), args.tolerance_from)
     progress = Progress(len(laid) - first, "question")
     with stage(LOG, f"precision fields of {len(sources)} oracles on {len(laid)} questions"), GpuMonitor() as gpu:
         for q in range(first, len(laid)):
@@ -144,8 +171,17 @@ def main(argv: list[str] | None = None) -> Path:
             for s in sources:
                 if np.isnan(fields[s][q]).any():
                     continue  # the oracle holds no field for this question (a prompt too long for the gradient)
-                got = find_threshold(*reading, groups, rung_costs(fields[s][q], ratios), check.tolerance, width,
-                                    share=check.tolerance_share)
+                # the allowance: this question's own, or the original's where one is given. The share makes the
+                # allowance grow with the model's own loss, so a question the model is unsure of - a paraphrase it
+                # answers less confidently - is allowed to lose more and asks for less precision. Two texts of one
+                # question have to be measured at one allowance, or their maps are not comparable
+                allowance, by_share = check.tolerance, check.tolerance_share
+                if borrowed is not None:
+                    taken = borrowed.get((corpus, row.id, s))
+                    if taken is not None:
+                        allowance, by_share = taken, 0.0
+                got = find_threshold(*reading, groups, rung_costs(fields[s][q], ratios), allowance, width,
+                                    share=by_share)
                 arrays[f"levels_{s}"][q], arrays[f"eps_{s}"][q] = got.levels, got.eps
                 arrays[f"nll_{s}"][q], arrays[f"target_{s}"][q] = got.nll, got.target
                 arrays[f"batches_{s}"][q] = got.batches

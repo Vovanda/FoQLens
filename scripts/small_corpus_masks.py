@@ -18,11 +18,11 @@ from pathlib import Path
 
 import numpy as np
 
-from foqlens import config, refocustensors, runlog
+from foqlens import config, refocustensors, runlog, sample
 from foqlens import model as fm
 from foqlens.gguf_weights import PUBLISHED
 from foqlens.gpu_share import default_share
-from foqlens.io import Checkpoint, plan_of
+from foqlens.io import Checkpoint, plan_of, read_wordings
 from foqlens.pipeline import ADDRESS_SOURCES, Bench, ModelSource
 from foqlens.prompt_variants import SETUPS
 from foqlens.quant import Level
@@ -53,6 +53,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="a json list of [corpus, id]: read these questions of the draw and no others")
     parser.add_argument("--also", type=Path, default=None,
                         help="a json list of [corpus, id]: lay these questions out on top of the share")
+    parser.add_argument("--wordings", type=Path, default=None,
+                        help="a folder of {'id', 'paraphrase'} files, one per corpus: ask these questions in those "
+                             "words instead of their own, and read no others")
+    parser.add_argument("--wordings-pattern", default="e006-*.jsonl",
+                        help="how the files of --wordings are named, the corpus in place of the star")
     parser.add_argument("--out", type=Path, default=Path("runs/masks"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     return parser.parse_args(argv)
@@ -76,6 +81,10 @@ def main(argv: list[str] | None = None) -> Path:
         wanted_ids = {tuple(pair) for pair in named(args.only)}
         asked = [(c, r) for c, r in asked if (c, r.id) in wanted_ids]
         LOG.info("%d of %d questions named by %s", len(asked), len(wanted_ids), args.only)
+    if args.wordings:  # the same questions asked in other words: a mask of the question against a mask of its wording
+        wordings = read_wordings(args.wordings, args.wordings_pattern)
+        asked = sample.in_other_words(asked, wordings)
+        LOG.info("%d of %d questions reworded from %s", len(asked), len(wordings), args.wordings)
     prompts = found.prompts(fmt, asked)
     lengths = np.array([len(ids) for ids in bench.tokenizer(prompts)["input_ids"]])
     # a backward pass over a prompt longer than the cap runs out of memory alone: its mask stays NaN, and every reader

@@ -1,4 +1,4 @@
-"""The rules that turn a lift into levels (foqlens.zones, docs/quantization-filter.md rules 2-6), on any metric: CPU."""
+"""The rules that turn a lift into levels (foqlens.zones, docs/precision-regulator.md rules 2-6), on any metric: CPU."""
 
 import numpy as np
 import pytest

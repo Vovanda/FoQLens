@@ -13,7 +13,7 @@ no picture is drawn:
 A zone is a center and a radius, and its figure is every block within the radius by the distances of
 the layout's metric - the geodesic along the graph (metric.geodesic), or its resistive form - so the
 figure is arbitrary and follows the graph, not a ball cut across the space. A zone lifts the blocks it
-reaches by rule 4 of docs/quantization-filter.md, from 1 at its center to 0 at its reach times the last
+reaches by rule 4 of docs/precision-regulator.md, from 1 at its center to 0 at its reach times the last
 stop. How far it reaches is replaceable (Reach): EqualReach sends every zone a share f of the width of the
 network, R = f D (rule 1, #19); ProportionalReach splits the same share by the zones' own radii; LogReach takes the radius
 at which a ball growing exponentially covers the share f of the network.
@@ -154,7 +154,7 @@ class LogReach:
     """f as the share of the network a zone covers where a ball grows exponentially (Volodya 19.09): a ball of R holds
     |B|^(R/D) blocks - one at R = 0, all at R = D - so it covers the share f at
     R = D log(1 + f (|B| - 1)) / log |B|. The map is one per graph, whatever the query, so the memory still follows
-    the query. Derivation: docs/quantization-filter-math.md, section 8."""
+    the query. Derivation: docs/bench-math.md, section 8."""
 
     focus_area: float
     width: float

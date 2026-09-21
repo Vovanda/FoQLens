@@ -1,0 +1,5 @@
+# The answers at the precision fields of E006: every field's layout and the reference's, and the uniform rungs,
+# generated beside every block at D8 in the same batches - does a layout answer as the whole network does, and at
+# what bytes. The questions and the groups are the oracle by trying's, on the sample of a hundred.
+group_oracle = "runs/E006-filter-map-retention/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
+precision = "runs/E006-filter-map-retention/precision-fields-bartowski-Q2_K-small-corpus.npz"

@@ -368,7 +368,7 @@ class GraphZoneLayout:
 
 @dataclass(frozen=True)
 class AttentionLevel:
-    """Rule 6 of docs/quantization-filter.md over any policy: a q_proj or k_proj block never reads ZERO.
+    """Rule 6 of docs/precision-regulator.md over any policy: a q_proj or k_proj block never reads ZERO.
 
     A zero row of q_proj or k_proj flattens attention - a distortion, not emptiness - so where a policy leaves
     such a block at ZERO (a ZERO base outside the zones) it reads the attention level A instead. Every other
@@ -408,7 +408,7 @@ class WorkingLayers:
         return np.where(self.blocks[None], np.uint8(int(self.level)), codes)
 
 
-# Every rung of the ladder divides the variance of a block's error by 16 (docs/quantization-filter-math.md, section 2),
+# Every rung of the ladder divides the variance of a block's error by 16 (docs/bench-math.md, section 2),
 # so the next rung of the same block pays 16 times less per byte and needs a 16 times higher sensitivity.
 RUNG_GAIN = 16.0
 PRICE_STEPS = 60  # bisection steps of the price in log space: 2^-60 of the range, far below one block's bits

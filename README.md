@@ -39,7 +39,7 @@ Three controls, each doing one thing:
 - **focus_area** - the size of the zones;
 - **focus_strength** - how far the zone centers rise above the base.
 
-Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas, the single source of truth for it: [docs/quantization-filter.md](docs/quantization-filter.md).
+Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas, the single source of truth for it: [docs/precision-regulator.md](docs/precision-regulator.md).
 
 If the idea holds, **expert zones emerge** as the regions that stay sharp when everything around them is coarsened - and related topics share part of their zone instead of paying for it twice, as MoE experts do.
 
@@ -66,6 +66,20 @@ The steps, numbered as in the [preregistration](prereg/), are ordered so each on
 | 7 | In an agent chain of a draft and refinements, does the zone model end better than the same model at native precision and than uniform quantization at the same memory? (the main hypothesis, once the model exists) | - |
 
 All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"). The full reasoning is in [`docs/`](docs/).
+
+## Experiments
+
+| Experiment | What it showed |
+| --- | --- |
+| [E001](experiments/E001-uniform-quantization/results.md) | Naive rounding leaves D2 incoherent; on questions the model does not know, the coarser model answers where the precise one refuses |
+| [E002](experiments/E002-base-precision-d2/results.md) | A working base precision over k-quants: the ladder keeps 98.8 / 96.8 / 91.0 / 51.4% of what the whole model knows |
+| [E003](experiments/E003-calibrated-base/results.md) | A base calibrated with an imatrix raised D2 by 25.3 points at a cost of 0.7 at D6 |
+| [E004](experiments/E004-question-address/results.md) | The address of a query is cheap to read: a paraphrase is read as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision are enough |
+| [E005](experiments/E005-precision-map/results.md) | An ideal precision map for a query holds 0.816 of the top rung's answers at 0.523 of its memory; the uniform D4, costing more, gives 0.000 |
+| [E006](experiments/E006-filter-map-retention/_index.md) | Sharpness set by the address of the query takes 26 hard questions of 50 at 0.516 of the top rung's memory; the flat D6 at 0.775 takes 7. The bounds of the field scale are computed from the ladder's own measurement |
+
+The maps are built by oracles that have seen the right answer - a ceiling and a target, not a mechanism. The
+regulator that works out a layout on its own is being built.
 
 ## Status
 
@@ -134,7 +148,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
 - [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones come out of it.
-- [`docs/quantization-filter.md`](docs/quantization-filter.md) - the quantization filter and its zones: how precision is laid out over the weights.
+- [`docs/precision-regulator.md`](docs/precision-regulator.md) - the quantization filter and its zones: how precision is laid out over the weights.
 - [`docs/glossary.md`](docs/glossary.md) - the terms of the project: block, group, rung, field, map, oracle, zone, regulator.
 - [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.

@@ -5,8 +5,8 @@ reads those answers against the top rung's, question by question (foqlens.runs),
 questions and the hard ones among them - and names the cheapest point that holds the answer for each oracle, then
 the one scale whose worst loss over the oracles is the smallest.
 
-    uv run python scripts/band_report.py --grid runs/E006-oracle-masks-that-hold/grid \
-        --hard runs/E006-oracle-masks-that-hold/sample/hard.json
+    uv run python scripts/band_report.py --grid runs/E006-filter-map-retention/grid \
+        --hard runs/E006-filter-map-retention/sample/hard.json
 """
 
 from __future__ import annotations

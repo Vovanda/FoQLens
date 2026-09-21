@@ -4,7 +4,7 @@ Per corpus, `--share` of the kept questions are laid out and `--calibration-shar
 background and the co-activation graph; both are drawn by the seed, the two sets never meet. `--unknown-share` of the
 questions the model does not know are laid out too and listed apart in the summary: they never enter the headline. The masks of all of them come from one
 mask source at bf16 (pipeline.Bench.source); the mechanism (strategies.MECHANISMS) turns the laid-out questions'
-masks into levels with the knobs of docs/quantization-filter.md; the regulator checks every layout against the
+masks into levels with the knobs of docs/precision-regulator.md; the regulator checks every layout against the
 kernel's ladder, applies rule 6 and sets it per question of a batch. The judge reads at bf16 as always.
 
 The summary holds the bytes the kernel reads - per question, and per decoding step of a batch (the union of its

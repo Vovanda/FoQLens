@@ -44,7 +44,7 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 ## Step 3. Precision follows the meaning
 
-Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([quantization-filter.md](quantization-filter.md)).*
+Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([precision-regulator.md](precision-regulator.md)).*
 
 Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones in the distance between blocks → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 

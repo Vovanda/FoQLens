@@ -114,7 +114,7 @@ def main(argv: list[str] | None = None) -> Path:
     # every field over the groups [questions, groups]: the oracle by trying's own two, then the block oracles'
     fields = {"lift": trying["lift"][at], "drop": trying["drop"][at]}
     fields |= {name: group_fields(pattern, keys, names) for name, pattern in check.fields.items()}
-    # the knapsack lifts by the gain a byte (docs/quantization-filter-math.md, section 9): every field also over the
+    # the knapsack lifts by the gain a byte (docs/bench-math.md, section 9): every field also over the
     # weights of its groups - an MLP group holds several times an attention group's weights
     # the oracles measure one thing in their own units: each field scaled to unit mass a question, then summed, is
     # their joint estimate of it (Volodya 20.09) - a field of its own, read at its own threshold like any other

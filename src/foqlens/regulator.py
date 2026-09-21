@@ -7,7 +7,7 @@ nothing at ZERO - so a layout the kernel reads is made of ZERO and the read dept
 (kernel_ladder). A layout with a level off that ladder would leave the kernel for unpacking, or be refused by a model
 cut short of it; the regulator refuses it before it reaches the controller.
 
-Memory is what a layout reads (docs/quantization-filter.md, rule 7, counted in the kernel's bytes): a block at depth d
+Memory is what a layout reads (docs/precision-regulator.md, rule 7, counted in the kernel's bytes): a block at depth d
 reads its rows' base blocks and d - base refinement planes of in / 4 bytes a row. A batch decodes in one step, and
 the kernel reads a block of a thread block's tokens to the deepest depth any of them asks: a step of a batch reads,
 per block, the deepest depth over its samples - the union of their zones, not their sum.

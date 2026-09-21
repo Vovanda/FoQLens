@@ -185,7 +185,7 @@ def centres(values: np.ndarray, layers: np.ndarray, base: float) -> np.ndarray:
 
 def zone_stops(values: np.ndarray, layers: np.ndarray, found: np.ndarray, base: float,
                rungs: list[float]) -> list[dict]:
-    """Every centre of a question written in the notation of the filter (docs/quantization-filter.md, rule 3): the
+    """Every centre of a question written in the notation of the filter (docs/precision-regulator.md, rule 3): the
     height of its peak, its radius - the first distance in layers where nothing around it is above the base any more -
     and the stop of every rung, the farthest distance the rung reaches as a share of that radius. A centre whose zone
     never comes down to the base inside the network has the radius of the network."""

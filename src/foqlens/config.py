@@ -209,8 +209,8 @@ class OracleAnswers:
 @dataclass(frozen=True)
 class RegulatorAnswers:
     """A run of the regulator over the small corpus (scripts/layerwise_answers.py): which approach reads the weights -
-    `upfront`, the map decided before the pass (docs/quantization-filter.md), or `layerwise`, a layer decided while the
-    pass runs (docs/layerwise-regulator.md) - and the controls of the one chosen."""
+    `upfront`, the map decided before the pass (docs/precision-regulator.md), or `layerwise`, a layer decided while the
+    pass runs (docs/precision-regulator.md) - and the controls of the one chosen."""
 
     approach: str  # upfront | layerwise
     corpus: str  # the SmallCorpus file: its laid-out questions are the ones answered

@@ -4,7 +4,7 @@ Hard is what only the top rung answers while the lower ones fail it or replace i
 what the lower rungs answer too. Both sides are drawn from a run the judge has already read, so no model runs here.
 The ordinary side takes the shares by corpus the hard side came out with.
 
-    uv run python scripts/draw_sample.py --config configs/e006-sample.toml
+    uv run python scripts/draw_sample.py --config experiments/E006-filter-map-retention/configs/sample.toml
 """
 
 from __future__ import annotations

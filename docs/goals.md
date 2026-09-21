@@ -12,7 +12,7 @@ Mixture of Experts is a special case of it: experts are zones with hard edges fi
 
 ## What this bench tests
 
-FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([quantization-filter.md](quantization-filter.md)).
+FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([precision-regulator.md](precision-regulator.md)).
 
 **The question to answer first** (2026-09-14): **does the regulator work** - does it give the model the right scale, the structure where a coarse reading is enough and the details where sharpness is needed, and does the model gain over iterations. Saving memory is a secondary goal, plan B: even without a gain in quality the mechanism saves memory at the same usability.
 

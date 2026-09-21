@@ -68,7 +68,7 @@ def test_every_oracle_s_map_comes_back_out_of_its_own_field():
     from foqlens.oracle_overlay import demand
     from foqlens.quant import Level
 
-    kept = np.load(Path("runs/E006-oracle-masks-that-hold/precision-fields-bartowski-Q2_K-small-corpus.npz"),
+    kept = np.load(Path("runs/E006-filter-map-retention/precision-fields-bartowski-Q2_K-small-corpus.npz"),
                    allow_pickle=True)
     codes = [int(Level[str(r)]) for r in kept["rungs"]]
     for source, least in (("lift_per_weight", 0.99), ("pooled", 0.98), ("drop", 0.94)):

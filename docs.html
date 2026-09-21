@@ -34,9 +34,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
            Keep in step with SHELF below. -->
         <h2>The idea</h2>
         <ul>
-          <li><a href="#filter" data-id="filter">The quantization filter and its zones</a></li>
+          <li><a href="#regulator" data-id="regulator">The precision regulator</a></li>
           <li><a href="#glossary" data-id="glossary">The glossary</a></li>
-          <li><a href="#filter-math" data-id="filter-math">The mathematics of the quantization filter</a></li>
+          <li><a href="#math" data-id="math">The mathematics of the bench</a></li>
           <li><a href="#strategies" data-id="strategies">Zone strategies</a></li>
           <li><a href="#refocustensors" data-id="refocustensors">The .refocustensors model format</a></li>
           <li><a href="#kernels" data-id="kernels">The kernel that reads the copy</a></li>
@@ -72,6 +72,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <li><a href="#e003-results" data-id="e003-results">E003 - the ladder over a calibrated base</a></li>
           <li><a href="#e004-results" data-id="e004-results">E004 - the address of a query</a></li>
           <li><a href="#e005-results" data-id="e005-results">E005 - the precision map of a query</a></li>
+          <li><a href="#e006-results" data-id="e006-results">E006 - retention of knowledge by the filter&#39;s map</a></li>
         </ul>
       </div></div>
   </aside>
@@ -101,10 +102,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <p>Pick a document on the left. Each is a markdown file in the repository, and every link below goes to its source.</p>
       <h3>The idea</h3>
       <ul>
-        <li><a href="#filter">The quantization filter and its zones</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/quantization-filter.md">docs/quantization-filter.md</a></span></li>
+        <li><a href="#regulator">The precision regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/precision-regulator.md">docs/precision-regulator.md</a></span></li>
         <li><a href="#glossary">The glossary</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/glossary.md">docs/glossary.md</a></span></li>
-        <li><a href="#filter-math">The mathematics of the quantization filter</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/quantization-filter-math.md">docs/quantization-filter-math.md</a></span></li>
-        <li><a href="#layerwise">The layer-wise regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/layerwise-regulator.md">docs/layerwise-regulator.md</a></span></li>
+        <li><a href="#math">The mathematics of the bench</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/bench-math.md">docs/bench-math.md</a></span></li>
         <li><a href="#strategies">Zone strategies</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/zone-strategies.md">docs/zone-strategies.md</a></span></li>
         <li><a href="#refocustensors">The .refocustensors model format</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/refocustensors.md">docs/refocustensors.md</a></span></li>
         <li><a href="#kernels">The kernel that reads the copy</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/kernels.md">docs/kernels.md</a></span></li>
@@ -140,6 +140,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <li><a href="#e003-results">E003 - the ladder over a calibrated base</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E003-calibrated-base/results.md">experiments/E003-calibrated-base/results.md</a></span></li>
         <li><a href="#e004-results">E004 - the address of a query</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E004-question-address/results.md">experiments/E004-question-address/results.md</a></span></li>
         <li><a href="#e005-results">E005 - the precision map of a query</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E005-precision-map/results.md">experiments/E005-precision-map/results.md</a></span></li>
+        <li><a href="#e006-results">E006 - retention of knowledge by the filter&#39;s map</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-filter-map-retention/results.md">experiments/E006-filter-map-retention/results.md</a></span></li>
       </ul>
     </main>
 
@@ -163,10 +164,9 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 const REPO = "https://github.com/Vovanda/FoQLens/blob/main/";
 const SHELF = [
   { group: "The idea", docs: [
-    ["filter", "docs/quantization-filter.md", "The quantization filter and its zones"],
+    ["regulator", "docs/precision-regulator.md", "The precision regulator"],
     ["glossary", "docs/glossary.md", "The glossary"],
-    ["filter-math", "docs/quantization-filter-math.md", "The mathematics of the quantization filter"],
-    ["layerwise", "docs/layerwise-regulator.md", "The layer-wise regulator"],
+    ["math", "docs/bench-math.md", "The mathematics of the bench"],
     ["strategies", "docs/zone-strategies.md", "Zone strategies"],
     ["refocustensors", "docs/refocustensors.md", "The .refocustensors model format"],
     ["kernels", "docs/kernels.md", "The kernel that reads the copy"],
@@ -198,12 +198,13 @@ const SHELF = [
     ["e003-results", "experiments/E003-calibrated-base/results.md", "E003 - the ladder over a calibrated base"],
     ["e004-results", "experiments/E004-question-address/results.md", "E004 - the address of a query"],
     ["e005-results", "experiments/E005-precision-map/results.md", "E005 - the precision map of a query"],
+    ["e006-results", "experiments/E006-filter-map-retention/results.md", "E006 - retention of knowledge by the filter's map"],
   ]},
 ];
 const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
 const DEFAULT_DOC = "filter";
 // Anchors that are already out in the world, from before the documents were renamed.
-const ALIASES = { lens: "filter" };
+const ALIASES = { lens: "regulator", filter: "regulator", layerwise: "regulator", "filter-math": "math" };
 
 /* ==== MENU ==== */
 const menu = document.getElementById("menu");

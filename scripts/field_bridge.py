@@ -24,7 +24,7 @@ from foqlens.projection import Projection
 from foqlens.small_corpus import StoredMasks
 
 NEAREST_K = 8  # fitted questions a nearest bridge averages: the address names its question, its neighbours fill it in
-RELATIVE_RIDGE = 0.1  # as the working address's projection (docs/quantization-filter-math.md, section 5)
+RELATIVE_RIDGE = 0.1  # as the working address's projection (docs/bench-math.md, section 5)
 NOT_READ = 255
 
 
@@ -38,7 +38,7 @@ def projected_address(masks: StoredMasks, names: list[str], layers: np.ndarray, 
                       relative_ridge: float) -> tuple[np.ndarray, dict]:
     """The address of every question of the file as one pass would have it: read over the groups of the first
     `depth_share` of the layers and carried onto every group by a ridge fitted on the calibration questions
-    (foqlens.projection, docs/quantization-filter-math.md, section 5). Returns [questions, groups] and what was fitted."""
+    (foqlens.projection, docs/bench-math.md, section 5). Returns [questions, groups] and what was fitted."""
     ids = block_group_ids(masks.block_layer, masks.block_kind, names)
     every = to_groups(np.abs(masks.masks), ids, len(names))
     early = layers < max(1, round(depth_share * (layers.max() + 1)))
@@ -101,7 +101,7 @@ def main(argv: list[str] | None = None) -> Path:
     fit_topics = np.array([c for c, _ in fit_keys])
     read_topics = np.array([c for c, _ in read_keys])
     # the price of memory is one for every question and fixed where the bridge was fitted: the bits the target maps
-    # spend there (docs/quantization-filter-math.md, section 9)
+    # spend there (docs/bench-math.md, section 9)
     bits = float(bits_of(to_levels(fit_maps), weights).mean())
 
     made = {"target": args.target, "bits_asked": bits, "questions_fitted": len(fit_keys),

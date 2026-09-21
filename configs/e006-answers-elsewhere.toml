@@ -1,4 +1,0 @@
-# The control of H3.4: every question answered on its own figure carried elsewhere in the network at exactly the
-# same cost (scripts/carry_fields.py --how elsewhere). The rungs move only onto groups holding as many weights.
-group_oracle = "runs/E006-oracle-masks-that-hold/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
-precision = "runs/E006-oracle-masks-that-hold/elsewhere/precision-fields-bartowski-Q2_K-small-corpus.npz"

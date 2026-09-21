@@ -17,15 +17,21 @@ runs/**/raw/
 *.npz
 *.safetensors
 
-# what an experiment stands on is kept, not left in a working tree: the oracles' fields over the groups are megabytes
-# and they are the material its numbers were read from. A tree can be removed and take everything ignored with it -
-# that is how the fields of E005 were lost on 21.09. The masks over the blocks stay out, they are tens of megabytes
-# each; what a reader needs of them is the manifest beside them.
+# what an experiment stands on is kept, not left in a working tree: a tree can be removed and take everything
+# ignored with it - that is how the maps and the masks of E005 were lost on 21.09, and the run had to be done
+# again. Fields, group oracles and the blocks of maps are megabytes and go in.
 !runs/oracles/**/unified-fields-*.npz
 !runs/oracles/**/precision-fields-*.npz
 !runs/oracles/**/group-oracle-*.npz
 !runs/E0*/**/precision-fields-*.npz
 !runs/E0*/**/group-oracle-*.npz
+!runs/E0*/**/maps-*.npz
+!runs/E0*/**/network-map-*.npz
+!runs/E0*/**/network-part-*.npz
+
+# The masks over the blocks cannot go in: 276 MB a file against GitHub's limit of 100, 1.7 GB for E006 alone.
+# They are copied out of the working tree instead, to C:/FoQLens-artifacts/<experiment>/, where no git operation
+# reaches them; the manifest beside a run says what they held and how to compute them again.
 
 # model cache, if HF_HOME points inside the repo
 hf-cache/
@@ -38,3 +44,16 @@ hf-cache/
 # browser artefacts from smoke runs
 .playwright-mcp/
 .idea/
+
+# the replies themselves: one file a layout a corpus, thousands of them holding two to four answers each. They
+# are kept as an archive beside the run - answers-e006.zip - and what is read from them, the summaries and the
+# fields, stays in the repository.
+runs/E0*/answers/
+runs/E0*/*/answers/
+
+# the three grids the field scale was searched on - every point of the search as its own layout, summaries and
+# logs included. They are kept as grids-e006.zip beside the run; the scales that came out of them are in the
+# documents of the experiment.
+runs/E0*/grid/
+runs/E0*/high/
+runs/E0*/noD8/

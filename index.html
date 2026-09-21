@@ -3,8 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FoQLens - precision follows the query</title>
-<meta name="description" content="A precision regulator for language models: FoQZones - focusable quantization zones, opened where the query needs them. An R&amp;D bench on Gemma 4 E2B.">
+<title>FoQLens - one set of weights, precision that follows the query</title>
+<meta name="description" content="A precision regulator for language models. Weights are read at the depth the query needs: a map built for one question keeps 26 hard answers of 50 at half the memory, where a uniform rung keeps 7. Open R&amp;D bench on Gemma 4 E2B - frozen corpus, predictions committed before every run.">
+<link rel="canonical" href="https://vovanda.github.io/FoQLens/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FoQLens">
+<meta property="og:url" content="https://vovanda.github.io/FoQLens/">
+<meta property="og:title" content="FoQLens - one set of weights, precision that follows the query">
+<meta property="og:description" content="A map built for one question keeps 26 hard answers of 50 at half the memory; a uniform rung keeps 7. Open bench, frozen corpus, every prediction committed before its run.">
+<meta property="og:image" content="https://vovanda.github.io/FoQLens/site/og.png">
+<meta property="og:image:alt" content="The weight map of Gemma 4 E2B with lenses opened over it.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FoQLens - one set of weights, precision that follows the query">
+<meta name="twitter:description" content="A map built for one question keeps 26 hard answers of 50 at half the memory; a uniform rung keeps 7.">
+<meta name="twitter:image" content="https://vovanda.github.io/FoQLens/site/og.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ResearchProject",
+  "name": "FoQLens",
+  "alternateName": "Focusable Quantization Zones",
+  "url": "https://vovanda.github.io/FoQLens/",
+  "description": "A precision regulator for language models: the weights are read at the depth the meaning of the query asks for, and expert zones emerge from the query instead of being set by a router.",
+  "founder": {"@type": "Person", "name": "Vladimir Savkin", "url": "https://sawking.tech/cv"},
+  "foundingDate": "2026-09-11",
+  "keywords": "quantization, mixture of experts, inference, language models, precision regulator, adaptive quantization",
+  "subjectOf": {"@type": "SoftwareSourceCode", "codeRepository": "https://github.com/Vovanda/FoQLens", "programmingLanguage": "Python"}
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -36,6 +64,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <ul>
           <li><a href="#map">The field</a></li>
           <li><a href="#idea">Precision where the question is</a></li>
+          <li><a href="#goals">The goals</a></li>
+          <li><a href="#results">What came out</a></li>
           <li><a href="#mechanism">The mechanism</a></li>
           <li><a href="#hypotheses">What is claimed</a></li>
           <li><a href="#roadmap">Where the work is</a></li>
@@ -127,7 +157,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
                inside the cap height (29 to 103 over a 104 baseline); the handle crossing the
                baseline the way the tail of a Q does, cut flat because IBM Plex cuts its stems flat;
                and the sheen of the letters, so one light crosses the whole word. -->
-          <g stroke-linecap="butt" stroke-width="13" fill="none" stroke="url(#sheen)">
+          <g stroke-linecap="butt" stroke-width="13" fill="none" stroke="var(--focus)">
             <path d="M162 92 L188 118"/>
             <circle cx="136" cy="66" r="37"/>
           </g>
@@ -156,11 +186,49 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     </div>
   </section>
 
+  <!-- ==== GOALS ==== -->
+  <section id="goals">
+    <div class="wrap">
+      <h2>The goals</h2>
+      <p class="lede">One set of weights that serves any device and any load, opening to full precision exactly where the query needs it.</p>
+      <div class="cols">
+        <p><b>On the device.</b> One file of weights for a phone, glasses or a laptop: the precision follows the battery, the heat and the free memory, and the zones stay where the query is.</p>
+        <p><b>The price of a request.</b> A simple question gets small zones and costs little; a hard one gets wider. The price of a token follows the question.</p>
+        <p><b>Agents and reasoning.</b> A draft read mostly at base precision is refined step by step - the main hypothesis, tested when the model is there.</p>
+        <p><b>Graceful degradation.</b> Under load or heat the model gets coarse first in what the query does not need.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== RESULTS ==== -->
+  <!-- What the bench has actually shown, one line each. The roadmap below says where the work is;
+       this says what came out of it, and every row links the file that holds the numbers. -->
+  <section id="results">
+    <div class="wrap">
+      <h2>What came out</h2>
+      <p class="lede">Six experiments in <b id="age">-</b> days of work, every number from a run that is in the repository. The maps here are built by oracles that see the right answer - a ceiling to aim at, not a mechanism.</p>
+      <p>What holds these numbers up: every prediction was committed to git before the run that tested it; the corpus is frozen - the questions, their wrappers and their reference answers do not move; every gain is measured against a control at memory equal to the byte; and every row below links the file the numbers were read from, raw answers included.</p>
+      <div class="scroller">
+        <table>
+          <thead><tr><th>What came out</th><th>Where the numbers are</th></tr></thead>
+          <tbody>
+            <tr><td>An <b>ideal map</b> built for one question takes <b>26 hard questions of 50</b> at 0.516 of the top rung's memory; the flat D6 at 0.775 takes 7</td><td><a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-filter-map-retention/results.ru.md">E006 results</a></td></tr>
+            <tr><td>The <b>bounds of the scale are computed</b>, not searched for: 1 / (1 + r) over the ladder's measured error ratios beat a search over 197 points</td><td><a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-filter-map-retention/bands.ru.md">E006 the field scale</a></td></tr>
+            <tr><td>The gain comes from <b>the address</b>: at memory equal to the byte, another question's map gives 0.59, the same figure carried elsewhere 0.61, rungs dealt at random 0.62 - against 0.86 for the question's own</td><td><a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E006-filter-map-retention/findings.ru.md">E006 findings</a></td></tr>
+            <tr><td>A map for a query holds <b>0.816 of the answers at 0.523 of the memory</b> where the uniform D4, costing more, holds none</td><td><a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E005-precision-map/results.md">E005 results</a></td></tr>
+            <tr><td>The <b>address of a query is cheap</b>: a paraphrase is read as the same query in 0.917 of the cases against 0.717 for its words, and the first 4-8 layers at base precision are enough</td><td><a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E004-question-address/results.md">E004 results</a></td></tr>
+            <tr><td>The ladder over a calibrated base keeps <b>97.5 / 96.2 / 90.8 / 76.7%</b> of what the full model knows, so the filter is tested from D2</td><td><a href="https://github.com/Vovanda/FoQLens/blob/main/experiments/E003-calibrated-base/results.md">E003 results</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- ==== MECHANISM ==== -->
   <section id="mechanism">
     <div class="wrap">
       <h2>The mechanism</h2>
-      <p>Three controls, each doing one thing: the <b>base precision</b> - what the whole network is read at before any zone is lifted, called <code>floor</code> in the runs and the scripts; <b>focus area</b> - the share of the network a zone covers; <b>focus strength</b> - how far their centers rise above it. The rules below are what the field above runs; the full text is in <a href="docs.html#filter">docs/quantization-filter.md</a>.</p>
+      <p>Three controls, each doing one thing: the <b>base precision</b> - what the whole network is read at before any zone is lifted, called <code>floor</code> in the runs and the scripts; <b>focus area</b> - the share of the network a zone covers; <b>focus strength</b> - how far their centers rise above it. The rules below are what the field above runs; the full text is in <a href="docs.html#regulator">docs/precision-regulator.md</a>.</p>
       <p>The rules need a distance <code>d</code> between blocks and do not say which. In what space the zones of a query live, and what makes two weights close, is an open question of the <a href="docs.html#problem">problem statement</a>; where zones grow from, along what, how far and how fast are strategies still to be tested (<a href="docs.html#strategies">docs/zone-strategies.md</a>).</p>
       <pre class="rules"><b>ladder</b>      ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          the levels this model can be read at; ℓ₀ = ZERO
 <b>base</b>        G = ℓ_γ                     any rung; floor in the scripts
@@ -189,7 +257,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
           <tbody>
             <tr><td class="num">H1</td><td>The mask of a query is separable by topic and concentrated - there is an address to read at all</td><td><span class="tag tag--wait">waits</span></td></tr>
             <tr><td class="num">H2</td><td>Zones of related topics overlap more than zones of unrelated ones</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">H3</td><td>Precision laid out by the query beats uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">H3</td><td>Precision laid out by the query beats uniform quantization at the same memory</td><td><span class="tag tag--done">the ceiling holds</span></td></tr>
             <tr><td class="num">H4</td><td><b>The main one.</b> A draft read mostly at base precision, then refined with sharper zones, ends <em>better</em> than the same model at native precision - where there are iterations: an agent or a model's reasoning</td><td><span class="tag tag--wait">waits</span></td></tr>
             <tr><td class="num">H5</td><td>A horizon. A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment</td><td><span class="tag tag--wait">waits</span></td></tr>
             <tr><td class="num">H6</td><td>An additional one. How good asking for a shorter answer and coarsening the weights each are at holding knowledge in compressed form - and below which step coarsening slides into nonsense</td><td><span class="tag tag--wait">waits</span></td></tr>
@@ -209,15 +277,16 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
         <table>
           <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
           <tbody>
-            <tr><td class="num">1</td><td><b><a href="docs.html#filter">The bench</a></b> - its design and optimization: one stored copy of the weights, a k-quant base with refinements, read at D2 / D4 / D6 / D8, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
+            <tr><td class="num">1</td><td><b><a href="docs.html#regulator">The bench</a></b> - its design and optimization: one stored copy of the weights, a k-quant base with refinements, read at D2 / D4 / D6 / D8, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
             <tr><td class="num">2</td><td><b><a href="docs.html#corpus">A corpus of what the model knows</a></b> - selected by its own answers in three regimes and frozen: 20,640 questions, 18,576 E2B-it knows and 2,064 it does not</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
             <tr><td class="num">3</td><td><b><a href="docs.html#e003-results">Uniform quantization on the corpus</a></b> - the answers at D8, D6, D4 and D2 over a base calibrated with an imatrix: D8 keeps 97.5% of the full model's knowledge, D6 96.2%, D4 90.8%, D2 76.7% (51.4% over the bench's own base, <a href="docs.html#e002-results">E002</a>), so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4 (<a href="docs.html#e001-results">E001</a>)</td><td><span class="tag tag--done">done</span><span class="when">2026-09-15 → 09-19</span></td></tr>
-            <tr><td class="num">4</td><td><b><a href="docs.html#filter">The filter</a></b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
+            <tr><td class="num">4</td><td><b><a href="docs.html#regulator">The filter</a></b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
             <tr><td class="num">5</td><td><b><a href="docs.html#e004-results">The address of a query</a></b> - which signal identifies the query rather than its wording: the hybrid of neuron activity and head energy reads a paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision give the same address as a full pass; the depth of the reading cannot be chosen from the query</td><td><span class="tag tag--done">done</span><span class="when">2026-09-19</span></td></tr>
             <tr><td class="num">6</td><td><b><a href="docs.html#e005-results">The precision map of a query</a></b> - over 103 questions only the top rung answers, a map built for the query holds 0.816 of the right answers at 0.523 bytes of the whole network, where the uniform D4 at 0.558 holds none and the uniform D6 at 0.775 holds 0.039; a common map that knows no question holds 0.544 at the same price. The maps are built by oracles that look at the answer - a ceiling, not a mechanism</td><td><span class="tag tag--done">done</span><span class="when">2026-09-20</span></td></tr>
-            <tr><td class="num">7</td><td><b><a href="docs.html#hypotheses">A map read at inference</a></b> - the same gain without looking at the answer: from the address of a query, or decided as the pass runs. Neither does it yet</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-20</span></td></tr>
-            <tr><td class="num">8</td><td><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">9</td><td><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">7</td><td><b><a href="docs.html#e006-results">Retention of knowledge by the filter's map</a></b> - over 150 questions, 50 hard and 50 ordinary with 50 paraphrases: an ideal map takes 26 hard questions of 50 at 0.516 of the top rung's memory, where the uniform D6 at 0.775 takes 7. The bounds of the scale are computed from the ladder, not searched for - a search over 197 points found nothing better. Three spoilings at memory equal to the byte give 0.59-0.62 against 0.86, so the address is what decides</td><td><span class="tag tag--done">done</span><span class="when">2026-09-21</span></td></tr>
+            <tr><td class="num">8</td><td><b><a href="docs.html#hypotheses">A map read at inference</a></b> - the same gain without looking at the answer: from the address of a query, or decided as the pass runs. Neither does it yet</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-20</span></td></tr>
+            <tr><td class="num">9</td><td><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">10</td><td><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -259,6 +328,16 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
    to the class it removes: from a cached script it might never run, and the page would keep every
    animation switched off. */
 requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove("preload")));
+</script>
+<script>
+/* The age of the project, counted from its first commit - a reader should see over what span the numbers below
+   were taken, without anyone editing a figure by hand. */
+(() => {
+  const started = Date.UTC(2026, 8, 11);
+  const days = Math.floor((Date.now() - started) / 86400000) + 1;
+  const out = document.getElementById("age");
+  if (out) out.textContent = days;
+})();
 </script>
 </body>
 </html>

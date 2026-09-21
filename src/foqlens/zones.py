@@ -1,4 +1,4 @@
-"""The rules that turn a zone's lift into levels (docs/quantization-filter.md, rules 2-6), on any metric.
+"""The rules that turn a zone's lift into levels (docs/precision-regulator.md, rules 2-6), on any metric.
 
 Where zones come from and how far they reach is graph_zones (the block graph of #4, the reach of #19); this module is
 what the rules do with a lift: the ceiling of a zone from the focus strength g (rule 2), the profile of stops from
@@ -25,7 +25,7 @@ from foqlens.quant import LADDER, Level
 PEAK_QUANTILE = 0.95  # a zone's top stands above this share of the smoothed scores (graph_zones.find_graph_zones)
 MAX_ZONES = 16  # the zones of one question at most, strongest first
 # The rungs a zone can lift a block to by default: the read depths D2 ... D8, the ladder of
-# docs/quantization-filter.md (rule 2: g = 1 is the top rung, D8). The kernel reads depths and ZERO only, and a
+# docs/precision-regulator.md (rule 2: g = 1 is the top rung, D8). The kernel reads depths and ZERO only, and a
 # model cut to D8 holds nothing above it; a run that reads its source weights passes a ladder with BF16 on top,
 # and a run on a copy cut shorter passes regulator.kernel_ladder.
 READ_LEVELS = tuple(lv for lv in LADDER if lv.depth)
@@ -41,7 +41,7 @@ def check_focus_area(focus_area: float) -> float:
 
 
 def levels_from_lift(lift: np.ndarray, floor: Level, ceiling: Level, stops: Sequence[tuple[Level, float]]) -> np.ndarray:
-    """Level codes [n_blocks] from the lift over the floor (docs/quantization-filter.md, rules 3 and 6).
+    """Level codes [n_blocks] from the lift over the floor (docs/precision-regulator.md, rules 3 and 6).
 
     `stops` are the profile from the ceiling down, each the outer edge of that level's ring as a
     share of the reach. A block at lift l sits at rho* = reach (1 - l) and takes the level of the
@@ -124,7 +124,7 @@ def even_stops(floor: Level, ceiling: Level, ladder: Sequence[Level] = READ_LEVE
     """The default profile: the rungs from the ceiling down to the floor, evenly spaced over the radius.
 
     Behind an empty floor the lowest rung goes past the edge instead, to HALO_STOP - the ring that
-    softens the step from a zone into nothing (docs/quantization-filter.md).
+    softens the step from a zone into nothing (docs/precision-regulator.md).
     """
     rungs = [lv for lv in reversed(ladder) if floor < lv <= ceiling]
     if not rungs:

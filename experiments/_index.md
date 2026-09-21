@@ -11,7 +11,7 @@ the raw runs are in `runs/E0NN-slug/`. The main preregistration is in [`prereg/`
 The first runs went on four MMLU subjects answered with an option letter, and nobody checked whether the model knew
 the questions: it mostly guessed, and those runs are deleted. What that taught is in [corpus.md](../docs/corpus.md).
 
-Status: `planned` - preregistration in progress; `fixed` - preregistration committed, not run; `done`.
+Status: `planned` - preregistration in progress; `fixed` - preregistration committed, not run; `running` - the runs are going; `done`.
 
 | Id | Experiment | Fixed | Hypotheses | Status |
 | --- | --- | --- | --- | --- |
@@ -20,3 +20,4 @@ Status: `planned` - preregistration in progress; `fixed` - preregistration commi
 | [E003](E003-calibrated-base/_index.md) | The ladder over a calibrated base: our refinements over bartowski's imatrix Q2_K, read from the model file, on tensor cores | 2026-09-18 | - | done |
 | [E004](E004-question-address/_index.md) | The address of a query: which signal identifies the query rather than its wording, and how cheaply it can be read | 2026-09-19 | H4 | done |
 | [E005](E005-precision-map/_index.md) | The precision map of a query: does a layout built for one question hold knowledge more cheaply than a uniform rung | 2026-09-20 | H3, H4 | done |
+| [E006](E006-filter-map-retention/_index.md) | Retention of knowledge by the filter's map: does a map built for a question keep the top rung's answer, and what it costs | - | H3, H3.1, H3.3, H3.4, H1.1, H0 | done |

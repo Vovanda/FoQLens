@@ -11,7 +11,7 @@ even an oracle's map is no better than a uniform rung of the same memory, there 
 
 ## 2. Design
 
-- **Mechanism**: [docs/quantization-filter.md](../../docs/quantization-filter.md), the precision field - the value of
+- **Mechanism**: [docs/precision-regulator.md](../../docs/precision-regulator.md), the precision field - the value of
   the field is the level of a group.
 - **Model and base**: gemma-4-E2B-it over bartowski Q2_K, the rungs D2 (base precision), D4, D6, D8.
 - **Corpus**: the frozen small corpus; 5% of the questions laid out, 20% for calibration.

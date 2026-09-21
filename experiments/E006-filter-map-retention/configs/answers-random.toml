@@ -1,0 +1,5 @@
+# The control of H3.3: the rungs of every map dealt at random over the groups at exactly the same cost
+# (scripts/carry_fields.py --how random --seed 21) - what a layout of this price is worth when nothing chose where
+# its sharpness goes.
+group_oracle = "runs/E006-filter-map-retention/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
+precision = "runs/E006-filter-map-retention/random/precision-fields-bartowski-Q2_K-small-corpus.npz"

@@ -146,7 +146,7 @@ def votes(activity: np.ndarray, near: np.ndarray, length: np.ndarray, spread: fl
 
     `spread` is how wide a voter looks (Volodya 20.09): the share of its own edges a block's vote is gathered over,
     the strongest first. At 0 nobody votes, and at 1 every edge of a block carries one. This is the one source that
-    looks ahead per question (docs/layerwise-regulator.md): a block is scored by what feeds it, not by itself.
+    looks ahead per question (docs/precision-regulator.md): a block is scored by what feeds it, not by itself.
 
     Invariant: a block's votes do not read its own activity - only its neighbours'.
     Invariant: the votes are linear in the activity - scaling it by c scales every vote by c.

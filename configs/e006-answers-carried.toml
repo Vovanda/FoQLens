@@ -1,0 +1,5 @@
+# The answers of E006 to the questions themselves, laid out by the maps of their paraphrases: the same meaning in
+# other words decides the precision, and the question is asked as it stands. H1.1 - the answer stays in the zone of
+# raised quality when the wording moves.
+group_oracle = "runs/E006-oracle-masks-that-hold/paraphrased/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
+precision = "runs/E006-oracle-masks-that-hold/paraphrased/precision-fields-bartowski-Q2_K-small-corpus.npz"

@@ -1,0 +1,2 @@
+group_oracle = "runs/E006-oracle-masks-that-hold/paraphrased/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
+precision = "runs/E006-oracle-masks-that-hold/fifty-paraphrased/precision-fields-bartowski-Q2_K-small-corpus.npz"

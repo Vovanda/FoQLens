@@ -1,0 +1,22 @@
+# The precision fields of E006, on the sample of a hundred: every oracle's field of importance read into a level a
+# group - D8, D6, D4, D2 - at the largest threshold that keeps the model's own reply within the tolerance of every
+# block at D8. The questions, the target and the groups are the oracle by trying's.
+group_oracle = "runs/E006-oracle-masks-that-hold/paraphrased/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
+tolerance = 0.03
+tolerance_share = 0.2
+probes = 15
+batch_tokens = 32768
+corpus = "configs/small-corpus.toml"
+base = "bartowski-Q2_K"
+replies = "runs/E001-uniform-quantization/e2b-it/answers/bf16"
+energies = [
+    "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus-paraphrased.npz",
+    "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-paraphrased.npz",
+    "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/error_energy_d6-file-bartowski-Q2_K-small-corpus-paraphrased.npz",
+]
+
+[fields]
+answer_gradient = "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/answer_gradient-d8-file-bartowski-Q2_K-small-corpus-paraphrased.npz"
+answer_quant_gap = "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/answer_quant_gap_d2d8-d8-file-bartowski-Q2_K-small-corpus-paraphrased.npz"
+error_energy = "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/error_energy-file-bartowski-Q2_K-small-corpus-paraphrased.npz"
+error_energy_d4 = "runs/E006-oracle-masks-that-hold/paraphrased/masks/e2b-it/error_energy_d4-file-bartowski-Q2_K-small-corpus-paraphrased.npz"

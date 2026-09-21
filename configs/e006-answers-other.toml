@@ -1,0 +1,4 @@
+# The control of H3.1: every question answered on another question's map of the same cost (scripts/carry_fields.py).
+# The questions, the corpora and the ids are unchanged - only the precision each of them is given has moved.
+group_oracle = "runs/E006-oracle-masks-that-hold/group-oracle-d2d8-bartowski-Q2_K-small-corpus.npz"
+precision = "runs/E006-oracle-masks-that-hold/carried-other/precision-fields-bartowski-Q2_K-small-corpus.npz"

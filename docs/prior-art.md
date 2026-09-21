@@ -32,6 +32,9 @@ The unit is fixed in advance (the whole model, layer, channel, token, expert) an
 - **HOBBIT** (Tang et al., 2024, arXiv 2411.01433). In an MoE, less critical experts that miss the cache are replaced by low-precision copies per token.
 - **PMPD** (Chen et al., 2024, arXiv 2410.13461). Precision lowered progressively along the decoded sequence; the unit is the phase, not a place in the weights.
 - **DynaExq** (Chu et al., 2025, arXiv 2511.15015). Hot experts, estimated from router traces, get high precision - from aggregate traffic, not per input.
+- **DQT** (Shalby et al., 2025, arXiv 2508.09176). A trained MLP picks each layer's bit width per input in a ResNet; the lower widths are a shift of one stored int8 master. [Reading notes](reading-notes.md#dqt).
+- **DynaQuant** (Bao et al., AAAI 2026, arXiv 2511.07903). A trained selector picks each layer's bit width per image in an image-compression network. [Reading notes](reading-notes.md#dynaquant).
+- **InfoQ** (Akbulut et al., AAAI 2026, arXiv 2508.04753). Static: one layer at a time is lowered while the rest stay at 8 bits, the loss of mutual information downstream is its sensitivity, and an ILP allocates the bits once for every input. [Reading notes](reading-notes.md#infoq).
 
 No work was found that gives different bits to different blocks inside a dense layer per query, by meaning. The search covered the web and arXiv, not exhaustively.
 

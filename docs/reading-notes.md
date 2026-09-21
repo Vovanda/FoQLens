@@ -103,3 +103,169 @@ Shao, Chen, Zhang, Xu, Zhao, Li, Zhang, Gao, Qiao, Luo. *OmniQuant: Omnidirectio
 5. **Precision varies by block** (§5.3) even under a per-token router - support for addressing precision by block, as FoQLens does.
 6. **Mixed depths in a big batch are open** (Appendix F) - exactly the case of the FoQLens bench, where every question in a batch has its own layout.
 7. **Lower precision can score higher** (§3) - a small observation in their setting, in the direction of H4.
+
+## Dynamic precision by the input: DQT, DynaQuant, InfoQ
+
+Three papers read in full on 2026-09-21 from their arXiv HTML versions, with the code where there is any, to answer
+one question: does published work already allocate precision by the input the way FoQLens does. Formulas are quoted
+from the LaTeX of the HTML; a dropped symbol is marked [...].
+
+In short: all three pick a bit width per **layer** of a convolutional network. The dynamic two do it with a small
+network trained jointly with the model; InfoQ does it once per network, for every input alike. None works on a
+language model, none looks inside a layer, none reads the meaning of a query.
+
+### DQT
+
+Shalby, Pittorino, Palermo, Trojaniello, Roveri. *DQT: Dynamic Quantization Training via Dequantization-Free Nested
+Integer Arithmetic.* arXiv 2508.09176v1, 7 Aug 2025. The abstract page names no venue. No code is released.
+
+**What it does.**
+
+- Abstract: "Dynamic, instance-based mixed-precision quantization promises a superior accuracy-efficiency trade-off by
+  allocating higher precision only when needed. However, a critical bottleneck remains: existing methods require a
+  costly dequantize-to-float and requantize-to-integer cycle to change precision".
+- §1: "In the DQT architecture, a lightweight controller adaptively selects per-layer bit-widths for each input. At
+  inference, the model loads high-precision weights once and uses bit-shifting to instantiate the desired precision
+  on-the-fly."
+- §4, the nesting: "The quantization scale for any other bit-width, $b<n$, is defined by a power-of-two relationship:
+  $\Delta_{b}=\Delta_{n}\cdot 2^{n-b}$" (Eq. 3), so that
+  $Q^{b}_{\text{DQT}}(x)=\text{clip}\left(\left\lfloor\frac{Q^{n}(x)}{2^{n-b}}\right\rceil,0,2^{b}-1\right)=Q^{n}(x)\gg(n-b)+\epsilon$ (Eq. 4).
+- §5, the controller: "It outputs logits for each of these layers, producing a probability distribution
+  $\mathbf{p}_{i}=\text{softmax}(\mathcal{C}(\mathbf{x})_{i})$ over $K$ candidate bit-widths" and "At inference,
+  bit-widths $b_{i}$ are chosen via a non-differentiable argmax". Appendix D: "The controller architecture is a
+  lightweight two-layer MLP. The first layer has a hidden dimension of 64."
+- §5, the loss: $J=J_{\mathrm{task}}+\alpha J_{\mathrm{consistency}}+\beta J_{\mathrm{cost}}$ (Eq. 11), where
+  $J_{\mathrm{consistency}}=\sum_{b\in K^{\prime}}J^{(b)}_{\mathrm{task}}$ "is the task loss when the entire network is
+  statically set to bit-width $b$" and $J_{\mathrm{cost}}=\frac{1}{N}\sum_{i=1}^{N}\sum_{k=1}^{K}p_{i,k}\cdot d_{k}$.
+- Appendix F: with $\alpha=0$ "training is unstable for the 2-bit configuration ... as the controller favors
+  higher-precision bit-widths during training."
+
+**Results.**
+
+- §6: "On ImageNet with ResNet-50, our 4-bit dynamic DQT model achieves 77.00% top-1 accuracy, outperforming the SotA
+  static method LSQ (76.70%) and the leading dynamic method DQNet (76.94%) at a comparable BitOPs budget."
+- Appendix D: "The cost regularization $\beta$ is set to 0.0 for the main results to prioritize accuracy." The
+  controller of the headline numbers is not pushed to save anything.
+- §6, memory: "The model memory footprint is determined by the master bit-width $n$, as the full $n$-bit weights must
+  be stored. We use $n=8$". A lower bit width saves operations, not memory.
+- §7: "Extending this framework to other domains, including large language models (LLMs) and object detection, is
+  another important direction."
+
+### DynaQuant
+
+Bao et al. (Shenzhen University, Harbin Institute of Technology). *DynaQuant: Dynamic Mixed-Precision Quantization for Learned Image
+Compression.* arXiv 2511.07903, AAAI 2026. Code: [baoyu2020/DynaQuant](https://github.com/baoyu2020/DynaQuant), read
+2026-09-21.
+
+**What it does.**
+
+- Abstract: "we introduce a data-driven, dynamic bit-width selector that learns to assign an optimal bit precision to
+  each layer, dynamically reconfiguring the network's precision profile based on the input data."
+- "Content-Aware Bit-Width Selector": "The selector takes the input activation tensor
+  $A\in\mathbb{R}^{C\times H\times W}$" - adaptive pooling, a two-layer MLP,
+  $\bm{p}=\text{Softmax}(\text{MLP}(\bm{h}_{\text{pool}}))$ (Eq. 7), Gumbel-Softmax in training and "we
+  deterministically select the bit-width with the highest probability" at inference.
+- "Joint Optimization Framework": $\mathcal{L}=R+\lambda D+\gamma\mathcal{L}_{\text{bits}}$ (Eq. 8) with
+  $\mathcal{L}_{\text{bits}}=\frac{1}{L}\sum_{l=1}^{L}\sum_{k=1}^{M}(\bm{p}_{l})_{k}\cdot b_{k}$ (Eq. 9) - the same cost
+  term as DQT's.
+- The rest of the paper is a gradient for rounding, $g(x)=\frac{1}{2}\cdot\frac{\tanh(\beta(x - \lfloor x \rfloor) - 0.5)}{\tanh(0.5)}+0.5$
+  (Eq. 6), for learnable scales and zero points - training, not selection.
+
+**Results.**
+
+- Table 1, Cheng2020, the average over three datasets: fixed 8 bits, BD-Rate loss 1.60% at 4.00x; dynamic at 6.19
+  bits on average, 12.18% at 5.17x. The dynamic model is compared there with a fixed one at 8 bits, not at its own
+  bits.
+- Table 2, the comparison at equal bits: fixed "+DPA[INT6]" at 6 bits, PSNR 35.664, R-D loss 1.74; dynamic
+  "+DPA-DQ" at 6.02 bits, PSNR 36.231, R-D loss 1.68. At the same bits the dynamic selector gains 0.57 dB.
+- "Bit-width Selection Results": "Edge layers (e.g., ga-0, ga-6, gs-1) exhibit higher precision than intermediate
+  layers" and an image with more texture "assigns a 10-bit width to its gs-1 layer, exceeding the 8-bit allocation in
+  other images." Most of the allocation follows the layer; the input moves it in places.
+
+**The code.** `DynamicQConv.forward` (`src/dynaquant/quantization/dynamic.py`) quantizes the weight three times, to
+`nbits - d_bit`, `nbits` and `nbits + d_bit`, each with its own rounding from the full-precision weight, runs all three
+convolutions and sums them under the one-hot mask. The three levels are not nested, and a lower level saves nothing in
+this code. The repository's `docs/IMPLEMENTATION_STATUS.md`: "Paper RD reproduction: pending" for every model, and "The
+speedups reported by the paper cannot be inferred from PyTorch simulated quantization alone".
+
+### InfoQ
+
+Akbulut, Shalby, Pittorino, Roveri. *InfoQ: Mixed-Precision Quantization via Global Information Flow.* arXiv
+2508.04753, AAAI 2026 (40(24), 19598-19606). The same group as DQT. Static: one allocation per network.
+
+**What it does.**
+
+- Abstract: "InfoQ assesses layer importance by performing a single forward pass to measure the change in mutual
+  information in the remaining part of the network, thus creating a global sensitivity score."
+- §4: "Our central hypothesis is that the impact of quantizing a layer is not a local phenomenon but is best measured
+  by its effect on the information propagated through subsequent layers."
+- §4, the measure against a model at 8 bits everywhere:
+  $\Delta\text{SMI}_{L,Y}^{(i,b,j)}=|\text{SMI}(L_{j,\text{8bit}};Y)-\text{SMI}(L_{j,b};Y)|$ (Eq. 3), and the same for
+  $\text{SMI}(X_{\mathcal{E}};L_{j})$, where the input is first embedded by DINOv2. The score (Eq. 4):
+  $S=\frac{1}{b}\frac{\langle\Delta\text{SMI}\rangle_{\mathcal{O}^{j>i}}}{\langle\text{SMI}\rangle^{\text{8bit}}_{\mathcal{O}^{j>i}}}$.
+- Algorithm 1: "Perturb model by quantizing only layer $\ell$ to bit $b$" with all others at 8 bits; §5: "the process
+  requires $L\times|\boldsymbol{B}|$ forward passes over a small, labeled calibration dataset".
+- §4, the allocation: $\boldsymbol{s}^{*}=\arg\min\sum_{\ell}\left(S_{w}(\ell,b_{w}^{(\ell)})+\alpha S_{a}(\ell,b_{a}^{(\ell)})\right)$
+  subject to $\text{Cost}(\boldsymbol{s})\leq C$ (Eq. 5), "solved efficiently using an off-the-shelf solver".
+- §4, where to measure: "the change in task-relevant information, $\Delta\text{SMI}_{L,Y}$, measured at layers toward
+  the end of the network ... exhibits the strongest correlation with accuracy degradation. Conversely, the change in
+  input-relevant information, $\Delta\text{SMI}_{X,L}$, is most predictive when measured at intermediate layers."
+
+**Results.** Table 3, ResNet50 at a 12.2x weight compression after QAT: 77.03% top-1, a drop of 0.34 from full
+precision, against 0.60 for LIMPQ and 1.50 for HAWQv2. §5: "on ResNet18 at a 4.5MB constraint, InfoQ yields a
+configuration that is 25% more accurate than its closest competitor" before any retraining.
+
+### Where FoQLens differs
+
+| | DQT | DynaQuant | InfoQ | FoQLens |
+| --- | --- | --- | --- | --- |
+| Networks | ResNet, MobileNetV2 | image-compression autoencoders | ResNet, MobileNetV2 | Gemma 4 E2B-it, generating answers |
+| Changes with the input | yes | yes | no | yes |
+| Unit of the decision | layer | layer | layer | block of 64 rows inside a module; the oracles' maps today by group - a layer's attention or its MLP |
+| Who decides | a trained MLP | a trained MLP | a one-time sweep over a calibration set | a regulator without training, from what the model itself computes ([precision-regulator.md](precision-regulator.md)) |
+| What it decides by | the input as a whole | pooled activations of the first module | nothing per input | the address of the query from the first layers ([E004](../experiments/E004-question-address/results.md)) and the state entering each layer |
+| Is the model retrained | yes, with the controller | yes | yes, after the search | no |
+| Storage | one int8 master, lower widths by a shift | in the code, three separate roundings | one width per layer | one stack: a base and refinements, read to a depth ([refocustensors.md](refocustensors.md)) |
+| Memory at a lower width | the same int8 | the same | smaller | the aim: what the layout reads; today the copy lies in memory whole |
+
+- **The unit.** All three decide per layer. FoQLens reads every block of 64 output rows at its own depth, and the
+  kernel multiplies a mixed layout in one launch ([kernels.md](kernels.md)). The maps measured so far are by group -
+  70 on E2B - which is close to per layer. Inside a layer the bench has the means and no measured gain yet.
+- **The selector.** DQT and DynaQuant train a controller together with the network, with a cost term on the expected
+  bits. FoQLens trains nothing: the cheap regulator is the open question, and the address the regulator would read is
+  measured on its own - a paraphrase is recognized in 0.917 of the cases against 0.717 for the words alone (E004).
+- **Knowing the input against a common allocation.** InfoQ is the common map of FoQLens computed well: one layout for
+  every input. On E005 the common map, averaged over the oracles' fields, holds 0.544 of the answers at 0.513 of the
+  memory, and a query's own map holds 0.816 at 0.523 - on 103 questions only the top rung answers, with maps built
+  knowing the answer. The gap is what knowing the query is worth, and a static allocation cannot take it by
+  construction. Neither dynamic paper measures this gap: DynaQuant compares its selector with uniform bits, DQT with
+  static uniform and static mixed methods at a comparable BitOPs budget, and neither with its own best static layout
+  at the same bits.
+- **The measure.** InfoQ's sensitivity - one layer lowered while the rest stay high, the change read downstream - is
+  the design of the FoQLens drop oracle and of the reference ([bench-math.md](bench-math.md#8-the-oracles-an-oracles-field-and-how-it-is-read-into-a-map)),
+  with mutual information in place of the likelihood of the model's own answer, and one calibration set in place of
+  one question. The allocation under a budget is the same problem as bench-math section 10: a multiple-choice
+  knapsack; InfoQ solves it with an ILP solver, FoQLens by a price of memory.
+- **Nesting.** DQT's power-of-two relation between the steps of the widths is the relation between FoQLens rungs:
+  refinement $k$ has the step $\Delta_b / 4^k$. DQT gets the lower widths from the top one by a shift and stores the top
+  one; FoQLens stores the base and refines upwards, so a coarse read needs no deeper plane. This belongs in the
+  comparison of the format with its analogues, beside Matryoshka Quantization, Any-Precision LLM and MoBiQuant.
+
+### What FoQLens takes
+
+1. **The consistency term** of DQT, $\sum_{b\in K^{\prime}}J^{(b)}_{\mathrm{task}}$ over uniform configurations: if
+   H5 trains a network for zones, every rung has to stay usable, and without the term their 2-bit path did not train
+   (Appendix F).
+2. **The expected-bits cost** $\sum_k p_{i,k} d_k$ with Gumbel-Softmax, as the form of a learned regulator, should the
+   untrained ones give an effect (plan, step 4).
+3. **Observers inside the network.** InfoQ finds that the change of task information is read best at the end and the
+   change of input information in the middle. The FoQLens oracles read only the likelihood of the answer at the
+   output; a change read at inner layers is a candidate source for a regulator that decides as the pass runs.
+4. **An exact solver for the allocation.** An ILP over groups - 70 of them, four rungs - is solved in milliseconds,
+   and gives the exact optimum where the price of memory leaves a gap of at most one block
+   (bench-math, section 10).
+5. **A control each experiment keeps.** A dynamic allocation is judged against the best static one at the same
+   memory; E005 does this with the common map, and the two dynamic papers do not.
+6. **Nothing for the kernel.** DQT's gain is avoiding a floating-point tensor between two widths. The FoQLens kernel
+   builds each weight in registers from the copy's bytes and never writes an unpacked weight
+   ([kernels.md](kernels.md)).

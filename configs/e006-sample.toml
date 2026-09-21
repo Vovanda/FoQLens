@@ -1,0 +1,13 @@
+# The sample of E006: the questions only D8 answers, and the ones D4 and D6 answer too.
+# The verdicts come from E003, where the judge read every rung over the whole corpus.
+answers = "runs/E003-calibrated-base/e2b-it/unjudged"
+judged = "runs/E003-calibrated-base/e2b-it/judge"
+view = "verdicts"
+corpora = ["triviaqa", "nq_open", "squad_v2", "arc_challenge_closed", "arc_easy_closed"]
+top = "d8"
+lower = ["d4", "d6"]
+hard = 50
+ordinary = 50
+seed = 21
+out = "runs/E006-oracle-masks-that-hold/sample"
+paraphrased = 25

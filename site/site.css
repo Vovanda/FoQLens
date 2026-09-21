@@ -77,6 +77,15 @@
   }
 }
 
+/* ==== LANGUAGE ==== */
+/* The page carries both languages and shows one. English is what a reader without the attribute
+   gets - a crawler with no scripts, the first paint before the switch runs - and the Russian text
+   is in the document either way. Why it is done here and not by a script: the site is static, so
+   text a script would insert would not exist for anyone who reads the page without running it
+   (panel.js, LANGUAGE). */
+:root:not([data-lang="ru"]) [lang="ru"] { display: none; }
+:root[data-lang="ru"] [lang="en"] { display: none; }
+
 /* ==== BASE ==== */
 * { box-sizing: border-box; }
 /* No clipping here, however tempting: overflow on <html> makes it the scroll container and the
@@ -93,7 +102,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 { font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 0.6em; }
+/* The browser breaks the lines, and left alone it leaves a word hanging at the end of one - the
+   footer read "Code," and then a new line. Headings are balanced across their lines, prose is
+   broken so that no last line is left with a single short word. */
+h1, h2, h3 { font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 0.6em;
+             text-wrap: balance; }
+p, li, td, th, figcaption { text-wrap: pretty; }
 h2 { font-size: clamp(1.4rem, 1rem + 1.4vw, 2rem); }
 h3 { font-size: 1.05rem; }
 p { margin: 0 0 1em; max-width: var(--measure); }
@@ -110,8 +124,10 @@ code, .num { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0
         border-inline: 1px solid var(--line); }
 /* Separators run at the width of the content, never across the whole sheet: a full-width rule
    reaches under the panel standing beside it and cuts the page in two. */
-section { padding-block: 0 clamp(3rem, 7vw, 5.5rem); }
-section > .wrap { padding-top: clamp(3rem, 7vw, 5.5rem); }
+/* The air between sections belongs inside the column, not around it: the rule down each side is
+   drawn on .wrap, so padding on the section itself would fall outside it and break the line. */
+section { padding-block: 0; }
+section > .wrap { padding-block: clamp(1.6rem, 3.4vw, 2.7rem); }
 section + section > .wrap { border-top: 1px solid var(--line); }
 
 /* ==== TOP BAR ==== */
@@ -195,12 +211,14 @@ section + section > .wrap { border-top: 1px solid var(--line); }
     background:color-mix(in srgb,var(--ground-deep) 82%,transparent);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line)}
   .side-head #side-swap{margin-left:auto}
-  #burger,#side-theme,#side-swap,#side-close{flex:none;width:34px;height:34px;font-size:16px;line-height:1;
+  #burger,#side-lang,#side-theme,#side-swap,#side-close{flex:none;width:34px;height:34px;font-size:16px;line-height:1;
     background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:8px;
     cursor:pointer;font-family:inherit}
-  #burger:hover,#side-theme:hover,#side-swap:hover,#side-close:hover{background:var(--panel-2)}
-  #side-theme,#side-swap,#side-close{width:28px;height:28px;font-size:13px}
-  .side-head #side-theme{margin-left:auto}
+  #burger:hover,#side-lang:hover,#side-theme:hover,#side-swap:hover,#side-close:hover{background:var(--panel-2)}
+  #side-lang,#side-theme,#side-swap,#side-close{width:28px;height:28px;font-size:13px}
+  /* two letters where the others carry one glyph: the box keeps its height and takes the width it needs */
+  #side-lang{width:auto;min-width:28px;padding:0 6px;font-size:11px;font-weight:600;letter-spacing:.03em}
+  .side-head #side-lang{margin-left:auto}
   body.wide #side-close{display:none}
   .side-title{flex:1;min-width:0;font-weight:600;font-size:15px;white-space:nowrap;
     overflow:hidden;text-overflow:ellipsis}
@@ -283,13 +301,40 @@ section + section > .wrap { border-top: 1px solid var(--line); }
    be shuffled about, and one side always ends short of the other. */
 .cols > p { margin-top: 0; }
 @media (max-width: 640px) { .cols { columns: 1; } }
+/* A table inside a cell: the numbers that prove the line stand right under it, so it is set
+   smaller and without a ground of its own - it is part of the sentence, not a second table. */
+.mini { width: auto; margin: 0.6rem 0 0.8rem; border-collapse: collapse; font-size: 0.88em; }
+.mini th, .mini td { padding: 0.25rem 0.9rem 0.25rem 0; text-align: left; white-space: nowrap; }
+.mini th { font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--line); }
+.mini td.num, .mini th:not(:first-child) { text-align: right; }
+
+/* ==== TABS ==== */
+/* Two panels, one shown. The switch is a radio button, so it works without scripts and takes the
+   keyboard for free; the panel is chosen by which button is checked. */
+.tabs { margin: 1.2rem 0 1.6rem; }
+.tabs > input { position: absolute; opacity: 0; pointer-events: none; }
+.tabs > label { display: inline-block; padding: 0.35rem 0.9rem; margin-right: 0.4rem; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px; font-size: 0.92rem; color: var(--muted); }
+.tabs > label:hover { color: var(--text); }
+.tabs > input:checked + label { color: var(--text); border-color: var(--focus); }
+.tabs > input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 3px; }
+.tab-panel { display: none; padding-top: 1rem; }
+.tabs:has(#variant-b:checked) .panel-b, .tabs:has(#variant-a:checked) .panel-a { display: block; }
+
 .rules { font-family: "IBM Plex Mono", monospace; font-size: 0.86rem; line-height: 1.75; margin: 0; padding: 1.2rem 1.3rem; overflow-x: auto; background: var(--ground-deep); border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); }
 .rules b { color: var(--text); font-weight: 500; }
 
 table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-th, td { text-align: left; padding: 0.7rem 0.8rem 0.7rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th, td { text-align: left; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th:first-child, td:first-child { padding-left: 0; }
+/* A rule between the columns, so a long line on the left and its proof on the right do not run
+   into one another; a small table inside a cell keeps its own spacing. */
+th + th, td + td { border-left: 1px solid var(--line); }
+.mini th + th, .mini td + td { border-left: 0; }
 th { font-weight: 500; color: var(--muted); font-size: 0.85rem; }
-.scroller { overflow-x: auto; }
+/* A table is a block of its own: without the air under it the next paragraph reads as its caption. */
+.scroller { overflow-x: auto; margin-bottom: 1.4rem; }
+.scroller + p, .scroller + ul { margin-top: 0; }
 .tag { display: inline-block; font-size: 0.78rem; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
 .tag--open { color: var(--rung-6); }
 .tag--yes { color: var(--rung-8); }

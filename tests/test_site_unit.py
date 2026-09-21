@@ -116,12 +116,25 @@ def test_the_documentation_lists_its_documents_without_scripts():
 
 
 def test_the_panel_state_is_shared_between_pages():
-    """One person, one preference: the side of the panel, whether it is open and which theme is on
-    are the reader's, not the page's. Anything else remembered here would be per-page state hiding
-    in a shared file."""
+    """One person, one preference: the side of the panel, whether it is open, which theme is on and
+    which language is read are the reader's, not the page's. Anything else remembered here would be
+    per-page state hiding in a shared file."""
     panel = (ROOT / "site" / "panel.js").read_text(encoding="utf-8")
     keys = set(re.findall(r'localStorage\.(?:get|set)Item\((\w+)', panel))
-    assert keys <= {"SIDE_KEY", "OPEN_KEY", "THEME_KEY"}, f"the panel remembers something else: {keys}"
+    assert keys <= {"SIDE_KEY", "OPEN_KEY", "THEME_KEY", "LANG_KEY"}, f"the panel remembers something else: {keys}"
     assert 'const SIDE_KEY = "foqlens.side"' in panel
     assert 'const OPEN_KEY = "foqlens.nav"' in panel
     assert 'const THEME_KEY = "foqlens.theme"' in panel
+    assert 'const LANG_KEY = "foqlens.lang"' in panel
+
+
+def test_no_wording_is_written_by_the_scripts():
+    """Both languages stand in the markup, so that a reader without scripts - a crawler, a model
+    fetching the page - gets the text. A script that writes a sentence would put that sentence
+    outside the markup and outside the language switch with it."""
+    for name in ("field.js", "panel.js", "sections.js"):
+        script = (ROOT / "site" / name).read_text(encoding="utf-8")
+        written = re.findall(r'(?:textContent|innerHTML)\s*=\s*("(?:[^"\\]|\\.)*"|`[^`]*`)', script)
+        for value in written:
+            words = re.findall(r"[A-Za-z]{3,}", re.sub(r"\$\{[^}]*\}", "", value))
+            assert not words, f"{name} writes wording into the page: {value}"

@@ -8,14 +8,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=45">
-<link rel="stylesheet" href="site/docs.css?v=45">
+<link rel="stylesheet" href="site/site.css?v=56">
+<link rel="stylesheet" href="site/docs.css?v=56">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
-try { document.documentElement.setAttribute("data-theme", localStorage.getItem("foqlens.theme") || "auto"); }
-catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
+/* A link can carry the language: ?lang=ru opens the page in Russian whatever this browser
+   remembers, so a page can be shared the way it was read. */
+var asked = new URLSearchParams(location.search).get("lang");
+var lang = asked === "ru" || asked === "en" ? asked : null;
+try {
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("foqlens.theme") || "auto");
+  document.documentElement.setAttribute("data-lang", lang || localStorage.getItem("foqlens.lang") || "en");
+} catch (e) {
+  document.documentElement.setAttribute("data-theme", "auto");
+  document.documentElement.setAttribute("data-lang", lang || "en");
+}
 </script>
 </head>
 <body>
@@ -24,6 +33,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
   <aside id="sidebar" aria-label="Documents">
     <div class="side-head">
       <span class="side-title">Documents</span>
+      <button id="side-lang" type="button" title="Читать по-русски" aria-label="Читать по-русски">RU</button>
       <button id="side-theme" type="button" title="Theme: follows the device" aria-label="Theme">◐</button>
       <button id="side-swap" type="button" title="Move the panel to the other side" aria-label="Move the panel to the other side">⇄</button>
       <button id="side-close" type="button" title="Close" aria-label="Close the panel">✕</button>
@@ -80,7 +90,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
   <div id="below">
     <div class="bar">
       <div class="wrap bar-inner">
-        <button id="burger" type="button" aria-expanded="false" aria-controls="sidebar" title="Documents">≡</button>
+        <button id="burger" type="button" aria-expanded="false" aria-controls="sidebar" title="Sections of this page">≡</button>
   <a class="bar__mark" href="./">
     <!-- the magnifier of Lucide's "search" (ISC), at its own proportions: r 8 at (11,11), the handle
          leaving the ring at 16.65 and ending at 21 -->
@@ -90,8 +100,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     FoQLens
   </a>
         <span class="spacer"></span>
-  <a href="./">About</a>
-  <a href="docs.html" aria-current="page">Docs</a>
+  <a href="./"><span lang="en">About</span><span lang="ru">О проекте</span></a>
+  <a href="docs.html" aria-current="page"><span lang="en">Docs</span><span lang="ru">Документы</span></a>
   <a href="https://github.com/Vovanda/FoQLens" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
@@ -99,7 +109,7 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     <main class="doc wrap" id="doc">
       <h1>The documents of the bench</h1>
       <p>FoQLens is a language model whose weights are read at a precision set by the meaning of the query; its mechanism is FoQZones, focusable quantization zones. This is the documentation of the bench that tests it - the mechanism, the goals, the plan and every preregistration.</p>
-      <p>Pick a document on the left. Each is a markdown file in the repository, and every link below goes to its source.</p>
+      <p>Every document below is a markdown file in the repository, and each link goes to its source.</p>
       <h3>The idea</h3>
       <ul>
         <li><a href="#regulator">The precision regulator</a> <span class="src">· <a href="https://github.com/Vovanda/FoQLens/blob/main/docs/precision-regulator.md">docs/precision-regulator.md</a></span></li>
@@ -145,75 +155,98 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     </main>
 
     <footer>
-      <div class="wrap">
-        <p>FoQLens is the research of <a href="https://sawking.tech/cv">Vladimir Savkin</a> - a systems architect, not a professional scientist, which is why the bench commits every prediction before the run. Code, preregistrations and raw numbers: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
-        <p>Made at <a href="https://sawking.tech">sawking.tech</a>.</p>
-      </div>
-    </footer>
+  <div class="wrap">
+    <p lang="en">FoQLens is the research of <a href="https://sawking.tech/cv">Vladimir Savkin</a>, systems architect. Code, preregistrations and raw numbers: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
+    <p lang="ru">FoQLens - исследование <a href="https://sawking.tech/cv">Владимира Савкина</a>, системного архитектора. Код, предрегистрации и сырые числа: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
+    <p><span lang="en">Made at</span><span lang="ru">Сделано в</span> <a href="https://sawking.tech">sawking.tech</a>.</p>
+  </div>
+</footer>
   </div>
 </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
-<script src="site/panel.js?v=45"></script>
+<script src="site/panel.js?v=56"></script>
 <script>
 /* ==== THE SHELF ==== */
 // Every document the site shows, by the path it has in the repository - the page renders the same
 // files the bench is written from, so a doc is never a second copy that drifts.
 const REPO = "https://github.com/Vovanda/FoQLens/blob/main/";
+/* A document is one entry: its anchor, the path without the extension, its title in both languages
+   and whether a Russian twin exists. The file to fetch is the path plus the suffix of the language
+   being read, so nothing below asks which language is on - the language note is in site/panel.js. */
 const SHELF = [
-  { group: "The idea", docs: [
-    ["regulator", "docs/precision-regulator.md", "The precision regulator"],
-    ["glossary", "docs/glossary.md", "The glossary"],
-    ["math", "docs/bench-math.md", "The mathematics of the bench"],
-    ["strategies", "docs/zone-strategies.md", "Zone strategies"],
-    ["refocustensors", "docs/refocustensors.md", "The .refocustensors model format"],
-    ["kernels", "docs/kernels.md", "The kernel that reads the copy"],
-    ["performance", "docs/performance.md", "Performance of the bench"],
-    ["problem", "docs/problem-statement.md", "Problem statement"],
-    ["goals", "docs/goals.md", "Goals"],
-    ["plan", "docs/plan.md", "Plan"],
-    ["hypotheses", "docs/hypotheses.md", "Hypotheses"],
+  { group: ["The idea", "Идея"], docs: [
+    ["regulator", "docs/precision-regulator", ["The precision regulator", "Регулятор точности"], true],
+    ["glossary", "docs/glossary", ["The glossary", "Глоссарий"], true],
+    ["math", "docs/bench-math", ["The mathematics of the bench", "Математика стенда"], true],
+    ["strategies", "docs/zone-strategies", ["Zone strategies", "Стратегии зон"], true],
+    ["refocustensors", "docs/refocustensors", ["The .refocustensors model format", "Формат модели .refocustensors"], true],
+    ["kernels", "docs/kernels", ["The kernel that reads the copy", "Ядро чтения копии"], true],
+    ["performance", "docs/performance", ["Performance of the bench", "Производительность стенда"], true],
+    ["problem", "docs/problem-statement", ["Problem statement", "Постановка задачи"], true],
+    ["goals", "docs/goals", ["Goals", "Цели"], true],
+    ["plan", "docs/plan", ["Plan", "План"], true],
+    ["hypotheses", "docs/hypotheses", ["Hypotheses", "Гипотезы"], true],
   ]},
-  { group: "What the bench measures on", docs: [
-    ["corpus", "docs/corpus.md", "The corpus"],
-    ["invariants", "docs/invariants.md", "Invariants"],
-    ["data", "docs/data-sources.md", "Data sources"],
-    ["runs", "docs/data.md", "The data of the runs"],
+  { group: ["What the bench measures on", "На чём меряет стенд"], docs: [
+    ["corpus", "docs/corpus", ["The corpus", "Корпус"], true],
+    ["invariants", "docs/invariants", ["Invariants", "Инварианты"], true],
+    ["data", "docs/data-sources", ["Data sources", "Источники данных"], true],
+    ["runs", "docs/data", ["The data of the runs", "Данные прогонов"], true],
   ]},
-  { group: "Around it", docs: [
-    ["metaphor", "docs/visual-metaphor.md", "Visual metaphor"],
-    ["prior-art", "docs/prior-art.md", "Prior art"],
-    ["reading", "docs/reading-notes.md", "Reading notes"],
-    ["station", "docs/station.md", "The station"],
+  { group: ["Around it", "Вокруг"], docs: [
+    ["metaphor", "docs/visual-metaphor", ["Visual metaphor", "Визуальная метафора"], true],
+    ["prior-art", "docs/prior-art", ["Prior art", "Что уже построено"], true],
+    ["reading", "docs/reading-notes", ["Reading notes", "Заметки по чтению"], false],
+    ["station", "docs/station", ["The station", "Станция"], false],
   ]},
-  { group: "Preregistration", docs: [
-    ["prereg", "prereg/PREREGISTRATION.md", "Preregistration (English)"],
-    ["prereg-ru", "prereg/PREREGISTRATION.ru.md", "Пререгистрация (original)"],
+  { group: ["Preregistration", "Предрегистрация"], docs: [
+    ["prereg", "prereg/PREREGISTRATION", ["Preregistration (English)", "Предрегистрация (перевод)"], false],
+    ["prereg-ru", "prereg/PREREGISTRATION.ru", ["Пререгистрация (original)", "Предрегистрация (оригинал)"], false],
   ]},
-  { group: "Experiments", docs: [
-    ["e001-results", "experiments/E001-uniform-quantization/results.md", "E001 - uniform quantization on the corpus"],
-    ["e002-results", "experiments/E002-base-precision-d2/results.md", "E002 - uniform quantization with a working base precision D2"],
-    ["e003-results", "experiments/E003-calibrated-base/results.md", "E003 - the ladder over a calibrated base"],
-    ["e004-results", "experiments/E004-question-address/results.md", "E004 - the address of a query"],
-    ["e005-results", "experiments/E005-precision-map/results.md", "E005 - the precision map of a query"],
-    ["e006-results", "experiments/E006-filter-map-retention/results.md", "E006 - retention of knowledge by the filter's map"],
+  { group: ["Experiments", "Эксперименты"], docs: [
+    ["e001-results", "experiments/E001-uniform-quantization/results", ["E001 - uniform quantization on the corpus", "E001 - ровное квантование на корпусе"], true],
+    ["e002-results", "experiments/E002-base-precision-d2/results", ["E002 - uniform quantization with a working base precision D2", "E002 - ровное квантование при рабочей базе D2"], true],
+    ["e003-results", "experiments/E003-calibrated-base/results", ["E003 - the ladder over a calibrated base", "E003 - лестница над калиброванной базой"], true],
+    ["e004-results", "experiments/E004-question-address/results", ["E004 - the address of a query", "E004 - адрес запроса"], true],
+    ["e005-results", "experiments/E005-precision-map/results", ["E005 - the precision map of a query", "E005 - карта точности запроса"], true],
+    ["e006-results", "experiments/E006-filter-map-retention/results", ["E006 - retention of knowledge by the filter's map", "E006 - удержание знаний картой фильтра"], true],
   ]},
 ];
-const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, path, title]) => [id, { id, path, title }])));
+
+// The language being read, and the file a document is carried in for it.
+const langIndex = () => (document.documentElement.getAttribute("data-lang") === "ru" ? 1 : 0);
+const fileOf = (entry) => entry.base + (langIndex() === 1 && entry.ru ? ".ru.md" : ".md");
+
+const BY_ID = new Map(SHELF.flatMap((g) => g.docs.map(([id, base, title, ru]) => [id, { id, base, title, ru }])));
 const DEFAULT_DOC = "filter";
 // Anchors that are already out in the world, from before the documents were renamed.
 const ALIASES = { lens: "regulator", filter: "regulator", layerwise: "regulator", "filter-math": "math" };
+
+/* ==== STRINGS ====
+   What the page says around a document. Both languages go into the node and the stylesheet shows
+   one, so no wording is decided in JavaScript. */
+const STR = {
+  loading: '<span lang="en">Loading…</span><span lang="ru">Загружается…</span>',
+  failed: '<span lang="en">This document did not load. Read it in the repository:</span>'
+        + '<span lang="ru">Документ не загрузился. Его можно прочитать в репозитории:</span>',
+  source: '<span lang="en">source on GitHub</span><span lang="ru">исходник на GitHub</span>',
+};
 
 /* ==== MENU ==== */
 const menu = document.getElementById("menu");
 const doc = document.getElementById("doc");
 
-menu.innerHTML = SHELF.map((group) => `
-  <h2>${group.group}</h2>
-  <ul>${group.docs.map(([id, , title]) => `<li><a href="#${id}" data-id="${id}">${title}</a></li>`).join("")}</ul>
+function renderMenu() {
+  const i = langIndex();
+  menu.innerHTML = SHELF.map((group) => `
+  <h2>${group.group[i]}</h2>
+  <ul>${group.docs.map(([id, , title]) => `<li><a href="#${id}" data-id="${id}">${title[i]}</a></li>`).join("")}</ul>
 `).join("");
+}
+renderMenu();
 
 function markCurrent(id) {
   for (const link of menu.querySelectorAll("a")) {
@@ -236,7 +269,7 @@ function stripFrontMatter(text) {
 }
 
 // Links between documents stay inside the site when the target is a document the shelf holds.
-const byPath = new Map([...BY_ID.values()].map((d) => [d.path, d]));
+const byPath = new Map([...BY_ID.values()].flatMap((d) => [[d.base + ".md", d], [d.base + ".ru.md", d]]));
 function resolveLink(href, fromPath) {
   if (/^[a-z]+:|^#/.test(href)) return null;
   const base = fromPath.split("/").slice(0, -1);
@@ -293,17 +326,18 @@ function anchorSections(body) {
 
 async function show(id) {
   const entry = BY_ID.get(ALIASES[id] ?? id) ?? BY_ID.get(DEFAULT_DOC);
+  const path = fileOf(entry);
   markCurrent(entry.id);
-  doc.innerHTML = '<p class="state">Loading…</p>';
+  doc.innerHTML = `<p class="state">${STR.loading}</p>`;
   let text;
   try {
     // Revalidated every time: a document changes without the page changing, and a cached copy would
     // show the reader a page that is no longer in the repository.
-    const response = await fetch(entry.path, { cache: "no-cache" });
+    const response = await fetch(path, { cache: "no-cache" });
     if (!response.ok) throw new Error(String(response.status));
     text = await response.text();
   } catch {
-    doc.innerHTML = `<p class="state">This document did not load. Read it in the repository: <a href="${REPO}${entry.path}">${entry.path}</a></p>`;
+    doc.innerHTML = `<p class="state">${STR.failed} <a href="${REPO}${path}">${path}</a></p>`;
     return;
   }
   const body = document.createElement("div");
@@ -311,7 +345,7 @@ async function show(id) {
   body.innerHTML = renderMath(marked.parse(markdown), formulas);
   anchorSections(body);
   for (const link of body.querySelectorAll("a[href]:not([href^='#'])")) {
-    const resolved = resolveLink(link.getAttribute("href"), entry.path);
+    const resolved = resolveLink(link.getAttribute("href"), path);
     if (resolved) link.setAttribute("href", resolved);
   }
   for (const table of body.querySelectorAll("table")) {
@@ -320,13 +354,14 @@ async function show(id) {
     table.replaceWith(scroll);
     scroll.append(table);
   }
-  doc.innerHTML = `<p class="meta"><span>${entry.path}</span> <a href="${REPO}${entry.path}">source on GitHub</a></p>`;
+  doc.innerHTML = `<p class="meta"><span>${path}</span> <a href="${REPO}${path}">${STR.source}</a></p>`;
   doc.append(...body.childNodes);
-  document.title = `${entry.title} - FoQLens`;
+  document.title = `${entry.title[langIndex()]} - FoQLens`;
   doc.focus?.();
 }
 
 addEventListener("hashchange", () => show(location.hash.slice(1)));
+addEventListener("langchange", () => { renderMenu(); show(location.hash.slice(1) || DEFAULT_DOC); });
 show(location.hash.slice(1) || DEFAULT_DOC);
 </script>
 <script>

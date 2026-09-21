@@ -25,8 +25,17 @@ RUSSIAN = ".ru.md"
 
 
 def shelf() -> set[str]:
-    """Every path the page lists, as written in its shelf."""
-    return set(re.findall(r'"((?:docs|prereg|experiments)/[^"]+\.md)"', PAGE.read_text(encoding="utf-8")))
+    """Every file the page can serve: the shelf holds a path without its extension, and the entry
+    says whether a Russian twin exists beside the English one."""
+    page = PAGE.read_text(encoding="utf-8")
+    files = set()
+    for base, has_russian in re.findall(
+        r'"((?:docs|prereg|experiments)/[^"]+)",\s*\[[^\]]*\],\s*(true|false)', page
+    ):
+        files.add(f"{base}.md")
+        if has_russian == "true":
+            files.add(f"{base}{RUSSIAN}")
+    return files
 
 
 def test_the_page_serves_files_rather_than_jekyll_pages():

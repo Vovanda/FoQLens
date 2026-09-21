@@ -117,6 +117,40 @@ class RunFiles:
             where r.level = ? and a.level != r.level group by a.level, a.corpus order by a.level, a.corpus""",
                           [reference])
 
+    def same_reply_by_question(self, reference: str) -> list[dict]:
+        """As same_reply, question by question: [level, corpus, id, same] with `same` 0 or 1.
+
+        A search over a grid of field scales asks how many questions a point holds and which ones, so the hard half
+        of a sample can be counted apart from the ordinary half; the shares of `same_reply` cannot be split back.
+        """
+        return self.query(rf"""
+            select a.level, a.corpus, a.id,
+                   ({self.SAME_FORM.format('a.reply')} = {self.SAME_FORM.format('r.reply')})::int same
+            from answers a join answers r using (corpus, id)
+            where r.level = ? and a.level != r.level order by a.level, a.corpus, a.id""", [reference])
+
+    def questions_by_verdicts(self, holds: list[str], fails: list[str], corpora: list[str],
+                              view: str = "verdicts") -> list[dict]:
+        """The questions of `corpora` that every level in `holds` answered and every level in `fails` did not.
+
+        The two sides of a sample come from one slice: the hard questions are what only the top rung holds, the
+        ordinary ones what the lower rungs hold too. A question the judge never read on one of the named levels is
+        left out - its picture is incomplete and neither side may claim it. `view` is where the verdicts of this run
+        lie: `verdicts` where a judge wrote its own files, `answers` where it wrote them into the answers.
+        """
+        if view not in ("verdicts", "answers"):
+            raise ValueError(f"no view {view!r}: verdicts or answers")
+        levels = holds + fails
+        return self.query(f"""
+            select corpus, id from {view}
+            where corpus = any(?) and level = any(?)
+            group by corpus, id
+            having count(distinct level) = ?
+               and count(*) filter (where level = any(?) and accepted) = ?
+               and count(*) filter (where level = any(?) and accepted) = 0
+            order by corpus, id""",
+                          [corpora, levels, len(levels), holds, len(holds), fails])
+
     @staticmethod
     def replies_of_two_runs(left: Path, right: Path) -> list[dict]:
         """Per level, the questions two runs of the same layouts both answered and how many of the replies differ.

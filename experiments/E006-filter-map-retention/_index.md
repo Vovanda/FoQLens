@@ -13,15 +13,14 @@ params:
 
 # E006 - Retention of knowledge by the filter's map
 
-Does the map of the quantization filter keep the model's knowledge: does a layout built for one question
-answer as the whole network does. The saving follows from how a map is built - everything the question does
-not need is read coarsely. Apart on the hard questions, where a uniform rung has already lost the knowledge,
-and on the ordinary ones, where a map has to be cheap.
+I wanted to know whether the map of the quantization filter keeps the model's knowledge: does a layout built
+for one question answer as the whole network does. The saving follows from how a map is built - everything
+the question does not need is read coarsely. I look at the hard questions, where a uniform rung has already
+lost the knowledge, apart from the ordinary ones, where a map has to be cheap.
 
-The documents of the experiment are kept in Russian, which is where the numbers are read and reviewed:
-[results](results.ru.md), [what came out](findings.ru.md), [the fields](fields.ru.md),
-[the field scale and the search for its optima](bands.ru.md), [what this says about the hypotheses](hypotheses.ru.md),
-[the journal](journal.ru.md). English versions follow once the numbers over all 150 are in.
+The documents of the experiment: [results](results.ru.md), [what came out](findings.ru.md),
+[the fields](fields.ru.md), [the field scale and the search for its optima](bands.ru.md),
+[what this says about the hypotheses](hypotheses.ru.md), [the journal](journal.ru.md).
 
 ## What this experiment changes against E005
 
@@ -34,14 +33,14 @@ The sample is different too: 50 hard and 50 ordinary questions with 50 paraphras
 The ordinary half is there to catch a layout that lifts everything: on the hard questions it looks excellent
 and costs as much as the top rung.
 
-## Where the project stands on 21.09.2026
+## Where I stand on 21.09.2026
 
-- **The ceiling is there.** A map built for a question takes three times as many hard questions as the flat
-  D6 and costs a third less.
-- **A map belongs to its question.** Three different ways of spoiling it at the same memory to the byte give
-  0.59-0.62 against 0.86.
-- **The field splits.** The network's own part separates from the question's part exactly and adds back
-  without loss.
-- **The scale needs no search** - the one derived from the ladder beats what a search over 197 points found.
-- **What is missing** is the mechanism. Every field but the error energy needs the right answer, and the
-  error energy is the dearest of them.
+The ceiling is there: a map built for a question takes three times as many hard questions as the flat D6 and
+costs a third less. It belongs to that question - three different ways of spoiling it at the same memory to
+the byte give 0.59-0.62 against 0.86 for its own map. The field splits into the network's own part and the
+question's part, and they add back without loss. The scale needs no search: the one derived from the ladder
+beats what a search over 197 points found.
+
+Next comes the mechanism. Today every field but the error energy is computed from the right answer, and the
+error energy is the dearest of them: 0.679 of the memory against 0.516 for an overlay. The next step is to
+choose the field to go on with and to look for a rule that computes it ahead of the answer.

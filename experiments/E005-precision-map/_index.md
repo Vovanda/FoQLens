@@ -14,8 +14,7 @@ params:
 # E005 - The precision map of a query
 
 Does a layout of precision built for one question hold knowledge more cheaply than a uniform rung of the same memory.
-The oracles build such a map by looking at the answer - they cannot run at inference and are here as a ceiling: if even
-they have no map, there is no mechanism to build. Preregistration: [PREREG](PREREG.md), results: [results](results.md).
+The oracles build such a map by looking at the answer: if even they have no map, there is no mechanism to build. Preregistration: [PREREG](PREREG.md), results: [results](results.md).
 
 ## Where the project stands, 2026-09-20
 

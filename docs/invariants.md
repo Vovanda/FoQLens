@@ -4,12 +4,9 @@ title: Invariants
 
 # Invariants
 
-What holds no matter how the question is asked. This page is the output of the exploration step
-([goals.md](goals.md)) and the input to the hypotheses that follow it: a hypothesis worth
-preregistering is a claim about something that already looks invariant, and a model of the mechanism
-([precision-regulator.md](precision-regulator.md)) is worth keeping only as far as the invariants agree with it.
-
-Started 2026-09-13.
+What holds no matter how the question is asked. A hypothesis worth preregistering is a claim about something
+that already looks invariant, and a model of the mechanism ([precision-regulator.md](precision-regulator.md))
+holds only as far as the invariants agree with it.
 
 ## What counts as an invariant of the phenomenon
 

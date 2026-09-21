@@ -1,10 +1,10 @@
 ---
-title: The mathematics of the quantization filter
+title: The mathematics of the bench
 ---
 
-# The mathematics of the quantization filter
+# The mathematics of the bench
 
-The whole mechanism in one derivation, from a block of weights to the zones of a query: what the object is, what precision costs, where the address comes from, how far two blocks are from each other, how zones are built, why they approximate the best use of the memory, and what a batch pays. Each step rests on the one before it. The rules this page derives are in [precision-regulator.md](precision-regulator.md); the strategies of source, metric and reach are in [zone-strategies.md](zone-strategies.md); the format the levels are read from is in [refocustensors.md](refocustensors.md). Sections marked *new* are derived here first; the rest is gathered from those pages, the code of the bench and the measurements of 2026-09-19. *Proved* means derived from the definitions or the code; *measured* is a number from a run; *hypothesis* is not checked.
+The whole mechanism in one derivation, from a block of weights to the zones of a query: what the object is, what precision costs, where the address comes from, how far two blocks are from each other, how zones are built, why they approximate the best use of the memory, and what a batch pays. Each step rests on the one before it. The rules this page derives are in [precision-regulator.md](precision-regulator.md); the strategies of source, metric and reach are in [zone-strategies.md](zone-strategies.md); the format the levels are read from is in [refocustensors.md](refocustensors.md). The marks on the sections: *new* is derived here first; *proved* is derived from the definitions or the code; *measured* is a number from a run; *hypothesis* is not checked.
 
 Order: [0 the task](#0-the-task-before-any-mechanism) → [1 the object](#1-the-object) → [2 the error of a level](#2-the-error-of-a-level) → [3 what a coarse block costs](#3-what-a-coarse-block-costs-the-output-new) → [4 the address](#4-the-address-signal-background-excess) → [5 the working address](#5-the-working-address-from-the-first-layers-to-the-rest) → [6 the depth of the reading](#6-the-depth-of-the-reading-closed) → [7 distance](#7-the-distance-between-blocks) → [8 the shape of a map](#9-the-shape-of-a-map) → [10 the best allocation](#10-the-best-allocation-knapsack-and-lagrangian-new) → [11 the batch](#11-the-batch) → [12 known and open](#12-what-is-known-and-what-is-being-worked-out).
 
@@ -54,7 +54,7 @@ $$\Delta \mathcal{L} \approx g^\top \delta y + \tfrac12\, \delta y^\top H\, \del
 
 Quantization noise has zero mean and does not depend on $x$, so the first term vanishes in expectation:
 
-$$\mathbb{E}[\Delta \mathcal{L}] \approx \tfrac12 \operatorname{tr}(H\, \Sigma_\delta), \qquad \Sigma_\delta = \mathbb{E}[\delta y\, \delta y^\top].$$
+$$\mathbb{E}[\Delta \mathcal{L}] \approx \tfrac12 \mathrm{tr}(H\, \Sigma_\delta), \qquad \Sigma_\delta = \mathbb{E}[\delta y\, \delta y^\top].$$
 
 With independent weight errors of variance $\sigma^2$, every row of the block gets $\mathbb{E}[\delta y_r^2] = \sigma^2 \lVert x \rVert^2$. Replacing the Hessian by the Fisher information ($H \approx \mathbb{E}[g g^\top]$, as in OBS and HAWQ) gives the block's share:
 
@@ -218,13 +218,13 @@ $$s^{\text{energy}}_g = \sum_{b \in g} \mathbb{E}_t \big\lVert (W_\top - W_\bot)
 
 The D4 variant measures what is left over an already raised network.
 
-**The pooled field is not a fifth oracle but a summary.** It measures nothing of its own: the four fields are brought to unit mass a question and averaged so that their scales become comparable.
+**The pooled field is a summary of the four.** It measures nothing of its own: the four fields are brought to unit mass a question and averaged so that their scales become comparable.
 
 $$s^{\text{pooled}}_g = \frac{1}{|O|} \sum_{o \in O} \frac{\max(s^o_g, 0)}{\sum_{g'} \max(s^o_{g'}, 0)}.$$
 
 An oracle that holds no field for a question does not vote on it.
 
-**The reference.** Not an estimate but a measurement rung by rung: with every other group at the top, the group $g$ is
+**The reference.** A measurement rung by rung: with every other group at the top, the group $g$ is
 put at each rung $r$, and the coarsest one that holds the answer is taken:
 
 $$\ell^{\text{alone}}_g = \min\{\, r : \mathrm{NLL}(A \mid \Lambda_\top \text{ with } g \text{ at } r) \le \mathrm{NLL}(A \mid \Lambda_\top) + \varepsilon \,\}.$$
@@ -321,12 +321,18 @@ Sharing a batch's cost between its questions (the Shapley value) and a budget be
 
 The numbers of the runs are in the results of the experiments: the address in
 [E004](../experiments/E004-question-address/results.md), the query's map in
-[E005](../experiments/E005-precision-map/results.md).
+[E005](../experiments/E005-precision-map/results.md), the oracles' fields and the scale they are read by in
+[E006](../experiments/E006-filter-map-retention/results.md).
 
 **Enters the formulas:**
 
 - the rungs' coefficients are measured rather than taken from the noise model, which would give 1/16 a rung
   ([section 3](#3-what-a-coarse-block-costs-the-output-new));
+- an oracle's field is brought to demand - the cost of a group over its question's threshold. The map is recovered
+  from that quantity at 0.95-0.99, and from a rank or a corpus quantile it is not (E006);
+- the bounds of the scale follow from the measured ladder: a rung holds while the demand is below `1 / (1 + r)` for
+  the share r of the error that rung leaves. On the bench that is 0.500 / 0.667 / 0.950, and a sweep of 197 points
+  found nothing better (E006);
 - the working address is the forward half of the sensitivity; the backward half is carried by the projection of the
   first layers ([section 5](#5-the-working-address-from-the-first-layers-to-the-rest));
 - the level at a given price of memory is a set of thresholds on the sensitivity
@@ -335,12 +341,18 @@ The numbers of the runs are in the results of the experiments: the address in
 
 **Being worked out, no exact description yet:**
 
-- the outline of a map by rules: what an area grows along, how far, with what profile ([section 9](#9-the-shape-of-a-map));
 - a cheap predictor of the map: how much of it the address of the first layers returns, and how much a decision taken
-  as the pass runs;
+  as the pass runs. Of the fields checked, only the error energy is computable without the answer, and it costs more:
+  0.679 of the memory against 0.516 for an overlay at the same answers (E006);
+- what sets the address: words, topic and place in the network are ruled out - a paraphrase keeps the map at
+  0.51-0.97, two questions of one corpus agree at 0.09-0.13, and shifting the figure through the depth does not help
+  (E006);
+- the outline of a map by rules: the measured maps are 15-30 peaks falling to the base within two or three layers, and
+  rules of growth by radius and profile do not fit them ([section 9](#9-the-shape-of-a-map));
 - the statement over a budget instead of a tolerance: today the threshold is searched by the answer rather than by a
   given memory;
-- the bounds of the scale of the rungs and the tolerance - set, not derived;
+- whether the D4 rung is needed at all: in 21 groups of 70 it leaves more error than the base, up to 19.8 times, and
+  all of them are MLP (E006);
 - the smoothness of the sensitivity over the block graph - the condition under which connected areas are near the
   optimum.
 

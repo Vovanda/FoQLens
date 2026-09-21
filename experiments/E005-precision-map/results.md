@@ -89,8 +89,7 @@ rungs dearer and should give coarser and cheaper maps. That is a run of its own.
 ## What it means for the mechanism
 
 The target is proved and measured: a layout built for the question exists, costs about half the memory of the whole
-network, and holds knowledge where a uniform rung loses it. The oracles build it by looking at the answer and are
-impossible at inference - this is a ceiling, not a mechanism.
+network, and holds knowledge where a uniform rung loses it. The oracles build it by looking at the answer.
 
 There is no cheap predictor of such a map yet. A bridge from the address is not distinguishable from a constant map by
 the answers. The layer-wise regulator (variant B) predicts no map in advance - it decides the layout as the pass runs;

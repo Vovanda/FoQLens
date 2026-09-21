@@ -4,7 +4,7 @@ title: Hypotheses
 
 # Hypotheses
 
-The claims FoQLens tests, each with the experiments that test it. The text of every hypothesis and its predictions lives in the preregistration ([PREREGISTRATION.ru.md](../prereg/PREREGISTRATION.ru.md), English: [PREREGISTRATION.md](../prereg/PREREGISTRATION.md)) and in the addenda of the experiments; this page only gives them ids (assigned 2026-09-12) and tracks their status.
+The claims FoQLens tests, each with its own experiments. The text of every hypothesis and its predictions lives in the preregistration ([PREREGISTRATION.ru.md](../prereg/PREREGISTRATION.ru.md), English: [PREREGISTRATION.md](../prereg/PREREGISTRATION.md)) and in the addenda of the experiments; this page only gives them ids (assigned 2026-09-12) and tracks their status.
 
 Each hypothesis is tested at its step of the roadmap ([goals.md](goals.md)); the steps done so far built the bench, the corpus and the baseline of uniform quantization. A step in the table below is numbered as in the preregistration; the roadmap is in [goals.md](goals.md).
 

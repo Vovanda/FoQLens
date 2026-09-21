@@ -4,8 +4,6 @@ title: Glossary
 
 # Glossary
 
-One notion, one word - in the documents, in the code and in conversation. Here is the definition of each and its properties; if a word is used otherwise, the error is in that text, not here.
-
 ## Block
 
 A piece of a module's weights: 64 output rows. On E2B-it there are 14,708 of them. A level of precision is set on a block.
@@ -39,7 +37,7 @@ same field scale.
 In full, **the map of the quantization filter**: how the filter lays precision over the network. In speech and
 in the documents "map" is enough.
 
-A field cut into levels: one rung a group. One field, one map. A map sets the rungs by group; a layout is the
+A field read into levels by a scale: one rung a group. A field gives as many maps as the scales applied to it. A map sets the rungs by group; a layout is the
 same map spread over the blocks, which is what the model reads on a pass.
 
 **How it is built.** The cost of a group at a rung is its importance times the share of the error that rung leaves. A group reads the coarsest rung whose cost fits the question's threshold. One threshold a question, searched by the answer.
@@ -59,7 +57,7 @@ A way of measuring importance while knowing the right answer. Impossible at infe
 3. **the error energy** - a forward pass: how much a block's output changes when it is read at the base instead of the top; a variant counts from D4 rather than from the base;
 4. **the reference** - a measurement rather than an estimate from a formula: every group is put at every rung with the others at the top, and the coarsest one that holds the answer is taken.
 
-**Properties.** One oracle gives one field and one map; the sweep, the gradient and the energy give two fields each. The pooled field is a fifth map, put together from the four after they are brought to one scale; it measures nothing of its own.
+**Properties.** One oracle gives one field, and as many maps as the scales applied to it; the sweep, the gradient and the energy give two fields each. The pooled field is a fifth field, put together from the four after they are brought to one scale; it measures nothing of its own.
 
 ## Antinode
 

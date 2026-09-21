@@ -140,8 +140,6 @@ piece of work of its own.
 
 ## 9. What this experiment does not show
 
-- The oracles see the right answer. This is a ceiling: it says the layout exists and what it costs, and says
-  nothing about how to find it at inference.
 - Of the fields tested, only the error energy is computed ahead, without an answer - and it is the dearest:
   0.679 against 0.516 for an overlay.
 - Whether a map can be predicted from the address was not tested here; in E005 the bridge from the address was

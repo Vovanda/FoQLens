@@ -4,8 +4,7 @@ title: The precision regulator
 
 # The precision regulator
 
-What decides the depth every weight is read at for a given query. This page is the single source of truth about it:
-the experiments cite it by commit, and other documents link here instead of retelling it.
+What decides the depth every weight is read at for a given query.
 
 | What | It is |
 | --- | --- |
@@ -28,7 +27,7 @@ build**: it needs no map predicted in advance and carries one rule for any netwo
 each.
 
 **The distance $d$ is an input of the mechanism.** The rules below need a distance between blocks and do not say
-which. In what space a query's areas are set, and what makes two weights close, is the first open hole of the
+which. In what space a query's areas are set, and what makes two weights close, is the first open question of the
 [problem statement](problem-statement.md). Where zones grow from, along what, how far and how fast are strategies to
 be tested: [zone-strategies.md](zone-strategies.md).
 
@@ -89,7 +88,7 @@ Both are continuous: at the border of an overlap the second zone adds 0, so the 
 | --- | --- | --- |
 | $\ell_0 < \ell_1 < \dots < \ell_m$ | the ladder: the levels a block can be read at, set by the model and its storage; $\ell_0$ = ZERO, nothing read | 0, 2, 4, 6, 8 bits (ZERO, D2, D4, D6, D8) |
 | $w_b$ | block $b$: its number of weights | |
-| $d(a, b)$ | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), hole 1) | not chosen ([zone-strategies.md](zone-strategies.md)) |
+| $d(a, b)$ | the distance between blocks; the space it is taken in is open ([problem statement](problem-statement.md), open question 1) | not chosen ([zone-strategies.md](zone-strategies.md)) |
 | $D$ | the width of the network in $d$ | |
 | $c_i$ | the centers of the query's expert zones ([where they come from](#where-the-zones-come-from)) | |
 
@@ -117,7 +116,7 @@ Both are continuous: at the border of an overlap the second zone adds 0, so the 
 7. Memory:
    $$\text{bits} = \frac{\sum_b w_b \cdot \text{bits}(\text{level of } b)}{\sum_b w_b}.$$
 
-The derivations behind these rules - where they come from, what they guarantee and how close they are to the best use of the memory - are in [the mathematics of the filter](bench-math.md).
+The derivations behind these rules - where they come from, what they guarantee and how close they are to the best use of the memory - are in [the mathematics of the bench](bench-math.md).
 
 **Worked examples** on the E2B ladder:
 
@@ -191,7 +190,7 @@ score is read into a level by the rule of [section 9](bench-math.md#9-the-best-a
 with the reduced sensitivity $\hat s_c = s_c \Delta_c^2 / w_c$ ($\Delta_c$ the block's quantization step, known offline,
 $w_c$ its weights),
 
-$$\text{level}(c) = \gamma + \#\{\, j \ge 1 : \hat s_c \ge \lambda\, 16^{\,j} \,\},$$
+$$\text{level}(c) = \gamma + \bigl|\{\, j \ge 1 : \hat s_c \ge \lambda\, 16^{\,j} \,\}\bigr|,$$
 
 capped at the ceiling $\kappa = \gamma + \lfloor g (m - \gamma) \rfloor$. With a share $f$ in place of a price, the
 threshold is the quantile: the top $f$ of the layer by $\hat s$ rise, the next band of width `rim` is held at

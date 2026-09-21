@@ -4,7 +4,7 @@ title: Zone strategies
 
 # Zone strategies
 
-The level rules in [precision-regulator.md](precision-regulator.md) say how a zone becomes levels. They do not say what a zone covers, where it grows from, along what, how far or how fast. Each of these is a replaceable strategy. The derivations behind them are in [the mathematics of the filter](bench-math.md); the code is `foqlens.strategies`, every part picked by name.
+The level rules in [precision-regulator.md](precision-regulator.md) say how a zone becomes levels. They do not say what a zone covers, where it grows from, along what, how far or how fast. Each of these is a replaceable strategy. The derivations behind them are in [the mathematics of the bench](bench-math.md); the code is `foqlens.strategies`, every part picked by name.
 
 ## What a zone covers: the query's subgraph
 

@@ -109,7 +109,7 @@ class Space:
 
 @dataclass(frozen=True)
 class Knobs:
-    """The controls of docs/quantization-filter.md: base precision, focus_area f, focus_strength g, combining."""
+    """The controls of docs/precision-regulator.md: base precision, focus_area f, focus_strength g, combining."""
 
     floor: Level
     focus_area: float

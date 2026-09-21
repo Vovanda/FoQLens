@@ -59,7 +59,7 @@ class Level(IntEnum):
         return LADDER.index(self)
 
 
-# Every level the bench can read a block at, coarse first - the ladder of docs/quantization-filter.md and of site/field.js.
+# Every level the bench can read a block at, coarse first - the ladder of docs/precision-regulator.md and of site/field.js.
 LADDER = (Level.ZERO, Level.D2, Level.D4, Level.D6, Level.D8, Level.BF16)
 
 

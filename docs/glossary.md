@@ -4,8 +4,6 @@ title: Glossary
 
 # Glossary
 
-One notion, one word - in the documents, in the code and in conversation. Here is the definition of each and its properties; if a word is used otherwise, the error is in that text, not here.
-
 ## Block
 
 A piece of a module's weights: 64 output rows. On E2B-it there are 14,708 of them. A level of precision is set on a block.
@@ -24,17 +22,27 @@ The depth a weight is read to: D2, D4, D6, D8 - two, four, six, eight bits a wei
 
 What the model actually reads on this pass: the level of every block. A uniform layout has every block at one rung; a layout by a map takes its levels from the map.
 
-## Field of importance
+## An oracle's field
 
-A number a group: how much the query needs it. What an oracle returns.
+A number a group: how much this question needs it. What an oracle gives - measured, not counted out of
+something else. Every oracle has its own measure - nats, the energy of the error, Taylor's score - so the
+fields of two oracles are comparable only once carried onto demand: a group's cost over its question's
+threshold.
 
-**What an oracle is obliged to output.** A field in 0 ... 1, normalized on its own scale. Nats, Taylor scores and error energy are the oracle's own business and never leave it: otherwise two oracles are incomparable and an intersection of their maps means nothing. One shared rule reads a field into rungs, not one rule each.
+A field made out of oracles' fields is a derived oracle field; it behaves the same and is read by the
+same field scale.
 
 ## Map
 
-A field cut into levels: one rung a group. One field, one map.
+In full, **the map of the quantization filter**: how the filter lays precision over the network. In speech and
+in the documents "map" is enough.
+
+A field read into levels by a scale: one rung a group. A field gives as many maps as the scales applied to it. A map sets the rungs by group; a layout is the
+same map spread over the blocks, which is what the model reads on a pass.
 
 **How it is built.** The cost of a group at a rung is its importance times the share of the error that rung leaves. A group reads the coarsest rung whose cost fits the question's threshold. One threshold a question, searched by the answer.
+
+**Ideal and predicted.** An ideal map is one an oracle built having seen the right answer: it says which layout exists for this query and what it costs. At inference there is no such map, and everything measured on it is a ceiling. The map a regulator builds from the address of the query, without looking at the answer, is not called ideal, even where it holds the same answer.
 
 **Properties.** A map comes out in one of three shapes, and two of them are not zones: the whole network at base precision (the query needs no precision), the whole network at the top rung (no threshold was found), and a map proper. Averages over them are taken apart.
 
@@ -47,9 +55,9 @@ A way of measuring importance while knowing the right answer. Impossible at infe
 1. **the sweep by trying** - every group in turn is raised from the base to the top (the lift) or dropped from the top to the base (the drop), and the likelihood of the model's own answer is measured;
 2. **the gradient of the answer** - a backward pass: importance is the gradient of the loss by a block's output times the strength of the signal through it; a variant takes the real difference of the weights between the base and the top instead of modelled noise (the quantization gap);
 3. **the error energy** - a forward pass: how much a block's output changes when it is read at the base instead of the top; a variant counts from D4 rather than from the base;
-4. **the reference** - not an estimate but a measurement: every group is put at every rung with the others at the top, and the coarsest one that holds the answer is taken.
+4. **the reference** - a measurement rather than an estimate from a formula: every group is put at every rung with the others at the top, and the coarsest one that holds the answer is taken.
 
-**Properties.** One oracle gives one field and one map; the sweep, the gradient and the energy give two fields each. The pooled field is a fifth map, put together from the four after they are brought to one scale; it measures nothing of its own.
+**Properties.** One oracle gives one field, and as many maps as the scales applied to it; the sweep, the gradient and the energy give two fields each. The pooled field is a fifth field, put together from the four after they are brought to one scale; it measures nothing of its own.
 
 ## Antinode
 
@@ -116,6 +124,36 @@ What a layout costs: bits a weight, or a share of what the top rung spends. The 
 ## The question's threshold
 
 The number a field is cut into levels by: a group reads the coarsest rung whose cost fits it. One a question.
+
+## A derived oracle field
+
+A field put together out of oracles' fields: an overlay of several oracles (`product`,
+`mean`, `least`), the network's part taken out, a field divided by the weights of its groups. An oracle gives its own field;
+a derived one is counted from one or several of them.
+
+**Properties.** A derived oracle field stands in the same quantity as a measured one, so the same field scale
+reads it, the same controls hold it, and it may be the aim itself. It takes on a measured field's
+properties whatever it was made of: `product`, made of four fields three of which are the network's,
+behaves as a field of the question - the network's part explains 0.16 of it against 0.09-0.18 for `lift`
+and `drop`, and its question part is 0.058 against their 0.057-0.065.
+
+Two of them compound: an overlay puts out what only one oracle holds, a subtraction takes away what all
+of them hold, and what is left after both is what this question needs.
+
+## The field scale
+
+The three bounds a field is read into rungs at: below the first a group stays at the base precision, between the
+first and the second it takes D4, between the second and the third D6, above the third the top. There is one
+bound fewer than there are rungs in the ladder.
+
+**Properties.** Every oracle has its own, found by the answers: of the points where the answer holds, the
+cheapest. The uniform field scale is one scale for every field: it stands between their optima and so sits
+well on any field worth having. It is not obliged to cover every field there is - a field it would have to be
+weakened for is a weak field, and weakening it for that field's sake buys nothing. Of scales that serve equally
+well the strictest is taken, the one lifting the fewest sections: the middle is sought from the strict side, or
+it slides into the loose region where half the network is lifted. An overlay and it are of one nature - both are an average over the fields -
+so overlays are measured on it: every field is read the same way, and the difference in the answers belongs to
+the overlay and not to the scale.
 
 ## Tolerance
 

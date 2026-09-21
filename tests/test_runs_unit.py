@@ -32,6 +32,28 @@ def test_agreement_counts_what_the_exact_match_and_the_judge_say_against_the_rea
     assert got == {"c": {"read": 3, "exact_match": pytest.approx(2 / 3), "judge": 1.0}}
 
 
+def test_the_two_sides_of_a_sample_come_from_the_verdicts_of_the_named_levels(tmp_path):
+    def graded(corpus: str, i: str, level: str, ok: bool) -> dict:
+        return {"corpus": corpus, "id": i, "level": level, "judge_kind": "Correct" if ok else "Wrong",
+                "judge_accepted": ok, "exact_match": 0.0, "judge_with_reference": float("nan")}
+
+    rows = [graded("c", "hard", "d8", True), graded("c", "hard", "d6", False), graded("c", "hard", "d4", False),
+            graded("c", "easy", "d8", True), graded("c", "easy", "d6", True), graded("c", "easy", "d4", True),
+            graded("c", "half", "d8", True), graded("c", "half", "d6", True), graded("c", "half", "d4", False),
+            graded("c", "part", "d8", True), graded("c", "part", "d4", False),  # d6 never read: neither side
+            graded("other", "hard", "d8", True), graded("other", "hard", "d6", False),
+            graded("other", "hard", "d4", False)]  # a corpus outside the sample
+    for level in ("d4", "d6", "d8"):
+        write_jsonl(tmp_path / f"answers/{level}/all.jsonl", [r for r in rows if r["level"] == level])
+    run = RunFiles(tmp_path / "answers")
+    assert run.questions_by_verdicts(["d8"], ["d4", "d6"], ["c"], view="answers") == [{"corpus": "c", "id": "hard"}]
+    assert run.questions_by_verdicts(["d4", "d6", "d8"], [], ["c"], view="answers") == [{"corpus": "c", "id": "easy"}]
+    assert run.questions_by_verdicts(["d8"], ["d4", "d6"], ["c", "other"], view="answers") == [
+        {"corpus": "c", "id": "hard"}, {"corpus": "other", "id": "hard"}]
+    with pytest.raises(ValueError):
+        run.questions_by_verdicts(["d8"], [], ["c"], view="frozen")
+
+
 def test_two_runs_are_compared_reply_against_reply_on_the_layouts_both_hold(tmp_path):
     def reply(i: str, text: str, level: str = "d2") -> dict:
         return {"corpus": "c", "id": i, "level": level, "prompt": "short-0", "reply": text}
@@ -126,3 +148,12 @@ def test_grades_by_regime_split_the_level_by_where_the_answer_comes_from(tmp_pat
     assert {key: (row["n"], row["excellent"]) for key, row in got.items()} == {
         ("d2", WEIGHTS): (2, 0.5), ("d2", PASSAGE): (4, 0.5), ("d2", TWO_PASSAGES): (1, 1.0)}
     assert {name for name, corpus in CORPORA.items() if corpus.passage} == {"squad_v2", "hotpotqa"}
+
+
+def test_a_question_by_question_slice_says_which_questions_a_level_held(tmp_path):
+    write_jsonl(tmp_path / "answers/top/c.jsonl",
+                [{"corpus": "c", "id": i, "level": "top", "reply": r} for i, r in (("1", "a"), ("2", "b"))])
+    write_jsonl(tmp_path / "answers/map/c.jsonl",
+                [{"corpus": "c", "id": i, "level": "map", "reply": r} for i, r in (("1", "A"), ("2", "c"))])
+    got = RunFiles(tmp_path / "answers").same_reply_by_question("top")
+    assert [(r["id"], r["same"]) for r in got] == [("1", 1), ("2", 0)]  # the capital is the same answer

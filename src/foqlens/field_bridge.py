@@ -187,7 +187,7 @@ def neighbours_of_blocks(block_layer: np.ndarray, block_kind: np.ndarray) -> np.
 
 @dataclass
 class Zones:
-    """The mechanism itself (docs/quantization-filter.md, docs/zone-strategies.md): a zone is the hill around a peak of
+    """The mechanism itself (docs/precision-regulator.md, docs/zone-strategies.md): a zone is the hill around a peak of
     the question's address - the connected region where the address stays above a share of that peak - and never a
     ball of some radius. A ball along the depth takes every group near the centre, engaged or not, and at any useful
     size covers the network (Volodya 20.09: "шар накроет всю сеть, пользы 0"). Inside the hill the lift is the address
@@ -292,7 +292,7 @@ def lift_of(levels: np.ndarray) -> np.ndarray:
 
 
 def to_levels(lift: np.ndarray, shift: float = 0.0, stops: tuple[float, ...] = EVEN_STOPS) -> np.ndarray:
-    """The mapper of the filter (docs/quantization-filter.md, rule 6) over a field of lifts: with the stops of the
+    """The mapper of the filter (docs/precision-regulator.md, rule 6) over a field of lifts: with the stops of the
     profile (the outer edge of every rung's ring, as a share of the radius, the top rung first), a group reads the
     finest rung whose stop is at or past its place in the zone, rho = 1 - lift, and the base where no stop reaches it -
     a lift under what the coarsest rung above the base is worth: [questions, groups] lifts -> codes."""

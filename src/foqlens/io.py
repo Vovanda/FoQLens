@@ -100,6 +100,17 @@ def read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
     return rows[:limit] if limit else rows
 
 
+def read_wordings(folder: Path, pattern: str) -> dict[tuple[str, str], str]:
+    """Other wordings of questions, read from `folder`: (corpus, id) -> the text to ask instead of the question's own.
+
+    A file per corpus, named by `pattern` with the corpus in place of `*` (e006-*.jsonl), each line
+    {"id", "paraphrase"}; the corpus comes from the file's name, so nothing names it twice.
+    """
+    head, tail = pattern.split("*")
+    return {(path.name[len(head):len(path.name) - len(tail)], row["id"]): row["paraphrase"]
+            for path in sorted(folder.glob(pattern)) for row in read_jsonl(path)}
+
+
 def read_questions(prompts_dir: Path, spec: str, limit: int | None = None) -> list[Question]:
     """Multiple-choice questions of one domain file; spec may carry a subdirectory (heldout/history)."""
     domain = Path(spec).name

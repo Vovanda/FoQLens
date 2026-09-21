@@ -1,4 +1,4 @@
-"""One ladder of precision in the code and in docs/quantization-filter.md: no model, CPU."""
+"""One ladder of precision in the code and in docs/precision-regulator.md: no model, CPU."""
 
 import pytest
 
@@ -39,7 +39,7 @@ def test_the_deepest_read_of_a_set_of_rungs_is_its_largest_code():
 
 @pytest.mark.parametrize(
     "floor, strength, halo, profile",
-    [  # the worked examples of docs/quantization-filter.md, row by row
+    [  # the worked examples of docs/precision-regulator.md, row by row
         (Level.D4, 1.0, False, "D8:0.5 D6:1"),
         (Level.D4, 0.5, False, "D6:1"),
         (Level.D2, 1.0, False, "D8:0.33 D6:0.67 D4:1"),

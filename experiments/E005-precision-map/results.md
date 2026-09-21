@@ -3,7 +3,7 @@
 Runs of 2026-09-19..20.
 
 **The configuration the final numbers were read at.** The base bartowski Q2_K, the rungs D2 / D4 / D6 / D8, the small
-corpus. A map is built like this: the field of importance is taken in its own units, the cost of a group at a rung is
+corpus. A map is built like this: the oracle's field is taken in its own units, the cost of a group at a rung is
 its importance times the share of the base's error that rung leaves (measured: D4 leaves 0.53, D6 leaves 0.055), and a
 group reads the coarsest rung whose cost fits the question's threshold. There is one threshold a question, searched by
 the answer by bisection; the tolerance is 0.03 nats or 0.2 of what the top rung itself spends, whichever is larger.
@@ -89,8 +89,7 @@ rungs dearer and should give coarser and cheaper maps. That is a run of its own.
 ## What it means for the mechanism
 
 The target is proved and measured: a layout built for the question exists, costs about half the memory of the whole
-network, and holds knowledge where a uniform rung loses it. The oracles build it by looking at the answer and are
-impossible at inference - this is a ceiling, not a mechanism.
+network, and holds knowledge where a uniform rung loses it. The oracles build it by looking at the answer.
 
 There is no cheap predictor of such a map yet. A bridge from the address is not distinguishable from a constant map by
 the answers. The layer-wise regulator (variant B) predicts no map in advance - it decides the layout as the pass runs;

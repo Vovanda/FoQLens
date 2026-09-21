@@ -4,7 +4,7 @@ title: The corpus
 
 # The corpus
 
-How questions get into the bench; the source of truth for it.
+How questions get into the bench.
 
 ## The first corpus
 

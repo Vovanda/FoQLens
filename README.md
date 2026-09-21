@@ -1,6 +1,6 @@
 # FoQLens
 
-Hi, I'm Vladimir Savkin. I studied mathematics and programming and hold a master's degree in fundamental computer science and information technology, and I work as a systems architect - distributed systems, lately with formal verification. FoQLens is my research, and it is a hobby: I am not a professional scientist. That is why the bench keeps me honest - every prediction is committed before the run that tests it. More about me: [CV](https://sawking.tech/cv).
+Hi, I'm Vladimir Savkin. I studied mathematics and programming and hold a master's degree in fundamental computer science and information technology, and I work as a systems architect - distributed systems, lately with formal verification. FoQLens is my research. More about me: [CV](https://sawking.tech/cv).
 
 **Does a language model need a fixed precision for every question?**
 
@@ -25,7 +25,7 @@ Mixture of Experts is its rigid special case: experts with hard edges fixed at t
 
 Quantization makes models smaller and faster by storing weights with fewer bits. Every existing scheme - static or dynamic - decides precision per **fixed unit**: the whole model, a layer, a channel, a token, an MoE expert. The boundaries come from the architecture; a controller only chooses how many bits each unit gets.
 
-A question about biology and a question about a proof do not need *more or less* precision. They need precision **in different places**.
+You add 2 + 2 without thinking; a theorem in differential equations takes a while. A model answers both **at full power**. Ask it how a word is spelled and it still reads every one of its weights, so that question costs as much as the hardest one it can solve. And in everyday use such questions are most of them.
 
 ## The idea
 
@@ -39,7 +39,7 @@ Three controls, each doing one thing:
 - **focus_area** - the size of the zones;
 - **focus_strength** - how far the zone centers rise above the base.
 
-Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas, the single source of truth for it: [docs/quantization-filter.md](docs/quantization-filter.md).
+Memory is the result of the settings, and no budget is preset: a query that needs little gets small zones and pays little. The mechanism in formulas: [docs/precision-regulator.md](docs/precision-regulator.md).
 
 If the idea holds, **expert zones emerge** as the regions that stay sharp when everything around them is coarsened - and related topics share part of their zone instead of paying for it twice, as MoE experts do.
 
@@ -50,7 +50,7 @@ If the idea holds, **expert zones emerge** as the regions that stay sharp when e
 - **Agents and reasoning.** Wherever a draft is refined step by step - the main hypothesis above.
 - **Graceful degradation.** Under load or heat the model gets coarser first in what the query does not need.
 
-These are the directions the regulator opens; each is tested by a step of the [plan](docs/goals.md) before it is claimed.
+These are the directions the regulator opens; each is tested by its own step of the [plan](docs/goals.md).
 
 ## What the bench checks
 
@@ -65,11 +65,25 @@ The steps, numbered as in the [preregistration](prereg/), are ordered so each on
 | 3 | How much of what the model knows do the query's zones keep, against uniform quantization at the same memory? The other topic's zones and generic importance test the address | the zones keep no more than uniform quantization at the same memory |
 | 7 | In an agent chain of a draft and refinements, does the zone model end better than the same model at native precision and than uniform quantization at the same memory? (the main hypothesis, once the model exists) | - |
 
-All predictions were [preregistered](prereg/) in git before each run, as directions ("A > B"). The full reasoning is in [`docs/`](docs/).
+The predictions and their criteria are in the [preregistration](prereg/); the full reasoning is in [`docs/`](docs/).
+
+## Experiments
+
+| Experiment | What it showed |
+| --- | --- |
+| [E001](experiments/E001-uniform-quantization/results.md) | Naive rounding leaves D2 incoherent; on questions the model does not know, the coarser model answers where the precise one refuses |
+| [E002](experiments/E002-base-precision-d2/results.md) | A working base precision over k-quants: the ladder keeps 98.8 / 96.8 / 91.0 / 51.4% of what the whole model knows |
+| [E003](experiments/E003-calibrated-base/results.md) | A base calibrated with an imatrix raised D2 by 25.3 points at a cost of 0.7 at D6 |
+| [E004](experiments/E004-question-address/results.md) | The address of a query is cheap to read: a paraphrase is read as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision are enough |
+| [E005](experiments/E005-precision-map/results.md) | An ideal precision map for a query holds 0.816 of the top rung's answers at 0.523 of its memory; the uniform D4, costing more, gives 0.000 |
+| [E006](experiments/E006-filter-map-retention/_index.md) | Sharpness set by the address of the query takes 26 hard questions of 50 at 0.516 of the top rung's memory; the flat D6 at 0.775 takes 7. The bounds of the field scale are computed from the ladder's own measurement |
+
+The maps are built by oracles. The
+regulator that works out a layout on its own is being built.
 
 ## Status
 
-**The bench and the data are ready; the hypotheses are tested from the next step on.**
+**The bench, the corpus and the kernel are ready; the map for a query is measured, the regulator is in the works.**
 
 **The corpus of what the model knows is built and frozen:** the full model answered every question of six
 datasets in its own words, with no options anywhere, and a question stays if the answer is right; three
@@ -86,7 +100,7 @@ the bench's own k-quant base the same ladder keeps 98.8%, 96.8%, 91.0% and 51.4%
 the answer only in the weights 13.0% (E002). On the first measurement naive rounding made D2 incoherent
 ([E001](experiments/E001-uniform-quantization/results.md)).
 
-**A layout built for the query holds knowledge more cheaply than a uniform rung.** Over 103 questions only the top rung answers, a map built for the query gives 0.816 of the right answers at 0.523 bytes of the whole model; the uniform D4 at 0.558 bytes gives 0.000 and the uniform D6 at 0.775 gives 0.039. A common map that knows no query gives 0.544 at the same price: the gap to 0.816 is what knowing the query is worth ([E005](experiments/E005-precision-map/results.md)). The maps are built by oracles that look at the answer - a ceiling, not a mechanism.
+**A layout built for the query holds knowledge more cheaply than a uniform rung.** Over 103 questions only the top rung answers, a map built for the query gives 0.816 of the right answers at 0.523 bytes of the whole model; the uniform D4 at 0.558 bytes gives 0.000 and the uniform D6 at 0.775 gives 0.039. A common map that knows no query gives 0.544 at the same price: the gap to 0.816 is what knowing the query is worth ([E005](experiments/E005-precision-map/results.md)).
 
 **The address of a query is cheap to read.** The hybrid of neuron activity and head energy reads a paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision give the same address as a full pass ([E004](experiments/E004-question-address/results.md)). The depth of the reading cannot be chosen from the query.
 
@@ -94,13 +108,12 @@ the answer only in the weights 13.0% (E002). On the first measurement naive roun
 coarser model answers where the precise one refuses: in E001 on HotpotQA bf16 says the passages hold no answer in
 12.1% of them, D4 in 4.6%, and the accepted answers rise from 13.4% to 25.2%. Coarsening removes the caution and adds
 no knowledge, and the guess is sometimes right. That is what [H4](docs/hypotheses.md) stands on: a draft guess can
-be refined, "I don't know" cannot. It came up on data not built to show it; a class of tasks that shows it on
-purpose is an experiment of its own.
+be refined, "I don't know" cannot. A class of tasks that shows it on purpose is an experiment of its own.
 
-**Next, the filter:** a mask that is asked about the model's answer, and the zones built from it.
+**Next, the regulator:** the model builds the same layout itself, without seeing the answer - from the address of a query or as the pass runs.
 
-**The question all of it serves:** does the regulator work - the structure where a coarse reading is enough, the
-details where sharpness is needed, a gain over iterations. Saving memory is a secondary goal, plan B: even without
+**The question all of it serves:** is there a cheap precision regulator - one that gives the structure where a
+coarse reading is enough, the details where sharpness is needed, and a gain over iterations. Saving memory is a secondary goal, plan B: even without
 a gain in quality the mechanism saves memory at the same usability.
 
 **Engineering:** one stored copy of the weights read at 2 / 4 / 6 / 8 bits: a k-quant base with 2-bit
@@ -134,7 +147,7 @@ Model weights are not stored in the repository. `scripts/download_models.py` fet
 
 - [`docs/goals.md`](docs/goals.md) - goals by step and their status.
 - [`docs/problem-statement.md`](docs/problem-statement.md) - the problem statement: expert zones come out of it.
-- [`docs/quantization-filter.md`](docs/quantization-filter.md) - the quantization filter and its zones: how precision is laid out over the weights.
+- [`docs/precision-regulator.md`](docs/precision-regulator.md) - the quantization filter and its zones: how precision is laid out over the weights.
 - [`docs/glossary.md`](docs/glossary.md) - the terms of the project: block, group, rung, field, map, oracle, zone, regulator.
 - [`docs/hypotheses.md`](docs/hypotheses.md) - the hypotheses under test, with their status and experiments.
 - [`docs/plan.md`](docs/plan.md) - the step-by-step plan, mask geometry tests, method.

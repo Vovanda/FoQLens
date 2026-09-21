@@ -67,6 +67,28 @@ class SmallCorpus:
 
 
 @dataclass(frozen=True)
+class Sample:
+    """The sample an experiment is measured on (scripts/draw_sample.py, foqlens.sample): the questions only the top
+    rung answers and the ones the lower rungs answer too, drawn from a run the judge has already read.
+
+    The ordinary side is drawn in the shares the hard side came out with, so that a difference between the two is
+    about the rungs and not about which corpus each of them is made of.
+    """
+
+    answers: str  # the folder of the run the verdicts are read from
+    corpora: tuple[str, ...]
+    hard: int  # questions only `top` answers
+    ordinary: int  # questions every rung in `lower` answers too
+    out: str  # the folder the sets are written to
+    judged: str | None = None  # the judge's own folder, where it wrote one
+    view: str = "verdicts"  # where the verdicts lie: `verdicts` beside the answers, or inside `answers`
+    top: str = "d8"
+    lower: tuple[str, ...] = ("d4", "d6")
+    seed: int = 0
+    paraphrased: int = 0  # questions of every side a paraphrase is written for, drawn in that side's own shares
+
+
+@dataclass(frozen=True)
 class AddressCheck:
     """Is a mask source an address (foqlens.address): the sources, the two-example wrapper of every corpus, and the
     working reading - its first layers at the base precision."""
@@ -187,8 +209,8 @@ class OracleAnswers:
 @dataclass(frozen=True)
 class RegulatorAnswers:
     """A run of the regulator over the small corpus (scripts/layerwise_answers.py): which approach reads the weights -
-    `upfront`, the map decided before the pass (docs/quantization-filter.md), or `layerwise`, a layer decided while the
-    pass runs (docs/layerwise-regulator.md) - and the controls of the one chosen."""
+    `upfront`, the map decided before the pass (docs/precision-regulator.md), or `layerwise`, a layer decided while the
+    pass runs (docs/precision-regulator.md) - and the controls of the one chosen."""
 
     approach: str  # upfront | layerwise
     corpus: str  # the SmallCorpus file: its laid-out questions are the ones answered

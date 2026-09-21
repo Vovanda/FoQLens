@@ -10,25 +10,7 @@ from foqlens.oracle_overlay import (
     bootstrap,
     overlay,
     to_groups,
-    unit_field,
-    unit_scale,
 )
-
-
-def test_a_field_on_its_own_scale_lands_in_the_unit_range_and_keeps_its_order():
-    field = unit_field(np.array([-1.0, 0.0, 0.5, 2.0, np.nan]), scale=2.0)
-    assert field.tolist() == [0.0, 0.0, 0.25, 1.0, 0.0]
-    rising = unit_field(np.array([1.0, 3.0, 2.0]), scale=10.0)
-    assert np.argsort(rising).tolist() == [0, 2, 1]
-    with pytest.raises(ValueError):
-        unit_field(np.array([1.0]), scale=0.0)
-
-
-def test_the_scale_is_a_quantile_so_one_outlying_group_does_not_set_it_for_everybody():
-    values = np.array([1.0, 1.0, 1.0, 1.0, 1000.0])
-    assert unit_scale(values, share=0.5) == 1.0
-    assert unit_field(values, unit_scale(values, share=0.5)).tolist() == [1.0, 1.0, 1.0, 1.0, 1.0]
-    assert unit_scale(np.array([-1.0, 0.0, np.nan])) == 1.0  # nothing positive to read a scale from
 
 
 def test_agreement_puts_out_what_one_oracle_holds_low_and_the_soft_overlay_does_not():
@@ -44,8 +26,9 @@ def test_agreement_puts_out_what_one_oracle_holds_low_and_the_soft_overlay_does_
 
 
 def test_every_oracle_answers_the_same_contract_whatever_it_measured():
-    nats = Kept("swept", np.array([[0.0, 0.4, 2.0], [0.1, 0.2, 0.3]]))  # an oracle that swept the answer
-    energy = Kept("energy", np.array([[0.0, 4e5, 9e7], [1e3, 2e3, 3e3]]))  # another, in the energy of the error
+    # the same two questions, measured by two oracles in units that share nothing, each against its own threshold
+    nats = Kept("swept", np.array([[0.0, 0.4, 2.0], [0.1, 0.2, 0.3]]), np.array([0.5, 0.2]))
+    energy = Kept("energy", np.array([[0.0, 4e5, 9e7], [1e3, 2e3, 3e3]]), np.array([1e6, 2e3]))
     assert isinstance(nats, Oracle) and isinstance(energy, Oracle)
     made = [oracle.field() for oracle in (nats, energy)]
     for one in made:  # the same kind of thing, in the same layout, whatever was inside
@@ -74,3 +57,21 @@ def test_a_block_joins_its_layers_attention_or_the_rest_of_its_layer():
 
 def test_the_bootstrap_interval_holds_the_statistic_of_a_constant_sample():
     assert bootstrap(np.full(20, 3.0), np.mean, draws=50, seed=0, level=0.95) == (3.0, 3.0)
+
+
+def test_every_oracle_s_map_comes_back_out_of_its_own_field():
+    """The field is the one every oracle is compared on, so every oracle's map must read back out of it."""
+    import numpy as np
+    from pathlib import Path
+
+    from foqlens.maps import read_map
+    from foqlens.oracle_overlay import demand
+    from foqlens.quant import Level
+
+    kept = np.load(Path("runs/E006-filter-map-retention/precision-fields-bartowski-Q2_K-small-corpus.npz"),
+                   allow_pickle=True)
+    codes = [int(Level[str(r)]) for r in kept["rungs"]]
+    for source, least in (("lift_per_weight", 0.99), ("pooled", 0.98), ("drop", 0.94)):
+        got = read_map(demand(kept[f"field_{source}"], kept[f"eps_{source}"]), kept["ratios"], 1.0, codes,
+                       int(Level.D8))
+        assert (got == kept[f"levels_{source}"]).mean() >= least, source

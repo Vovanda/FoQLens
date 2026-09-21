@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
-from foqlens import config, refocustensors, runlog
+from foqlens import config, refocustensors, runlog, sample
 from foqlens import model as fm
 from foqlens.attention import PLANS, SPLIT
 from foqlens.gguf_weights import PUBLISHED
@@ -24,7 +24,7 @@ from foqlens.gpu_monitor import GpuMonitor
 from foqlens.gpu_share import default_share
 from foqlens.graph_decode import PREFILL_TOKENS, StaticDecoder
 from foqlens.group_oracle import RUN_FIELDS, block_groups
-from foqlens.io import answers_path, append_answers, read_npz_parts, write_json, written_ids
+from foqlens.io import answers_path, append_answers, read_npz_parts, read_wordings, write_json, written_ids
 from foqlens.judging import NotJudged
 from foqlens.layouts import GivenLevels
 from foqlens.pipeline import Bench
@@ -48,6 +48,11 @@ def main(argv: list[str] | None = None) -> list[Path]:
     parser.add_argument("--corpus-config", type=Path, default=Path("configs/small-corpus.toml"))
     parser.add_argument("--also", type=Path, default=None,
                         help="a json list of [corpus, id]: lay these questions out on top of the share")
+    parser.add_argument("--wordings", type=Path, default=None,
+                        help="a folder of {'id', 'paraphrase'} files, one per corpus: ask these questions in those "
+                             "words instead of their own, and answer no others (scripts/precision_fields.py)")
+    parser.add_argument("--wordings-pattern", default="e006-*.jsonl",
+                        help="how the files of --wordings are named, the corpus in place of the star")
     parser.add_argument("--out", type=Path, default=Path("runs/oracles/e2b-it"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     parser.add_argument("--attention", choices=list(PLANS), default=SPLIT.name)
@@ -72,6 +77,10 @@ def main(argv: list[str] | None = None) -> list[Path]:
                             skip={"ratios", "rungs"})
     at = {k: i for i, k in enumerate(zip(fields["corpus"].tolist(), fields["ids"].tolist()))}
     laid = [(c, r) for c, r in found.laid if (c, r.id) in at]
+    if args.wordings:  # the paraphrases as questions of their own: the same ids, the words the fields were read on
+        wordings = read_wordings(args.wordings, args.wordings_pattern)
+        laid = sample.in_other_words(laid, wordings)
+        LOG.info("%d questions asked in other words from %s", len(laid), args.wordings)
     if len(laid) < len(found.laid):
         LOG.warning("%d questions the fields were not read for are left out", len(found.laid) - len(laid))
     held = [at[(c, r.id)] for c, r in laid]

@@ -1,6 +1,6 @@
 # Goals
 
-The goals of FoQLens and the roadmap of the bench. Details, measurements and reasoning are in the [plan](plan.md); every experiment is in [experiments/](../experiments/_index.md), every hypothesis in [hypotheses.md](hypotheses.md). Updated 2026-09-15.
+The goals of FoQLens and the roadmap of the bench. Details, measurements and reasoning are in the [plan](plan.md); every experiment is in [experiments/](../experiments/_index.md), every hypothesis in [hypotheses.md](hypotheses.md).
 
 ## Main goal
 
@@ -12,9 +12,9 @@ Mixture of Experts is a special case of it: experts are zones with hard edges fi
 
 ## What this bench tests
 
-FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([quantization-filter.md](quantization-filter.md)).
+FoQLens tests the core of the regulator on the weights: **can precision follow the meaning of the query?** The whole network is read at a base precision - any rung, down to nothing at all - and each expert zone of the query is read more precisely ([precision-regulator.md](precision-regulator.md)).
 
-**The question to answer first** (2026-09-14): **does the regulator work** - does it give the model the right scale, the structure where a coarse reading is enough and the details where sharpness is needed, and does the model gain over iterations. Saving memory is a secondary goal, plan B: even without a gain in quality the mechanism saves memory at the same usability.
+**The question to answer first: is there a cheap precision regulator** - one that gives the model the right scale, the structure where a coarse reading is enough and the details where sharpness is needed, and a gain over iterations. Saving memory is a secondary goal, plan B: even without a gain in quality the mechanism saves memory at the same usability.
 
 That makes the comparison uniform quantization at the same memory - what a deployment would otherwise do. A random mask is not a baseline: it costs more than the query's own zones and nobody ships one, so beating it settles nothing ([plan.md](plan.md)). Where the *place* of the zones has to be isolated, the control is the query's own zones carried elsewhere at the same cost.
 
@@ -43,13 +43,19 @@ In order of work; items 3 and 4 ran in parallel. Each hypothesis is tested at it
    built to show it.
 4. **The filter: how the zones are built** - now, since 2026-09-15. Grounded variants of the mask and
    of the zones built from it, read from the papers before any is coded.
-5. **The address** - waits for the filter. Topics separate in the model, the mask is concentrated, zones
-   of related topics overlap.
-6. **Precision follows the meaning** - waits for the filter. How much of what the model knows the zones
-   keep, against uniform quantization at the same memory - including the outcome that they keep no more.
-7. **The regulator answers to the machine** - waits. Precision lowered under load or heat, the zones of
+5. **The address of a query** - done, 2026-09-19. The hybrid of neuron activity and head energy reads a
+   paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first
+   4-8 layers at base precision are enough ([E004](../experiments/E004-question-address/results.md)).
+6. **Precision follows the meaning** - done, 2026-09-20 → 2026-09-21. A map built for a query holds 0.816 of the
+   top rung's answers at 0.523 of its memory, where the uniform D4 at a higher price holds none
+   ([E005](../experiments/E005-precision-map/results.md)); over a sample of hard and ordinary questions it takes 26
+   hard ones of 50 at 0.516, where the uniform D6 at 0.775 takes seven, and three spoilings at memory equal to the
+   byte show that the address is what decides ([E006](../experiments/E006-filter-map-retention/results.md)).
+7. **A map the model builds itself** - now, since 2026-09-20. The same gain without looking at the answer: from the
+   address of a query, or decided as the pass runs.
+8. **The regulator answers to the machine** - waits. Precision lowered under load or heat, the zones of
    the query kept sharpest.
-8. **Agents on the FoQLens model - the main hypothesis** - waits for the model (zones with the address
+9. **Agents on the FoQLens model - the main hypothesis** - waits for the model (zones with the address
    taken online from the first layers). An agent solves a hard multi-step task - designing a software
    architecture, for example - as a chain of a draft and refinements, on the zone model, on the same
    model at native precision and on uniform quantization at the same memory; compared are the result of

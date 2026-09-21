@@ -17,11 +17,11 @@ from pathlib import Path
 
 import numpy as np
 
-from foqlens import config, refocustensors, runlog
+from foqlens import config, refocustensors, runlog, sample
 from foqlens import model as fm
 from foqlens.gpu_share import default_share
 from foqlens.group_oracle import block_groups, joined_answer, lift_layouts, variants_nll
-from foqlens.io import save_npz_atomic
+from foqlens.io import read_wordings, save_npz_atomic
 from foqlens.pipeline import Bench
 from foqlens.progress import Progress
 from foqlens.prompt_variants import SETUPS
@@ -47,6 +47,11 @@ def main(argv: list[str] | None = None) -> Path:
                         help="a json list of [corpus, id]: read these questions of the draw and no others")
     parser.add_argument("--also", type=Path, default=None,
                         help="a json list of [corpus, id]: lay these questions out on top of the share")
+    parser.add_argument("--wordings", type=Path, default=None,
+                        help="a folder of {'id', 'paraphrase'} files, one per corpus: ask these questions in those "
+                             "words instead of their own, and read no others")
+    parser.add_argument("--wordings-pattern", default="e006-*.jsonl",
+                        help="how the files of --wordings are named, the corpus in place of the star")
     parser.add_argument("--out", type=Path, default=Path("runs/oracles/e2b-it"))
     parser.add_argument("--gpu-share", type=float, default=default_share())
     args = parser.parse_args(argv)
@@ -64,6 +69,10 @@ def main(argv: list[str] | None = None) -> Path:
         wanted = {tuple(pair) for pair in json.loads(args.only.read_text(encoding="utf-8"))}
         laid = [(c, r) for c, r in laid if (c, r.id) in wanted]
         LOG.info("%d of %d questions named by %s", len(laid), len(wanted), args.only)
+    if args.wordings:  # the same questions asked in other words: a mask of the question against a mask of its wording
+        wordings = read_wordings(args.wordings, args.wordings_pattern)
+        laid = sample.in_other_words(laid, wordings)
+        LOG.info("%d of %d questions reworded from %s", len(laid), len(wordings), args.wordings)
     prompts = found.prompts(fmt, laid)
     groups, names = block_groups(bench.ctl)
     g = len(names)

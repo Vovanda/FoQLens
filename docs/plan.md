@@ -44,7 +44,7 @@ If so, compactness through refusing to duplicate is confirmed as an effect, not 
 
 ## Step 3. Precision follows the meaning
 
-Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([quantization-filter.md](quantization-filter.md)).*
+Only if steps 1–2 passed. *Updated 2026-09-12: the layout is the zone layout over a floor ([precision-regulator.md](precision-regulator.md)).*
 
 Pass scheme: the first N layers at base precision → a per-block score from the intermediate representation → the query's expert zones in the distance between blocks → each zone read more precisely, the rest of the weights at base precision (any rung of the ladder, down to empty). Until the online version exists, the mask comes from a full pass - an upper bound.
 
@@ -60,7 +60,7 @@ A small matrix from the intermediate representation to a score vector, trained o
 
 Training the mask directly does not work - bit depth is discrete, no gradient flows through it. Hence the soft version.
 
-A side effect in favor of the statement: with a continuous learnable mask **zones are not assigned but converge by themselves** - overlaps appear where they pay off.
+A side effect in favor of the statement: with a continuous learnable mask **zones converge by themselves** - overlaps appear where they pay off.
 
 ## Step 5. Residuals instead of copies
 
@@ -88,7 +88,7 @@ What can honestly be shown at home:
 
 The block score: **how much this block is needed for this meaning**. The naive version through norms will almost certainly be too coarse - it is about the magnitude of influence, not specificity, and will light up large blocks instead of topic-related ones. Step 1 will tell.
 
-It is the same hole as in the problem statement, but in a form you can probe: not "where is the region in weight space" but "how to compute a scalar per block". The scheme is ready; the question is open.
+It is the same open question as in the problem statement, in a form you can probe: how to compute a scalar per block. The scheme is ready; the question is open.
 
 ---
 
@@ -107,7 +107,7 @@ Does the biophysics mask fit a linear combination of the biology and physics mas
 
 ### Support shape: two bundles or a blurred blob
 
-The question is not about values but about what the mask looks like geometrically.
+The question is what the mask looks like geometrically.
 
 Sort the scores in descending order and look at the concentration - the Gini coefficient or the entropy of the score distribution.
 
@@ -151,10 +151,10 @@ Compare the cosines between the representations of the three queries and, separa
 
 Do not mix up two different "betweens": the biophysics vector will almost certainly land in the middle **in representation space** - an ordinary property of embeddings. It does not follow that the mask is also in the middle **in block space**.
 
-- **The vector is in the middle, the mask is bimodal** → the mapping is non-linear and meaningful: closeness of meanings does not transfer into closeness of blocks mechanically, the isthmus is not an averaging artifact but a structure of its own. More interesting.
+- **The vector is in the middle, the mask is bimodal** → the mapping is non-linear and meaningful: closeness of meanings does not transfer into closeness of blocks mechanically, and the isthmus is a structure of its own. More interesting.
 - **Both pictures agree** → the mapping is nearly linear, the construction is simpler than expected.
 
-Both outcomes are useful. This is also the first direct measurement of that very transition from representation space to weight space - the main hole of the statement.
+Both outcomes are useful. This is also the first direct measurement of that very transition from representation space to weight space - the main open question of the statement.
 
 ---
 
@@ -164,11 +164,11 @@ Both outcomes are useful. This is also the first direct measurement of that very
 
 Seven properties the system should show if the statement is right:
 
-**1. Not additive.** Masks do not add linearly. Reason: if they did, topics would be stored independently, and the whole construction about intertwining would be unnecessary - MoE would be enough. Additivity would mean the model does not use a shared foundation but keeps copies.
+**1. Not additive.** Masks do not add linearly. Reason: if they did, topics would be stored independently, and the whole construction about intertwining would be unnecessary - MoE would be enough. Additivity would mean the model keeps copies instead of a shared foundation.
 
 **2. Strongly overlapping.** Related zones share a significant part of their support. This is the source of compactness and what distinguishes the scheme from a router.
 
-**3. With isthmuses that carry a function.** Between zones there is not emptiness but a working channel. Tested by ablation: coarsen the isthmus → pure tasks intact, mixed ones drop.
+**3. With isthmuses that carry a function.** Between zones there is a working channel. Tested by ablation: coarsen the isthmus → pure tasks intact, mixed ones drop.
 
 **4. Sparse.** For any given query a small share of blocks is sharpened. Otherwise there is nothing to cut and no budget gain.
 
@@ -244,7 +244,7 @@ The predictions diverge, which is more useful than agreement - one cheap measure
 - Quality after subtraction **did not change** → the signal was clean, Vladimir is right.
 - Quality after subtraction **improved sharply** → the raw score caught mostly background, Claude is right.
 
-Background subtraction is worth keeping in the plan as a prepared next step: it is cheap and removes exactly the artifact that spoils the naive version. With an intermediate outcome it is the right move - not to change the instrument entirely but to subtract the background first.
+Background subtraction is worth keeping in the plan as a prepared next step: it is cheap and removes exactly the artifact that spoils the naive version. With an intermediate outcome the right move is to subtract the background first.
 
 ## The baseline: uniform quantization at the same memory
 
@@ -259,7 +259,7 @@ Where a control for shape is genuinely needed, it is the query's own zones carri
 
 ## The boundary of solo work
 
-**The learned score (step 4) is taken outside what is done alone.** It is not "run the model and look" but training with a non-standard gradient through soft depth: parameterization, loss, stability, regime. A profession of its own; on one 3090 Ti and one person it takes not weeks but months.
+**The learned score (step 4) is taken outside what is done alone.** It is training with a non-standard gradient through soft depth: parameterization, loss, stability, regime. A profession of its own; on one 3090 Ti and one person it takes months.
 
 **The construction does not collapse because of this.** The whole testable part is done on untrained scores: separability, concentration, overlaps, support shape, isthmuses, ablations, quality against uniform quantization at the same memory. The learned version improves the result, it does not create it.
 
@@ -277,8 +277,8 @@ Steps 4 and 5 are not part of these two weeks at all.
 
 The bench is written in full, **all runs go at once, analysis only afterwards**.
 
-This is not about suspense but about method: you cannot tune the next measurement to what you saw in the previous one. During the runs look only at whether the script crashed - no plots and no aggregates.
+The method requires it: you cannot tune the next measurement to what you saw in the previous one. During the runs look only at whether the script crashed - no plots and no aggregates.
 
 Raw results are written to files. They are all opened at once, after everything has run. The order of opening does not matter - there is nothing left to redo.
 
-**The only exception is step 0**, whether activations separate by topic at all. It is not a result but a check that the model is fit: if representations do not separate by topic, the rest of the bench is pointless. Look at it separately and on the very first evening, before writing everything else.
+**The only exception is step 0**, whether activations separate by topic at all. It is a check that the model is fit: if representations do not separate by topic, the rest of the bench is pointless. Look at it separately and on the very first evening, before writing everything else.

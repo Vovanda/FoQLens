@@ -13,6 +13,7 @@ const MENU_W = cssPx("--panelw", 272), CONTENT_MAX = cssPx("--maxw", 1000);
 const SIDE_KEY = "foqlens.side";
 const OPEN_KEY = "foqlens.nav";
 const THEME_KEY = "foqlens.theme";
+const LANG_KEY = "foqlens.lang";
 
 /* The theme cycles through the three states in this order; "auto" is the default and means the
    device decides. The face of the button says which one is on, not which one comes next. */
@@ -38,6 +39,47 @@ function cycleTheme() {
   const now = document.documentElement.getAttribute("data-theme") || "auto";
   applyTheme(THEMES[(THEMES.indexOf(now) + 1) % THEMES.length]);
 }
+
+/* ==== LANGUAGE ====
+   Both languages are written into the page, and the stylesheet shows one of them; the switch only
+   sets an attribute on the root, as the theme does.
+
+   Why this way and not a dictionary the script fills in: the site is static, served by GitHub
+   Pages straight from the repository, with no build step and no server to pick a language by a
+   header. Text that a script inserts is text that does not exist for whoever reads the page
+   without running it - a crawler, a reader with scripts off, a model fetching the URL. Keeping
+   both in the markup costs the length of the text and nothing else: no code branches on the
+   language, the anchors and the links stay the same on both, and the English one is what the
+   page shows before the switch has run at all.
+
+   The site is small enough to be kept this way - two pages of text. Should it grow past that,
+   moving the strings into per-language config and a template is a mechanical change an assistant
+   does in one pass, so nothing here is decided for good. */
+const LANGS = ["en", "ru"];
+const LANG_FACE = { en: ["RU", "Читать по-русски"], ru: ["EN", "Read in English"] };
+
+function applyLang(name) {
+  const lang = LANGS.includes(name) ? name : "en";
+  document.documentElement.setAttribute("data-lang", lang);
+  const [face, title] = LANG_FACE[lang];
+  const button = document.getElementById("side-lang");
+  button.textContent = face;
+  button.title = title;
+  button.setAttribute("aria-label", title);
+  try { localStorage.setItem(LANG_KEY, lang); } catch { /* private mode */ }
+  // the address follows the choice, so copying it shares the page in the language being read
+  const url = new URL(location.href);
+  url.searchParams.set("lang", lang);
+  history.replaceState(null, "", url);
+  // the documents page draws its shelf and its open document in the language being read
+  dispatchEvent(new Event("langchange"));
+}
+
+function toggleLang() {
+  const now = document.documentElement.getAttribute("data-lang") || "en";
+  applyLang(LANGS[(LANGS.indexOf(now) + 1) % LANGS.length]);
+}
+
 const st = { side: localStorage.getItem(SIDE_KEY) === "left" ? "left" : "right" };
 
 function layoutVars() {
@@ -112,12 +154,14 @@ document.getElementById("below").addEventListener("click", (e) => {
 
 document.getElementById("burger").onclick = () => setNav(!document.body.classList.contains("nav-open"));
 document.getElementById("side-theme").onclick = cycleTheme;
+document.getElementById("side-lang").onclick = toggleLang;
 document.getElementById("side-swap").onclick = swapSide;
 document.getElementById("side-close").onclick = closeNav;
 addEventListener("keydown", (e) => { if (e.key === "Escape") closeNav(); });
 new ResizeObserver(layoutVars).observe(document.documentElement);
 // the attribute is already on <html> from the head; this puts the matching face on the button
 applyTheme(document.documentElement.getAttribute("data-theme"));
+applyLang(document.documentElement.getAttribute("data-lang"));
 applySide();
 // the panel opens where it was left, on either page
 if (localStorage.getItem(OPEN_KEY) === "1") setNav(true);

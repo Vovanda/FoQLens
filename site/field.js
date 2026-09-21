@@ -440,7 +440,7 @@ function report(meanBits) {
   // the rung by name first, as the whole bench names it, and the bits it comes to after: a slider and
   // the select it becomes on a narrow screen then read the same
   const rung = LADDER[Number(controls.floor.value)];
-  el("floorOut").textContent = `${rung.name} · ${rung.bits} bits`;
+  el("floorOut").textContent = `${rung.name} · ${rung.bits}`;
   el("areaOut").textContent = Number(controls.area.value).toFixed(2);
   el("strengthOut").textContent = Number(controls.strength.value).toFixed(2);
 }
@@ -521,9 +521,8 @@ addEventListener("keydown", (e) => {
 // become numbers - a value is easier to hit and to read than a thumb on a 4 mm track
 if (matchMedia("(pointer: coarse)").matches) {
   document.body.classList.add("by-finger");
-  // no dragging with a finger, so the line loses it; every other phrase is lit, as on the pointer
-  // version of it in index.html
-  el("hint").innerHTML = "Tap the field to place a lens · <b>tap it again to remove</b>";
+  // the finger hint is in the markup beside the pointer one, in both languages: .by-finger shows
+  // one and hides the other, so no wording lives in this file
   // the floor is a choice of rungs, not a quantity: a finger picks it by name
   const pick = document.createElement("select");
   pick.id = controls.floor.id;
@@ -601,7 +600,11 @@ fetch("site/weight-map.bin")
     lenses.push(...first.at.map(([fx, fy]) => under(fx, fy, first.scale)));
     render();
   })
-  .catch(() => { el("bitsOut").textContent = "no data"; });
+  .catch((e) => {
+    // the map is what the field draws; without it the page says so and the reason stays in the console
+    document.body.classList.add("no-map");
+    console.error("weight map", e);
+  });
 
 // The lenses, for a smoke check from the console: place a few and see what the glass does with them.
 window.foqlens = { lenses, render };

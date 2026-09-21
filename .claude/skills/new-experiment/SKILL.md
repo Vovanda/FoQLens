@@ -43,7 +43,7 @@ Written <date>, before any run.
 The question in the project's terms, and what the answer changes for the regulator.
 
 ## 2. Design
-- **Mechanism**: [docs/quantization-filter.md](../../docs/quantization-filter.md) at commit `<sha>`.
+- **Mechanism**: [docs/precision-regulator.md](../../docs/precision-regulator.md) at commit `<sha>`.
 - **Corpus**: the frozen corpus file at commit `<sha>`; which regimes.
 - **Compared**: the layouts, with floor / focus_area / focus_strength; the baseline is uniform
   quantization at the same memory. A shape control, where one is needed, is the query's own zones

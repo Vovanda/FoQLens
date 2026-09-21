@@ -1,4 +1,4 @@
-"""The layer-wise regulator (docs/layerwise-regulator.md, variant B): the level of a block is decided while the pass
+"""The layer-wise regulator (docs/precision-regulator.md, variant B): the level of a block is decided while the pass
 runs, from what its layer is given, and never before the pass.
 
 A hook sits in front of every layer. It is given the state entering the layer, scores that layer's blocks, turns the
@@ -6,7 +6,7 @@ scores into levels by the knapsack's rule (foqlens.layouts.knapsack_levels - the
 them into the controller before the layer multiplies anything. Nothing is fitted: the price of memory and the ceiling
 are the controls, and the score is read in the pass.
 
-The sources of a score, in the order of what they can tell (docs/layerwise-regulator.md):
+The sources of a score, in the order of what they can tell (docs/precision-regulator.md):
 
 - `activity`: the norm of what enters a block times the norms of its own rows. Inside a layer gate, up, q, k and v are
   given one vector, so between their blocks this is the rows alone - a property of the model. It is the floor.

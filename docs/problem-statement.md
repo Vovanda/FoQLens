@@ -2,7 +2,7 @@
 
 The precision-controller problem developed into an architectural branch. Assembled 2026-09-10, moved into FoQLens 2026-09-11. Based on the author's private note on the precision controller (not included in the repo).
 
-**Status: a coherent problem statement with two named holes, not a solution.** Both holes are hard research questions, not implementation details.
+**Status: a coherent problem statement with two named open questions.** Both are research questions in their own right, and neither is an implementation detail.
 
 ## What differs from everything that exists
 
@@ -18,7 +18,7 @@ Quantization should be **non-uniform and directed**: sharp at the center, coarse
 
 A hard boundary would give a cliff at the junction - exactly what MoE is criticized for. A gradient of sharpness gives **bridges between zones** without a separate mechanism.
 
-**Caveat (2026-09-11):** a smooth falloff is not a guarantee but a subject of measurement. Quality may drop in steps by kind of knowledge rather than smoothly.
+A smooth falloff is a subject of measurement: quality may drop in steps by kind of knowledge (2026-09-11).
 
 ## Zones overlapping themselves - the main argument for compactness
 
@@ -45,7 +45,7 @@ A side effect of the first option works in favor of the statement: if the mask i
 
 ## Coarsening cuts precision, not structure
 
-Example: "how many fingers does a person have". What is needed is not just a coarse answer but a coarse answer **with the caveat about exceptions preserved**: 20 is the center of the funnel, genetic variations are its edge, and the edge must survive.
+Example: "how many fingers does a person have". What is needed is a coarse answer **with the caveat about exceptions preserved**: 20 is the center of the funnel, genetic variations are its edge, and the edge must survive.
 
 The argument against uniform coarsening: it removes the tail of the distribution first, because the tail is stored thinly. The naive "simple question - cut everything" gives a confident "twenty" with no edge.
 
@@ -71,9 +71,9 @@ Scheme: run the input through a few first layers at coarse precision → from th
 
 Consequence: there is no separate controller to train - the mask is derived from what the model has already computed. The controller becomes a function of the intermediate state.
 
-## Two holes - the subject of research
+## Two open questions - the subject of research
 
 1. **In what space are the regions defined.** By what metric are weights "close"? Adjacency by index in a matrix means nothing. Quantization today works on tensors and groups with a shared scale per group - there is simply no structure that describes an arbitrary connected shape.
 2. **How to map a representation into a mask over weights.** The address is needed in weight space; activations live in representation space. The transition between them is undefined.
 
-The second hole narrows the first: not "in what space are regions at all" but "how to get a region from a representation". That is progress in the statement, not its closure.
+The second question narrows the first: from "in what space are regions at all" to "how to get a region from a representation".

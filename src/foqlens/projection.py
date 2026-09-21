@@ -1,4 +1,4 @@
-"""The projection of issue #18: carry a signal read on a few units onto every block (hole 2 of the problem statement).
+"""The projection of issue #18: carry a signal read on a few units onto every block (open question 2 of the problem statement).
 
 A working source reads the first layers only, and on its own units - heads, groups of neurons; the mask is
 needed on every block. The projection is fitted on calibration questions to what a comparison score says

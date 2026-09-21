@@ -3,18 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FoQLens - precision follows the query</title>
-<meta name="description" content="A precision regulator for language models: FoQZones - focusable quantization zones, opened where the query needs them. An R&amp;D bench on Gemma 4 E2B.">
+<title>FoQLens - one set of weights, precision that follows the query</title>
+<meta name="description" content="A precision regulator for language models. Weights are read at the depth the query needs: a map built for one question keeps 26 hard answers of 50 at half the memory, where a uniform rung keeps 7. An open R&amp;D bench on Gemma 4 E2B.">
+<link rel="canonical" href="https://vovanda.github.io/FoQLens/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FoQLens">
+<meta property="og:url" content="https://vovanda.github.io/FoQLens/">
+<meta property="og:title" content="FoQLens - one set of weights, precision that follows the query">
+<meta property="og:description" content="A map built for one question keeps 26 hard answers of 50 at half the memory; a uniform rung keeps 7.">
+<meta property="og:image" content="https://vovanda.github.io/FoQLens/site/og.png">
+<meta property="og:image:alt" content="The weight map of Gemma 4 E2B with lenses opened over it.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FoQLens - one set of weights, precision that follows the query">
+<meta name="twitter:description" content="A map built for one question keeps 26 hard answers of 50 at half the memory; a uniform rung keeps 7.">
+<meta name="twitter:image" content="https://vovanda.github.io/FoQLens/site/og.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ResearchProject",
+  "name": "FoQLens",
+  "alternateName": "Focusable Quantization Zones",
+  "url": "https://vovanda.github.io/FoQLens/",
+  "description": "A precision regulator for language models: the weights are read at the depth the meaning of the query asks for, and expert zones emerge from the query instead of being set by a router.",
+  "founder": {"@type": "Person", "name": "Vladimir Savkin", "url": "https://sawking.tech/cv"},
+  "foundingDate": "2026-09-11",
+  "keywords": "quantization, mixture of experts, inference, language models, precision regulator, adaptive quantization",
+  "subjectOf": {"@type": "SoftwareSourceCode", "codeRepository": "https://github.com/Vovanda/FoQLens", "programmingLanguage": "Python"}
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site/site.css?v=47">
-<link rel="stylesheet" href="site/front.css?v=47">
+<link rel="stylesheet" href="site/site.css?v=56">
+<link rel="stylesheet" href="site/front.css?v=56">
 <script>
 /* The theme is set before the first paint, from the reader's own choice or, by default, from the
    device - a class applied later would show one palette and then swap to the other. */
-try { document.documentElement.setAttribute("data-theme", localStorage.getItem("foqlens.theme") || "auto"); }
-catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
+/* A link can carry the language: ?lang=ru opens the page in Russian whatever this browser
+   remembers, so a page can be shared the way it was read. */
+var asked = new URLSearchParams(location.search).get("lang");
+var lang = asked === "ru" || asked === "en" ? asked : null;
+try {
+  document.documentElement.setAttribute("data-theme", localStorage.getItem("foqlens.theme") || "auto");
+  document.documentElement.setAttribute("data-lang", lang || localStorage.getItem("foqlens.lang") || "en");
+} catch (e) {
+  document.documentElement.setAttribute("data-theme", "auto");
+  document.documentElement.setAttribute("data-lang", lang || "en");
+}
 </script>
 </head>
 <body>
@@ -24,7 +61,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 <div id="cols">
   <aside id="sidebar" aria-label="Sections of this page">
     <div class="side-head">
-      <span class="side-title">About</span>
+      <span class="side-title"><span lang="en">About</span><span lang="ru">О проекте</span></span>
+      <button id="side-lang" type="button" title="Читать по-русски" aria-label="Читать по-русски">RU</button>
       <button id="side-theme" type="button" title="Theme: follows the device" aria-label="Theme">◐</button>
       <button id="side-swap" type="button" title="Move the panel to the other side" aria-label="Move the panel to the other side">⇄</button>
       <button id="side-close" type="button" title="Close" aria-label="Close the panel">✕</button>
@@ -32,13 +70,16 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     <!-- The panel of the documentation page, with this page's own sections in it: the same shelf,
          the same style, the contents of the page it stands on. -->
     <div class="side-body"><div id="menu">
-        <h2>On this page</h2>
+        <h2><span lang="en">On this page</span><span lang="ru">На этой странице</span></h2>
         <ul>
-          <li><a href="#map">The field</a></li>
-          <li><a href="#idea">Precision where the question is</a></li>
-          <li><a href="#mechanism">The mechanism</a></li>
-          <li><a href="#hypotheses">What is claimed</a></li>
-          <li><a href="#roadmap">Where the work is</a></li>
+          <li><a href="#map"><span lang="en">The field</span><span lang="ru">Поле</span></a></li>
+          <li><a href="#idea"><span lang="en">Precision to match the question</span><span lang="ru">Точность по вопросу</span></a></li>
+          <li><a href="#goals"><span lang="en">The goals</span><span lang="ru">Цели</span></a></li>
+          <li><a href="#results"><span lang="en">Progress</span><span lang="ru">Прогресс</span></a></li>
+          <li><a href="#mechanism"><span lang="en">FoQZones</span><span lang="ru">FoQZones</span></a></li>
+          <li><a href="#hypotheses"><span lang="en">What is claimed</span><span lang="ru">Что заявлено</span></a></li>
+          <li><a href="#roadmap"><span lang="en">Roadmap</span><span lang="ru">Дорожная карта</span></a></li>
+          <li><a href="#corpus"><span lang="en">The corpus</span><span lang="ru">Корпус</span></a></li>
         </ul>
       </div></div>
   </aside>
@@ -56,8 +97,8 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
     FoQLens
   </a>
         <span class="spacer"></span>
-  <a href="./" aria-current="page">About</a>
-  <a href="docs.html">Docs</a>
+  <a href="./" aria-current="page"><span lang="en">About</span><span lang="ru">О проекте</span></a>
+  <a href="docs.html"><span lang="en">Docs</span><span lang="ru">Документы</span></a>
   <a href="https://github.com/Vovanda/FoQLens" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
@@ -72,31 +113,36 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
       <div class="hero__top">
       <div class="panel" role="group" aria-label="The regulator">
         <label class="control">
-          <span>Base precision <b class="num" id="floorOut">D2 · 2 bits</b></span>
+          <span><span lang="en">Base precision</span><span lang="ru">Базовая точность</span> <b class="num" id="floorOut">D2 · 2</b> <span lang="en">bits</span><span lang="ru">бит</span></span>
           <input type="range" id="floor" min="0" max="4" step="1" value="1" aria-describedby="floorOut">
         </label>
         <label class="control">
-          <span>Focus area <b class="num" id="areaOut">0.50</b></span>
+          <span><span lang="en">Focus area</span><span lang="ru">Размер зоны</span> <b class="num" id="areaOut">0.50</b></span>
           <input type="range" id="area" min="0.05" max="0.85" step="0.05" value="0.5">
         </label>
         <label class="control">
-          <span>Focus strength <b class="num" id="strengthOut">1.00</b></span>
+          <span><span lang="en">Focus strength</span><span lang="ru">Сила зоны</span> <b class="num" id="strengthOut">1.00</b></span>
           <input type="range" id="strength" min="0" max="1" step="0.05" value="1">
         </label>
         <label class="control">
-          <span>Combine <i>where lenses overlap</i></span>
+          <span><span lang="en">Combine <i>where lenses overlap</i></span><span lang="ru">Сведение <i>там, где линзы перекрываются</i></span></span>
           <select id="combine">
-            <option value="sum">sum · adds up</option>
-            <option value="max">max · strongest</option>
+            <option value="sum">sum · складывает</option>
+            <option value="max">max · сильнейшая</option>
           </select>
         </label>
         <p class="readout">
-          <span>Memory <b id="bitsOut">-</b> bits</span>
-          <span><b id="shareOut">-</b> of bf16</span>
-          <span>Lenses <b id="lensOut">0</b></span>
+          <span><span lang="en">Memory</span><span lang="ru">Память</span> <b id="bitsOut">-</b> <span lang="en">bits</span><span lang="ru">бит</span></span>
+          <span><b id="shareOut">-</b> <span lang="en">of bf16</span><span lang="ru">от bf16</span></span>
+          <span><span lang="en">Lenses</span><span lang="ru">Линз</span> <b id="lensOut">0</b></span>
         </p>
       </div>
-        <p class="hero__hint" id="hint">Click to place a lens · <b>drag to move</b> · scroll to resize · <b>click to remove</b> · <kbd>R</kbd> clears</p>
+        <p class="hero__hint" id="hint">
+          <span class="by-pointer" lang="en">Click to place a lens · <b>drag to move</b> · scroll to resize · <b>click to remove</b> · <kbd>R</kbd> clears</span>
+          <span class="by-pointer" lang="ru">Клик ставит линзу · <b>тянуть - двигать</b> · колесо меняет размер · <b>клик убирает</b> · <kbd>R</kbd> очищает</span>
+          <span class="by-touch" lang="en">Tap the field to place a lens · <b>tap it again to remove</b></span>
+          <span class="by-touch" lang="ru">Коснитесь поля, чтобы поставить линзу · <b>второе касание убирает</b></span>
+        </p>
       </div>
 
       <div class="hero__inner">
@@ -127,13 +173,14 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
                inside the cap height (29 to 103 over a 104 baseline); the handle crossing the
                baseline the way the tail of a Q does, cut flat because IBM Plex cuts its stems flat;
                and the sheen of the letters, so one light crosses the whole word. -->
-          <g stroke-linecap="butt" stroke-width="13" fill="none" stroke="url(#sheen)">
+          <g stroke-linecap="butt" stroke-width="13" fill="none" stroke="var(--focus)">
             <path d="M162 92 L188 118"/>
             <circle cx="136" cy="66" r="37"/>
           </g>
         </svg></h1>
 
-        <p class="hero__line">The weights sit behind a glass. <b>Lenses open where the query needs to see.</b> Place one.</p>
+        <p class="hero__line" lang="en">The weights sit behind a glass. <b>Lenses open over the blocks a request needs.</b> Place a few.</p>
+        <p class="hero__line" lang="ru">Веса лежат за стеклом. <b>Линзы открываются над теми блоками, которые нужны запросу.</b> Поставьте несколько.</p>
 
       </div>
     </header>
@@ -142,29 +189,174 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
   <!-- ==== THE IDEA ==== -->
   <section id="idea">
     <div class="wrap">
-      <h2>Precision where the question is, not everywhere</h2>
-      <p class="lede">A question about biology and a question about a proof do not need more or less precision. They need precision in different places.</p>
-      <!-- Set in two balanced columns rather than two boxes: the browser splits the text so both
-           sides end level, and nothing has to be moved by hand when a paragraph is edited. -->
+      <h2 lang="en">Precision to match the question</h2>
+      <h2 lang="ru">Точность - такая, какой вопрос</h2>
+      <p class="lede" lang="en">You add 2 + 2 without thinking; a theorem in differential equations takes a while. A
+      model answers both <b>at full power</b>. Ask it how a word is spelled and it still reads every one of its
+      weights, so that question costs as much as the hardest one it can solve. And in everyday use such questions
+      are most of them.</p>
+      <p class="lede" lang="ru">2 + 2 вы считаете не задумываясь, а над теоремой из дифференциальных уравнений
+      придётся посидеть. Модель считает оба <b>на полной мощности</b>. Спросили, как пишется слово, - она прочитала
+      все свои веса до последнего, и вопрос стоил как самый сложный, какой она вообще способна решить. А в
+      повседневной жизни таких вопросов большинство.</p>
+
       <div class="cols">
-        <p>Every quantization scheme decides precision per fixed unit - the model, a layer, a channel, a token, an expert. The boundaries come from the architecture; a controller only picks how many bits each unit gets.</p>
-        <p>FoQLens asks the model itself which weights matter for <em>this</em> query, reads them more precisely, and reads the rest coarsely. Mixture of Experts is the rigid special case of the same idea: experts with hard edges, fixed at training, opened by a router.</p>
-        <p>The mechanism is <b>FoQZones</b> - focusable quantization zones. Call it a Mixture of Zones if you like, though there is no router here and there will not be one. FoQLens is the project and the model that carries the regulator; the lens is its metaphor.</p>
-        <p>The metaphor above is drawn on real weights: the map of Gemma 4 E2B, 14 708 blocks of 64 output rows, blocks that light up together lying close. Place a zone on it and the regulator runs - the plate gives the cost in bits per weight.</p>
-        <p>Coarse pixels are weights read at few bits; sharp ones are read at many. Memory is not a budget you set - it is what your zones cost.</p>
+        <p lang="en">Quantization does spend less, and pays for it in the quality of the answers: every scheme of
+        it decides the precision in pieces fixed in advance - the whole model, a layer, a channel, a token, an
+        expert. The pieces are cut by the architecture, and all that is left to decide is how many bits each one
+        gets. The question never enters into it.</p>
+        <p lang="ru">Квантование умеет тратить меньше, и расплачивается за это качеством ответов: любая его схема
+        раздаёт точность кусками, нарезанными заранее - вся модель, слой, канал, токен, эксперт. Куски задаёт
+        архитектура, и решить остаётся только, сколько бит достанется каждому. Самого вопроса в этом решении
+        нет.</p>
+
+        <p lang="en">FoQLens reads its weights unevenly: as a request travels through the model towards an answer, the
+        precision rises on the blocks that request needs, and the rest is read coarsely. Which blocks those are the
+        model works out itself - the field above shows such a layout on the real weights of Gemma 4 E2B.</p>
+        <p lang="ru">FoQLens читает свои веса неравномерно: пока запрос идёт сквозь модель к ответу, точность
+        поднимается на тех блоках, которые этому запросу нужны, а остальные читаются грубо. Какие это блоки,
+        модель решает сама - поле наверху показывает такую раскладку на настоящих весах Gemma 4 E2B.</p>
+
+        <p lang="en">Mixture of Experts comes closest - the strongest architecture there is today, and what most
+        large models are built on. Its weights are split into groups in advance, and for each token a router
+        switches a few of them on while the rest are not computed at all. The split is decided during training
+        and is the same for every request, the border is sharp - a group is on or off - and the precision is one
+        and the same for every weight. Hence the waste: whatever many groups need is held inside each of them as
+        its own copy, and the memory goes on duplicates. Here only the ladder of depths is fixed in advance:
+        which blocks are read deeper is worked out on the request itself, and the depth changes by rungs.</p>
+        <p lang="ru">Ближе всех к этому Mixture of Experts - сегодня самая сильная архитектура, на ней построена
+        большая часть крупных моделей. Веса там заранее поделены на группы, и роутер для каждого токена
+        включает несколько из них, а остальные не считаются вовсе. Деление задано при обучении и одно на все
+        запросы, граница резкая - группа включена или нет, - а точность у всех весов одна и та же. Отсюда и
+        расточительность: то общее, что нужно многим группам, лежит в каждой своей копией, и память уходит на
+        дубли. У нас заранее задана только лестница глубин: какие блоки прочитать глубже, определяется на самом
+        запросе, и глубина меняется ступенями.</p>
       </div>
     </div>
+  </section>
+
+  <!-- ==== GOALS ==== -->
+  <section id="goals">
+    <div class="wrap">
+      <h2 lang="en">The goals</h2>
+      <h2 lang="ru">Цели</h2>
+      <p class="lede" lang="en">The same weights run on any device and under any load, and open to full precision where the question needs it.</p>
+      <p class="lede" lang="ru">Одни и те же веса работают на любом устройстве и под любой нагрузкой, а полную точность открывают там, где она нужна вопросу.</p>
+      <div class="cols">
+        <p lang="en"><b>On the device.</b> One file of weights for a phone, glasses or a laptop: the precision follows the battery, the heat and the free memory, and what the question needs is read deepest.</p>
+        <p lang="ru"><b>На устройстве.</b> Один файл весов на телефон, очки и ноутбук: точность подстраивается под заряд, нагрев и свободную память, а то, что нужно запросу, читается глубже всего.</p>
+        <p lang="en"><b>The price of a request.</b> A simple request needs small zones and little computation; a hard one lifts wider zones and takes longer. The bill follows the difficulty of the request.</p>
+        <p lang="ru"><b>Цена запроса.</b> Простому запросу хватает маленьких зон, и вычислений на него уходит мало; трудный поднимает зоны шире и считается дольше. Счёт выходит по сложности запроса.</p>
+        <p lang="en"><b>A model that does not fit.</b> More weights than the machine has memory for: only what the
+        request needs is loaded, the rest is read coarsely or not read at all.</p>
+        <p lang="ru"><b>Модель, которая не помещается.</b> Весов больше, чем памяти на машине: в память
+        поднимается только то, что нужно запросу, остальное читается грубо или не читается вовсе.</p>
+
+        <p lang="en"><b>Agents and reasoning.</b> The first pass runs mostly at base precision and gives a draft; the next ones read deeper where the draft shows it is needed.</p>
+        <p lang="ru"><b>Агенты и рассуждение.</b> Первый проход идёт почти целиком на базовой точности и даёт черновик; следующие читают глубже там, где черновик показал, что это нужно.</p>
+        <p lang="en"><b>Under load the quality gives way slowly.</b> When the machine is busy or hot, the precision comes off the blocks the request does not need first, and the answer holds longer.</p>
+        <p lang="ru"><b>Под нагрузкой качество падает не сразу.</b> Когда машина занята или горячая, точность снимают сначала с тех блоков, которые запросу не нужны, и ответ держится дольше.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== RESULTS ==== -->
+  <!-- What the bench has actually shown, one line each. The roadmap below says where the work is;
+       this says what came out of it, and every row links the file that holds the numbers. -->
+  <section id="results">
+    <div class="wrap">
+      <h2 lang="en">Progress</h2>
+      <h2 lang="ru">Прогресс</h2>
+      <div class="scroller">
+        <table>
+          <thead><tr><th><span lang="en">Facts</span><span lang="ru">Факты</span></th><th><span lang="en">Proof</span><span lang="ru">Пруфы</span></th></tr></thead>
+          <tbody>
+            <tr><td><span lang="en"><b>A format of our own</b> - the model is stored as one stack, a base with refinements over it, and any depth is read from the same file without repacking: 2, 4, 6 or 8 bits from one copy, 1.63 GiB less than bf16 on E2B</span><span lang="ru"><b>Свой формат хранения</b> - модель лежит одной стопкой, база и уточнения поверх неё, и любая глубина читается из того же файла без перепаковки: 2, 4, 6 или 8 бит из одной копии, на 1.63 ГиБ меньше bf16 на E2B</span></td><td><a href="docs.html#refocustensors">.refocustensors</a></td></tr>
+            <tr><td><span lang="en"><b>The card reads a layout inside the pass</b> - a CUDA kernel of ours takes every block of rows to its own depth straight from the bytes of the stored copy, inside the pass itself: a decoding step at a batch of 32 takes <b>28.8 ms</b> against 422.6 unpacked, with bf16 at 20.4. The precision can therefore change from one pass to the next, with nothing reloaded</span><span lang="ru"><b>Видеокарта читает раскладку прямо в проходе</b> - наше ядро CUDA берёт каждый блок строк до своей глубины прямо из байтов хранимой копии: шаг декодирования при батче 32 занимает <b>28.8 мс</b> против 422.6 с распаковкой, у bf16 - 20.4. Значит точность можно менять от прохода к проходу, ничего не перезагружая</span></td><td><a href="docs.html#kernels">kernels</a></td></tr>
+            <tr><td><span lang="en"><b>A coarser model answers where the precise one refuses</b> - on questions the full model does not know, the full model says the answer is not there in 12.1% of cases, and read coarsely it says so in 4.6%, while accepted answers rise from 13.4% to <b>25.2%</b> - and the trend holds as the reading gets coarser</span><span lang="ru"><b>Грубая модель отвечает там, где точная отказывается</b> - на вопросах, которых полная модель не знает, она говорит «здесь ответа нет» в 12.1% случаев, а прочитанная грубо - в 4.6%, и принятых ответов становится больше: с 13.4% до <b>25.2%</b>. Чем грубее чтение, тем сильнее тренд</span></td><td><a href="docs.html#e001-results">E001</a></td></tr>
+            <tr><td><span lang="en"><b>The base precision went from nothing to 76%</b> - two-bit weights gave incoherent answers at first; over a calibrated base the same two bits keep <b>76.7%</b> of what the model knows, and the whole ladder is read up from that base</span><span lang="ru"><b>Базовая точность поднята с нуля до 76%</b> - на двух битах модель сперва несла бессвязицу; над калиброванной базой те же два бита держат <b>76.7%</b> её знаний, и с этой базы читается вся лестница</span></td><td><a href="docs.html#e003-results">E003</a></td></tr>
+            <tr><td><span lang="en"><b>The address of a question is real and cheap to read</b> - a paraphrase is recognised as the same question <b>92%</b> of the time against 72% by its words, and the first 4-8 layers carry the same address as a full pass</span><span lang="ru"><b>Адрес вопроса существует и читается дёшево</b> - пересказанный вопрос узнаётся как тот же в <b>92%</b> случаев против 72% по одним словам, а первые 4-8 слоёв несут тот же адрес, что и полный проход</span></td><td><a href="docs.html#e004-results">E004</a></td></tr>
+            <tr><td><span lang="en"><b>A map exists, and it pays</b> - over 103 hard questions, the ones only the eight-bit model answers, a map built for the question holds <b>82% of its answers on 52% of its memory</b>. Over another hundred, half of them ordinary:<table class="mini"><thead><tr><th>How it was read</th><th>Memory of the 8-bit</th><th>of 100</th><th>hard of 50</th><th>%</th></tr></thead><tbody><tr><td>Even eight bits</td><td class="num">100%</td><td class="num">100</td><td class="num">50</td><td class="num">100%</td></tr><tr><td><b>A map for the question</b></td><td class="num"><b>52%</b></td><td class="num"><b>58</b></td><td class="num"><b>26</b></td><td class="num"><b>52%</b></td></tr><tr><td>Even six bits</td><td class="num">78%</td><td class="num">44</td><td class="num">7</td><td class="num">14%</td></tr><tr><td>Even four bits</td><td class="num">56%</td><td class="num">32</td><td class="num">3</td><td class="num">6%</td></tr><tr><td>Even two bits</td><td class="num">34%</td><td class="num">26</td><td class="num">8</td><td class="num">16%</td></tr></tbody></table></span><span lang="ru"><b>Карта существует, и она окупается</b> - на 103 трудных вопросах, которые берёт только восьмибитная модель, карта под вопрос держит <b>82% её ответов на 52% памяти</b>. На другой сотне, где половина вопросов обычные:<table class="mini"><thead><tr><th>Как читали</th><th>Память от 8 бит</th><th>из 100</th><th>трудных из 50</th><th>%</th></tr></thead><tbody><tr><td>Ровно восемь бит</td><td class="num">100%</td><td class="num">100</td><td class="num">50</td><td class="num">100%</td></tr><tr><td><b>Карта под вопрос</b></td><td class="num"><b>52%</b></td><td class="num"><b>58</b></td><td class="num"><b>26</b></td><td class="num"><b>52%</b></td></tr><tr><td>Ровно шесть бит</td><td class="num">78%</td><td class="num">44</td><td class="num">7</td><td class="num">14%</td></tr><tr><td>Ровно четыре бита</td><td class="num">56%</td><td class="num">32</td><td class="num">3</td><td class="num">6%</td></tr><tr><td>Ровно два бита</td><td class="num">34%</td><td class="num">26</td><td class="num">8</td><td class="num">16%</td></tr></tbody></table></span></td><td><a href="docs.html#e005-results">E005</a>, <a href="docs.html#e006-results">E006</a></td></tr>
+            <tr><td><span lang="en"><b>The map belongs to its question</b> - spoil the map at the same memory to the byte - another question’s, the same figure moved elsewhere, rungs dealt at random - and it gives 0.59-0.62 against <b>0.86</b></span><span lang="ru"><b>Карта принадлежит вопросу</b> - испортить её при той же памяти до байта - взять чужую, сдвинуть свою фигуру, раздать ступени наугад - и выходит 0.59-0.62 против <b>0.86</b></span></td><td><a href="docs.html#e006-results">E006</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </section>
 
   <!-- ==== MECHANISM ==== -->
   <section id="mechanism">
     <div class="wrap">
-      <h2>The mechanism</h2>
-      <p>Three controls, each doing one thing: the <b>base precision</b> - what the whole network is read at before any zone is lifted, called <code>floor</code> in the runs and the scripts; <b>focus area</b> - the share of the network a zone covers; <b>focus strength</b> - how far their centers rise above it. The rules below are what the field above runs; the full text is in <a href="docs.html#filter">docs/quantization-filter.md</a>.</p>
-      <p>The rules need a distance <code>d</code> between blocks and do not say which. In what space the zones of a query live, and what makes two weights close, is an open question of the <a href="docs.html#problem">problem statement</a>; where zones grow from, along what, how far and how fast are strategies still to be tested (<a href="docs.html#strategies">docs/zone-strategies.md</a>).</p>
-      <pre class="rules"><b>ladder</b>      ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          the levels this model can be read at; ℓ₀ = ZERO
+      <h2 lang="en">FoQZones, the mechanism</h2>
+      <h2 lang="ru">Описание механизма FoQZones</h2>
+
+      <p lang="en">Every block of weights is read to its own depth. Most of the network stays at a <b>base
+      precision</b>; the blocks a question puts to work are read deeper, up to the top of the ladder. A layout is
+      exactly that: a depth per block. Two controls bound it - how much of the network rises above the base, and how
+      far above it the highest blocks go - and what the reading costs follows from them.</p>
+      <p lang="ru">Каждый блок весов читается на своей глубине. Большая часть сети остаётся на <b>базовой
+      точности</b>, а блоки, которые задействует вопрос, читаются глубже, вплоть до верха лестницы. Раскладка - это
+      и есть глубина на каждый блок. Ограничивают её две ручки: какая доля сети поднимается над базой и насколько
+      высоко поднимаются самые верхние блоки; цена чтения выходит из них.</p>
+
+      <p lang="en">Where the depths come from is what the two variants differ in.</p>
+      <p lang="ru">Чем два варианта различаются - откуда берутся эти глубины.</p>
+
+      <!-- Two variants of where the decision is taken. Radio buttons rather than script: the site is
+           static, both texts are in the markup, and a reader without JavaScript still gets them. -->
+      <div class="tabs">
+        <input type="radio" name="variant" id="variant-b" checked>
+        <label for="variant-b"><span lang="en">B - decided as the pass runs</span><span lang="ru">Б - решение по ходу прохода</span></label>
+        <input type="radio" name="variant" id="variant-a">
+        <label for="variant-a"><span lang="en">A - the map is built first</span><span lang="ru">А - карта строится заранее</span></label>
+
+        <div class="tab-panel panel-b">
+          <p lang="en">The layer decides for itself: it looks at what has just entered it and sets the depth of the
+          blocks ahead. The network is read once, and the decision travels with the pass. This is the variant to
+          build - it runs on the card already, the scores and the levels living on the device, a decoding step of
+          39.6 ms at a batch of 32 against 31.5 for a fixed mixed layout. One question is open, and it is the formula
+          by which a layer picks whom to lift.</p>
+          <p lang="ru">Слой решает сам: смотрит, что в него вошло, и назначает глубину блокам впереди. Сеть читается
+          один раз, и решение едет вместе с проходом. Это приоритетный вариант - он уже работает на карте, очки и
+          уровни лежат на устройстве, шаг декодирования 39.6 мс при батче 32 против 31.5 у неподвижной смешанной
+          раскладки. Открыт один вопрос - сама формула, по которой слой выбирает, кого поднять.</p>
+<pre class="rules" lang="en"><b>at a layer</b>  the pass holds h_k, the state that entered it
+<b>the score</b>  s_c = <b>???</b>                  which formula - still being looked for; three tried below
+
+1 <b>activity</b>  s_c = ‖x_c‖²                 how strong a signal enters the unit
+2 <b>votes</b>     s_c = Σ a_b · κ(b → c)       a unit votes for those it feeds; κ from the weights
+3 <b>draft</b>     s_c = ‖y_c(base)‖² · Δ_c²    the layer read at base shows who carries the question
+
+<b>reduced</b>   ŝ_c = s_c · Δ_c² / w_c       Δ_c the quantization step, w_c the weights of the block
+<b>level</b>     ℓ(c) = γ + |{ j ≥ 1 : ŝ_c ≥ λ · 16ʲ }|   capped at κ = γ + ⌊g · (m − γ)⌋
+<b>by share</b>  the top f of the layer by ŝ rise; the rest stays at the base</pre>
+<pre class="rules" lang="ru"><b>на слое</b>    проход держит h_k - состояние, вошедшее в слой
+<b>очки</b>      s_c = <b>???</b>                  какая формула - ищется; ниже три, которые пробуем
+
+1 <b>активность</b> s_c = ‖x_c‖²                насколько сильный сигнал входит в единицу
+2 <b>голоса</b>    s_c = Σ a_b · κ(b → c)       единица голосует за тех, кого кормит; κ - из весов
+3 <b>черновик</b>  s_c = ‖y_c(база)‖² · Δ_c²    слой, прочитанный на базе, показывает, кто несёт вопрос
+
+<b>приведённая</b> ŝ_c = s_c · Δ_c² / w_c      Δ_c - шаг квантования, w_c - веса блока
+<b>уровень</b>   ℓ(c) = γ + |{ j ≥ 1 : ŝ_c ≥ λ · 16ʲ }|   с потолком κ = γ + ⌊g · (m − γ)⌋
+<b>по доле</b>   верхние f слоя по ŝ поднимаются, остальное остаётся на базе</pre>
+        </div>
+
+        <div class="tab-panel panel-a">
+          <p lang="en">The whole map is worked out before the first layer, from the address the first layers read.
+          The depths are then a shape: zones grown around the peaks of that address, each falling off to the base at
+          its edge, by the rules below. There is a hint that this does not work: a map predicted from the address
+          gave the same answers as the common map, the one used for every question
+          (<a href="docs.html#e005-results">E005</a>).</p>
+          <p lang="ru">Вся карта считается до первого слоя, по адресу, который читают первые слои. Глубины тогда
+          складываются в фигуру: зоны растут вокруг пиков этого адреса и спадают к базе на краю, по правилам ниже.
+          Есть намёк, что так не выйдет: карта, предсказанная по адресу, дала те же ответы, что и общая карта - одна
+          на все вопросы (<a href="docs.html#e005-results">E005</a>).</p>
+<pre class="rules" lang="en"><b>ladder</b>      ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          the levels this model can be read at; ℓ₀ = ZERO
 <b>base</b>        G = ℓ_γ                     any rung; floor in the scripts
 <b>distance</b>    d(a, b)                     between blocks; not chosen
+<b>centers</b>     c_i = <b>???</b>                  where a zone grows from, out of the address; not found
 <b>width</b>       D                           of the network in d
 
 1 <b>radius</b>    R = f · D                   f = 0: the center only;   f = 1: the whole network
@@ -174,85 +366,137 @@ catch (e) { document.documentElement.setAttribute("data-theme", "auto"); }
 5 <b>combine</b>   L(b) = min(1, Σ L_i)  or  max L_i
 6 <b>level</b>     ρ* = s_last · (1 − L(b))    the ring that ρ* falls into; outside every zone: G
 7 <b>memory</b>    bits = Σ w_b · bits(b) / Σ w_b</pre>
-      <p>Nothing here names a level: the ladder comes from the model and its storage. On Gemma 4 E2B one stored copy - a k-quant base with refinements over it - is read at 2, 4, 6 or 8 bits, and the model holds no other weights - so the ladder is ZERO, D2, D4, D6, D8, and the regulator runs over all five.</p>
+<pre class="rules" lang="ru"><b>лестница</b>    ℓ₀ &lt; ℓ₁ &lt; … &lt; ℓ_m          уровни, на которых читается эта модель; ℓ₀ = ZERO
+<b>база</b>        G = ℓ_γ                     любая ступень; floor в скриптах
+<b>расстояние</b>  d(a, b)                     между блоками; не выбрано
+<b>центры</b>      c_i = <b>???</b>                  откуда растёт зона, из адреса; способ не найден
+<b>ширина</b>      D                           ширина сети в d
+
+1 <b>радиус</b>    R = f · D                   f = 0: только центр;   f = 1: вся сеть
+2 <b>потолок</b>   κ = γ + ⌊g · (m − γ)⌋       g = 0: зона равна базе;   g = 1: верхняя ступень
+3 <b>профиль</b>   ступени s_κ &lt; … &lt; s_(γ+1)   где кончается каждое кольцо, в радиусах; выше 1 - за краем
+4 <b>подъём</b>    ρ_i(b) = d(b, c_i) / R,     L_i(b) = max(0, 1 − ρ_i(b) / s_last)   пока линейный
+5 <b>сведение</b>  L(b) = min(1, Σ L_i)  или  max L_i
+6 <b>уровень</b>   ρ* = s_last · (1 − L(b))    кольцо, в которое попал ρ*; вне всех зон: G
+7 <b>память</b>    бит = Σ w_b · бит(b) / Σ w_b</pre>
+        </div>
+      </div>
+
+      <p lang="en">The rules name no level: the ladder comes from the model and the way it is stored. In full:
+      <a href="docs.html#regulator">docs/precision-regulator.md</a>.</p>
+      <p lang="ru">Уровни в правилах не названы: лестницу задаёт модель и то, как она хранится. Полностью:
+      <a href="docs.html#regulator">docs/precision-regulator.ru.md</a>.</p>
     </div>
   </section>
 
   <!-- ==== HYPOTHESES ==== -->
   <section id="hypotheses">
     <div class="wrap">
-      <h2>What is claimed</h2>
-      <p>Each is fixed in git as a direction before the run that tests it. Each is tested at its step of the roadmap.</p>
+      <h2 lang="en">What is claimed</h2>
+      <h2 lang="ru">Что заявлено</h2>
       <div class="scroller">
         <table>
-          <thead><tr><th>Id</th><th>Claim</th><th></th></tr></thead>
+          <thead><tr><th>Id</th><th><span lang="en">Claim</span><span lang="ru">Утверждение</span></th><th></th></tr></thead>
           <tbody>
-            <tr><td class="num">H1</td><td>The mask of a query is separable by topic and concentrated - there is an address to read at all</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">H2</td><td>Zones of related topics overlap more than zones of unrelated ones</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">H3</td><td>Precision laid out by the query beats uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">H4</td><td><b>The main one.</b> A draft read mostly at base precision, then refined with sharper zones, ends <em>better</em> than the same model at native precision - where there are iterations: an agent or a model's reasoning</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">H5</td><td>A horizon. A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">H6</td><td>An additional one. How good asking for a shorter answer and coarsening the weights each are at holding knowledge in compressed form - and below which step coarsening slides into nonsense</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">H0</td><td><span lang="en">Topics separate in the model’s representations</span><span lang="ru">Темы разделяются в представлениях модели</span></td><td><span class="tag tag--wait"><span lang="en">the measurement caught the format</span><span lang="ru">замер поймал формат вопроса</span></span></td></tr>
+            <tr><td class="num">H1</td><td><span lang="en">The mask of a query is separable by topic and concentrated - there is an address to read at all</span><span lang="ru">Маска запроса разделима по темам и сконцентрирована - адрес существует и читается</span></td><td><span class="tag tag--now"><span lang="en">half measured</span><span lang="ru">половина измерена</span></span></td></tr>
+            <tr><td class="num">H2</td><td><span lang="en">Zones of related topics overlap more than zones of unrelated ones</span><span lang="ru">Зоны родственных тем перекрываются сильнее, чем зоны неродственных</span></td><td><span class="tag tag--wait"><span lang="en">waits</span><span lang="ru">ждёт</span></span></td></tr>
+            <tr><td class="num">H3</td><td><span lang="en">Precision laid out by the query beats uniform quantization at the same memory</span><span lang="ru">Точность, разложенная по запросу, обходит ровное квантование при той же памяти</span></td><td><span class="tag tag--done"><span lang="en">the ceiling is measured</span><span lang="ru">потолок измерен</span></span></td></tr>
+            <tr><td class="num">H4</td><td><span lang="en">A draft read mostly at base precision, then refined with sharper zones, ends <em>better</em> than the same model at native precision - where there are iterations: an agent or a model's reasoning</span><span lang="ru">Черновик, прочитанный в основном на базовой точности, а затем уточнённый более резкими зонами, заканчивает <em>лучше</em> той же модели в исходной точности - там, где есть итерации: агент или рассуждение модели</span></td><td><span class="tag tag--now"><span lang="en">the premise showed up</span><span lang="ru">предпосылка проявилась</span></span></td></tr>
+            <tr><td class="num">H5</td><td><span lang="en">A network trained with zoning and read with FoQZones beats a Mixture of Experts trained the classical way on the same data, holding no more in memory at any moment</span><span lang="ru">Сеть, обученная с зонированием и читаемая через FoQZones, обходит Mixture of Experts, обученную классически на тех же данных, не держа в памяти больше ни в какой момент</span></td><td><span class="tag tag--wait"><span lang="en">waits</span><span lang="ru">ждёт</span></span></td></tr>
+            <tr><td class="num">H6</td><td><span lang="en">How good asking for a shorter answer and coarsening the weights each are at holding knowledge in compressed form - and below which step coarsening slides into nonsense</span><span lang="ru">Насколько хорошо держат знание в сжатом виде просьба ответить короче и огрубление весов - и ниже какой ступени огрубление сползает в бессмыслицу</span></td><td><span class="tag tag--wait"><span lang="en">waits</span><span lang="ru">ждёт</span></span></td></tr>
           </tbody>
         </table>
       </div>
-      <p>The full list, with the experiments behind each: <a href="docs.html#hypotheses">docs/hypotheses.md</a>.</p>
+      <p lang="en">The full list, with the experiments behind each: <a href="docs.html#hypotheses">docs/hypotheses.md</a>.</p>
+      <p lang="ru">Полный список, с экспериментами за каждой гипотезой: <a href="docs.html#hypotheses">docs/hypotheses.ru.md</a>.</p>
     </div>
   </section>
 
   <!-- ==== ROADMAP ==== -->
   <section id="roadmap">
     <div class="wrap">
-      <h2>Where the work is</h2>
-      <p class="lede">The ceiling is measured: a map built for the query holds knowledge at half the memory where a uniform rung loses it. What is missing is a map read at inference.</p>
+      <h2 lang="en">Roadmap</h2>
+      <h2 lang="ru">Дорожная карта</h2>
+      <p class="lede" lang="en">The ceiling is measured: a map built for the request answers on half the memory where an even reading has already lost those answers. A map the model builds for itself while it answers is not there yet.</p>
+      <p class="lede" lang="ru">Потолок измерен: карта под запрос отвечает за половину памяти там, где ровное чтение ответы уже теряет. Карту, которую модель строит сама в момент ответа, пока получить не вышло.</p>
       <div class="scroller">
         <table>
-          <thead><tr><th>Step</th><th>What it settles</th><th></th></tr></thead>
+          <thead><tr><th><span lang="en">Step</span><span lang="ru">Шаг</span></th><th><span lang="en">What it settles</span><span lang="ru">Что решает</span></th><th></th></tr></thead>
           <tbody>
-            <tr><td class="num">1</td><td><b><a href="docs.html#filter">The bench</a></b> - its design and optimization: one stored copy of the weights, a k-quant base with refinements, read at D2 / D4 / D6 / D8, a decoding step as one CUDA graph</td><td><span class="tag tag--done">done</span><span class="when">2026-09-11 → 09-14</span></td></tr>
-            <tr><td class="num">2</td><td><b><a href="docs.html#corpus">A corpus of what the model knows</a></b> - selected by its own answers in three regimes and frozen: 20,640 questions, 18,576 E2B-it knows and 2,064 it does not</td><td><span class="tag tag--done">done</span><span class="when">2026-09-13 → 09-15</span></td></tr>
-            <tr><td class="num">3</td><td><b><a href="docs.html#e003-results">Uniform quantization on the corpus</a></b> - the answers at D8, D6, D4 and D2 over a base calibrated with an imatrix: D8 keeps 97.5% of the full model's knowledge, D6 96.2%, D4 90.8%, D2 76.7% (51.4% over the bench's own base, <a href="docs.html#e002-results">E002</a>), so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4 (<a href="docs.html#e001-results">E001</a>)</td><td><span class="tag tag--done">done</span><span class="when">2026-09-15 → 09-19</span></td></tr>
-            <tr><td class="num">4</td><td><b><a href="docs.html#filter">The filter</a></b> - grounded variants of how the zones are built</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-15</span></td></tr>
-            <tr><td class="num">5</td><td><b><a href="docs.html#e004-results">The address of a query</a></b> - which signal identifies the query rather than its wording: the hybrid of neuron activity and head energy reads a paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision give the same address as a full pass; the depth of the reading cannot be chosen from the query</td><td><span class="tag tag--done">done</span><span class="when">2026-09-19</span></td></tr>
-            <tr><td class="num">6</td><td><b><a href="docs.html#e005-results">The precision map of a query</a></b> - over 103 questions only the top rung answers, a map built for the query holds 0.816 of the right answers at 0.523 bytes of the whole network, where the uniform D4 at 0.558 holds none and the uniform D6 at 0.775 holds 0.039; a common map that knows no question holds 0.544 at the same price. The maps are built by oracles that look at the answer - a ceiling, not a mechanism</td><td><span class="tag tag--done">done</span><span class="when">2026-09-20</span></td></tr>
-            <tr><td class="num">7</td><td><b><a href="docs.html#hypotheses">A map read at inference</a></b> - the same gain without looking at the answer: from the address of a query, or decided as the pass runs. Neither does it yet</td><td><span class="tag tag--now">now</span><span class="when">since 2026-09-20</span></td></tr>
-            <tr><td class="num">8</td><td><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - load, heat, memory</td><td><span class="tag tag--wait">waits</span></td></tr>
-            <tr><td class="num">9</td><td><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</td><td><span class="tag tag--wait">waits</span></td></tr>
+            <tr><td class="num">1</td><td><span lang="en"><b><a href="docs.html#regulator">The bench</a></b> - what everything is measured on: one stored copy of the weights, a k-quant base with refinements, read at 2, 4, 6 or 8 bits, a decoding step as one CUDA graph</span><span lang="ru"><b><a href="docs.html#regulator">Стенд</a></b> - на чём всё считается: одна хранимая копия весов, база k-quant с уточнениями, чтение на 2, 4, 6 или 8 битах, шаг декодирования одним CUDA-графом</span></td><td><span class="tag tag--done"><span lang="en">done</span><span lang="ru">сделано</span></span><span class="when">2026-09-11 → 09-14</span></td></tr>
+            <tr><td class="num">2</td><td><span lang="en"><b><a href="docs.html#corpus">A corpus of what the model knows</a></b> - selected by its own answers in three regimes and frozen: 20,640 questions, 18,576 E2B-it knows and 2,064 it does not</span><span lang="ru"><b><a href="docs.html#corpus">Корпус того, что модель знает</a></b> - собран по её собственным ответам в трёх режимах и заморожен: 20 640 вопросов, из них 18 576 модель знает и 2 064 нет</span></td><td><span class="tag tag--done"><span lang="en">done</span><span lang="ru">сделано</span></span><span class="when">2026-09-13 → 09-15</span></td></tr>
+            <tr><td class="num">3</td><td><span lang="en"><b><a href="docs.html#e003-results">Uniform quantization on the corpus</a></b> - the answers at D8, D6, D4 and D2 over a base calibrated with an imatrix: D8 keeps 97.5% of the full model's knowledge, D6 96.2%, D4 90.8%, D2 76.7% (51.4% over the bench's own base, <a href="docs.html#e002-results">E002</a>), so the filter is tested from D2; where the full model refuses, a coarser one answers - the premise of H4 (<a href="docs.html#e001-results">E001</a>)</span><span lang="ru"><b><a href="docs.html#e003-results">Ровное квантование на корпусе</a></b> - сколько модель помнит, когда все веса читаются на одной глубине: на 8 битах 97.5%, на 6 - 96.2%, на 4 - 90.8%, на 2 - 76.7% (над собственной базой стенда 51.4%, <a href="docs.html#e002-results">E002</a>). Там, где полная модель отказывается отвечать, грубая отвечает - на этом стоит H4 (<a href="docs.html#e001-results">E001</a>)</span></td><td><span class="tag tag--done"><span lang="en">done</span><span lang="ru">сделано</span></span><span class="when">2026-09-15 → 09-19</span></td></tr>
+            <tr><td class="num">4</td><td><span lang="en"><b><a href="docs.html#regulator">The filter</a></b> - how the zones are built: the source of the scores, the distance between blocks, the reach and the profile</span><span lang="ru"><b><a href="docs.html#regulator">Фильтр</a></b> - как строятся зоны: источник очков, метрика расстояния между блоками, охват и профиль</span></td><td><span class="tag tag--now"><span lang="en">now</span><span lang="ru">идёт</span></span><span class="when"><span lang="en">since</span><span lang="ru">с</span> 2026-09-15</span></td></tr>
+            <tr><td class="num">5</td><td><span lang="en"><b><a href="docs.html#e004-results">The address of a query</a></b> - which signal identifies the query rather than its wording: the hybrid of neuron activity and head energy reads a paraphrase as the same query in 0.917 of the cases against 0.717 for a bag of its tokens, and the first 4-8 layers at base precision give the same address as a full pass; the depth of the reading cannot be chosen from the query</span><span lang="ru"><b><a href="docs.html#e004-results">Адрес запроса</a></b> - какой сигнал узнаёт сам вопрос, а не слова, которыми он задан: активность нейронов вместе с энергией голов внимания узнаёт пересказ как тот же вопрос в 92% случаев против 72% по одним словам, и первых 4-8 слоёв для этого хватает. Насколько глубоко читать веса, по вопросу не угадать</span></td><td><span class="tag tag--done"><span lang="en">done</span><span lang="ru">сделано</span></span><span class="when">2026-09-19</span></td></tr>
+            <tr><td class="num">6</td><td><span lang="en"><b><a href="docs.html#e005-results">The precision map of a query</a></b> - over 103 questions only the top rung answers, a map built for the query holds 82% of the right answers on 52% of the whole network's memory, where an even four-bit reading at 56% holds none and a six-bit one at 78% holds 4%; a common map that knows no question holds 0.544 at the same price. The maps are built by oracles</span><span lang="ru"><b><a href="docs.html#e005-results">Карта точности запроса</a></b> - на 103 вопросах, которые берёт только полная точность, карта под запрос держит 82% ответов за 52% памяти; ровное четырёхбитное чтение, стоя дороже, не держит ни одного, шестибитное - 4%. Общая карта, одна на все вопросы, при той же цене держит 54%: разница и есть цена знания о вопросе</span></td><td><span class="tag tag--done"><span lang="en">done</span><span lang="ru">сделано</span></span><span class="when">2026-09-20</span></td></tr>
+            <tr><td class="num">7</td><td><span lang="en"><b><a href="docs.html#e006-results">The map against an even reading</a></b> - over 150 questions, 50 hard and 50 ordinary with 50 paraphrases: an ideal map takes 26 hard questions of 50 at 52% of the memory, where an even six-bit reading at 78% takes 7. The bounds of the scale are computed from the ladder; a search over 197 points found nothing better. Three spoilings at memory equal to the byte give 0.59-0.62 against 0.86, so the address is what decides</span><span lang="ru"><b><a href="docs.html#e006-results">Карта против ровного чтения</a></b> - на 150 вопросах, 50 трудных и 50 обычных плюс 50 пересказов: идеальная карта берёт 26 трудных из 50 за 52% памяти, ровное шестибитное чтение за 78% - семеро из тех же 50. Пороги точности считаются формулой, перебор 197 вариантов лучше не нашёл. Три порчи карты при той же памяти до байта дают 0.59-0.62 против 0.86 - решает адрес</span></td><td><span class="tag tag--done"><span lang="en">done</span><span lang="ru">сделано</span></span><span class="when">2026-09-21</span></td></tr>
+            <tr><td class="num">8</td><td><span lang="en"><b><a href="docs.html#hypotheses">A map the model builds itself</a></b> - the same gain without looking at the answer: from the address of a query, or decided as the pass runs. Neither does it yet</span><span lang="ru"><b><a href="docs.html#hypotheses">Карта, которую модель строит сама</a></b> - тот же выигрыш, но без подглядывания в ответ: по адресу запроса или решением по ходу прохода. Мост от адреса к карте уже пробовали - он ответил как общая карта; формула для решения по ходу прохода ещё не найдена</span></td><td><span class="tag tag--now"><span lang="en">now</span><span lang="ru">идёт</span></span><span class="when"><span lang="en">since</span><span lang="ru">с</span> 2026-09-20</span></td></tr>
+            <tr><td class="num">9</td><td><span lang="en"><b><a href="docs.html#goals">The regulator answers to the machine</a></b> - under load and heat the precision comes off what the request does not need first</span><span lang="ru"><b><a href="docs.html#goals">Регулятор отвечает машине</a></b> - под нагрузкой и при нагреве точность снимается сначала с того, что запросу не нужно</span></td><td><span class="tag tag--wait"><span lang="en">waits</span><span lang="ru">ждёт</span></span></td></tr>
+            <tr><td class="num">10</td><td><span lang="en"><b><a href="docs.html#hypotheses">Agents on the FoQLens model</a></b> - a chain of a draft and refinements against the same model at native precision and uniform quantization at the same memory</span><span lang="ru"><b><a href="docs.html#hypotheses">Агенты на модели FoQLens</a></b> - цепочка черновика и уточнений против той же модели в исходной точности и ровного квантования при той же памяти</span></td><td><span class="tag tag--wait"><span lang="en">waits</span><span lang="ru">ждёт</span></span></td></tr>
           </tbody>
         </table>
       </div>
 
-      <h3>The corpus</h3>
-      <p>A layout can only be measured where the model answers from knowledge. So the questions are selected by measurement: a question stays if the full model answers it right in its own words. It never sees options, in any regime, and three judges read its answer - the SQuAD score, the full model itself grading it as an exam, and Claude. The corpus is frozen: 20,640 questions - 18,576 E2B-it knows and 2,064 it does not.</p>
+    </div>
+  </section>
+
+  <!-- ==== THE CORPUS ==== -->
+  <section id="corpus">
+    <div class="wrap">
+      <h2 lang="en">The corpus</h2>
+      <h2 lang="ru">Корпус</h2>
+      <p lang="en">A layout can only be measured where the model answers from memory: if the answer sits in the
+        question itself, there is nothing to measure. So the questions are selected by measurement - a question
+        stays if the full model answers it right in its own words. It never sees the options, in any regime,
+        and three read the answer it gives:</p>
+      <ul lang="en">
+        <li>the SQuAD score - the match against the reference answer;</li>
+        <li>the full model itself, marking the answer as an examiner would;</li>
+        <li>Claude.</li>
+      </ul>
+      <p lang="en">The corpus is frozen: 20,640 questions - 18,576 the model knows and 2,064 it does not.</p>
+      <p lang="ru">Проверять карту есть смысл там, где модель отвечает по памяти: если ответ лежит в самом
+        вопросе, мерить нечего. Поэтому вопросы отобраны замером: вопрос остаётся, если полная модель отвечает
+        на него верно своими словами. Вариантов ответа она не видит ни в одном режиме, а сам ответ читают
+        трое:</p>
+      <ul lang="ru">
+        <li>оценка SQuAD - совпадение с эталонным ответом;</li>
+        <li>сама полная модель - она проверяет ответ как экзаменатор;</li>
+        <li>Claude.</li>
+      </ul>
+      <p lang="ru">Корпус заморожен: 20 640 вопросов - 18 576 модель знает и 2 064 не знает.</p>
       <div class="scroller">
         <table>
-          <thead><tr><th>Regime</th><th>Where the answer is</th><th>What the zones should do</th></tr></thead>
+          <thead><tr><th><span lang="en">Regime</span><span lang="ru">Режим</span></th><th><span lang="en">Where the answer is</span><span lang="ru">Где ответ</span></th><th><span lang="en">What the zones should do</span><span lang="ru">Что должны делать зоны</span></th></tr></thead>
           <tbody>
-            <tr><td>Reading</td><td>in the passage - SQuAD v2</td><td>little: the knowledge came in with the prompt</td></tr>
-            <tr><td>Knowledge</td><td>only in the weights - TriviaQA, NQ-open, ARC-Challenge and ARC-Easy without their options</td><td>decide - the regime the idea is about</td></tr>
-            <tr><td>Two steps</td><td>split across two passages - HotpotQA</td><td>matter, and less than in the second</td></tr>
+            <tr><td><span lang="en">Reading</span><span lang="ru">Чтение</span></td><td><span lang="en">in the passage - SQuAD v2</span><span lang="ru">в отрывке - SQuAD v2</span></td><td><span lang="en">little: the knowledge came in with the prompt</span><span lang="ru">мало: знание пришло вместе с промптом</span></td></tr>
+            <tr><td><span lang="en">Knowledge</span><span lang="ru">Знание</span></td><td><span lang="en">only in the weights - TriviaQA, NQ-open, ARC-Challenge and ARC-Easy without their options</span><span lang="ru">только в весах - TriviaQA, NQ-open, ARC-Challenge и ARC-Easy без вариантов</span></td><td><span lang="en">decide - the regime the idea is about</span><span lang="ru">решают всё - ради этого режима идея и затевалась</span></td></tr>
+            <tr><td><span lang="en">Two steps</span><span lang="ru">Два шага</span></td><td><span lang="en">split across two passages - HotpotQA</span><span lang="ru">разнесён по двум отрывкам - HotpotQA</span></td><td><span lang="en">matter, but less than in the second</span><span lang="ru">важны, но меньше, чем во втором режиме</span></td></tr>
           </tbody>
         </table>
       </div>
-      <p>If the zones help as much where the answer sits in the context as where it is only in the weights, the mechanism is not doing what it claims - and that is the test the old corpus could not run. How a corpus is chosen: <a href="docs.html#corpus">docs/corpus.md</a>.</p>
+      <p lang="en">If the zones help as much where the answer sits in the text of the question as where it is only in the weights, the mechanism is not doing what it claims. How a corpus is chosen: <a href="docs.html#corpus">docs/corpus.md</a>.</p>
+      <p lang="ru">Если зоны помогают там, где ответ лежит прямо в тексте вопроса, ровно так же, как там, где он только в весах, значит механизм делает не то, что заявлено. Как выбирается корпус: <a href="docs.html#corpus">docs/corpus.ru.md</a>.</p>
     </div>
-  </section>
+</section>
 
     </main>
 
 <footer>
   <div class="wrap">
-    <p>FoQLens is the research of <a href="https://sawking.tech/cv">Vladimir Savkin</a> - a systems architect, not a professional scientist, which is why the bench commits every prediction before the run. Code, preregistrations and raw numbers: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
-    <p>Made at <a href="https://sawking.tech">sawking.tech</a>.</p>
+    <p lang="en">FoQLens is the research of <a href="https://sawking.tech/cv">Vladimir Savkin</a>, systems architect. Code, preregistrations and raw numbers: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
+    <p lang="ru">FoQLens - исследование <a href="https://sawking.tech/cv">Владимира Савкина</a>, системного архитектора. Код, предрегистрации и сырые числа: <a href="https://github.com/Vovanda/FoQLens">github.com/Vovanda/FoQLens</a>.</p>
+    <p><span lang="en">Made at</span><span lang="ru">Сделано в</span> <a href="https://sawking.tech">sawking.tech</a>.</p>
   </div>
 </footer>
   </div>
 </div>
 </div>
 
-<script src="site/panel.js?v=47"></script>
-<script src="site/sections.js?v=47"></script>
-<script src="site/field.js?v=47"></script>
+<script src="site/panel.js?v=56"></script>
+<script src="site/sections.js?v=56"></script>
+<script src="site/field.js?v=56"></script>
 <script>
 /* Transitions come back only once the panel and the sheet stand where storage says - two frames
    later, so the browser has laid the page out and painted it at rest. This lives in the page, next

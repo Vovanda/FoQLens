@@ -45,6 +45,12 @@ select {
   font-size: clamp(1rem, 0.9rem + 0.4vw, 1.2rem);
   text-shadow: 0 0 6px var(--ground), 0 0 16px var(--ground), 0 1px 3px var(--ground);
 }
+/* The hint is written twice, for a pointer and for a finger, and the body says which one the
+   reader has (field.js). Keeping both phrasings here rather than in the script leaves no wording
+   in JavaScript at all - the same reason the two languages live in the markup. */
+.by-touch { display: none; }
+.by-finger .by-pointer { display: none; }
+.by-finger .by-touch { display: inline; }
 .hero__hint b { font-weight: 600; color: var(--focus-text); }
 .hero__hint kbd { font-family: "IBM Plex Mono", monospace; font-size: 0.9em; border: 1px solid var(--line);
                   border-bottom-width: 2px; border-radius: 4px; padding: 0.05em 0.35em; }

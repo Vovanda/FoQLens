@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_scoring_sdpa_gpu",
+  "gpu": {
+    "samples": 21,
+    "started": "2026-09-21T13:09",
+    "wall_s": 23.34256625175476,
+    "utilization_mean": 7.095238095238095,
+    "utilization_median": 0.0,
+    "memory_reserved_peak_mib": 17719.0,
+    "temperature_mean_c": 47.333333333333336,
+    "temperature_peak_c": 52.0,
+    "power_mean_w": 115.65571428571431,
+    "power_peak_w": 238.17,
+    "memory_allocated_peak_mib": 15820.28759765625
+  },
+  "note": "1 passed"
+}

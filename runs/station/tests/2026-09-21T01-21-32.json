@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_edges_gpu",
+  "gpu": {
+    "samples": 31,
+    "started": "2026-09-21T01:20",
+    "wall_s": 35.13006114959717,
+    "utilization_mean": 11.35483870967742,
+    "utilization_median": 0.0,
+    "memory_reserved_peak_mib": 11285.0,
+    "temperature_mean_c": 47.774193548387096,
+    "temperature_peak_c": 52.0,
+    "power_mean_w": 126.66290322580647,
+    "power_peak_w": 231.92,
+    "memory_allocated_peak_mib": 10144.91796875
+  },
+  "note": "4 passed"
+}

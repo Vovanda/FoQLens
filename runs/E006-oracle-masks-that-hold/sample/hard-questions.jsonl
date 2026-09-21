@@ -1,0 +1,50 @@
+{"corpus": "arc_challenge_closed", "id": "Mercury_7025060", "question": "An air mass travels north over the Pacific Ocean, from the tropics, and then eastward across the United States. Which weather pattern can be expected?"}
+{"corpus": "arc_challenge_closed", "id": "Mercury_7041668", "question": "Which human activity directly affects the quality of freshwater resources?"}
+{"corpus": "arc_challenge_closed", "id": "Mercury_7082845", "question": "A construction worker hit a solid steel wall with a sledgehammer, but the wall did not move. Part of the energy exerted by the worker"}
+{"corpus": "arc_challenge_closed", "id": "Mercury_7168823", "question": "Nutrient-laden waters from heavy rains flow into the Gulf of Mexico. This produces an algae bloom in the ocean environment. As the algae decays, it uses up large amounts of oxygen along the coastline. Which would most likely happen to the area as a result?"}
+{"corpus": "arc_challenge_closed", "id": "Mercury_7212818", "question": "Scientists present the results of their investigations to others for review because"}
+{"corpus": "arc_challenge_closed", "id": "Mercury_7236740", "question": "If two tectonic plates are each moving in opposite directions away from the mid-ocean ridge at a rate of 10 millimeters per year, how long will it take for the ridge to become 100 millimeters broader?"}
+{"corpus": "arc_easy_closed", "id": "LEAP_2008_4_10287", "question": "Anne and her father find a 30-million year-old tropical plant fossil in Louisiana. Which question does the fossil help them answer?"}
+{"corpus": "arc_easy_closed", "id": "MDSA_2007_8_23", "question": "The motion of a car accelerating in a straight line differs from the motion of a car moving in a straight line at a constant speed. Which change best describes acceleration of a car?"}
+{"corpus": "arc_easy_closed", "id": "Mercury_185115", "question": "A hypothesis that is successfully tested many times may become a"}
+{"corpus": "arc_easy_closed", "id": "Mercury_7263428", "question": "Which are replenished more quickly than they are used?"}
+{"corpus": "arc_easy_closed", "id": "Mercury_SC_401358", "question": "Which substance is magnetic and conducts heat?"}
+{"corpus": "arc_easy_closed", "id": "Mercury_SC_414130", "question": "Which sea otter behavior is learned?"}
+{"corpus": "arc_easy_closed", "id": "NAEP_2005_4_S12+7", "question": "Where does water in a lake get most of its energy to evaporate?"}
+{"corpus": "arc_easy_closed", "id": "TIMSS_2003_8_pg19", "question": "When chlorine gas reacts with sodium metal, what type of substance is formed?"}
+{"corpus": "arc_easy_closed", "id": "VASoL_2007_5_38", "question": "A student sees many plants around a pond. The student can determine which plants are nonvascular by"}
+{"corpus": "nq_open", "id": "2472", "question": "what was the tower of london originally used for"}
+{"corpus": "nq_open", "id": "332", "question": "the fertile crescent is located between what two bodies of water"}
+{"corpus": "nq_open", "id": "3349", "question": "what features of muscle contraction can be determined from an emg (electromyogram)"}
+{"corpus": "nq_open", "id": "3370", "question": "who sang i put a spell on you in hocus pocus"}
+{"corpus": "squad_v2", "id": "56e202e9e3433e1400423240", "question": "What paper is commonly considered the bellwether ushering in systematic studies computational complexity?"}
+{"corpus": "squad_v2", "id": "5725cc38ec44d21400f3d5bb", "question": "How did the principle treaties that form the European Union begin?"}
+{"corpus": "squad_v2", "id": "5726eb4b5951b619008f826c", "question": "Who often operates internet pharmacies?"}
+{"corpus": "squad_v2", "id": "5727ed2e3acd2414000df002", "question": "When there are many workers competing for a few jobs its considered as what?"}
+{"corpus": "squad_v2", "id": "572815d9ff5b5019007d9cbf", "question": "What drew would-be Jacksonville tourists to other Florida destinations?"}
+{"corpus": "squad_v2", "id": "572885023acd2414000dfa87", "question": "Who did the Yuan's increase in commerce help?"}
+{"corpus": "squad_v2", "id": "5728ec6a4b864d19001650ac", "question": "What was the result of the disobedience protesting the nuclear site?"}
+{"corpus": "squad_v2", "id": "572facb0a23a5019007fc865", "question": "Why were the initial suggestions for a devolved parliament before 1914 shelved?"}
+{"corpus": "squad_v2", "id": "573085ea8ab72b1400f9c54e", "question": "How would one create an empire by means of Imperialism?"}
+{"corpus": "squad_v2", "id": "5733d249d058e614000b6333", "question": "Where was France concentraing efforts?"}
+{"corpus": "squad_v2", "id": "5a25eed2c93d92001a40034a", "question": "Who is usually hired for a design-bid-build contract?"}
+{"corpus": "triviaqa", "id": "bb_6664", "question": "Abraham Maslow's 'Hierarchy of Needs' theory explains?"}
+{"corpus": "triviaqa", "id": "bb_9139", "question": "Who was made Archbishop of Capetown in 1986?"}
+{"corpus": "triviaqa", "id": "dpql_4690", "question": "What nickname did the American media give to Jane Fonda during the Vietnam War?"}
+{"corpus": "triviaqa", "id": "dpql_6139", "question": "The Most Noble Order of the Garter was established during the reign of which King?"}
+{"corpus": "triviaqa", "id": "jp_1280", "question": "What did Peter Carl Fabergé famously make?"}
+{"corpus": "triviaqa", "id": "jp_1332", "question": "\"What beverage is often described as \"\"peaty\"\"?\""}
+{"corpus": "triviaqa", "id": "jp_2305", "question": "What pope resigned in 2013?"}
+{"corpus": "triviaqa", "id": "odql_4802", "question": "A 'Comedo' is the medical name for what?"}
+{"corpus": "triviaqa", "id": "qb_10284", "question": "The original Ferris Wheel was erected in which US state for the 1893 World’s Columbian Exposition?"}
+{"corpus": "triviaqa", "id": "qb_4446", "question": "The chemical compound Thujone is best known for being present in which alcoholic drink?"}
+{"corpus": "triviaqa", "id": "qb_9129", "question": "Who designed the red telephone box, which first appeared in London in 1926?"}
+{"corpus": "triviaqa", "id": "qg_3766", "question": "Name the ingredients that make up that classic American favorite, the Big Mac"}
+{"corpus": "triviaqa", "id": "qw_10951", "question": "\"Who had a hit record in 1990 with \"\"U Can't Touch This\"\"?\""}
+{"corpus": "triviaqa", "id": "qz_3358", "question": "Who is the patron saint of lost causes?"}
+{"corpus": "triviaqa", "id": "qz_429", "question": "What was the Spice Girls' debut single called?"}
+{"corpus": "triviaqa", "id": "qz_5203", "question": "Which cartoon strip character first appeared in The Beano in 1951?"}
+{"corpus": "triviaqa", "id": "sfq_17841", "question": "In Imperial measurement, how many pounds are there in a hundredweight?"}
+{"corpus": "triviaqa", "id": "sfq_23194", "question": "Katie Melua was born in which republic of the USSR, now anindependent country"}
+{"corpus": "triviaqa", "id": "sfq_646", "question": "What was the first name of the Dutch explorer, Tasman, after whom Tasmania is named?"}
+{"corpus": "triviaqa", "id": "sfq_9163", "question": "Give a year in the life of Miguel Cervantes, Spanish novelist, poet and playwright?"}

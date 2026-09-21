@@ -1,0 +1,17 @@
+{
+  "run": "GPU tests: test_layerwise_gpu",
+  "gpu": {
+    "samples": 12,
+    "started": "2026-09-21T01:54",
+    "wall_s": 12.017701148986816,
+    "utilization_mean": 1.0833333333333333,
+    "utilization_median": 1.0,
+    "memory_reserved_peak_mib": 1176.0,
+    "temperature_mean_c": 52.166666666666664,
+    "temperature_peak_c": 53.0,
+    "power_mean_w": 110.06166666666667,
+    "power_peak_w": 113.49,
+    "memory_allocated_peak_mib": 21.3212890625
+  },
+  "note": "8 passed"
+}

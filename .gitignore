@@ -24,6 +24,8 @@ runs/**/raw/
 !runs/oracles/**/unified-fields-*.npz
 !runs/oracles/**/precision-fields-*.npz
 !runs/oracles/**/group-oracle-*.npz
+!runs/E0*/**/precision-fields-*.npz
+!runs/E0*/**/group-oracle-*.npz
 
 # model cache, if HF_HOME points inside the repo
 hf-cache/

@@ -1,0 +1,1 @@
+{"level": "INFO", "logger": "foqlens.band_grid", "message": "written", "path": "runs\\E006-oracle-masks-that-hold\\hundred\\precision-fields-bartowski-Q2_K-small-corpus.npz", "bands": 25, "questions": 100, "run": "band_grid", "script": "band_grid", "timestamp": "2026-09-21T10:28:27.802331+00:00"}

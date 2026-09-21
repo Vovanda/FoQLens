@@ -1,0 +1,1 @@
+{"level": "INFO", "logger": "foqlens.build_maps", "message": "written", "path": "runs\\E006-oracle-masks-that-hold\\paraphrased\\maps\\maps-bartowski-Q2_K-small-corpus.npz", "oracles": 34, "layouts": 170, "run": "precision-fields-bartowski-Q2_K-small-corpus", "script": "build_maps", "timestamp": "2026-09-21T10:32:33.551613+00:00"}
